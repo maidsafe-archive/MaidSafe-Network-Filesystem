@@ -36,15 +36,20 @@ class Nfs {
 
   template <typename DATA>
   void Get(Identity name, get_callback<DATA>);  // anybody gets free forever
-
+  // send to address of data direct
   template <typename DATA>
   void Put(Identity name,DATA data, action_callback);  // may require make/take payment
-
+  // send to account holders who send on to CIH (then payment is proven - it
+  // came from account holder group)
   template <typename DATA>
   void Post(Identity name, DATA message, action_callback);  // no payment
-
+  // send direct but goes to group if node off line (buffered data). Size of
+  // buffer is got from the nodes account holders.
   template <typename DATA>
   void Delete(Identity name, DATA data, action_callback);  // may require take payment
+  // client send this to account holders (they are close) and they decrement
+  // account and tell CIH to delete. CIH hold list of nodes interested (int
+  // only)
 
  private:
   Routing routing_;
