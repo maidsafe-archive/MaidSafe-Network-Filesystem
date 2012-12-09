@@ -4,7 +4,7 @@ MaidSafe-Network-Filesystem
 Treats the MaidSafe network as a filesystem exposes a pseudo resful interface (GET PUT	[POST] DELETE)
 
 
-GET - Retrieve a representation of the addressed data, expressed in an appropriate Internet media type. 
+GET - Retrieve the the addressed data.  
 
 PUT - Replace the addressed data, or if it doesn't exist, create it. 
 
