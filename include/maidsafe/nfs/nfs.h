@@ -17,47 +17,89 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
+#include "maidsafe/private/data_types/fob.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/nfs/type_traits.h"
+#include "maidsafe/nfs/get_policies.h"
+#include "maidsafe/nfs/put_policies.h"
+#include "maidsafe/nfs/post_policies.h"
+#include "maidsafe/nfs/delete_policies.h"
 
-namespace maidsafe { 
+namespace maidsafe {
 
 namespace nfs {
 
-template <typename DATA>
-using get_callback = std::function<DATA(Identity)>;
+template <typename Data>
+using get_callback = std::function<Data(Identity)>;
 
 using action_callback = std::function<bool(Identity)>;
 
-template<typename ID>  // PMID MPID MAID etc.
-class Nfs {
+// sfinae test for has routing
+template <typename T>
+class has_routing {
+  typedef char one[1];
+  typedef char two[2];
+  template <typename U> static one test(decltype(&U::Routing());
+// the above gets masked out as sfinae will choose two
+  template <typename U) static two test(...);
  public:
-  Nfs(Routing routing) : routing_(routing) {}
+  static bool const value = sizeof(test<T>(0)) == sizeof(one);
+  // use has_routing<T>::value as the test
+};
+// sfinae test for has fob
+template <typename T>
+class has_fob {
+  typedef char one[1];
+  typedef char two[2];
+  template <typename U> static one test(decltype(&U::Fob());
+  template <typename U) static two test(...);
+ public:
+  static bool const value = sizeof(test<T>(0)) == sizeof(one);
+  // use has_fob<T>::value as the test
+};
 
-  template <typename DATA>
-  void Get(Identity name, get_callback<DATA>);  // anybody gets free forever
-  // send to address of data direct
-  template <typename DATA>
-  void Put(Identity name,DATA data, action_callback);  // may require make/take payment
-  // send to account holders who send on to CIH (then payment is proven - it
-  // came from account holder group)
-  template <typename DATA>
-  void Post(Identity name, DATA message, action_callback);  // no payment
-  // send direct but goes to group if node off line (buffered data). Size of
-  // buffer is got from the nodes account holders.
-  template <typename DATA>
-  void Delete(Identity name, DATA data, action_callback);  // may require take payment
-  // client send this to account holders (they are close) and they decrement
-  // account and tell CIH to delete. CIH hold list of nodes interested (int
-  // only)
+
+
+// host class (default policies work for client objects)
+template<typename ID,  // DataHolderAccountHolder,
+                       // DataHolder,
+                       // MetaDataManager,
+                       // MAIDAccountHolder Client (default)
+// pass a param whose type is a template dependant on another template
+         template <class> class GetPolicy = GetFromMetadataManager,
+         template <class> class PutPolicy = PutToMaidAccountHolder,
+         template <class> class PostPolicy = PostToAddress,
+         template <class> class DeletePolicy = DeleteToMaidAccountHolder>
+class NetworkFileSystem :
+    public GetPolicy, public PutPolicy, public PostPolicy, public DeletePolicy {
+ public:
+  // should be 
+  // Nfs(ID id,
+  //     typename std::enable_if<has_routing<ID>::value, ID>type* = 0,
+  //     typename std::enable_if<has_fob<ID>::value, ID>type* =0)  {}
+  Nfs(Routing routing, Fob id_fob) : routing_(routing), id_fob_(fob) {}
+
+  template <typename Data>
+  void Get(Identity name, get_callback<Data> callback) { // anybody gets free forever
+    GetPolicy::Get(name, callback, routing_, fob_);
+  }
+  template <typename Data>
+  void Put(Identity name,Data data, action_callback callbacki, routing_, fob_);
+
+  template <typename Data>
+  void Post(Identity name, Data message, action_callback callback);
+
+  template <typename Data>
+  void Delete(Identity name, Data data, action_callback callback);
 
  private:
-  Routing routing_;
+  Routing routing_; // not needed with the sfinae checks
+  Fob fob_;
 }:
 
 
 
-}  /*namespace nfs */  
+}  /*namespace nfs */
 
 }  /* namespace maidsafe */
 
