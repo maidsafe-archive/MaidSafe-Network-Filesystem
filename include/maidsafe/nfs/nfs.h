@@ -18,6 +18,7 @@
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/private/data_types/fob.h"
+#include "maidsafe/private/data_types/data_types.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/nfs/type_traits.h"
 #include "maidsafe/nfs/get_policies.h"
@@ -34,57 +35,21 @@ using get_callback = std::function<Data(Identity)>;
 
 using action_callback = std::function<bool(Identity)>;
 
-// sfinae test for has routing
-template <typename T>
-class has_routing {
-  typedef char one[1];
-  typedef char two[2];
-  template <typename U> static one test(decltype(&U::Routing());
-// the above gets masked out as sfinae will choose two
-  template <typename U) static two test(...);
- public:
-  static bool const value = sizeof(test<T>(0)) == sizeof(one);
-  // use has_routing<T>::value as the test
-};
-// sfinae test for has fob
-template <typename T>
-class has_fob {
-  typedef char one[1];
-  typedef char two[2];
-  template <typename U> static one test(decltype(&U::Fob());
-  template <typename U) static two test(...);
- public:
-  static bool const value = sizeof(test<T>(0)) == sizeof(one);
-  // use has_fob<T>::value as the test
-};
-
-
-
-// host class (default policies work for client objects)
-template<typename ID,  // DataHolderAccountHolder,
-                       // DataHolder,
-                       // MetaDataManager,
-                       // MAIDAccountHolder Client (default)
-// pass a param whose type is a template dependant on another template
-         template <class> class GetPolicy = GetFromMetadataManager,
-         template <class> class PutPolicy = PutToMaidAccountHolder,
-         template <class> class PostPolicy = PostToAddress,
-         template <class> class DeletePolicy = DeleteToMaidAccountHolder>
+template<typename GetPolicy,
+         typename PutPolicy,
+         typename PostPolicy,
+         typename DeletePolicy>
 class NetworkFileSystem :
     public GetPolicy, public PutPolicy, public PostPolicy, public DeletePolicy {
  public:
-  // should be 
-  // Nfs(ID id,
-  //     typename std::enable_if<has_routing<ID>::value, ID>type* = 0,
-  //     typename std::enable_if<has_fob<ID>::value, ID>type* =0)  {}
   Nfs(Routing routing, Fob id_fob) : routing_(routing), id_fob_(fob) {}
 
   template <typename Data>
-  void Get(Identity name, get_callback<Data> callback) { // anybody gets free forever
+  void Get(Data::name_type name, get_callback<Data> callback) {
     GetPolicy::Get(name, callback, routing_, fob_);
   }
   template <typename Data>
-  void Put(Identity name,Data data, action_callback callbacki, routing_, fob_);
+  void Put(Identity name,Data data, action_callback callback, routing_, fob_);
 
   template <typename Data>
   void Post(Identity name, Data message, action_callback callback);
@@ -93,10 +58,11 @@ class NetworkFileSystem :
   void Delete(Identity name, Data data, action_callback callback);
 
  private:
-  Routing routing_; // not needed with the sfinae checks
+  Routing routing_;
   Fob fob_;
 }:
 
+typedef Nfs<GetFromMetadataManager, PutToMaidAccountHolder, PostToAddress, DeleteFromMaidAccountHolder> ClientNfs;
 
 
 }  /*namespace nfs */
