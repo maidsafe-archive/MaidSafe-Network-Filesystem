@@ -17,8 +17,8 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
-#include "maidsafe/private/data_types/fob.h"
-#include "maidsafe/private/data_types/data_types.h"
+//#include "maidsafe/private/data_types/fob.h"
+#include "maidsafe/data_types/data_types.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/nfs/type_traits.h"
 #include "maidsafe/nfs/get_policies.h"
@@ -29,6 +29,10 @@
 namespace maidsafe {
 
 namespace nfs {
+
+class Fob {
+
+};
 
 template <typename Data>
 using get_callback = std::function<Data(Identity)>;
