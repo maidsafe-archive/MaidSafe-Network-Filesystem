@@ -32,27 +32,27 @@ include_directories(${routing_SOURCE_DIR}/include)
 file(GLOB SOURCE_FILES_NFS_DIR "${PROJECT_SOURCE_DIR}/src/maidsafe/nfs/*.cc")
 file(GLOB HEADER_FILES_NFS_DIR "${PROJECT_SOURCE_DIR}/src/maidsafe/nfs/*.h")
 file(GLOB API_FILES_NFS_DIR "${PROJECT_SOURCE_DIR}/include/maidsafe/nfs/*.h")
-set(ALL_FILES_nfs_DIR ${SOURCE_FILES_nfs_DIR} ${HEADER_FILES_nfs_DIR} ${API_FILES_nfs_DIR})
-source_group("nfs Source Files" FILES ${SOURCE_FILES_nfs_DIR})
-source_group("nfs Header Files" FILES ${HEADER_FILES_nfs_DIR})
-source_group("nfs API Files" FILES ${API_FILES_nfs_DIR})
+set(ALL_FILES_NFS_DIR ${SOURCE_FILES_NFS_DIR} ${HEADER_FILES_NFS_DIR} ${API_FILES_NFS_DIR})
+source_group("nfs Source Files" FILES ${SOURCE_FILES_NFS_DIR})
+source_group("nfs Header Files" FILES ${HEADER_FILES_NFS_DIR})
+source_group("nfs API Files" FILES ${API_FILES_NFS_DIR})
 
 file(GLOB SOURCE_FILES_NFS_TESTS_DIR "${PROJECT_SOURCE_DIR}/src/maidsafe/nfs/tests/*.cc")
 file(GLOB HEADER_FILES_NFS_TESTS_DIR "${PROJECT_SOURCE_DIR}/src/maidsafe/nfs/tests/*.h")
-set(ALL_FILES_NFS_TESTS_DIR ${SOURCE_FILES_nfs_TESTS_DIR} ${HEADER_FILES_nfs_TESTS_DIR})
-source_group("Tests Source Files" FILES ${SOURCE_FILES_nfs_TESTS_DIR})
-source_group("Tests Header Files" FILES ${HEADER_FILES_nfs_TESTS_DIR})
+set(ALL_FILES_NFS_TESTS_DIR ${SOURCE_FILES_NFS_TESTS_DIR} ${HEADER_FILES_NFS_TESTS_DIR})
+source_group("Tests Source Files" FILES ${SOURCE_FILES_NFS_TESTS_DIR})
+source_group("Tests Header Files" FILES ${HEADER_FILES_NFS_TESTS_DIR})
 
-set(STYLE_nfs ${ALL_FILES_nfs_DIR} ${ALL_FILES_nfs_TESTS_DIR})
+set(STYLE_nfs ${ALL_FILES_NFS_DIR} ${ALL_FILES_NFS_TESTS_DIR})
 
 ###################################################################################################
 # Define MaidSafe libraries and executables                                                       #
 ###################################################################################################
-ms_add_static_library(nfs ${ALL_FILES_nfs_DIR})
-target_link_libraries(maidsafe_nfs maidsafe_common maidsafe_utilities)
+#ms_add_static_library(nfs ${ALL_FILES_NFS_DIR})
+#target_link_libraries(maidsafe_nfs maidsafe_common maidsafe_utilities)
 
 if(MAIDSAFE_TESTING)
-  ms_add_executable(TESTnfs "Tests/nfs" ${ALL_FILES_nfs_TESTS_DIR})
+  ms_add_executable(TESTnfs "Tests/nfs" ${ALL_FILES_NFS_TESTS_DIR})
   target_link_libraries(TESTnfs maidsafe_common maidsafe_private maidsafe_routing)
 endif()
 
