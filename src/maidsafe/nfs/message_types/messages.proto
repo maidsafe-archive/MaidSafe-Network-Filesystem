@@ -1,11 +1,11 @@
 package maidsafe.vault.proto;
 option optimize_for = LITE_RUNTIME;
 
-enum kIdentityType {
+enum kPersonaType {
   MaidAccoutHolder = 0;
   MetaDataManager = 1;
-  PmidAccountHolder = 3;
-  DataHolder = 4;
+  PmidAccountHolder = 2;
+  DataHolder = 3;
 }
 
 enum kActionType {
@@ -22,11 +22,11 @@ enum kDataType {
 }
 
 message Nfs {
-  required kActionType = 0;
-  required KIdentityType = 1;
-  required kDataType = 2;
+  required kActionType action_type = 0;
+  required kPersonaType persona_type = 1;
+  required kDataType data_type = 2;
   required bytes destination = 3;
-  required bytes Source = 4;
+  required bytes source = 4;
   required bytes content = 5;
   optional bytes signature = 6;
 }
