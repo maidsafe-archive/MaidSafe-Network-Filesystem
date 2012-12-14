@@ -17,7 +17,7 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
-//#include "maidsafe/private/data_types/fob.h"
+// #include "maidsafe/private/data_types/fob.h"
 #include "maidsafe/data_types/data_types.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/nfs/type_traits.h"
@@ -31,7 +31,6 @@ namespace maidsafe {
 namespace nfs {
 
 class Fob {
-
 };
 
 template <typename Data>
@@ -53,7 +52,7 @@ class NetworkFileSystem :
     GetPolicy::Get(name, callback, routing_, fob_);
   }
   template <typename Data>
-  void Put(Identity name,Data data, action_callback callback, routing_, fob_);
+  void Put(Identity name, Data data, action_callback callback, routing_, fob_);
 
   template <typename Data>
   void Post(Identity name, Data message, action_callback callback);
@@ -66,7 +65,10 @@ class NetworkFileSystem :
   Fob fob_;
 }:
 
-typedef Nfs<GetFromMetadataManager, PutToMaidAccountHolder, PostToAddress, DeleteFromMaidAccountHolder> ClientNfs;
+typedef Nfs<GetFromMetadataManager,
+            PutToMaidAccountHolder,
+            PostToAddress,
+            DeleteFromMaidAccountHolder> ClientNfs;
 
 
 }  /*namespace nfs */

@@ -19,6 +19,8 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
 project(nfs)
 
+set(PROTO_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+file(GLOB PROTO_FILES RELATIVE ${PROTO_SOURCE_DIR} "${PROTO_SOURCE_DIR}/maidsafe/nfs/message_types/*.proto")
 include(../../cmake_modules/maidsafe_standard_setup.cmake)
 
 include_directories(${common_SOURCE_DIR}/include)
@@ -48,12 +50,13 @@ set(STYLE_nfs ${ALL_FILES_NFS_DIR} ${ALL_FILES_NFS_TESTS_DIR})
 ###################################################################################################
 # Define MaidSafe libraries and executables                                                       #
 ###################################################################################################
-#ms_add_static_library(nfs ${ALL_FILES_NFS_DIR})
-#target_link_libraries(maidsafe_nfs maidsafe_common maidsafe_utilities)
+ms_add_static_library(nfs ${ALL_FILES_NFS_DIR})
+target_link_libraries(maidsafe_nfs maidsafe_common maidsafe_utilities)
 
 if(MAIDSAFE_TESTING)
   ms_add_executable(TESTnfs "Tests/nfs" ${ALL_FILES_NFS_TESTS_DIR})
-  target_link_libraries(TESTnfs maidsafe_common maidsafe_private maidsafe_routing)
+  #target_link_libraries(TESTnfs maidsafe_common maidsafe_private maidsafe_routing)
+  target_link_libraries(TESTnfs maidsafe_common)
 endif()
 
 rename_outdated_built_exes()

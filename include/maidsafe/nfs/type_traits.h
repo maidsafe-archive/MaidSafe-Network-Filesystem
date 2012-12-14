@@ -28,7 +28,7 @@ template <>
 struct is_nfs_id<PMID> : std::true_type {};
 
 template <>
-struct is_nfs_id<MPID> : std::true_type{};
+struct is_nfs_id<MPID> : std::true_type {};
 
 template <>
 struct is_nfs_id<MAID> : std::true_type {};
