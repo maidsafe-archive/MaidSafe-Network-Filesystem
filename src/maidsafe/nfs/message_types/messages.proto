@@ -3,10 +3,11 @@ option optimize_for = LITE_RUNTIME;
 
 message Nfs {
   required int32 action_type = 1;
-  required int32 persona_type = 2;
-  required int32 data_type = 3;
-  required bytes destination = 4;
-  required bytes source = 5;
-  required bytes content = 6;
-  optional bytes signature = 7;
+  required int32 source_persona_type = 2;
+  required int32 destination_persona_type = 3;
+  required int32 data_type = 4;
+  required bytes destination = 5;
+  required bytes source = 6;
+  required bytes content = 7;
+  optional bytes signature = 8;
 }

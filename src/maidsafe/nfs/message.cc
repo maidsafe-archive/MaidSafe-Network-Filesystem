@@ -18,14 +18,16 @@ namespace maidsafe {
 namespace nfs {
 
 Message::Message(const ActionType& action_type,
-                 const PersonaType& persona_type,
+                 const PersonaType& source_persona_type,
+                 const PersonaType& destination_persona_type,
                  const int& data_type,
                  const NodeId& destination,
                  const NodeId& source,
                  const std::string& content,
                  const std::string& signature)
     : action_type_(action_type),
-      persona_type_(persona_type),
+      source_persona_type_(source_persona_type),
+      destination_persona_type_(destination_persona_type),
       data_type_(data_type),
       destination_(destination),
       source_(source),
@@ -47,20 +49,25 @@ Message ParseFromString(const std::string& message_string) {
   }
 
   ActionType action_type = static_cast<ActionType>(proto_message.action_type());
-  PersonaType persona_type = static_cast<PersonaType>(proto_message.persona_type());
+  PersonaType source_persona_type = static_cast<PersonaType>(proto_message.source_persona_type());
+  PersonaType destination_persona_type =
+      static_cast<PersonaType>(proto_message.destination_persona_type());
   int data_type = proto_message.data_type();
   NodeId destination(proto_message.destination());
   NodeId source(proto_message.source());
   std::string content(proto_message.content());
   std::string signature(proto_message.signature());
-  return (Message(action_type, persona_type, data_type, destination, source, content, signature));
+  return (Message(action_type, source_persona_type, destination_persona_type, data_type,
+                  destination, source, content, signature));
 }
 
 // throws
 std::string SerialiseAsString(const Message& message) {
   proto::Nfs proto_message;
   proto_message.set_action_type(static_cast<int32_t>(message.action_type()));
-  proto_message.set_persona_type(static_cast<int32_t>(message.persona_type()));
+  proto_message.set_source_persona_type(static_cast<int32_t>(message.source_persona_type()));
+  proto_message.set_destination_persona_type(
+      static_cast<int32_t>(message.destination_persona_type()));
   proto_message.set_data_type(message.data_type());
   proto_message.set_destination(message.destination().string());
   proto_message.set_source(message.source().string());
