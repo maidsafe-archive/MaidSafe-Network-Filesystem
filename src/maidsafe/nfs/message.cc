@@ -11,7 +11,7 @@
 
 #include "maidsafe/nfs/message.h"
 
-#include "maidsafe/nfs/message_types/messages.pb.h"
+#include "maidsafe/nfs/messages.pb.h"
 
 namespace maidsafe {
 

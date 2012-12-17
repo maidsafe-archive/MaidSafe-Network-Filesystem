@@ -187,7 +187,7 @@ TEST_F(MessageTest, FUNC_AssignMessage) {
 }
 
 
-TEST_F(MessageTest, BadDataType) {
+TEST_F(MessageTest, FUNC_BadDataType) {
   int32_t bad_data_type(RandomInt32());
   while (bad_data_type >= 0)
     bad_data_type = RandomInt32();
@@ -206,7 +206,7 @@ TEST_F(MessageTest, BadDataType) {
   }
 }
 
-TEST_F(MessageTest, BadSource) {
+TEST_F(MessageTest, FUNC_BadSource) {
   try {
     Message message(action_type_,
                     dest_persona_type_,
@@ -222,7 +222,7 @@ TEST_F(MessageTest, BadSource) {
   }
 }
 
-TEST_F(MessageTest, BadDestination) {
+TEST_F(MessageTest, FUNC_BadDestination) {
   try {
     Message message(action_type_,
                     dest_persona_type_,
