@@ -111,13 +111,8 @@ TEST_F(MessageTest, FUNC_ParseFromBadString) {
   bad_strings.push_back(good_string);
 
   for (auto bad_string : bad_strings) {
-    // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting specific value
-    try {
-      ParseFromString(bad_string);
-      EXPECT_TRUE(false) << "Should not be able to parse bad string: " << bad_string;
-    } catch (const std::exception& ex) {
-      LOG(kInfo) << "Threw on bad string.";
-    }
+    // TODO(Alison) - expect more specific value
+    EXPECT_THROW(ParseFromString(bad_string), std::exception);
   }
 }
 
@@ -189,57 +184,45 @@ TEST_F(MessageTest, FUNC_AssignMessage) {
 
 
 TEST_F(MessageTest, BEH_BadDataType) {
-  // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting CommonErrors::invalid_parameter
   int32_t bad_data_type(RandomInt32());
   while (bad_data_type >= 0)
     bad_data_type = RandomInt32();
-  try {
-    Message message(action_type_,
-                    dest_persona_type_,
-                    src_persona_type_,
-                    bad_data_type,
-                    dest_id_,
-                    src_id_,
-                    content_,
-                    signature_);
-    ASSERT_TRUE(false);
-  } catch (const std::exception& ex) {
-    LOG(kInfo) << "Threw on bad data type: " << ex.what();
-  }
+  // TODO(Alison) - expect CommonErrors::invalid_parameter
+  EXPECT_THROW(Message(action_type_,
+                       dest_persona_type_,
+                       src_persona_type_,
+                       bad_data_type,
+                       dest_id_,
+                       src_id_,
+                       content_,
+                       signature_),
+               std::exception);
 }
 
 TEST_F(MessageTest, BEH_BadSource) {
-  // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting CommonErrors::invalid_parameter
-  try {
-    Message message(action_type_,
-                    dest_persona_type_,
-                    src_persona_type_,
-                    data_type_,
-                    dest_id_,
-                    NodeId(),
-                    content_,
-                    signature_);
-    ASSERT_TRUE(false);
-  } catch (const std::exception& ex) {
-    LOG(kInfo) << "Threw on bad source: " << ex.what();
-  }
+  // TODO(Alison) - expect CommonErrors::invalid_parameter
+  EXPECT_THROW(Message(action_type_,
+                       dest_persona_type_,
+                       src_persona_type_,
+                       data_type_,
+                       dest_id_,
+                       NodeId(),
+                       content_,
+                       signature_),
+               std::exception);
 }
 
 TEST_F(MessageTest, BEH_BadDestination) {
-  // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting CommonErrors::invalid_parameter
-  try {
-    Message message(action_type_,
-                    dest_persona_type_,
-                    src_persona_type_,
-                    data_type_,
-                    NodeId(),
-                    src_id_,
-                    content_,
-                    signature_);
-    ASSERT_TRUE(false);
-  } catch (const std::exception& ex) {
-    LOG(kInfo) << "Threw on bad destination: " << ex.what();
-  }
+  // TODO(Alison) - expect CommonErrors::invalid_parameter
+  EXPECT_THROW(Message(action_type_,
+                       dest_persona_type_,
+                       src_persona_type_,
+                       data_type_,
+                       NodeId(),
+                       src_id_,
+                       content_,
+                       signature_),
+               std::exception);
 }
 */
 
