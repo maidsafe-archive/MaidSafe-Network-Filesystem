@@ -71,6 +71,7 @@ typedef Nfs<GetFromDataHolder,
             DeleteFromDataHolder> ClientNfs;
 
 // TODO(prakash) example .... ClientNfs client_nfs(routing, Pmid pmd);
+// client_nfs.Get<ImmutableData>(name, get_callback callback);
 
 }  /*namespace nfs */
 
