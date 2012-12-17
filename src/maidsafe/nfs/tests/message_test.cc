@@ -51,7 +51,7 @@ class MessageTest : public testing::Test {
   std::string signature_;
 };
 
-TEST_F(MessageTest, FUNC_CheckGetters) {
+TEST_F(MessageTest, BEH_CheckGetters) {
   Message message(action_type_,
                   dest_persona_type_,
                   src_persona_type_,
@@ -111,6 +111,7 @@ TEST_F(MessageTest, FUNC_ParseFromBadString) {
   bad_strings.push_back(good_string);
 
   for (auto bad_string : bad_strings) {
+    // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting specific value
     try {
       ParseFromString(bad_string);
       EXPECT_TRUE(false) << "Should not be able to parse bad string: " << bad_string;
@@ -187,7 +188,8 @@ TEST_F(MessageTest, FUNC_AssignMessage) {
 }
 
 
-TEST_F(MessageTest, BadDataType) {
+TEST_F(MessageTest, BEH_BadDataType) {
+  // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting CommonErrors::invalid_parameter
   int32_t bad_data_type(RandomInt32());
   while (bad_data_type >= 0)
     bad_data_type = RandomInt32();
@@ -206,7 +208,8 @@ TEST_F(MessageTest, BadDataType) {
   }
 }
 
-TEST_F(MessageTest, BadSource) {
+TEST_F(MessageTest, BEH_BadSource) {
+  // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting CommonErrors::invalid_parameter
   try {
     Message message(action_type_,
                     dest_persona_type_,
@@ -222,7 +225,8 @@ TEST_F(MessageTest, BadSource) {
   }
 }
 
-TEST_F(MessageTest, BadDestination) {
+TEST_F(MessageTest, BEH_BadDestination) {
+  // TODO(Alison) - replace with EXPECT_THROW equivalent, expecting CommonErrors::invalid_parameter
   try {
     Message message(action_type_,
                     dest_persona_type_,
