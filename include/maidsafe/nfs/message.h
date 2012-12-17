@@ -22,7 +22,7 @@ namespace maidsafe {
 namespace nfs {
 
 enum class PersonaType : int {
-  kMaidAccoutHolder = 0,
+  kMaidAccountHolder = 0,
   kMetaDataManager = 1,
   kPmidAccountHolder = 2,
   kDataHolder = 3
