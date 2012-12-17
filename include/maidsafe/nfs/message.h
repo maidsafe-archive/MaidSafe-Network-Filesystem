@@ -38,8 +38,8 @@ enum class ActionType : int {
 class Message {
  public:
   Message(const ActionType& action_type,
-          const PersonaType& source_persona_type,
           const PersonaType& destination_persona_type,
+          const PersonaType& source_persona_type,
           const int& data_type,
           const NodeId& destination,
           const NodeId& source,
@@ -47,8 +47,8 @@ class Message {
           const std::string& signature);
 
   ActionType action_type() const { return action_type_; }
-  PersonaType source_persona_type() const { return source_persona_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
+  PersonaType source_persona_type() const { return source_persona_type_; }
   int data_type() const { return data_type_; }
   NodeId destination() const { return destination_; }
   NodeId source() const { return source_; }
@@ -57,8 +57,8 @@ class Message {
 
  private:
   ActionType action_type_;
-  PersonaType source_persona_type_;
   PersonaType destination_persona_type_;
+  PersonaType source_persona_type_;
   int data_type_;
   NodeId destination_;
   NodeId source_;
