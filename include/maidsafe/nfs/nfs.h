@@ -70,6 +70,7 @@ typedef Nfs<GetFromDataHolder,
             NoPost,
             DeleteFromDataHolder> ClientNfs;
 
+// TODO(prakash) example .... ClientNfs client_nfs(routing, Pmid pmd);
 
 }  /*namespace nfs */
 
