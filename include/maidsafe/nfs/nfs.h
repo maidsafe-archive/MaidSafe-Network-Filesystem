@@ -65,10 +65,10 @@ class NetworkFileSystem :
   Fob fob_;
 }:
 
-typedef Nfs<GetFromMetadataManager,
-            PutToMaidAccountHolder,
-            PostToAddress,
-            DeleteFromMaidAccountHolder> ClientNfs;
+typedef Nfs<GetFromDataHolder,
+            PutToDataHolder,
+            NoPost,
+            DeleteFromDataHolder> ClientNfs;
 
 
 }  /*namespace nfs */
