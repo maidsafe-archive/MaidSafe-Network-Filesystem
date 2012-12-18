@@ -18,6 +18,7 @@
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
 // #include "maidsafe/private/data_types/fob.h"
+#include "maidsafe/passport/types.h"
 #include "maidsafe/data_types/data_types.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/nfs/type_traits.h"
@@ -30,14 +31,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-class Fob {
-};
-
-template <typename Data>
-using get_callback = std::function<Data(Identity)>;
-
-using action_callback = std::function<bool(Identity)>;
-
 template<typename GetPolicy,
          typename PutPolicy,
          typename PostPolicy,
@@ -45,12 +38,13 @@ template<typename GetPolicy,
 class NetworkFileSystem :
     public GetPolicy, public PutPolicy, public PostPolicy, public DeletePolicy {
  public:
-  Nfs(Routing routing, Fob id_fob) : routing_(routing), id_fob_(fob) {}
+  explicit Nfs(Routing routing) : routing_(routing) {}
 
   template <typename Data>
-  void Get(Data::name_type name, get_callback<Data> callback) {
-    GetPolicy::Get(name, callback, routing_, fob_);
+  std::future<Data> Get(Data::name_type name) {
+    return GetPolicy::Get(name);
   }
+  
   template <typename Data>
   void Put(Identity name, Data data, action_callback callback, routing_, fob_);
 
