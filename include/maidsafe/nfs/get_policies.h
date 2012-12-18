@@ -24,14 +24,31 @@
 
 namespace maidsafe {
 
-template <typename T>
 class GetFromMetaDataManager {
  public:
-  static void  GetPolicy<>(name, callback, routing, fob) {
+  template <typename T>
+  static void  Get<>(name, callback, routing, fob) {
   }
  protected:
   ~GetFromDataManager() {}
 };
+
+
+class GetFromDataHolder {
+ public:
+  template <typename T>
+  static std::future<T>  Get<>(T::name_type name, routing::Routing& routing) {
+    std::async([] (T::name_type name, std::vector<std::string> messages) {
+    routing.Send(name, name, nfs::Message message ....  
+    }); 
+  }
+ protected:
+  ~GetFromDataHolder() {}
+};
+
+
+
+
 
 }  // namespace maidsafe
 

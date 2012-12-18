@@ -44,7 +44,7 @@ class NetworkFileSystem :
   std::future<Data> Get(Data::name_type name) {
     return GetPolicy::Get(name);
   }
-  
+
   template <typename Data>
   void Put(Identity name, Data data, action_callback callback, routing_, fob_);
 
