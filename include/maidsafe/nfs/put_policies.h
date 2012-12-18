@@ -24,12 +24,12 @@
 
 namespace maidsafe {
 
-template <typename T>
+template <typename Data>
 class PutToMaidAccountHolder {
  public:
-  static void  PutPolicy<>(name, callback, routing, fob) {
+  static void  Put<>(const Data& data, callback, routing::Routing& routing, fob) {
   }
-  static void  PutPolicy<MutableData>(name, callback, routing, fob) {
+  static void  Put<MutableData>(const Data& data, callback, routing::Routing& routing, fob) {
     // could use T.Fob() T.Routing() here rather than passing routing fob parameters.
     // need to get result of edit or store may be +ve or -Ve or fail after it
     // goes to MAIDAccountHandler
@@ -42,4 +42,3 @@ class PutToMaidAccountHolder {
 }  // namespace maidsafe
 
 #endif  // MAIDSAFE_NFS_PUT_POLICIES_H_
-
