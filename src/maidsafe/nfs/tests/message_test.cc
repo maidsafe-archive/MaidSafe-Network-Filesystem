@@ -10,6 +10,7 @@
  *  the explicit written permission of the board of directors of maidsafe.net. *
  ******************************************************************************/
 
+#include "maidsafe/common/log.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
 
@@ -22,11 +23,11 @@ namespace nfs {
 namespace test {
 
 ActionType GenerateActionType() {
-  return static_cast<ActionType>(RandomUint32() % 4);  // matches enum in message.h
+  return static_cast<ActionType>(RandomUint32() % 4);  // matches ActionType enum in message.h
 }
 
 PersonaType GeneratePersonaType() {
-  return static_cast<PersonaType>(RandomUint32() % 4);  // matches enum in message.h
+  return static_cast<PersonaType>(RandomUint32() % 4);  // matches PersonaType enum in message.h
 }
 
 class MessageTest : public testing::Test {
@@ -70,7 +71,6 @@ TEST_F(MessageTest, BEH_CheckGetters) {
   EXPECT_EQ(signature_, message.signature());
 }
 
-/*
 TEST_F(MessageTest, BEH_SerialiseThenParse) {
   Message message(action_type_,
                   dest_persona_type_,
@@ -107,7 +107,7 @@ TEST_F(MessageTest, BEH_ParseFromBadString) {
   bad_strings.push_back("");
   std::string good_string(SerialiseAsString(message));
   bad_strings.push_back(good_string.append(RandomAlphaNumericString(1)));
-  good_string.resize(good_string.size() - 1);
+  good_string.resize(good_string.size() - 2);
   bad_strings.push_back(good_string);
 
   for (auto bad_string : bad_strings) {
@@ -186,8 +186,10 @@ TEST_F(MessageTest, BEH_AssignMessage) {
 
 TEST_F(MessageTest, BEH_BadDataType) {
   int32_t bad_data_type(RandomInt32());
-  while (bad_data_type >= 0)
+  while (bad_data_type == 0)
     bad_data_type = RandomInt32();
+  if (bad_data_type > 0)
+    bad_data_type = -bad_data_type;
   // TODO(Alison) - expect CommonErrors::invalid_parameter
   EXPECT_THROW(Message(action_type_,
                        dest_persona_type_,
@@ -225,7 +227,6 @@ TEST_F(MessageTest, BEH_BadDestination) {
                        signature_),
                std::exception);
 }
-*/
 
 }  // namespace test
 
