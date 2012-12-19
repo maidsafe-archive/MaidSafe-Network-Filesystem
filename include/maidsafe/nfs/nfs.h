@@ -46,13 +46,19 @@ class NetworkFileSystem :
   }
 
   template <typename Data>
-  void Put(Identity name, Data data, action_callback callback, routing_, fob_);
+  void Put(Identity name, Data data, action_callback callback, routing_, fob_) {
+    PutPolicy::Put(name, data, callback, routing_, fob_);
+  }
 
   template <typename Data>
-  void Post(Identity name, Data message, action_callback callback);
+  void Post(Identity name, Data message, action_callback callback) {
+    PostPolicy::Post(name, message, callback);
+  }
 
   template <typename Data>
-  void Delete(Identity name, Data data, action_callback callback);
+  void Delete(Identity name, Data data, action_callback callback) {
+    DeletePolicy::Delete(name, data, callback);
+  }
 
  private:
   Routing routing_;
