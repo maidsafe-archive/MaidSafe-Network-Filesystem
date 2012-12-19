@@ -42,7 +42,9 @@ class NetworkFileSystem :
 
   template <typename Data>
   std::future<Data> Get(Data::name_type name) {
-    return GetPolicy::Get(name);
+    std::promise<Data> get_promise;
+    std::function<void<std::string>> std::bind(&HandleGetResponse, std::move(p));
+    return get_promise.get_future();
   }
 
   template <typename Data>
@@ -61,6 +63,18 @@ class NetworkFileSystem :
   }
 
  private:
+
+  template <typename Data>
+  void HandleGetResponse(std::promise p) {
+    try {
+      std::future<Data> res = GetPolicy::Get(name);
+    } catch(Exception e) {
+      p.set_exception(std::exception_ptr(e));
+      return;
+    }
+    p.set_value(res.get());
+  }
+
   Routing routing_;
   Fob fob_;
 }:
