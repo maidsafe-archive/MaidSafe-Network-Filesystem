@@ -14,37 +14,30 @@
 
 #include <string>
 
-#include "maidsafe/common/error.h"
 #include "maidsafe/common/node_id.h"
+#include "maidsafe/common/rsa.h"
+#include "maidsafe/common/types.h"
+
+#include "maidsafe/nfs/types.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
-enum class PersonaType : int {
-  kMaidAccountHolder = 0,
-  kMetaDataManager = 1,
-  kPmidAccountHolder = 2,
-  kDataHolder = 3
-};
-
-enum class ActionType : int {
-  kGet = 0,
-  kPut = 1,
-  kPost = 2,
-  kDelete = 3
-};
+namespace protobuf { class Message; }
 
 class Message {
  public:
-  Message(const ActionType& action_type,
-          const PersonaType& destination_persona_type,
-          const PersonaType& source_persona_type,
-          const int& data_type,
+  Message(ActionType action_type,
+          PersonaType destination_persona_type,
+          PersonaType source_persona_type,
+          int data_type,
           const NodeId& destination,
           const NodeId& source,
-          const std::string& content,
-          const std::string& signature);
+          const NonEmptyString& content,
+          const asymm::Signature& signature);
+  explicit Message(const protobuf::Message& proto_message);
 
   ActionType action_type() const { return action_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
@@ -52,25 +45,29 @@ class Message {
   int data_type() const { return data_type_; }
   NodeId destination() const { return destination_; }
   NodeId source() const { return source_; }
-  std::string content() const {return content_; }
-  std::string signature() const { return signature_; }
+  NonEmptyString content() const { return content_; }
+  asymm::Signature signature() const { return signature_; }
+
+  void set_content(const NonEmptyString& content) { content_ = content; }
+  void set_signature(const asymm::Signature& signature) { signature_ = signature; }
 
  private:
+  bool ValidateInputs() const;
+
   ActionType action_type_;
   PersonaType destination_persona_type_;
   PersonaType source_persona_type_;
   int data_type_;
   NodeId destination_;
   NodeId source_;
-  std::string content_;
-  std::string signature_;
+  NonEmptyString content_;
+  asymm::Signature signature_;
 };
 
-// throws
-Message ParseFromString(const std::string& message_string);
-std::string SerialiseAsString(const Message& message);
+Message Parse(const NonEmptyString& serialised_message);
+NonEmptyString Serialise(const Message& message);
 
-}  // namespace vault
+}  // namespace nfs
 
 }  // namespace maidsafe
 

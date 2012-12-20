@@ -9,37 +9,25 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_PUT_POLICIES_H_
-#define MAIDSAFE_NFS_PUT_POLICIES_H_
-
-#include "maidsafe/common/types.h"
-
-#include "maidsafe/passport/types.h"
-
-#include "maidsafe/routing/routing_api.h"
+#ifndef MAIDSAFE_NFS_TYPES_H_
+#define MAIDSAFE_NFS_TYPES_H_
 
 
 namespace maidsafe {
 
 namespace nfs {
 
-template<typename Data>
-class PutToMaidAccountHolder {
- public:
-  static void Put<>(const Data& data, callback, routing::Routing& routing, fob) {
-  }
-  static void Put<MutableData>(const Data& data, callback, routing::Routing& routing, fob) {
-    // could use T.Fob() T.Routing() here rather than passing routing fob parameters.
-    // need to get result of edit or store may be +ve or -Ve or fail after it
-    // goes to MAIDAccountHandler
-  }
-
- protected:
-  ~PutToMaidAccountHolder() {}
+enum class PersonaType : int {
+  kMaidAccountHolder = 0,
+  kMetaDataManager = 1,
+  kPmidAccountHolder = 2,
+  kDataHolder = 3
 };
+
+enum class ActionType : int { kGet = 0, kPut = 1, kPost = 2, kDelete = 3 };
 
 }  // namespace nfs
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_PUT_POLICIES_H_
+#endif  // MAIDSAFE_NFS_TYPES_H_

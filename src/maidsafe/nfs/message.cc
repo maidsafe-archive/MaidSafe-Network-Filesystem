@@ -11,20 +11,23 @@
 
 #include "maidsafe/nfs/message.h"
 
-#include "maidsafe/nfs/messages.pb.h"
+#include "maidsafe/common/error.h"
+
+#include "maidsafe/nfs/message_pb.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
-Message::Message(const ActionType& action_type,
-                 const PersonaType& destination_persona_type,
-                 const PersonaType& source_persona_type,
-                 const int& data_type,
+Message::Message(ActionType action_type,
+                 PersonaType destination_persona_type,
+                 PersonaType source_persona_type,
+                 int data_type,
                  const NodeId& destination,
                  const NodeId& source,
-                 const std::string& content,
-                 const std::string& signature)
+                 const NonEmptyString& content,
+                 const asymm::Signature& signature)
     : action_type_(action_type),
       destination_persona_type_(destination_persona_type),
       source_persona_type_(source_persona_type),
@@ -33,53 +36,58 @@ Message::Message(const ActionType& action_type,
       source_(source),
       content_(content),
       signature_(signature) {
-  if ((data_type_ < 0) ||
-     (destination_.IsZero()) ||
-     (source_.IsZero()) ||
-     content.empty()) {
-    ThrowError(CommonErrors::invalid_parameter);
-  }
+  if (!ValidateInputs())
+    ThrowError(NfsErrors::invalid_parameter);
 }
 
-// throws
-Message ParseFromString(const std::string& message_string) {
-  proto::Nfs proto_message;
-  if (!proto_message.ParseFromString(message_string)) {
-    ThrowError(CommonErrors::unknown);  // TODO(Prakash) : is new error type for this case?
-  }
-
-  ActionType action_type = static_cast<ActionType>(proto_message.action_type());
-  PersonaType destination_persona_type =
-      static_cast<PersonaType>(proto_message.destination_persona_type());
-  PersonaType source_persona_type = static_cast<PersonaType>(proto_message.source_persona_type());
-  int data_type = proto_message.data_type();
-  NodeId destination(proto_message.destination());
-  NodeId source(proto_message.source());
-  std::string content(proto_message.content());
-  std::string signature(proto_message.signature());
-  return (Message(action_type, destination_persona_type, source_persona_type, data_type,
-                  destination, source, content, signature));
+Message::Message(const protobuf::Message& proto_message)
+    : action_type_(static_cast<ActionType>(proto_message.action_type())),
+      destination_persona_type_(static_cast<PersonaType>(proto_message.destination_persona_type())),
+      source_persona_type_(static_cast<PersonaType>(proto_message.source_persona_type())),
+      data_type_(proto_message.data_type()),
+      destination_(proto_message.destination()),
+      source_(proto_message.source()),
+      content_(proto_message.content()),
+      signature_(proto_message.signature()) {
+  if (!ValidateInputs())
+    ThrowError(NfsErrors::invalid_parameter);
 }
 
-// throws
-std::string SerialiseAsString(const Message& message) {
-  proto::Nfs proto_message;
-  proto_message.set_action_type(static_cast<int32_t>(message.action_type()));
-  proto_message.set_destination_persona_type(
-      static_cast<int32_t>(message.destination_persona_type()));
-  proto_message.set_source_persona_type(static_cast<int32_t>(message.source_persona_type()));
-  proto_message.set_data_type(message.data_type());
-  proto_message.set_destination(message.destination().string());
-  proto_message.set_source(message.source().string());
-  proto_message.set_content(message.content());
-  if (!message.signature().empty())
-    proto_message.set_signature(message.signature());
-  if (!proto_message.IsInitialized()) {
-    ThrowError(CommonErrors::unknown);  // TODO(Prakash) : is new error type for this case?
-  }
-  return proto_message.SerializeAsString();
+bool Message::ValidateInputs() const {
+  return (data_type_ >= 0) && !destination_.IsZero() && !source_.IsZero();
 }
 
-}  // namespace vault
+Message Parse(const NonEmptyString& serialised_message) {
+  protobuf::Message proto_message;
+  if (!proto_message.ParseFromString(serialised_message.string()))
+    ThrowError(NfsErrors::message_parsing_error);
+
+  return Message(proto_message);
+}
+
+NonEmptyString Serialise(const Message& message) {
+  NonEmptyString serialised_message;
+  try {
+    protobuf::Message proto_message;
+    proto_message.set_action_type(static_cast<int32_t>(message.action_type()));
+    proto_message.set_destination_persona_type(
+        static_cast<int32_t>(message.destination_persona_type()));
+    proto_message.set_source_persona_type(static_cast<int32_t>(message.source_persona_type()));
+    proto_message.set_data_type(message.data_type());
+    proto_message.set_destination(message.destination().string());
+    proto_message.set_source(message.source().string());
+    proto_message.set_content(message.content().string());
+    if (message.signature().IsInitialised())
+      proto_message.set_signature(message.signature().string());
+
+    serialised_message = NonEmptyString(proto_message.SerializeAsString());
+  }
+  catch(const std::system_error&) {
+    ThrowError(NfsErrors::invalid_parameter);
+  }
+  return serialised_message;
+}
+
+}  // namespace nfs
 
 }  // namespace maidsafe
