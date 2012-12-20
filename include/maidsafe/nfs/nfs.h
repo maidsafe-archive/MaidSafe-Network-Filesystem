@@ -15,8 +15,8 @@
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/nfs/get_policies.h"
 #include "maidsafe/nfs/put_policies.h"
-// #include "maidsafe/nfs/post_policies.h"
-// #include "maidsafe/nfs/delete_policies.h"
+#include "maidsafe/nfs/post_policies.h"
+#include "maidsafe/nfs/delete_policies.h"
 
 
 namespace maidsafe {
@@ -52,7 +52,7 @@ class NetworkFileSystem : public GetPolicy,
   }
 
   template<typename Data>
-  void Delete(Identity name, Data data, action_callback callback) {
+  void Delete(const Data& data, action_callback callback) {
     DeletePolicy::Delete(name, data, callback);
   }
 
@@ -64,6 +64,13 @@ typedef NetworkFileSystem<GetFromDataHolder,
                           PutToDataHolder,
                           NoPost,
                           DeleteFromDataHolder> ClientMaidNfs;
+
+#ifdef TESTING
+typedef NetworkFileSystem<GetFromKeyFile,
+                          NoPut,
+                          NoPost,
+                          NoDelete> KeyHelperNfs;
+#endif
 
 // TODO(prakash) example .... ClientNfs client_nfs(routing, Pmid pmd);
 // client_nfs.Get<ImmutableData>(name, get_callback callback);

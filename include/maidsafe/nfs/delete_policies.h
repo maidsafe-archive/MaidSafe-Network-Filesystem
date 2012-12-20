@@ -9,8 +9,8 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_PUT_POLICIES_H_
-#define MAIDSAFE_NFS_PUT_POLICIES_H_
+#ifndef MAIDSAFE_NFS_DELETE_POLICIES_H_
+#define MAIDSAFE_NFS_DELETE_POLICIES_H_
 
 #include <future>
 
@@ -29,31 +29,16 @@ namespace maidsafe {
 
 namespace nfs {
 
-class NoPut {
+class NoDelete {
  public:
-  template<typename Data>
-  static void Put(const Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
+  template<typename T>
+  static void Delete(name, callback, routing, fob) {}
  protected:
-  ~NoPut() {}
-};
-
-template<typename Data>
-class PutToMaidAccountHolder {
- public:
-  static void Put<>(const Data& data, callback, routing::Routing& routing, fob) {
-  }
-  static void Put<MutableData>(const Data& data, callback, routing::Routing& routing, fob) {
-    // could use T.Fob() T.Routing() here rather than passing routing fob parameters.
-    // need to get result of edit or store may be +ve or -Ve or fail after it
-    // goes to MAIDAccountHandler
-  }
-
- protected:
-  ~PutToMaidAccountHolder() {}
+  ~NoDelete() {}
 };
 
 }  // namespace nfs
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_PUT_POLICIES_H_
+#endif  // MAIDSAFE_NFS_DELETE_POLICIES_H_

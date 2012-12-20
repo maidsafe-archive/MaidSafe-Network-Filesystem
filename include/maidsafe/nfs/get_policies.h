@@ -12,7 +12,6 @@
 #ifndef MAIDSAFE_NFS_GET_POLICIES_H_
 #define MAIDSAFE_NFS_GET_POLICIES_H_
 
-#include <functional>
 #include <future>
 
 #include "maidsafe/common/rsa.h"
@@ -26,16 +25,23 @@
 #include "maidsafe/nfs/utils.h"
 
 
-namespace args = std::placeholders;
-
 namespace maidsafe {
 
 namespace nfs {
 
+class NoGet {
+ public:
+  template<typename Data>
+  static void Get(const Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
+ protected:
+  ~NoGet() {}
+};
+
 class GetFromMetaDataManager {
  public:
-  template<typename T>
-  static void Get<>(name, callback, routing, fob) {}
+  template<typename Data>
+  static void Get(const Data::name_type& name, routing::Routing& routing) {
+  }
  protected:
   ~GetFromMetaDataManager() {}
 };
@@ -60,6 +66,24 @@ class GetFromDataHolder {
  protected:
   ~GetFromDataHolder() {}
 };
+
+#ifdef TESTING
+class GetFromKeyFile {
+ public:
+  template<typename Data>
+  std::future<Data> Get(const Data::name_type& name, routing::Routing& /*routing*/) {
+    std::promise<Data> promise;
+    Data fetched_key(ReadFromKeyFile());
+    promise.set_value(fetched_key);
+    std::future<Data> future(promise.get_future());
+    return future;
+  }
+
+ protected:
+  ~GetFromKeyFile() {}
+};
+#endif
+
 
 }  // namespace nfs
 
