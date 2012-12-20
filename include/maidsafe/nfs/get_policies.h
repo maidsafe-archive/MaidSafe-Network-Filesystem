@@ -44,10 +44,12 @@ class GetFromDataHolder {
  public:
   template<typename Data>
   std::future<Data> Get(const Data::name_type& name, routing::Routing& routing) {
-    std::promise<Data> promise;
-    std::future<Data> future(promise.get_future());
+    auto promise(std::make_shared<std::promise<Data>>());
+    std::future<Data> future(promise->get_future());
     routing::ResponseFunctor callback =
-        std::bind(&HandleGetResponse, std::move(promise), args::_);
+        [promise](const std::vector<std::string>& serialised_messages) {
+          HandleGetResponse(promise, serialised_messages);
+        };
     bool is_cacheable(is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value);
     //construct serialised nfs::Message
     routing.Send(name, name, serialised_message, callback, bptime::seconds(11),

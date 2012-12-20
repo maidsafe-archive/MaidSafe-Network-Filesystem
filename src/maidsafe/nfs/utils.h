@@ -13,6 +13,7 @@
 #define MAIDSAFE_NFS_UTILS_H_
 
 #include <exception>
+#include <future>
 #include <string>
 #include <vector>
 
@@ -33,7 +34,7 @@ namespace nfs {
 //                  expect this to be slow (e.g. validate and parse message), we should take this
 //                  off Routing's thread.
 template<typename Data>
-void HandleGetResponse(std::promise<Data>&& promise,
+void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
                        const std::vector<std::string>& serialised_messages) {
   try {
     if (serialised_messages.empty())
@@ -43,7 +44,7 @@ void HandleGetResponse(std::promise<Data>&& promise,
       try {
         Message message(Parse(serialised_message));
         Data data(ValidateAndParse(message));
-        promise.set_value(std::move(data));
+        promise->set_value(std::move(data));
         return;
       }
       catch(const std::system_error& error) {
@@ -54,7 +55,7 @@ void HandleGetResponse(std::promise<Data>&& promise,
     ThrowError(NfsErrors::failed_to_get_data);
   }
   catch(...) {
-    promise.set_exception(std::current_exception());
+    promise->set_exception(std::current_exception());
   }
 }
 
