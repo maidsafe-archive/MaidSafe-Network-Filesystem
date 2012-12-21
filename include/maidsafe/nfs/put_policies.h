@@ -32,24 +32,32 @@ namespace nfs {
 class NoPut {
  public:
   template<typename Data>
-  static void Put(const Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
+  static void Put(const Data& /*data*/, routing::Routing& /*routing*/) {}
  protected:
   ~NoPut() {}
 };
 
-template<typename Data>
-class PutToMaidAccountHolder {
+class PutToDataHolder {
  public:
-  static void Put<>(const Data& data, callback, routing::Routing& routing, fob) {
-  }
-  static void Put<MutableData>(const Data& data, callback, routing::Routing& routing, fob) {
-    // could use T.Fob() T.Routing() here rather than passing routing fob parameters.
-    // need to get result of edit or store may be +ve or -Ve or fail after it
-    // goes to MAIDAccountHandler
+  template<typename Data>
+  static void Put(const Data& data,
+                  OnError on_error,
+                  const passport::Maid& maid,
+                  routing::Routing& routing) {
+    NonEmptyString content(data.Serialise());
+    Message message(ActionType::kPut, PersonaType::kDataHolder, PersonaType::kClientMaid,
+                    DataType<Data>(), NodeId(name.data.string()), routing.kNodeId(),
+                    content, asymm::Sign(content, maid.private_key()));
+    routing::ResponseFunctor callback =
+        [on_error_functor, message](const std::vector<std::string>& serialised_messages) {
+          HandlePutResponse(on_error, message, serialised_messages);
+        };
+    routing.Send(NodeId(data.name().data.string()), Serialise(message).string(), callback,
+                 routing::DestinationType::kGroup, IsCacheable<Data>());
   }
 
  protected:
-  ~PutToMaidAccountHolder() {}
+  ~PutToDataHolder() {}
 };
 
 }  // namespace nfs

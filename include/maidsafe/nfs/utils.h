@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+#include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
@@ -32,9 +33,18 @@ namespace maidsafe {
 namespace nfs {
 
 template<typename Data>
+bool IsCacheable() {
+  return is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value;
+}
 
-Data ValidateAndParse(const Message& 1essage) {
-///  ...
+template<typename Data>
+int DataType() {
+  return Data::name_type::tag_type::kEnumValue;
+}
+
+template<typename Data>
+Data ValidateAndParse(const Message& message) {
+  return Data(Data::serialised_type(message.content()));
 }
 
 // TODO(Fraser#5#): 2012-12-20 - This is executed on one of Routing's io_service threads.  If we
@@ -63,6 +73,45 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
   }
   catch(...) {
     promise->set_exception(std::current_exception());
+  }
+}
+
+template<typename Data>
+void HandlePutResponse(std::function<void(Message message)> on_error_functor,
+                       Message original_message,
+                       const std::vector<std::string>& serialised_messages) {
+  if (serialised_messages.empty()) {
+    LOG(kError) << "No responses received for Put type " << original_message.data_type
+                << "  " << DebugId(original_message.destination);
+    on_error_functor(std::move(original_message));
+  }
+
+  // TODO(Fraser#5#): 2012-12-21 - Confirm this is OK as a means of deciding overall success
+  int success_count(0), failure_count(0);
+  protobuf::ErrorCode error_code;
+  for (auto& serialised_message : serialised_messages) {
+    error_code.clear();
+    try {
+      error_code.ParseFromString(serialised_message);
+      if (static_cast<CommonErrors>(error_code.value()) == CommonErrors::success) {
+        ++success_count;
+      } else {
+        LOG(kWarning) << "Received an error " << error_code.value() << " for Put type "
+                      << original_message.data_type << " " << DebugId(original_message.destination);
+        ++failure_count;
+      }
+    }
+    catch(const std::exception& e) {
+      ++failure_count;
+      LOG(kError) << e.code() << " - " << error.what();
+    }
+  }
+
+  if (success_count == 0) {
+    LOG(kError) << "No successful responses received for Put type " << original_message.data_type
+                << "  " << DebugId(original_message.destination) << "  received " << failure_count
+                << " failures.";
+    on_error_functor(std::move(original_message));
   }
 }
 

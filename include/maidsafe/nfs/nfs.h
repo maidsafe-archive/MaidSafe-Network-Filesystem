@@ -13,6 +13,8 @@
 #define MAIDSAFE_NFS_NFS_H_
 
 #include "maidsafe/routing/routing_api.h"
+
+#include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/get_policies.h"
 #include "maidsafe/nfs/put_policies.h"
 #include "maidsafe/nfs/post_policies.h"
@@ -36,13 +38,12 @@ class NetworkFileSystem : public GetPolicy,
 
   template<typename Data>
   std::future<Data> Get(const Data::name_type& name) {
-    return GetPolicy::Get(name, routing);
+    return GetPolicy::Get(name, routing_);
   }
 
+  // TODO(Fraser#5#): 2012-12-21 - The signing fob type needs to be fixed - make class template?
   template<typename Data>
-  void Put(const Data& data,
-           const Data::signer_type& signing_fob,
-           std::function<void(Data, Data::signer_type)> on_error) {
+  void Put(const Data& data, const OnError& on_error, const Data::signer_type& signing_fob) {
     PutPolicy::Put(data, signing_fob, on_error, routing_);
   }
 
@@ -60,10 +61,7 @@ class NetworkFileSystem : public GetPolicy,
   Routing routing_;
 };
 
-typedef NetworkFileSystem<GetFromDataHolder,
-                          PutToDataHolder,
-                          NoPost,
-                          DeleteFromDataHolder> ClientMaidNfs;
+typedef NetworkFileSystem<GetFromDataHolder, PutToDataHolder, NoPost, NoDelete> ClientMaidNfs;
 
 #ifdef TESTING
 typedef NetworkFileSystem<GetFromKeyFile,
@@ -71,9 +69,6 @@ typedef NetworkFileSystem<GetFromKeyFile,
                           NoPost,
                           NoDelete> KeyHelperNfs;
 #endif
-
-// TODO(prakash) example .... ClientNfs client_nfs(routing, Pmid pmd);
-// client_nfs.Get<ImmutableData>(name, get_callback callback);
 
 }  // namespace nfs
 

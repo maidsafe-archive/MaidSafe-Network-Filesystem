@@ -12,10 +12,14 @@
 #ifndef MAIDSAFE_NFS_TYPES_H_
 #define MAIDSAFE_NFS_TYPES_H_
 
+#include <functional>
+
 
 namespace maidsafe {
 
 namespace nfs {
+
+class Message;
 
 enum class PersonaType : int {
   kMaidAccountHolder = 0,
@@ -27,6 +31,8 @@ enum class PersonaType : int {
 };
 
 enum class ActionType : int { kGet = 0, kPut = 1, kPost = 2, kDelete = 3 };
+
+typedef std::function<void(Message message)> OnError;
 
 }  // namespace nfs
 
