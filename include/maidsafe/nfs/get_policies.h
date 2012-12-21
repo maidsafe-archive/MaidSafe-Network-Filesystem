@@ -32,7 +32,7 @@ namespace nfs {
 class NoGet {
  public:
   template<typename Data>
-  static void Get(const Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
+  void Get(const typename Data::name_type& name, routing::Routing& routing) {}
  protected:
   ~NoGet() {}
 };
@@ -40,8 +40,7 @@ class NoGet {
 class GetFromMetaDataManager {
  public:
   template<typename Data>
-  static void Get(const Data::name_type& name, routing::Routing& routing) {
-  }
+  void Get(const typename Data::name_type& name, routing::Routing& routing) {}
  protected:
   ~GetFromMetaDataManager() {}
 };
@@ -49,7 +48,7 @@ class GetFromMetaDataManager {
 class GetFromDataHolder {
  public:
   template<typename Data>
-  std::future<Data> Get(const Data::name_type& name, routing::Routing& routing) {
+  std::future<Data> Get(const typename Data::name_type& name, routing::Routing& routing) {
     auto promise(std::make_shared<std::promise<Data>>());
     std::future<Data> future(promise->get_future());
     routing::ResponseFunctor callback =
@@ -57,9 +56,13 @@ class GetFromDataHolder {
           HandleGetResponse(promise, serialised_messages);
         };
     bool is_cacheable(is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value);
-    //construct serialised nfs::Message
-    routing.Send(name, name, serialised_message, callback, bptime::seconds(11),
-                 routing::DestinationType::kGroup, is_cacheable);
+    nfs::Message message;
+    message.set_data_type(Data::name_type::tag_type::kEnumValue;
+    routing.Send(name,
+                 serialised_message,
+                 callback,
+                 routing::DestinationType::kGroup,
+                 is_cacheable);
     return future;
   }
 
@@ -71,7 +74,7 @@ class GetFromDataHolder {
 class GetFromKeyFile {
  public:
   template<typename Data>
-  std::future<Data> Get(const Data::name_type& name, routing::Routing& /*routing*/) {
+  std::future<Data> Get(const typename Data::name_type& name, routing::Routing& routing) {
     std::promise<Data> promise;
     Data fetched_key(ReadFromKeyFile());
     promise.set_value(fetched_key);
@@ -83,7 +86,6 @@ class GetFromKeyFile {
   ~GetFromKeyFile() {}
 };
 #endif
-
 
 }  // namespace nfs
 

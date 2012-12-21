@@ -32,7 +32,8 @@ namespace maidsafe {
 namespace nfs {
 
 template<typename Data>
-Data ValidateAndParse(const Message& message) {
+
+Data ValidateAndParse(const Message& 1essage) {
 ///  ...
 }
 
