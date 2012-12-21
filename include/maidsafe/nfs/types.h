@@ -21,7 +21,7 @@ enum class PersonaType : int {
   kMaidAccountHolder = 0,
   kMetaDataManager = 1,
   kPmidAccountHolder = 2,
-  kDataHolder = 3
+  kDataHolder = 3,
   kClientMaid = 4,
   kClientMpid = 5
 };
