@@ -42,7 +42,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
 
     for (auto& serialised_message : serialised_messages) {
       try {
-        Message message(Parse(serialised_message));
+        Message message(Parse(NonEmptyString(serialised_message)));
         Data data(ValidateAndParse(message));
         promise->set_value(std::move(data));
         return;
