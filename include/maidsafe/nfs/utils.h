@@ -23,12 +23,18 @@
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
+
+template<typename Data>
+Data ValidateAndParse(const Message& message) {
+///  ...
+}
 
 // TODO(Fraser#5#): 2012-12-20 - This is executed on one of Routing's io_service threads.  If we
 //                  expect this to be slow (e.g. validate and parse message), we should take this
@@ -43,7 +49,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
     for (auto& serialised_message : serialised_messages) {
       try {
         Message message(Parse(NonEmptyString(serialised_message)));
-        Data data(ValidateAndParse(message));
+        Data data(ValidateAndParse<Data>(message));
         promise->set_value(std::move(data));
         return;
       }
@@ -59,10 +65,6 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
   }
 }
 
-template<typename Data>
-Data ValidateAndParse(const Message& message) {
-  ...
-}
 
 }  // namespace nfs
 
