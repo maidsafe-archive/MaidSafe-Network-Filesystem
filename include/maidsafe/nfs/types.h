@@ -27,7 +27,8 @@ enum class PersonaType : int {
   kPmidAccountHolder = 2,
   kDataHolder = 3,
   kClientMaid = 4,
-  kClientMpid = 5
+  kClientMpid = 5,
+  kDataGetter = 6
 };
 
 enum class ActionType : int { kGet = 0, kPut = 1, kPost = 2, kDelete = 3 };

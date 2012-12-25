@@ -13,6 +13,8 @@
 #define MAIDSAFE_NFS_GET_POLICIES_H_
 
 #include <future>
+#include <string>
+#include <vector>
 
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"
@@ -45,19 +47,20 @@ class GetFromMetaDataManager {
   ~GetFromMetaDataManager() {}
 };
 
+template<PersonaType persona>
 class GetFromDataHolder {
  public:
   template<typename Data>
   static std::future<Data> Get(const typename Data::name_type& name, routing::Routing& routing) {
-    auto promise(std::make_shared<std::promise<Data>>());
+    auto promise(std::make_shared<std::promise<Data>>());  // NOLINT (Fraser)
     std::future<Data> future(promise->get_future());
     routing::ResponseFunctor callback =
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    Message message(ActionType::kGet, PersonaType::kClientMaid, PersonaType::kDataHolder,
-                    DataType<Data>(), NodeId(name.data.string()), routing.kNodeId(),
-                    NonEmptyString(), asymm::Signature());
+    Message message(ActionType::kGet, PersonaType::kDataHolder, persona, DataType<Data>(),
+                    NodeId(name.data.string()), routing.kNodeId(), NonEmptyString(),
+                    asymm::Signature());
     routing.Send(NodeId(name.data.string()), Serialise(message).string(), callback,
                  routing::DestinationType::kGroup, IsCacheable<Data>());
     return future;
@@ -67,7 +70,9 @@ class GetFromDataHolder {
   ~GetFromDataHolder() {}
 };
 
+
 #ifdef TESTING
+
 class GetFromKeyFile {
  public:
   template<typename Data>
@@ -81,7 +86,9 @@ class GetFromKeyFile {
  protected:
   ~GetFromKeyFile() {}
 };
+
 #endif
+
 
 }  // namespace nfs
 

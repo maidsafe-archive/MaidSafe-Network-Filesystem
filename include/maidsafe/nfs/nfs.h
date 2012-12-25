@@ -61,7 +61,15 @@ class NetworkFileSystem : public GetPolicy,
   Routing routing_;
 };
 
-typedef NetworkFileSystem<GetFromDataHolder, PutToDataHolder, NoPost, NoDelete> ClientMaidNfs;
+typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kClientMaid>,
+                          PutToDataHolder,
+                          NoPost,
+                          NoDelete> ClientMaidNfs;
+
+typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kDataGetter>,
+                          NoPut,
+                          NoPost,
+                          NoDelete> KeyGetterNfs;
 
 #ifdef TESTING
 typedef NetworkFileSystem<GetFromKeyFile,

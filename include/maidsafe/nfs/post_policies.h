@@ -13,6 +13,8 @@
 #define MAIDSAFE_NFS_POST_POLICIES_H_
 
 #include <future>
+#include <string>
+#include <vector>
 
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"

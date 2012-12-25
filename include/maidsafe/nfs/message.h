@@ -29,6 +29,7 @@ namespace protobuf { class Message; }
 
 class Message {
  public:
+  typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
   Message(ActionType action_type,
           PersonaType destination_persona_type,
           PersonaType source_persona_type,
@@ -37,7 +38,13 @@ class Message {
           const NodeId& source,
           const NonEmptyString& content,
           const asymm::Signature& signature);
-  explicit Message(const protobuf::Message& proto_message);
+  Message(const Message& other);
+  Message& operator=(const Message& other);
+  Message(Message&& other);
+  Message& operator=(Message&& other);
+
+  explicit Message(const serialised_type& serialised_message);
+  serialised_type Serialise() const;
 
   ActionType action_type() const { return action_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
@@ -63,9 +70,6 @@ class Message {
   NonEmptyString content_;
   asymm::Signature signature_;
 };
-
-Message Parse(const NonEmptyString& serialised_message);
-NonEmptyString Serialise(const Message& message);
 
 }  // namespace nfs
 

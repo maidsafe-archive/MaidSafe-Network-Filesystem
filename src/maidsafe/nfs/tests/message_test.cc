@@ -68,8 +68,8 @@ TEST_F(MessageTest, BEH_CheckGetters) {
 }
 
 TEST_F(MessageTest, BEH_SerialiseThenParse) {
-  NonEmptyString serialised_message(Serialise(message_));
-  Message recovered_message(Parse(serialised_message));
+  auto serialised_message(message_.Serialise());
+  Message recovered_message(serialised_message);
 
   EXPECT_EQ(action_type_, recovered_message.action_type());
   EXPECT_EQ(dest_persona_type_, recovered_message.destination_persona_type());
@@ -82,26 +82,28 @@ TEST_F(MessageTest, BEH_SerialiseThenParse) {
 }
 
 TEST_F(MessageTest, BEH_ParseFromBadString) {
-  std::vector<NonEmptyString> bad_strings;
-  bad_strings.push_back(NonEmptyString(RandomString(1 + RandomUint32() % 100)));
-  bad_strings.push_back(NonEmptyString());
-  NonEmptyString good_string(Serialise(message_));
-  bad_strings.push_back(good_string + NonEmptyString(RandomString(1)));
-  bad_strings.push_back(
-      NonEmptyString(good_string.string().substr(0, good_string.string().size() - 2)));
+  std::vector<Message::serialised_type> bad_strings;
+  bad_strings.push_back(Message::serialised_type(
+      NonEmptyString(RandomString(1 + RandomUint32() % 100))));
+  bad_strings.push_back(Message::serialised_type());
+  auto good_string(message_.Serialise());
+  bad_strings.push_back(Message::serialised_type(
+      good_string.data + NonEmptyString(RandomString(1))));
+  bad_strings.push_back(Message::serialised_type(
+      NonEmptyString(good_string.data.string().substr(0, good_string.data.string().size() - 2))));
 
   for (auto& bad_string : bad_strings) {
     // TODO(Alison) - expect more specific value
-    EXPECT_THROW(Parse(bad_string), std::system_error);
+    EXPECT_THROW(Message message(bad_string), std::system_error);
   }
 }
 
 TEST_F(MessageTest, BEH_SerialiseParseReserialiseReparse) {
-  NonEmptyString serialised_message(Serialise(message_));
-  Message recovered_message(Parse(serialised_message));
+  auto serialised_message(message_.Serialise());
+  Message recovered_message(serialised_message);
 
-  NonEmptyString serialised_message2(Serialise(recovered_message));
-  Message recovered_message2(Parse(serialised_message2));
+  auto serialised_message2(recovered_message.Serialise());
+  Message recovered_message2(serialised_message2);
 
   EXPECT_EQ(serialised_message, serialised_message2);
   EXPECT_EQ(action_type_, recovered_message2.action_type());
@@ -136,6 +138,28 @@ TEST_F(MessageTest, BEH_AssignMessage) {
   EXPECT_EQ(src_id_, message3.source());
   EXPECT_EQ(content_, message3.content());
   EXPECT_EQ(signature_, message3.signature());
+
+  Message message4 = std::move(message3);
+
+  EXPECT_EQ(action_type_, message4.action_type());
+  EXPECT_EQ(dest_persona_type_, message4.destination_persona_type());
+  EXPECT_EQ(src_persona_type_, message4.source_persona_type());
+  EXPECT_EQ(data_type_, message4.data_type());
+  EXPECT_EQ(dest_id_, message4.destination());
+  EXPECT_EQ(src_id_, message4.source());
+  EXPECT_EQ(content_, message4.content());
+  EXPECT_EQ(signature_, message4.signature());
+
+  Message message5(std::move(message4));
+
+  EXPECT_EQ(action_type_, message5.action_type());
+  EXPECT_EQ(dest_persona_type_, message5.destination_persona_type());
+  EXPECT_EQ(src_persona_type_, message5.source_persona_type());
+  EXPECT_EQ(data_type_, message5.data_type());
+  EXPECT_EQ(dest_id_, message5.destination());
+  EXPECT_EQ(src_id_, message5.source());
+  EXPECT_EQ(content_, message5.content());
+  EXPECT_EQ(signature_, message5.signature());
 }
 
 TEST_F(MessageTest, BEH_BadDataType) {

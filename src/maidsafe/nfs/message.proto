@@ -11,7 +11,3 @@ message Message {
   optional bytes content = 7;
   optional bytes signature = 8;
 }
-
-message ErrorCode {
-  required int32 value = 1;
-}

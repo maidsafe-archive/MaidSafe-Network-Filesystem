@@ -9,38 +9,16 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_DELETE_POLICIES_H_
-#define MAIDSAFE_NFS_DELETE_POLICIES_H_
+#ifndef MAIDSAFE_NFS_RETURN_CODE_PB_H_
+#define MAIDSAFE_NFS_RETURN_CODE_PB_H_
 
-#include <future>
-#include <string>
-#include <vector>
+#ifdef __MSVC__
+#  pragma warning(push)
+#  pragma warning(disable: 4127 4244 4267)
+#endif
+#include "maidsafe/nfs/return_code.pb.h"
+#ifdef __MSVC__
+#  pragma warning(pop)
+#endif
 
-#include "maidsafe/common/rsa.h"
-#include "maidsafe/common/crypto.h"
-#include "maidsafe/common/types.h"
-
-#include "maidsafe/passport/types.h"
-
-#include "maidsafe/routing/routing_api.h"
-
-#include "maidsafe/nfs/utils.h"
-
-
-namespace maidsafe {
-
-namespace nfs {
-
-class NoDelete {
- public:
-  template<typename T>
-  static void Delete(name, callback, routing, fob) {}
- protected:
-  ~NoDelete() {}
-};
-
-}  // namespace nfs
-
-}  // namespace maidsafe
-
-#endif  // MAIDSAFE_NFS_DELETE_POLICIES_H_
+#endif  // MAIDSAFE_NFS_RETURN_CODE_PB_H_
