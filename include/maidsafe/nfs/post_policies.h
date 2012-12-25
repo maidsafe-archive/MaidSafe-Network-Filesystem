@@ -34,7 +34,7 @@ namespace nfs {
 class NoPost {
  public:
   template<typename Data>
-  static void Post(const Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
+  static void Post(const typename Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
  protected:
   ~NoPost() {}
 };

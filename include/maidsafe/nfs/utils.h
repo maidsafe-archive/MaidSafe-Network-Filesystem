@@ -24,6 +24,7 @@
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/return_code.h"
 #include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/types.h"
 
@@ -59,7 +60,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
 
     for (auto& serialised_message : serialised_messages) {
       try {
-        Message message(Parse(NonEmptyString(serialised_message)));
+        Message message(serialised_message);
         Data data(ValidateAndParse<Data>(message));
         promise->set_value(std::move(data));
         return;
@@ -88,15 +89,14 @@ void HandlePutResponse(std::function<void(Message message)> on_error_functor,
 
   // TODO(Fraser#5#): 2012-12-21 - Confirm this is OK as a means of deciding overall success
   int success_count(0), failure_count(0);
-  protobuf::ErrorCode error_code;
+  ReturnCode return_code;
   for (auto& serialised_message : serialised_messages) {
-    error_code.clear();
     try {
-      error_code.ParseFromString(serialised_message);
-      if (static_cast<CommonErrors>(error_code.value()) == CommonErrors::success) {
+      return_code = ReturnCode(serialised_message);
+      if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
         ++success_count;
       } else {
-        LOG(kWarning) << "Received an error " << error_code.value() << " for Put type "
+        LOG(kWarning) << "Received an error " << return_code.value() << " for Put type "
                       << original_message.data_type() << " "
                       << DebugId(original_message.destination());
         ++failure_count;
@@ -104,7 +104,7 @@ void HandlePutResponse(std::function<void(Message message)> on_error_functor,
     }
     catch(const std::exception& e) {
       ++failure_count;
-      LOG(kError) << e.code() << " - " << error.what();
+      LOG(kError) << return_code.value() << " - " << e.what();
     }
   }
 

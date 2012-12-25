@@ -34,7 +34,7 @@ namespace nfs {
 class NoDelete {
  public:
   template<typename T>
-  static void Delete(name, callback, routing, fob) {}
+  static void Delete() {}
  protected:
   ~NoDelete() {}
 };

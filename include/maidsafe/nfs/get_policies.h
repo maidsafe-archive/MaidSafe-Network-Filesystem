@@ -61,7 +61,7 @@ class GetFromDataHolder {
     Message message(ActionType::kGet, PersonaType::kDataHolder, persona, DataType<Data>(),
                     NodeId(name.data.string()), routing.kNodeId(), NonEmptyString(),
                     asymm::Signature());
-    routing.Send(NodeId(name.data.string()), Serialise(message).string(), callback,
+    routing.Send(NodeId(name.data.string()), message.Serialise().data.string(), callback,
                  routing::DestinationType::kGroup, IsCacheable<Data>());
     return future;
   }
@@ -73,19 +73,19 @@ class GetFromDataHolder {
 
 #ifdef TESTING
 
-class GetFromKeyFile {
- public:
-  template<typename Data>
-  static std::future<Data> Get(const typename Data::name_type& name, routing::Routing& routing) {
-    std::promise<Data> promise;
-    Data fetched_key(ReadFromKeyFile());
-    promise.set_value(fetched_key);
-    return promise.get_future();
-  }
+//class GetFromKeyFile {
+// public:
+//  template<typename Data>
+//  static std::future<Data> Get(const typename Data::name_type& name, routing::Routing& routing) {
+//    std::promise<Data> promise;
+//    Data fetched_key(ReadFromKeyFile());
+//    promise.set_value(fetched_key);
+//    return promise.get_future();
+//  }
 
- protected:
-  ~GetFromKeyFile() {}
-};
+// protected:
+//  ~GetFromKeyFile() {}
+//};
 
 #endif
 

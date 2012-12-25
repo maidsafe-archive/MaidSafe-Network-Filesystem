@@ -34,7 +34,7 @@ namespace nfs {
 class NoPut {
  public:
   template<typename Data>
-  static void Put(const Data& /*data*/, routing::Routing& /*routing*/) {}
+  static void Put(const Data& data, routing::Routing& routing) {}
  protected:
   ~NoPut() {}
 };
@@ -48,18 +48,21 @@ class PutToDataHolder {
                   routing::Routing& routing) {
     NonEmptyString content(data.Serialise());
     Message message(ActionType::kPut, PersonaType::kDataHolder, PersonaType::kClientMaid,
-                    DataType<Data>(), NodeId(name.data.string()), routing.kNodeId(),
+                    DataType<Data>(), NodeId(data.destination.data.string()), routing.kNodeId(),
                     content, asymm::Sign(content, maid.private_key()));
     routing::ResponseFunctor callback =
-        [on_error_functor, message](const std::vector<std::string>& serialised_messages) {
+        [on_error, message](const std::vector<std::string>& serialised_messages) {
           HandlePutResponse(on_error, message, serialised_messages);
         };
-    routing.Send(NodeId(data.name().data.string()), Serialise(message).string(), callback,
+    routing.Send(NodeId(data.name().data.string()), message.Serialise().data.string(), callback,
                  routing::DestinationType::kGroup, IsCacheable<Data>());
   }
 
  protected:
   ~PutToDataHolder() {}
+  void HandlePutResponse(OnError /*on_error*/, const Message& /*message*/,
+                         const std::vector<std::string>& /*serialised_messages*/) {
+  }
 };
 
 }  // namespace nfs

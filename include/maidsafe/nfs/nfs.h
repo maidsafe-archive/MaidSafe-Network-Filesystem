@@ -14,6 +14,8 @@
 
 #include "maidsafe/routing/routing_api.h"
 
+#include <functional>
+
 #include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/get_policies.h"
 #include "maidsafe/nfs/put_policies.h"
@@ -24,6 +26,8 @@
 namespace maidsafe {
 
 namespace nfs {
+
+typedef std::function <void()> action_callback;
 
 template<typename GetPolicy,
          typename PutPolicy,
@@ -37,13 +41,14 @@ class NetworkFileSystem : public GetPolicy,
   explicit NetworkFileSystem(routing::Routing& routing) : routing_(routing) {}
 
   template<typename Data>
-  std::future<Data> Get(const Data::name_type& name) {
+  std::future<Data> Get(const typename Data::name_type& name) {
     return GetPolicy::Get(name, routing_);
   }
 
   // TODO(Fraser#5#): 2012-12-21 - The signing fob type needs to be fixed - make class template?
   template<typename Data>
-  void Put(const Data& data, const OnError& on_error, const Data::signer_type& signing_fob) {
+  void Put(const Data& data, const OnError& on_error,
+           const typename Data::signer_type& signing_fob) {
     PutPolicy::Put(data, signing_fob, on_error, routing_);
   }
 
@@ -54,11 +59,11 @@ class NetworkFileSystem : public GetPolicy,
 
   template<typename Data>
   void Delete(const Data& data, action_callback callback) {
-    DeletePolicy::Delete(name, data, callback);
+    DeletePolicy::Delete();
   }
 
  private:
-  Routing routing_;
+  routing::Routing routing_;
 };
 
 typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kClientMaid>,
@@ -72,10 +77,10 @@ typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kDataGetter>,
                           NoDelete> KeyGetterNfs;
 
 #ifdef TESTING
-typedef NetworkFileSystem<GetFromKeyFile,
-                          NoPut,
-                          NoPost,
-                          NoDelete> KeyHelperNfs;
+//typedef NetworkFileSystem<GetFromKeyFile,
+//                          NoPut,
+//                          NoPost,
+//                          NoDelete> KeyHelperNfs;
 #endif
 
 }  // namespace nfs
