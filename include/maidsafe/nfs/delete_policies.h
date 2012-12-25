@@ -33,8 +33,11 @@ namespace nfs {
 
 class NoDelete {
  public:
-  template<typename T>
-  static void Delete() {}
+  template<typename Data>
+  static void Delete(const Data& /*data*/,
+                     OnError /*on_error*/,
+                     routing::Routing& /*routing*/,
+                     const passport::Maid& /*maid*/) {}
  protected:
   ~NoDelete() {}
 };

@@ -60,7 +60,8 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
 
     for (auto& serialised_message : serialised_messages) {
       try {
-        Message message(serialised_message);
+        // Need '((' when constructing Message to avoid most vexing parse.
+        Message message((Message::serialised_type((NonEmptyString(serialised_message)))));
         Data data(ValidateAndParse<Data>(message));
         promise->set_value(std::move(data));
         return;
@@ -92,7 +93,8 @@ void HandlePutResponse(std::function<void(Message message)> on_error_functor,
   ReturnCode return_code;
   for (auto& serialised_message : serialised_messages) {
     try {
-      return_code = ReturnCode(serialised_message);
+      // Need '((' when constructing ReturnCode to avoid most vexing parse.
+      return_code = ReturnCode((ReturnCode::serialised_type((NonEmptyString(serialised_message)))));
       if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
         ++success_count;
       } else {

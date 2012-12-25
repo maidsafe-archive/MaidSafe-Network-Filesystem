@@ -14,7 +14,7 @@
 
 #include "maidsafe/routing/routing_api.h"
 
-#include <functional>
+#include "maidsafe/passport/types.h"
 
 #include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/get_policies.h"
@@ -27,18 +27,19 @@ namespace maidsafe {
 
 namespace nfs {
 
-typedef std::function <void()> action_callback;
-
 template<typename GetPolicy,
          typename PutPolicy,
          typename PostPolicy,
-         typename DeletePolicy>
+         typename DeletePolicy,
+         typename SigningFob>
 class NetworkFileSystem : public GetPolicy,
                           public PutPolicy,
                           public PostPolicy,
                           public DeletePolicy {
  public:
-  explicit NetworkFileSystem(routing::Routing& routing) : routing_(routing) {}
+  NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob_)
+      : routing_(routing),
+        signing_fob_(signing_fob)
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
@@ -47,40 +48,43 @@ class NetworkFileSystem : public GetPolicy,
 
   // TODO(Fraser#5#): 2012-12-21 - The signing fob type needs to be fixed - make class template?
   template<typename Data>
-  void Put(const Data& data, const OnError& on_error,
-           const typename Data::signer_type& signing_fob) {
-    PutPolicy::Put(data, signing_fob, on_error, routing_);
+  void Put(const Data& data, const OnError& on_error) {
+    PutPolicy::Put(data, on_error, routing_, signing_fob_);
   }
 
-  template<typename Data>
-  void Post(Identity name, Data message, action_callback callback) {
-    PostPolicy::Post(name, message, callback);
-  }
+  //template<typename Data>
+  //void Post(Identity name, Data message, action_callback callback) {
+  //  PostPolicy::Post(name, message, callback);
+  //}
 
   template<typename Data>
-  void Delete(const Data& data, action_callback callback) {
-    DeletePolicy::Delete();
+  void Delete(const Data& data, const OnError& on_error) {
+    DeletePolicy::Delete(data, on_error, routing_, signing_fob_);
   }
 
  private:
   routing::Routing routing_;
+  SigningFob signing_fob_;
 };
 
 typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kClientMaid>,
                           PutToDataHolder,
                           NoPost,
-                          NoDelete> ClientMaidNfs;
+                          NoDelete,
+                          passport::Maid> ClientMaidNfs;
 
 typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kDataGetter>,
                           NoPut,
                           NoPost,
-                          NoDelete> KeyGetterNfs;
+                          NoDelete,
+                          passport::Pmid> KeyGetterNfs;
 
 #ifdef TESTING
 //typedef NetworkFileSystem<GetFromKeyFile,
 //                          NoPut,
 //                          NoPost,
-//                          NoDelete> KeyHelperNfs;
+//                          NoDelete,
+//                          passport::Pmid> KeyHelperNfs;
 #endif
 
 }  // namespace nfs

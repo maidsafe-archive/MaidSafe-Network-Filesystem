@@ -34,7 +34,10 @@ namespace nfs {
 class NoPut {
  public:
   template<typename Data>
-  static void Put(const Data& data, routing::Routing& routing) {}
+  static void Put(const Data& /*data*/,
+                  OnError /*on_error*/,
+                  routing::Routing& /*routing*/,
+                  const passport::Maid& /*maid*/) {}
  protected:
   ~NoPut() {}
 };
@@ -44,8 +47,8 @@ class PutToDataHolder {
   template<typename Data>
   static void Put(const Data& data,
                   OnError on_error,
-                  const passport::Maid& maid,
-                  routing::Routing& routing) {
+                  routing::Routing& routing,
+                  const passport::Maid& maid) {
     NonEmptyString content(data.Serialise());
     Message message(ActionType::kPut, PersonaType::kDataHolder, PersonaType::kClientMaid,
                     DataType<Data>(), NodeId(data.destination.data.string()), routing.kNodeId(),
