@@ -37,9 +37,10 @@ class NetworkFileSystem : public GetPolicy,
                           public PostPolicy,
                           public DeletePolicy {
  public:
-  NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob_)
+  NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
       : routing_(routing),
-        signing_fob_(signing_fob)
+        signing_fob_(signing_fob) {
+  }
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
