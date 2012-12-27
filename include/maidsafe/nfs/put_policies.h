@@ -63,7 +63,7 @@ class PutToDataHolder {
 
  protected:
   ~PutToDataHolder() {}
-  void HandlePutResponse(OnError /*on_error*/, const Message& /*message*/,
+  static void HandlePutResponse(OnError /*on_error*/, const Message& /*message*/,
                          const std::vector<std::string>& /*serialised_messages*/) {
   }
 };

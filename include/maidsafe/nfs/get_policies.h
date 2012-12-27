@@ -34,7 +34,7 @@ namespace nfs {
 class NoGet {
  public:
   template<typename Data>
-  static std::future<Data> Get(const typename Data::name_type& name, routing::Routing& routing) {}
+  static std::future<Data> Get(const typename Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
  protected:
   ~NoGet() {}
 };
@@ -42,7 +42,7 @@ class NoGet {
 class GetFromMetaDataManager {
  public:
   template<typename Data>
-  void Get(const typename Data::name_type& name, routing::Routing& routing) {}
+    void Get(const typename Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
  protected:
   ~GetFromMetaDataManager() {}
 };
