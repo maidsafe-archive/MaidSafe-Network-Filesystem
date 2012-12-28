@@ -104,22 +104,7 @@ class GetFromKeyFile {
 template<>
 std::future<passport::PublicPmid> GetFromKeyFile::Get<passport::PublicPmid>(
     const typename passport::PublicPmid::name_type& name,
-    const std::vector<passport::Pmid>& pmids) {
-  std::promise<passport::PublicPmid> promise;
-  try {
-    auto itr(std::find_if(pmids.begin(), pmids.end(), [&name](const passport::Pmid& pmid) {
-      return pmid.name() == name;
-    }));
-    if (itr == pmids.end())
-      ThrowError(NfsErrors::failed_to_get_data);
-    promise.set_value(passport::PublicPmid(*itr));
-  }
-  catch(...) {
-    promise.set_exception(std::current_exception());
-  }
-  return promise.get_future();
-}
-
+    const std::vector<passport::Pmid>& pmids);
 #endif
 
 
