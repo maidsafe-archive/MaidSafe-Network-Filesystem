@@ -40,8 +40,8 @@ bool IsCacheable() {
 
 template<typename Data>
 Data ValidateAndParse(const Message& message) {
-  return Data(Data::name_type(Identity(message.destination().string())),
-              Data::serialised_type(NonEmptyString(message.content())));
+  return Data(typename Data::name_type(Identity(message.destination().string())),
+              typename Data::serialised_type(NonEmptyString(message.content())));
 }
 
 // TODO(Fraser#5#): 2012-12-20 - This is executed on one of Routing's io_service threads.  If we

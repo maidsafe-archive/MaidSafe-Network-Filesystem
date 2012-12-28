@@ -84,6 +84,10 @@ include(maidsafe_standard_flags)
 
 ms_disable_warnings(${NfsProtoSources})
 
+if(UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-effc++")
+endif()
+
 
 ###################################################################################################
 # Tests                                                                                           #
