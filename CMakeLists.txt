@@ -67,7 +67,7 @@ list(REMOVE_ITEM StyleAllFiles ${NfsProtos} ${NfsProtoSources} ${NfsProtoHeaders
 # Define MaidSafe libraries and executables                                                       #
 ###################################################################################################
 ms_add_static_library(nfs ${NfsAllFiles})
-target_link_libraries(maidsafe_nfs maidsafe_passport)
+target_link_libraries(maidsafe_nfs maidsafe_routing)
 
 if(MAIDSAFE_TESTING)
   ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})

@@ -30,62 +30,35 @@ namespace nfs {
 template<typename GetPolicy,
          typename PutPolicy,
          typename PostPolicy,
-         typename DeletePolicy,
-         typename SigningFob>
+         typename DeletePolicy>
 class NetworkFileSystem : public GetPolicy,
                           public PutPolicy,
                           public PostPolicy,
                           public DeletePolicy {
  public:
+  template<typename SigningFob>
   NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
-      : routing_(routing),
-        signing_fob_(signing_fob) {
-  }
-
-  template<typename Data>
-  std::future<Data> Get(const typename Data::name_type& name) {
-    return GetPolicy::Get(name, routing_);
-  }
-
-  // TODO(Fraser#5#): 2012-12-21 - The signing fob type needs to be fixed - make class template?
-  template<typename Data>
-  void Put(const Data& data, const OnError& on_error) {
-    PutPolicy::Put(data, on_error, routing_, signing_fob_);
-  }
-
-  //template<typename Data>
-  //void Post(Identity name, Data message, action_callback callback) {
-  //  PostPolicy::Post(name, message, callback);
-  //}
-
-  template<typename Data>
-  void Delete(const Data& data, const OnError& on_error) {
-    DeletePolicy::Delete(data, on_error, routing_, signing_fob_);
-  }
-
- private:
-  routing::Routing routing_;
-  SigningFob signing_fob_;
+      : GetPolicy(routing),
+        PutPolicy(routing, signing_fob),
+        PostPolicy(routing, signing_fob),
+        DeletePolicy(routing, signing_fob) {}
 };
 
 typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kClientMaid>,
-                          PutToDataHolder,
-                          NoPost,
-                          NoDelete,
-                          passport::Maid> ClientMaidNfs;
+                          PutToDataHolder<passport::Maid>,
+                          NoPost<passport::Maid>,
+                          NoDelete<passport::Maid>> ClientMaidNfs;
 
 typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kDataGetter>,
-                          NoPut,
-                          NoPost,
-                          NoDelete,
-                          passport::Pmid> KeyGetterNfs;
+                          NoPut<passport::Pmid>,
+                          NoPost<passport::Pmid>,
+                          NoDelete<passport::Pmid>> KeyGetterNfs;
 
 #ifdef TESTING
-//typedef NetworkFileSystem<GetFromKeyFile,
-//                          NoPut,
-//                          NoPost,
-//                          NoDelete,
-//                          passport::Pmid> KeyHelperNfs;
+typedef NetworkFileSystem<GetFromKeyFile,
+                          NoPut<passport::Pmid>,
+                          NoPost<passport::Pmid>,
+                          NoDelete<passport::Pmid>> KeyHelperNfs;
 #endif
 
 }  // namespace nfs

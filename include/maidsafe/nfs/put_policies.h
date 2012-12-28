@@ -31,24 +31,27 @@ namespace maidsafe {
 
 namespace nfs {
 
+template<typename SigningFob>
 class NoPut {
  public:
+  NoPut(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
+
   template<typename Data>
-  static void Put(const Data& /*data*/,
-                  OnError /*on_error*/,
-                  routing::Routing& /*routing*/,
-                  const passport::Maid& /*maid*/) {}
+  void Put(const Data& /*data*/, OnError /*on_error*/) {}
+
  protected:
   ~NoPut() {}
 };
 
+template<typename SigningFob>
 class PutToDataHolder {
  public:
+  PutToDataHolder(routing::Routing& routing, const SigningFob& signing_fob)
+      : routing_(routing),
+        signing_fob_(signing_fob) {}
+
   template<typename Data>
-  static void Put(const Data& data,
-                  OnError on_error,
-                  routing::Routing& routing,
-                  const passport::Maid& maid) {
+  void Put(const Data& data, OnError on_error) {
     NonEmptyString content(data.Serialise());
     Message message(ActionType::kPut, PersonaType::kDataHolder, PersonaType::kClientMaid,
                     DataType<Data>(), NodeId(data.destination.data.string()), routing.kNodeId(),
@@ -57,15 +60,20 @@ class PutToDataHolder {
         [on_error, message](const std::vector<std::string>& serialised_messages) {
           HandlePutResponse(on_error, message, serialised_messages);
         };
-    routing.Send(NodeId(data.name().data.string()), message.Serialise().data.string(), callback,
-                 routing::DestinationType::kGroup, IsCacheable<Data>());
+    routing_.Send(NodeId(data.name().data.string()), message.Serialise().data.string(), callback,
+                  routing::DestinationType::kGroup, IsCacheable<Data>());
   }
 
  protected:
   ~PutToDataHolder() {}
-  static void HandlePutResponse(OnError /*on_error*/, const Message& /*message*/,
+  void HandlePutResponse(OnError /*on_error*/,
+                         const Message& /*message*/,
                          const std::vector<std::string>& /*serialised_messages*/) {
   }
+
+ private:
+  routing::Routing& routing_;
+  SigningFob signing_fob_;
 };
 
 }  // namespace nfs

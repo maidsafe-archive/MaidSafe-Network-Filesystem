@@ -31,10 +31,14 @@ namespace maidsafe {
 
 namespace nfs {
 
+template<typename SigningFob>
 class NoPost {
  public:
+  explicit NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+
   template<typename Data>
-  static void Post(const typename Data::name_type& /*name*/, routing::Routing& /*routing*/) {}
+  void Post(const typename Data::name_type& /*name*/) {}
+
  protected:
   ~NoPost() {}
 };

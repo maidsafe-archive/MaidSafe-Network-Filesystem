@@ -39,13 +39,9 @@ bool IsCacheable() {
 }
 
 template<typename Data>
-int DataType() {
-  return Data::name_type::tag_type::kEnumValue;
-}
-
-template<typename Data>
 Data ValidateAndParse(const Message& message) {
-  return Data(Data::serialised_type(message.content()));
+  return Data(Data::name_type(Identity(message.destination().string())),
+              Data::serialised_type(NonEmptyString(message.content())));
 }
 
 // TODO(Fraser#5#): 2012-12-20 - This is executed on one of Routing's io_service threads.  If we
@@ -61,7 +57,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
     for (auto& serialised_message : serialised_messages) {
       try {
         // Need '((' when constructing Message to avoid most vexing parse.
-        Message message((Message::serialised_type((NonEmptyString(serialised_message)))));
+        Message message((Message::serialised_type(NonEmptyString(serialised_message))));
         Data data(ValidateAndParse<Data>(message));
         promise->set_value(std::move(data));
         return;
@@ -93,7 +89,7 @@ void HandlePutResponse(std::function<void(Message message)> on_error_functor,
   for (auto& serialised_message : serialised_messages) {
     try {
       // Need '((' when constructing ReturnCode to avoid most vexing parse.
-      ReturnCode return_code((ReturnCode::serialised_type((NonEmptyString(serialised_message)))));
+      ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(serialised_message))));
       if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
         ++success_count;
       } else {

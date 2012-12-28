@@ -31,15 +31,21 @@ namespace maidsafe {
 
 namespace nfs {
 
+template<typename SigningFob>
 class NoDelete {
  public:
+  NoDelete(routing::Routing& routing, const SigningFob& signing_fob)
+      : routing_(routing),
+        signing_fob_(signing_fob) {}
   template<typename Data>
-  static void Delete(const Data& /*data*/,
-                     OnError /*on_error*/,
-                     routing::Routing& /*routing*/,
-                     const passport::Maid& /*maid*/) {}
+  void Delete(const Data& /*data*/, OnError /*on_error*/) {}
+
  protected:
   ~NoDelete() {}
+
+ private:
+  routing::Routing& routing_;
+  SigningFob signing_fob_;
 };
 
 }  // namespace nfs
