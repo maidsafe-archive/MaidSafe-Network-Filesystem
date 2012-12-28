@@ -54,11 +54,11 @@ class PutToDataHolder {
   void Put(const Data& data, OnError on_error) {
     NonEmptyString content(data.Serialise());
     Message message(ActionType::kPut, PersonaType::kDataHolder, PersonaType::kClientMaid,
-                    Data::type_enum_value(), NodeId(data.destination.data.string()),
+                    Data::type_enum_value(), NodeId(data.name().data.string()),
                     routing_.kNodeId(), content, asymm::Sign(content, signing_fob_.private_key()));
     routing::ResponseFunctor callback =
         [on_error, message](const std::vector<std::string>& serialised_messages) {
-          HandlePutResponse(on_error, message, serialised_messages);
+          HandlePutResponse<Data>(on_error, message, serialised_messages);
         };
     routing_.Send(NodeId(data.name().data.string()), message.Serialise().data.string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
@@ -66,10 +66,6 @@ class PutToDataHolder {
 
  protected:
   ~PutToDataHolder() {}
-  void HandlePutResponse(OnError /*on_error*/,
-                         const Message& /*message*/,
-                         const std::vector<std::string>& /*serialised_messages*/) {
-  }
 
  private:
   routing::Routing& routing_;

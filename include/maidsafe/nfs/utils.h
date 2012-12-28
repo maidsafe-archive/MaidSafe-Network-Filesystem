@@ -75,7 +75,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
 }
 
 template<typename Data>
-void HandlePutResponse(std::function<void(Message message)> on_error_functor,
+void HandlePutResponse(OnError on_error_functor,
                        Message original_message,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
