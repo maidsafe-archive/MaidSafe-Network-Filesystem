@@ -13,6 +13,8 @@
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
 
+#include "maidsafe/detail/data_type_values.h"
+
 #include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/types.h"
 
@@ -37,7 +39,7 @@ class MessageTest : public testing::Test {
       : action_type_(GenerateActionType()),
         dest_persona_type_(GeneratePersonaType()),
         src_persona_type_(GeneratePersonaType()),
-        data_type_(RandomInt32()),
+        data_type_(static_cast<detail::DataTagValue>(RandomUint32() % 13)),
         dest_id_(NodeId(NodeId::kRandomId)),
         src_id_(NodeId(NodeId::kRandomId)),
         content_(RandomString(1 + RandomUint32() % 50)),
@@ -48,7 +50,7 @@ class MessageTest : public testing::Test {
   ActionType action_type_;
   PersonaType dest_persona_type_;
   PersonaType src_persona_type_;
-  int data_type_;
+  detail::DataTagValue data_type_;
   NodeId dest_id_;
   NodeId src_id_;
   NonEmptyString content_;
@@ -169,8 +171,9 @@ TEST_F(MessageTest, BEH_BadDataType) {
   if (bad_data_type > 0)
     bad_data_type = -bad_data_type;
   // TODO(Alison) - expect CommonErrors::invalid_parameter
-  EXPECT_THROW(Message(action_type_, dest_persona_type_, src_persona_type_, bad_data_type, dest_id_,
-                       src_id_, content_, signature_),
+  EXPECT_THROW(Message(action_type_, dest_persona_type_, src_persona_type_,
+                       static_cast<detail::DataTagValue>(bad_data_type), dest_id_, src_id_,
+                       content_, signature_),
                std::system_error);
 }
 

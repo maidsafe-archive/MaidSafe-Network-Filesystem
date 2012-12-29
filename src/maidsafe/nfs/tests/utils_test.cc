@@ -78,31 +78,31 @@ passport::PublicMpid CreatePublicMpid() {
 template<typename Data>
 std::pair<Identity, NonEmptyString> GetNameAndContent() {
   switch (Data::name_type::tag_type::kEnumValue) {
-    case detail::kAnmidValue: {
+    case detail::DataTagValue::kAnmidValue: {
       auto anmid(CreatePublicAnmid());
       return std::make_pair(anmid.name().data, anmid.Serialise().data);
     }
-    case detail::kAnsmidValue: {
+    case detail::DataTagValue::kAnsmidValue: {
       auto ansmid(CreatePublicAnsmid());
       return std::make_pair(ansmid.name().data, ansmid.Serialise().data);
     }
-    case detail::kAntmidValue: {
+    case detail::DataTagValue::kAntmidValue: {
       auto antmid(CreatePublicAntmid());
       return std::make_pair(antmid.name().data, antmid.Serialise().data);
     }
-    case detail::kAnmaidValue: {
+    case detail::DataTagValue::kAnmaidValue: {
       auto anmaid(CreatePublicAnmaid());
       return std::make_pair(anmaid.name().data, anmaid.Serialise().data);
     }
-    case detail::kMaidValue: {
+    case detail::DataTagValue::kMaidValue: {
       auto maid(CreatePublicMaid());
       return std::make_pair(maid.name().data, maid.Serialise().data);
     }
-    case detail::kPmidValue: {
+    case detail::DataTagValue::kPmidValue: {
       auto pmid(CreatePublicPmid());
       return std::make_pair(pmid.name().data, pmid.Serialise().data);
     }
-    case detail::kMidValue: {
+    case detail::DataTagValue::kMidValue: {
       const UserPassword kKeyword(RandomAlphaNumericString(20));
       const UserPassword kPassword(RandomAlphaNumericString(20));
       const uint32_t kPin(RandomUint32() % 9999 + 1);
@@ -117,7 +117,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent() {
                         anmid);
       return std::make_pair(mid.name().data, mid.Serialise().data);
     }
-    case detail::kSmidValue: {
+    case detail::DataTagValue::kSmidValue: {
       const UserPassword kKeyword(RandomAlphaNumericString(20));
       const UserPassword kPassword(RandomAlphaNumericString(20));
       const uint32_t kPin(RandomUint32() % 9999 + 1);
@@ -132,7 +132,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent() {
                           ansmid);
       return std::make_pair(smid.name().data, smid.Serialise().data);
     }
-    case detail::kTmidValue: {
+    case detail::DataTagValue::kTmidValue: {
       const UserPassword kKeyword(RandomAlphaNumericString(20));
       const UserPassword kPassword(RandomAlphaNumericString(20));
       const uint32_t kPin(RandomUint32() % 9999 + 1);
@@ -142,11 +142,11 @@ std::pair<Identity, NonEmptyString> GetNameAndContent() {
       passport::Tmid tmid(encrypted_session, antmid);
       return std::make_pair(tmid.name().data, tmid.Serialise().data);
     }
-    case detail::kAnmpidValue: {
+    case detail::DataTagValue::kAnmpidValue: {
       auto anmpid(CreatePublicAnmpid());
       return std::make_pair(anmpid.name().data, anmpid.Serialise().data);
     }
-    case detail::kMpidValue: {
+    case detail::DataTagValue::kMpidValue: {
       auto mpid(CreatePublicMpid());
       return std::make_pair(mpid.name().data, mpid.Serialise().data);
     }
