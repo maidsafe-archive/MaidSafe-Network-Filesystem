@@ -161,7 +161,7 @@ class UtilsTest : public testing::Test {
 
 TYPED_TEST_CASE_P(UtilsTest);
 
-TYPED_TEST_P(UtilsTest, TestHandleGetResponse) {
+TYPED_TEST_P(UtilsTest, BEH_TestHandleGetResponse) {
   auto promise(std::make_shared<std::promise<TypeParam>>());  // NOLINT (Fraser)
   std::future<TypeParam> future1(promise->get_future());
   std::vector<std::string> serialised_messages;
@@ -184,7 +184,7 @@ TYPED_TEST_P(UtilsTest, TestHandleGetResponse) {
 }
 
 REGISTER_TYPED_TEST_CASE_P(UtilsTest,
-                           TestHandleGetResponse);
+                           BEH_TestHandleGetResponse);
 
 typedef testing::Types<passport::PublicAnmid,
                        passport::PublicAnsmid,
