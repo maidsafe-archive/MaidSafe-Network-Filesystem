@@ -23,7 +23,7 @@ namespace nfs {
 Message::Message(ActionType action_type,
                  PersonaType destination_persona_type,
                  PersonaType source_persona_type,
-                 int data_type,
+                 maidsafe::detail::DataTagValue data_type,
                  const NodeId& destination,
                  const NodeId& source,
                  const NonEmptyString& content,
@@ -102,7 +102,7 @@ Message::Message(const serialised_type& serialised_message)
   action_type_ = static_cast<ActionType>(proto_message.action_type());
   destination_persona_type_ = static_cast<PersonaType>(proto_message.destination_persona_type());
   source_persona_type_ = static_cast<PersonaType>(proto_message.source_persona_type());
-  data_type_ = proto_message.data_type();
+  data_type_ = static_cast<maidsafe::detail::DataTagValue>(proto_message.data_type());
   destination_ = NodeId(proto_message.destination());
   source_ = NodeId(proto_message.source());
   if (proto_message.has_content())
@@ -114,7 +114,7 @@ Message::Message(const serialised_type& serialised_message)
 }
 
 bool Message::ValidateInputs() const {
-  return (data_type_ >= 0) && !destination_.IsZero() && !source_.IsZero();
+  return (static_cast<int32_t>(data_type_) >= 0) && !destination_.IsZero() && !source_.IsZero();
 }
 
 Message::serialised_type Message::Serialise() const {
@@ -124,7 +124,7 @@ Message::serialised_type Message::Serialise() const {
     proto_message.set_action_type(static_cast<int32_t>(action_type_));
     proto_message.set_destination_persona_type(static_cast<int32_t>(destination_persona_type_));
     proto_message.set_source_persona_type(static_cast<int32_t>(source_persona_type_));
-    proto_message.set_data_type(data_type_);
+    proto_message.set_data_type(static_cast<int32_t>(data_type_));
     proto_message.set_destination(destination_.string());
     proto_message.set_source(source_.string());
     if (content_.IsInitialised())

@@ -70,12 +70,13 @@ class GetFromDataHolder {
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    Message message(ActionType::kGet, PersonaType::kDataHolder, persona, Data::type_enum_value(),
+    Message message(ActionType::kGet, PersonaType::kDataHolder, persona,
+                    Data::name_type::tag_type::kEnumValue,
                     NodeId(name.data.string()), routing_.kNodeId(), NonEmptyString(),
                     asymm::Signature());
     routing_.Send(NodeId(name.data.string()), message.Serialise().data.string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
-    return future;
+    return std::move(future);
   }
 
  protected:

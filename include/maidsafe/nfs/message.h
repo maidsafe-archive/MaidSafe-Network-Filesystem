@@ -18,6 +18,8 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 
+#include "maidsafe/detail/data_type_values.h"
+
 #include "maidsafe/nfs/types.h"
 
 
@@ -33,7 +35,7 @@ class Message {
   Message(ActionType action_type,
           PersonaType destination_persona_type,
           PersonaType source_persona_type,
-          int data_type,
+          maidsafe::detail::DataTagValue data_type,
           const NodeId& destination,
           const NodeId& source,
           const NonEmptyString& content,
@@ -49,7 +51,7 @@ class Message {
   ActionType action_type() const { return action_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
   PersonaType source_persona_type() const { return source_persona_type_; }
-  int data_type() const { return data_type_; }
+  maidsafe::detail::DataTagValue data_type() const { return data_type_; }
   NodeId destination() const { return destination_; }
   NodeId source() const { return source_; }
   NonEmptyString content() const { return content_; }
@@ -64,7 +66,7 @@ class Message {
   ActionType action_type_;
   PersonaType destination_persona_type_;
   PersonaType source_persona_type_;
-  int data_type_;
+  maidsafe::detail::DataTagValue data_type_;
   NodeId destination_;
   NodeId source_;
   NonEmptyString content_;
