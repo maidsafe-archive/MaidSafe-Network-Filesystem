@@ -5,9 +5,93 @@ message Message {
   required int32 action_type = 1;
   required int32 destination_persona_type = 2;
   required int32 source_persona_type = 3;
-  required int32 data_type = 4;
-  required bytes destination = 5;
-  required bytes source = 6;
-  optional bytes content = 7;
-  optional bytes signature = 8;
+  required bool  data = 4; // data or message (post)
+  required int32 type = 5;
+  required bytes destination = 6;
+  required bytes source = 7;
+  optional bytes content = 8;
+  optional bytes signature = 9;
 }
+
+///////////////////////////////
+// post messages
+///////////////////////////////
+
+// maid_client send to maid account holder
+message PmidRegistration {
+  required bytes maid_id = 1;
+  required bytes pmid_id = 2;
+  required bool register = 3;
+  required bytes pmid_signature = 4;
+  required bytes maid_signature = 5;
+}
+
+//mpidclient to mpidclient (or mpidaccountholders)
+message ConnectMessage {
+  required int32 message_id = 1; // random int32
+  optional int32 parent_id = 2;
+  required bytes mpid_signature = 3;
+}
+
+// Question maid_account_holder to pmid_account_holder
+message GetPmidSize {
+  required bytes pmid_id = 1;
+}
+
+// Answer pmid_account_holder to maid_account_holder
+message PmidSize {
+  required bytes pmid_id = 1;
+  required int32 num_data_elements = 2;
+  required int64 total_size = 3;
+  required int64 lost_size = 4;
+  required int64 lost_number_of_elements = 5;
+}
+
+// mpid_account_holder to MM
+// mpid_account_holder to mpid ??
+message NodeDown {
+  required bytes node_id = 1;
+}
+
+////////////////////////
+// storage containers
+///////////////////////
+message DataElements {
+  required bytes data_id = 1;
+  required int32 data_size = 2;
+}
+
+// maid_account_holder
+message PmidTotals {
+  required PmidRegistration registration = 1;
+  required PmidSize pmid_size = 2;
+}
+message MaidAccount {
+  required bytes maid_id = 1;
+  repeated PmidTotals pmid_totals = 2;
+  repeated DataElements data_elements = 3;
+  required int64 total_data_stored = 4;
+  required int64 total_data_given = 5;
+}
+
+// pmid_account_holder
+message PmidAccount {
+  required bytes pmid_id = 1;
+  required PmidSize pmid_size = 2;
+  repeated DataElements data_stored = 3;
+}
+
+// meta_data_manager
+
+message DataElementsManaged {
+  required bytes data_id = 1;
+  required bytes element_size = 2;
+  required int64 number_stored = 3;
+  repeated bytes online_pmid_id = 4;
+  repeated bytes offline_pmid_id = 5;
+}
+
+message DataManaged {
+  repeated DataElementsManaged elements = 1;
+}
+
