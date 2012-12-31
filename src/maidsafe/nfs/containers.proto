@@ -1,0 +1,45 @@
+package maidsafe.nfs.protobuf;
+import "maidsafe/nfs/post_messages.proto";
+option optimize_for = LITE_RUNTIME;
+
+message DataElements {
+  required bytes data_id = 1;
+  required int32 data_size = 2;
+}
+
+
+// MAID Account Holder
+message PmidTotals {
+  required PmidRegistration registration = 1;
+  required PmidSize pmid_size = 2;
+}
+
+message MaidAccount {
+  required bytes maid_id = 1;
+  repeated PmidTotals pmid_totals = 2;
+  repeated DataElements data_elements = 3;
+  required int64 total_data_stored = 4;
+  required int64 total_data_given = 5;
+}
+
+
+// PMID Account Holder
+message PmidAccount {
+  required bytes pmid_id = 1;
+  required PmidSize pmid_size = 2;
+  repeated DataElements data_stored = 3;
+}
+
+
+// Metadata Manager
+message DataElementsManaged {
+  required bytes data_id = 1;
+  required bytes element_size = 2;
+  required int64 number_stored = 3;
+  repeated bytes online_pmid_id = 4;
+  repeated bytes offline_pmid_id = 5;
+}
+
+message DataManaged {
+  repeated DataElementsManaged elements = 1;
+}

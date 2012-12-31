@@ -79,7 +79,7 @@ void HandlePutResponse(OnError on_error_functor,
                        Message original_message,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
-    LOG(kError) << "No responses received for Put type " << Data::name_type.string() 
+    LOG(kError) << "No responses received for Put " << original_message.data_type()
                 << "  " << DebugId(original_message.destination());
     on_error_functor(std::move(original_message));
   }
@@ -93,8 +93,8 @@ void HandlePutResponse(OnError on_error_functor,
       if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
         ++success_count;
       } else {
-        LOG(kWarning) << "Received an error " << return_code.value() << " for Put type "
-                      << Data::name_type.string() << " "
+        LOG(kWarning) << "Received an error " << return_code.value() << " for Put "
+                      << original_message.data_type() << " "
                       << DebugId(original_message.destination());
         ++failure_count;
       }
@@ -106,7 +106,7 @@ void HandlePutResponse(OnError on_error_functor,
   }
 
   if (success_count == 0) {
-    LOG(kError) << "No successful responses received for Put type " << Data::name_type.string()
+    LOG(kError) << "No successful responses received for Put " << original_message.data_type()
                 << "  " << DebugId(original_message.destination()) << "  received " << failure_count
                 << " failures.";
     on_error_functor(std::move(original_message));

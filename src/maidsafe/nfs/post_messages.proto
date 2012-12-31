@@ -1,0 +1,38 @@
+package maidsafe.nfs.protobuf;
+option optimize_for = LITE_RUNTIME;
+
+// MAID Client send to MAID Account Holder
+message PmidRegistration {
+  required bytes maid_id = 1;
+  required bytes pmid_id = 2;
+  required bool register = 3;
+  required bytes pmid_signature = 4;
+  required bytes maid_signature = 5;
+}
+
+// MPID Client to MPID Client (or MPID Account Holders)
+message ConnectMessage {
+  required int32 message_id = 1; // random int32
+  optional int32 parent_id = 2;
+  required bytes mpid_signature = 3;
+}
+
+// Question MAID Account Holder to PMID Account Holder
+message GetPmidSize {
+  required bytes pmid_id = 1;
+}
+
+// Answer PMID Account Holder to MAID Account Holder
+message PmidSize {
+  required bytes pmid_id = 1;
+  required int32 num_data_elements = 2;
+  required int64 total_size = 3;
+  required int64 lost_size = 4;
+  required int64 lost_number_of_elements = 5;
+}
+
+// MPID Account Holder to Metadata Manager
+// MPID Account Holder to MPID ??
+message NodeDown {
+  required bytes node_id = 1;
+}
