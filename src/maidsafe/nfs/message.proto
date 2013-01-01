@@ -2,12 +2,14 @@ package maidsafe.nfs.protobuf;
 option optimize_for = LITE_RUNTIME;
 
 message Message {
+  message Peer {
+    required int32 persona_type = 1;
+    required bytes node_id = 2;
+  }
   required int32 action_type = 1;
-  required int32 destination_persona_type = 2;
-  required int32 source_persona_type = 3;
+  required Peer destination_peer = 2;
+  required Peer source_peer = 3;
   required int32 data_type = 4;
-  required bytes destination = 5;
-  required bytes source = 6;
-  optional bytes content = 7;
-  optional bytes signature = 8;
+  optional bytes content = 5;
+  optional bytes signature = 6;
 }

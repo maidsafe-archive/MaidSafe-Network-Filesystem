@@ -21,19 +21,15 @@ namespace maidsafe {
 namespace nfs {
 
 Message::Message(ActionType action_type,
-                 PersonaType destination_persona_type,
-                 PersonaType source_persona_type,
+                 Destination destination,
+                 Source source,
                  maidsafe::detail::DataTagValue data_type,
-                 const NodeId& destination,
-                 const NodeId& source,
                  const NonEmptyString& content,
                  const asymm::Signature& signature)
     : action_type_(action_type),
-      destination_persona_type_(destination_persona_type),
-      source_persona_type_(source_persona_type),
-      data_type_(data_type),
       destination_(destination),
       source_(source),
+      data_type_(data_type),
       content_(content),
       signature_(signature) {
   if (!ValidateInputs())
@@ -42,21 +38,17 @@ Message::Message(ActionType action_type,
 
 Message::Message(const Message& other)
     : action_type_(other.action_type_),
-      destination_persona_type_(other.destination_persona_type_),
-      source_persona_type_(other.source_persona_type_),
-      data_type_(other.data_type_),
       destination_(other.destination_),
       source_(other.source_),
+      data_type_(other.data_type_),
       content_(other.content_),
       signature_(other.signature_) {}
 
 Message& Message::operator=(const Message& other) {
   action_type_ = other.action_type_;
-  destination_persona_type_ = other.destination_persona_type_;
-  source_persona_type_ = other.source_persona_type_;
-  data_type_ = other.data_type_;
   destination_ = other.destination_;
   source_ = other.source_;
+  data_type_ = other.data_type_;
   content_ = other.content_;
   signature_ = other.signature_;
   return *this;
@@ -64,21 +56,17 @@ Message& Message::operator=(const Message& other) {
 
 Message::Message(Message&& other)
     : action_type_(std::move(other.action_type_)),
-      destination_persona_type_(std::move(other.destination_persona_type_)),
-      source_persona_type_(std::move(other.source_persona_type_)),
-      data_type_(std::move(other.data_type_)),
       destination_(std::move(other.destination_)),
       source_(std::move(other.source_)),
+      data_type_(std::move(other.data_type_)),
       content_(std::move(other.content_)),
       signature_(std::move(other.signature_)) {}
 
 Message& Message::operator=(Message&& other) {
   action_type_ = std::move(other.action_type_);
-  destination_persona_type_ = std::move(other.destination_persona_type_);
-  source_persona_type_ = std::move(other.source_persona_type_);
-  data_type_ = std::move(other.data_type_);
   destination_ = std::move(other.destination_);
   source_ = std::move(other.source_);
+  data_type_ = std::move(other.data_type_);
   content_ = std::move(other.content_);
   signature_ = std::move(other.signature_);
   return *this;
@@ -89,22 +77,21 @@ Message& Message::operator=(Message&& other) {
 //                  inside a private constructor taking a single arg of type protobuf.
 Message::Message(const serialised_type& serialised_message)
     : action_type_(),
-      destination_persona_type_(),
-      source_persona_type_(),
-      data_type_(),
       destination_(),
       source_(),
+      data_type_(),
       content_(),
       signature_() {
   protobuf::Message proto_message;
-  if (!proto_message.ParseFromString(serialised_message.data.string()))
+  if (!proto_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
   action_type_ = static_cast<ActionType>(proto_message.action_type());
-  destination_persona_type_ = static_cast<PersonaType>(proto_message.destination_persona_type());
-  source_persona_type_ = static_cast<PersonaType>(proto_message.source_persona_type());
+  destination_->persona_type =
+      static_cast<PersonaType>(proto_message.destination_peer().persona_type());
+  destination_->node_id = NodeId(proto_message.destination_peer().node_id());
+  source_->persona_type = static_cast<PersonaType>(proto_message.source_peer().persona_type());
+  source_->node_id = NodeId(proto_message.source_peer().node_id());
   data_type_ = static_cast<maidsafe::detail::DataTagValue>(proto_message.data_type());
-  destination_ = NodeId(proto_message.destination());
-  source_ = NodeId(proto_message.source());
   if (proto_message.has_content())
     content_ = NonEmptyString(proto_message.content());
   if (proto_message.has_signature())
@@ -114,7 +101,9 @@ Message::Message(const serialised_type& serialised_message)
 }
 
 bool Message::ValidateInputs() const {
-  return (static_cast<int32_t>(data_type_) >= 0) && !destination_.IsZero() && !source_.IsZero();
+  return (static_cast<int32_t>(data_type_) >= 0) &&
+          !destination_->node_id.IsZero() &&
+          !source_->node_id.IsZero();
 }
 
 Message::serialised_type Message::Serialise() const {
@@ -122,11 +111,13 @@ Message::serialised_type Message::Serialise() const {
   try {
     protobuf::Message proto_message;
     proto_message.set_action_type(static_cast<int32_t>(action_type_));
-    proto_message.set_destination_persona_type(static_cast<int32_t>(destination_persona_type_));
-    proto_message.set_source_persona_type(static_cast<int32_t>(source_persona_type_));
+    proto_message.mutable_destination_peer()->set_persona_type(
+        static_cast<int32_t>(destination_->persona_type));
+    proto_message.mutable_destination_peer()->set_node_id(destination_->node_id.string());
+    proto_message.mutable_source_peer()->set_persona_type(
+        static_cast<int32_t>(source_->persona_type));
+    proto_message.mutable_source_peer()->set_node_id(source_->node_id.string());
     proto_message.set_data_type(static_cast<int32_t>(data_type_));
-    proto_message.set_destination(destination_.string());
-    proto_message.set_source(source_.string());
     if (content_.IsInitialised())
       proto_message.set_content(content_.string());
     if (signature_.IsInitialised())

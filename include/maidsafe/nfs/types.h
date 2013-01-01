@@ -13,6 +13,8 @@
 #define MAIDSAFE_NFS_TYPES_H_
 
 #include <functional>
+#include <ostream>
+#include <string>
 
 
 namespace maidsafe {

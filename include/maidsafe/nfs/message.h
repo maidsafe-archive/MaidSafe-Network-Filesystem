@@ -31,13 +31,23 @@ namespace protobuf { class Message; }
 
 class Message {
  public:
+  struct Peer {
+    Peer(PersonaType persona_type_in, const NodeId& node_id_in)
+        : persona_type(persona_type_in),
+          node_id(node_id_in) {}
+    Peer() : persona_type(), node_id() {}
+    PersonaType persona_type;
+    NodeId node_id;
+  };
+  typedef TaggedValue<Peer, struct DestinationTag> Destination;
+  typedef TaggedValue<Peer, struct SourceTag> Source;
+
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
+
   Message(ActionType action_type,
-          PersonaType destination_persona_type,
-          PersonaType source_persona_type,
+          Destination destination,
+          Source source,
           maidsafe::detail::DataTagValue data_type,
-          const NodeId& destination,
-          const NodeId& source,
           const NonEmptyString& content,
           const asymm::Signature& signature);
   Message(const Message& other);
@@ -49,11 +59,9 @@ class Message {
   serialised_type Serialise() const;
 
   ActionType action_type() const { return action_type_; }
-  PersonaType destination_persona_type() const { return destination_persona_type_; }
-  PersonaType source_persona_type() const { return source_persona_type_; }
+  Destination destination() const { return destination_; }
+  Source source() const { return source_; }
   maidsafe::detail::DataTagValue data_type() const { return data_type_; }
-  NodeId destination() const { return destination_; }
-  NodeId source() const { return source_; }
   NonEmptyString content() const { return content_; }
   asymm::Signature signature() const { return signature_; }
 
@@ -64,11 +72,9 @@ class Message {
   bool ValidateInputs() const;
 
   ActionType action_type_;
-  PersonaType destination_persona_type_;
-  PersonaType source_persona_type_;
+  Destination destination_;
+  Source source_;
   maidsafe::detail::DataTagValue data_type_;
-  NodeId destination_;
-  NodeId source_;
   NonEmptyString content_;
   asymm::Signature signature_;
 };

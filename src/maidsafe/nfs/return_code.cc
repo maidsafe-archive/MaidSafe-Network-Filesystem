@@ -45,7 +45,7 @@ ReturnCode& ReturnCode::operator=(ReturnCode&& other) {
 //                  inside a private constructor taking a single arg of type protobuf.
 ReturnCode::ReturnCode(const serialised_type& serialised_return_code) : value_(), info_() {
   protobuf::ReturnCode proto_return_code;
-  if (!proto_return_code.ParseFromString(serialised_return_code.data.string()))
+  if (!proto_return_code.ParseFromString(serialised_return_code->string()))
     ThrowError(NfsErrors::return_code_parsing_error);
   value_ = proto_return_code.value();
   if (proto_return_code.has_info())

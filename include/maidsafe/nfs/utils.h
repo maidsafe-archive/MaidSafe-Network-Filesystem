@@ -40,7 +40,7 @@ bool IsCacheable() {
 
 template<typename Data>
 Data ValidateAndParse(const Message& message) {
-  return Data(typename Data::name_type(Identity(message.destination().string())),
+  return Data(typename Data::name_type(Identity(message.destination()->node_id.string())),
               typename Data::serialised_type(NonEmptyString(message.content())));
 }
 
@@ -80,7 +80,7 @@ void HandlePutResponse(OnError on_error_functor,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
     LOG(kError) << "No responses received for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.destination());
+                << "  " << DebugId(original_message.destination()->node_id);
     on_error_functor(std::move(original_message));
   }
 
@@ -95,7 +95,7 @@ void HandlePutResponse(OnError on_error_functor,
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Put "
                       << original_message.data_type() << " "
-                      << DebugId(original_message.destination());
+                      << DebugId(original_message.destination()->node_id);
         ++failure_count;
       }
     }
@@ -107,8 +107,8 @@ void HandlePutResponse(OnError on_error_functor,
 
   if (success_count == 0) {
     LOG(kError) << "No successful responses received for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.destination()) << "  received " << failure_count
-                << " failures.";
+                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << failure_count << " failures.";
     on_error_functor(std::move(original_message));
   }
 }

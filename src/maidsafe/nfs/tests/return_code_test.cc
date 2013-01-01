@@ -89,7 +89,7 @@ TEST_P(ReturnCodeTest, BEH_ParseFromBadString) {
   bad_strings.push_back(
       ReturnCode::serialised_type(good_string.data + NonEmptyString(RandomString(1))));
   bad_strings.push_back(ReturnCode::serialised_type(
-      NonEmptyString(good_string.data.string().substr(0, good_string.data.string().size() - 2))));
+      NonEmptyString(good_string->string().substr(0, good_string->string().size() - 2))));
 
   for (auto& bad_string : bad_strings)
     EXPECT_THROW(ReturnCode parsed(bad_string), std::system_error);
