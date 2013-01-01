@@ -49,16 +49,17 @@ typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kClientMaid>,
                           NoPost<passport::Maid>,
                           NoDelete<passport::Maid>> ClientMaidNfs;
 
-typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kDataGetter>,
-                          NoPut<passport::Pmid>,
-                          NoPost<passport::Pmid>,
-                          NoDelete<passport::Pmid>> KeyGetterNfs;
+
+template<typename GetPolicy>
+class NetworkFileSystemGetter : public GetPolicy {
+ public:
+  explicit NetworkFileSystemGetter(routing::Routing& routing) : GetPolicy(routing) {}
+};
+
+typedef NetworkFileSystemGetter<GetFromDataHolder<PersonaType::kDataGetter>> KeyGetterNfs;
 
 #ifdef TESTING
-typedef NetworkFileSystem<GetFromKeyFile,
-                          NoPut<passport::Pmid>,
-                          NoPost<passport::Pmid>,
-                          NoDelete<passport::Pmid>> KeyHelperNfs;
+typedef NetworkFileSystemGetter<GetFromKeyFile> KeyHelperNfs;
 #endif
 
 }  // namespace nfs
