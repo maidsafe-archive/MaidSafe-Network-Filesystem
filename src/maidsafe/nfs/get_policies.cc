@@ -16,17 +16,14 @@ namespace maidsafe {
 namespace nfs {
 
 #ifdef TESTING
-// Only specialised for PublicPmid type - all other types not implemented
-template<>
-std::future<passport::PublicPmid> GetFromKeyFile::Get<passport::PublicPmid>(
-    const typename passport::PublicPmid::name_type& name,
-    const std::vector<passport::Pmid>& pmids) {
+
+std::future<passport::PublicPmid> GetFromKeyFile::Get(const passport::PublicPmid::name_type& name) {
   std::promise<passport::PublicPmid> promise;
   try {
-    auto itr(std::find_if(pmids.begin(), pmids.end(), [&name](const passport::Pmid& pmid) {
-      return pmid.name() == name;
-    }));
-    if (itr == pmids.end())
+    auto itr(std::find_if(kAllPmids_.begin(),
+                          kAllPmids_.end(),
+                          [&name](const passport::Pmid& pmid) { return pmid.name() == name; }));  // NOLINT (Fraser)
+    if (itr == kAllPmids_.end())
       ThrowError(NfsErrors::failed_to_get_data);
     promise.set_value(passport::PublicPmid(*itr));
   }

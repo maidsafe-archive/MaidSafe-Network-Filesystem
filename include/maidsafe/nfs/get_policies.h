@@ -94,21 +94,13 @@ class GetFromDataHolder {
 
 class GetFromKeyFile {
  public:
-  explicit GetFromKeyFile(routing::Routing& /*routing*/) {}
+  explicit GetFromKeyFile(const std::vector<passport::Pmid>& all_pmids) : kAllPmids_(all_pmids) {}
+  std::future<passport::PublicPmid> Get(const passport::PublicPmid::name_type& name);
 
-  template<typename Data>
-  std::future<Data> Get(const typename Data::name_type& name,
-                        const std::vector<passport::Pmid>& pmids);
-
- protected:
-  ~GetFromKeyFile() {}
+ private:
+  const std::vector<passport::Pmid> kAllPmids_;
 };
 
-// Only specialised for PublicPmid type - all other types not implemented
-template<>
-std::future<passport::PublicPmid> GetFromKeyFile::Get<passport::PublicPmid>(
-    const typename passport::PublicPmid::name_type& name,
-    const std::vector<passport::Pmid>& pmids);
 #endif
 
 

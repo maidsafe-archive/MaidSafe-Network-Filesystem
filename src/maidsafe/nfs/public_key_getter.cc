@@ -11,20 +11,31 @@
 
 #include "maidsafe/nfs/public_key_getter.h"
 
+#include "maidsafe/common/error.h"
+#include "maidsafe/common/log.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
-PublicKeyGetter::PublicKeyGetter(routing::Routing& routing)
-    : routing_(routing),
-      key_getter_nfs_(routing),
+PublicKeyGetter::PublicKeyGetter(routing::Routing& routing,
+                                 const std::vector<passport::Pmid>& pmids_from_file)
+    : key_getter_nfs_(pmids_from_file.empty() ? new KeyGetterNfs(routing) : nullptr),
+      key_helper_nfs_(pmids_from_file.empty() ? nullptr : new KeyHelperNfs(pmids_from_file)),
       running_(true),
       pending_keys_(),
       flags_mutex_(),
       mutex_(),
       condition_(),
-      thread_([this] { Run(); }) {}
+      thread_([this] { Run(); }) {
+#ifndef TESTING
+  if (use_key_helper) {
+    LOG(kError) << "Cannot use fake key getter if TESTING is not defined";
+    ThrowError(NfsErrors::invalid_parameter);
+  }
+#endif
+}
 
 PublicKeyGetter::~PublicKeyGetter() {
   {
@@ -37,8 +48,19 @@ PublicKeyGetter::~PublicKeyGetter() {
 
 void PublicKeyGetter::HandleGetKey(const NodeId& node_id,
                                    const routing::GivePublicKeyFunctor& give_key) {
-  auto future(key_getter_nfs_.Get<passport::PublicPmid>(
+#ifdef TESTING
+  std::future<passport::PublicPmid> future;
+  if (key_getter_nfs_) {
+    future = std::move(key_getter_nfs_->Get<passport::PublicPmid>(
+        passport::PublicPmid::name_type(Identity(node_id.string()))));
+  } else {
+    future = std::move(key_helper_nfs_->Get(
+        passport::PublicPmid::name_type(Identity(node_id.string()))));
+  }
+#else
+  std::future<passport::PublicPmid> future(key_getter_nfs_->Get<passport::PublicPmid>(
       passport::PublicPmid::name_type(Identity(node_id.string()))));
+#endif
   std::shared_ptr<PendingKey> pending_key(new PendingKey(std::move(future), give_key));
   AddPendingKey(pending_key);
 }

@@ -33,7 +33,10 @@ namespace nfs {
 
 class PublicKeyGetter {
  public:
-  explicit PublicKeyGetter(routing::Routing& routing);
+  // all_pmids_from_file should only be non-empty if TESTING is defined
+  PublicKeyGetter(routing::Routing& routing,
+                  const std::vector<passport::Pmid>& pmids_from_file =
+                      std::vector<passport::Pmid>());
   ~PublicKeyGetter();
   void HandleGetKey(const NodeId& node_id, const routing::GivePublicKeyFunctor& give_key);
 
@@ -49,8 +52,8 @@ class PublicKeyGetter {
   void Run();
   void AddPendingKey(std::shared_ptr<PendingKey> pending_key);
 
-  routing::Routing& routing_;
-  KeyGetterNfs key_getter_nfs_;
+  std::unique_ptr<KeyGetterNfs> key_getter_nfs_;
+  std::unique_ptr<KeyHelperNfs> key_helper_nfs_;
   bool running_;
   std::vector<std::shared_ptr<PendingKey>> pending_keys_;
   std::mutex flags_mutex_, mutex_;
