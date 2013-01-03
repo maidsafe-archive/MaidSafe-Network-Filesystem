@@ -111,6 +111,9 @@ void HandlePutResponse(OnError on_error_functor,
                 << failure_count << " failures.";
     on_error_functor(std::move(original_message));
   }
+  LOG(kVerbose) << "Overall success for Put " << original_message.data_type()
+                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << success_count << " successes and " << failure_count << " failures.";
 }
 
 
