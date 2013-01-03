@@ -38,7 +38,7 @@ message DataElementsManaged {
   optional int32 version = 3;
   required int64 number_stored = 4;
   repeated bytes online_pmid_id = 5;
-  repeated bytes offline_pmid_id = 5;
+  repeated bytes offline_pmid_id = 6;
 }
 
 message DataManaged {
