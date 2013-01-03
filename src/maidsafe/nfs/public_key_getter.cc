@@ -46,25 +46,6 @@ PublicKeyGetter::~PublicKeyGetter() {
   thread_.join();
 }
 
-void PublicKeyGetter::HandleGetKey(const NodeId& node_id,
-                                   const routing::GivePublicKeyFunctor& give_key) {
-#ifdef TESTING
-  std::future<passport::PublicPmid> future;
-  if (key_getter_nfs_) {
-    future = std::move(key_getter_nfs_->Get<passport::PublicPmid>(
-        passport::PublicPmid::name_type(Identity(node_id.string()))));
-  } else {
-    future = std::move(key_helper_nfs_->Get(
-        passport::PublicPmid::name_type(Identity(node_id.string()))));
-  }
-#else
-  std::future<passport::PublicPmid> future(key_getter_nfs_->Get<passport::PublicPmid>(
-      passport::PublicPmid::name_type(Identity(node_id.string()))));
-#endif
-  std::shared_ptr<PendingKey> pending_key(new PendingKey(std::move(future), give_key));
-  AddPendingKey(pending_key);
-}
-
 void PublicKeyGetter::AddPendingKey(std::shared_ptr<PendingKey> pending_key) {
   std::lock_guard<std::mutex> flags_lock(flags_mutex_);
   if (!running_)
@@ -99,8 +80,7 @@ void PublicKeyGetter::Run() {
       }
     }
     if (ready_pending_key) {
-      passport::PublicPmid public_pmid = ready_pending_key->future.get();
-      ready_pending_key->give_key(public_pmid.public_key());
+      ready_pending_key->get_key_future(std::move(ready_pending_key->future));
     }
   }
 }
