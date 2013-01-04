@@ -74,6 +74,7 @@ class PublicKeyGetter {
 template<typename Data>
 void PublicKeyGetter::HandleGetKey(const typename Data::name_type& key_name,
                                    std::function<void(std::future<Data>)> get_key_future) {
+  std::future<Data> future;
 #ifdef TESTING
   if (key_getter_nfs_) {
     std::future<Data> future(key_getter_nfs_->Get<Data>(Data::name_type(key_name)));
@@ -81,13 +82,13 @@ void PublicKeyGetter::HandleGetKey(const typename Data::name_type& key_name,
     AddPendingKey(pending_key);
     return;
   } else {
-    std::future<Data> future(key_helper_nfs_->Get(Data::name_type(key_name)));
+    future = std::move(key_helper_nfs_->Get(Data::name_type(key_name)));
     std::shared_ptr<PendingKey> pending_key(new PendingKey(std::move(future), get_key_future));
     AddPendingKey(pending_key);
     return;
   }
 #else
-  std::future<Data> future(key_getter_nfs_->Get<Data>(Data::name_type(key_name)));
+  future = std::move(key_getter_nfs_->Get<Data>(Data::name_type(key_name)));
 #endif
   std::shared_ptr<PendingKey> pending_key(new PendingKey(std::move(future), get_key_future));
   AddPendingKey(pending_key);
