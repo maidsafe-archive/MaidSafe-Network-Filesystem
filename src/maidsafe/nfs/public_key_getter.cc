@@ -67,7 +67,7 @@ void PublicKeyGetter::Run() {
     std::shared_ptr<PendingKey> ready_pending_key;
     {
       std::unique_lock<std::mutex> lock(mutex_);
-      while (pending_keys_.empty())
+      while (pending_keys_.empty() && running_)
         condition_.wait(lock);
 
       auto itr_pending_key(pending_keys_.begin());
