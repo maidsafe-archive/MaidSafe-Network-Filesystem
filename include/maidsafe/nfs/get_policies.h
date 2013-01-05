@@ -44,10 +44,11 @@ class NoGet {
 };
 
 template<PersonaType persona>
-class GetFromMetaDataManager {
+class GetFromMetadataManager {
  public:
-  explicit GetFromMetaDataManager(routing::Routing& routing) : routing_(routing),
-                              source_(Message::Peer(persona, routing.kNodeId())){}
+  explicit GetFromMetadataManager(routing::Routing& routing)
+      : routing_(routing),
+        source_(Message::Peer(persona, routing.kNodeId())) {}
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
@@ -57,16 +58,17 @@ class GetFromMetaDataManager {
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    Message::Destination destination(Message::Peer(PersonaType::kMetaDataManager,
+    Message::Destination destination(Message::Peer(PersonaType::kMetadataManager,
                                                    NodeId(name->string())));
     Message message(ActionType::kGet, destination, source_, Data::name_type::tag_type::kEnumValue,
                     NonEmptyString(), asymm::Signature());
     routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
     return std::move(future);
-}
+  }
+
  protected:
-  ~GetFromMetaDataManager() {}
+  ~GetFromMetadataManager() {}
 
  private:
   routing::Routing& routing_;

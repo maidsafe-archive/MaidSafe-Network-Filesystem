@@ -44,7 +44,7 @@ class NetworkFileSystem : public GetPolicy,
         DeletePolicy(routing, signing_fob) {}
 };
 
-typedef NetworkFileSystem<GetFromDataHolder<PersonaType::kClientMaid>,
+typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           PutToDataHolder<passport::Maid>,
                           NoPost<passport::Maid>,
                           NoDelete<passport::Maid>> ClientMaidNfs;
