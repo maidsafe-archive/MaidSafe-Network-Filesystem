@@ -47,8 +47,28 @@ class NetworkFileSystem : public GetPolicy,
 typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           PutToDataHolder<passport::Maid>,
                           NoPost<passport::Maid>,
-                          NoDelete<passport::Maid>> ClientMaidNfs;
+                          NoDelete<passport::Maid>> TemporaryClientMaidNfs;
+/*
+typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
+                          PutToMaidAccountHolder,
+                          NoPost<passport::Maid>,
+                          DeleteFromMaidAccountHolder> ClientMaidNfs;
 
+typedef NetworkFileSystem<NoGet,
+                          PutToMetadataManager,
+                          NoPost<passport::Pmid>,
+                          DeleteFromMetadataManager> MaidAccountHolderNfs;
+
+typedef NetworkFileSystem<GetFromPmidAccountHolder,
+                          PutToPmidAccountHolder,
+                          NoPost<passport::Pmid>,
+                          DeleteFromPmidAccountHolder> MetadataManagerNfs;
+
+typedef NetworkFileSystem<GetFromVaultPmid,
+                          PutToVaultPmid,
+                          NoPost<passport::Pmid>,
+                          DeleteFromVaultPmid> PmidAccountHolderNfs;
+*/
 
 template<typename GetPolicy>
 class NetworkFileSystemGetter : public GetPolicy {

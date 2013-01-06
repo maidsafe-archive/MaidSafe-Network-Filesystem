@@ -43,6 +43,38 @@ class NoPut {
   ~NoPut() {}
 };
 
+
+class PutToMetadataManager {
+ public:
+  PutToMetadataManager(routing::Routing& routing, const passport::Maid& signing_maid)
+      : routing_(routing),
+        signing_maid_(signing_maid),
+        source_(Message::Peer(PersonaType::kClientMaid, routing.kNodeId())) {}
+
+  template<typename Data>
+  void Put(const Data& data, OnError on_error) {
+    NonEmptyString content(data.Serialise());
+    Message::Destination destination(Message::Peer(PersonaType::kDataHolder,
+                                                   NodeId(data.name()->string())));
+    Message message(ActionType::kPut, destination, source_, Data::name_type::tag_type::kEnumValue,
+                    content, asymm::Sign(content, signing_maid_.private_key()));
+    routing::ResponseFunctor callback =
+        [on_error, message](const std::vector<std::string>& serialised_messages) {
+          HandlePutResponse<Data>(on_error, message, serialised_messages);
+        };
+    routing_.Send(NodeId(data.name()->string()), message.Serialise()->string(), callback,
+                  routing::DestinationType::kGroup, IsCacheable<Data>());
+  }
+
+ protected:
+  ~PutToMetadataManager() {}
+
+ private:
+  routing::Routing& routing_;
+  passport::Maid signing_maid_;
+  Message::Source source_;
+};
+
 template<typename SigningFob>
 class PutToDataHolder {
  public:

@@ -43,6 +43,7 @@ class NoGet {
   ~NoGet() {}
 };
 
+
 template<PersonaType persona>
 class GetFromMetadataManager {
  public:
@@ -74,6 +75,7 @@ class GetFromMetadataManager {
   routing::Routing& routing_;
   Message::Source source_;
 };
+
 
 template<PersonaType persona>
 class GetFromDataHolder {
