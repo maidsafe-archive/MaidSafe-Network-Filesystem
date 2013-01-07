@@ -46,6 +46,28 @@ PublicKeyGetter::~PublicKeyGetter() {
   thread_.join();
 }
 
+void PublicKeyGetter::HandleGetKey(const PublicData::name_type& key_name,
+                                   std::function<void(std::future<PublicData>)> get_key_future) {
+  std::future<PublicData> future;
+#ifdef TESTING
+  if (key_getter_nfs_) {
+    future = key_getter_nfs_->Get<PublicData>(PublicData::name_type(key_name));
+    std::shared_ptr<PendingKey> pending_key(new PendingKey(std::move(future), get_key_future));
+    AddPendingKey(pending_key);
+    return;
+  } else {
+    future = std::move(key_helper_nfs_->Get(PublicData::name_type(key_name)));
+    std::shared_ptr<PendingKey> pending_key(new PendingKey(std::move(future), get_key_future));
+    AddPendingKey(pending_key);
+    return;
+  }
+#else
+  future = std::move(key_getter_nfs_->Get<Data>(PublicData::name_type(key_name)));
+  std::shared_ptr<PendingKey> pending_key(new PendingKey(std::move(future), get_key_future));
+  AddPendingKey(pending_key);
+#endif
+}
+
 void PublicKeyGetter::AddPendingKey(std::shared_ptr<PendingKey> pending_key) {
   std::lock_guard<std::mutex> flags_lock(flags_mutex_);
   if (!running_)
