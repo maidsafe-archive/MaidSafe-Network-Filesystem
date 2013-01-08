@@ -12,6 +12,8 @@
 #ifndef MAIDSAFE_NFS_MAID_ACCOUNT_H_
 #define MAIDSAFE_NFS_MAID_ACCOUNT_H_
 
+#include <vector>
+
 #include "maidsafe/common/types.h"
 
 namespace maidsafe {
@@ -48,7 +50,7 @@ class PmidRegistration {
 
 class PmidSize {
  public:
-  PmidSize(Identity pmid_id_in)
+  explicit PmidSize(Identity pmid_id_in)
     : pmid_id(pmid_id_in),
       num_data_elements(0),
       total_size(0),
@@ -101,10 +103,15 @@ class DataElement {
 
 class MaidAccount {
  public:
-  MaidAccount(Identity maid_id_in)
-   : maid_id(maid_id_in),
-     pmid_totals(),
-     data_elements() {}
+  MaidAccount()
+    : maid_id(),
+      pmid_totals(),
+      data_elements() {}
+
+  explicit MaidAccount(Identity maid_id_in)
+    : maid_id(maid_id_in),
+      pmid_totals(),
+      data_elements() {}
 
   void Parse(const NonEmptyString& serialised_maidaccount);
   NonEmptyString Serialise();
