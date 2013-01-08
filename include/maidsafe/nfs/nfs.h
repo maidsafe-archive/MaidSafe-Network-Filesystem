@@ -52,7 +52,7 @@ typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
 typedef NetworkFileSystem<GetFromMaidAccountHolder<PersonaType::kMaidAccountHolder>,
                           PutToMetadataManager,
                           NoPost<passport::Pmid>,
-                          NoDelete<passport::Pmid>> MaidAccountHolderNfs;
+                          DeleteFromMetadataManager> MaidAccountHolderNfs;
 /*
 typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           PutToMaidAccountHolder,

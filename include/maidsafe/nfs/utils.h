@@ -116,6 +116,47 @@ void HandlePutResponse(OnError on_error_functor,
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
+template<typename Data>
+void HandleDeleteResponse(OnError on_error_functor,
+                          Message original_message,
+                          const std::vector<std::string>& serialised_messages) {
+  if (serialised_messages.empty()) {
+    LOG(kError) << "No responses received for Delete " << original_message.data_type()
+                << "  " << DebugId(original_message.destination()->node_id);
+    on_error_functor(std::move(original_message));
+  }
+
+  // TODO(Fraser#5#): 2012-12-21 - Confirm this is OK as a means of deciding overall success
+  int success_count(0), failure_count(0);
+  for (auto& serialised_message : serialised_messages) {
+    try {
+      // Need '((' when constructing ReturnCode to avoid most vexing parse.
+      ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(serialised_message))));
+      if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
+        ++success_count;
+      } else {
+        LOG(kWarning) << "Received an error " << return_code.value() << " for Delete "
+                      << original_message.data_type() << " "
+                      << DebugId(original_message.destination()->node_id);
+        ++failure_count;
+      }
+    }
+    catch(const std::exception& e) {
+      ++failure_count;
+      LOG(kError) <<  e.what();
+    }
+  }
+
+  if (success_count == 0) {
+    LOG(kError) << "No successful responses received for Delete " << original_message.data_type()
+                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << failure_count << " failures.";
+    on_error_functor(std::move(original_message));
+  }
+  LOG(kVerbose) << "Overall success for Delete " << original_message.data_type()
+                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << success_count << " successes and " << failure_count << " failures.";
+}
 
 }  // namespace nfs
 
