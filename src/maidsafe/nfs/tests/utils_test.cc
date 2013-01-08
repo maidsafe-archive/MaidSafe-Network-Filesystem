@@ -19,7 +19,9 @@
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
+
 #include "maidsafe/passport/passport.h"
+
 #include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/nfs.h"
@@ -77,32 +79,25 @@ passport::PublicMpid CreatePublicMpid() {
 
 template<typename Data>
 std::pair<Identity, NonEmptyString> GetNameAndContent() {
-  switch (Data::name_type::tag_type::kEnumValue) {
-    case detail::DataTagValue::kAnmidValue: {
+  if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnmidValue) {
       auto anmid(CreatePublicAnmid());
       return std::make_pair(anmid.name().data, anmid.Serialise().data);
-    }
-    case detail::DataTagValue::kAnsmidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnsmidValue) {
       auto ansmid(CreatePublicAnsmid());
       return std::make_pair(ansmid.name().data, ansmid.Serialise().data);
-    }
-    case detail::DataTagValue::kAntmidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAntmidValue) {
       auto antmid(CreatePublicAntmid());
       return std::make_pair(antmid.name().data, antmid.Serialise().data);
-    }
-    case detail::DataTagValue::kAnmaidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnmaidValue) {
       auto anmaid(CreatePublicAnmaid());
       return std::make_pair(anmaid.name().data, anmaid.Serialise().data);
-    }
-    case detail::DataTagValue::kMaidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kMaidValue) {
       auto maid(CreatePublicMaid());
       return std::make_pair(maid.name().data, maid.Serialise().data);
-    }
-    case detail::DataTagValue::kPmidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kPmidValue) {
       auto pmid(CreatePublicPmid());
       return std::make_pair(pmid.name().data, pmid.Serialise().data);
-    }
-    case detail::DataTagValue::kMidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kMidValue) {
       const UserPassword kKeyword(RandomAlphaNumericString(20));
       const UserPassword kPassword(RandomAlphaNumericString(20));
       const uint32_t kPin(RandomUint32() % 9999 + 1);
@@ -116,8 +111,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent() {
                         passport::EncryptTmidName(kKeyword, kPin, tmid.name()),
                         anmid);
       return std::make_pair(mid.name().data, mid.Serialise().data);
-    }
-    case detail::DataTagValue::kSmidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kSmidValue) {
       const UserPassword kKeyword(RandomAlphaNumericString(20));
       const UserPassword kPassword(RandomAlphaNumericString(20));
       const uint32_t kPin(RandomUint32() % 9999 + 1);
@@ -131,8 +125,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent() {
                           passport::EncryptTmidName(kKeyword, kPin, tmid.name()),
                           ansmid);
       return std::make_pair(smid.name().data, smid.Serialise().data);
-    }
-    case detail::DataTagValue::kTmidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kTmidValue) {
       const UserPassword kKeyword(RandomAlphaNumericString(20));
       const UserPassword kPassword(RandomAlphaNumericString(20));
       const uint32_t kPin(RandomUint32() % 9999 + 1);
@@ -141,16 +134,13 @@ std::pair<Identity, NonEmptyString> GetNameAndContent() {
       passport::Antmid antmid;
       passport::Tmid tmid(encrypted_session, antmid);
       return std::make_pair(tmid.name().data, tmid.Serialise().data);
-    }
-    case detail::DataTagValue::kAnmpidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnmpidValue) {
       auto anmpid(CreatePublicAnmpid());
       return std::make_pair(anmpid.name().data, anmpid.Serialise().data);
-    }
-    case detail::DataTagValue::kMpidValue: {
+    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kMpidValue) {
       auto mpid(CreatePublicMpid());
       return std::make_pair(mpid.name().data, mpid.Serialise().data);
-    }
-    default:
+    } else {
       return std::make_pair(Identity(), NonEmptyString());
   }
 }
