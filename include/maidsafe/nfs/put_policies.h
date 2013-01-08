@@ -46,15 +46,15 @@ class NoPut {
 
 class PutToMetadataManager {
  public:
-  PutToMetadataManager(routing::Routing& routing, const passport::Maid& signing_maid)
+  PutToMetadataManager(routing::Routing& routing, const passport::Pmid& signing_pmid)
       : routing_(routing),
-        signing_maid_(signing_maid),
-        source_(Message::Peer(PersonaType::kClientMaid, routing.kNodeId())) {}
+        signing_pmid_(signing_pmid),
+        source_(Message::Peer(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
 
   template<typename Data>
   void Put(const Data& data, OnError on_error) {
     NonEmptyString content(data.Serialise());
-    Message::Destination destination(Message::Peer(PersonaType::kDataHolder,
+    Message::Destination destination(Message::Peer(PersonaType::kMetadataManager,
                                                    NodeId(data.name()->string())));
     Message message(ActionType::kPut, destination, source_, Data::name_type::tag_type::kEnumValue,
                     content, asymm::Sign(content, signing_maid_.private_key()));
@@ -71,7 +71,7 @@ class PutToMetadataManager {
 
  private:
   routing::Routing& routing_;
-  passport::Maid signing_maid_;
+  passport::Pmid signing_pmid_;
   Message::Source source_;
 };
 
