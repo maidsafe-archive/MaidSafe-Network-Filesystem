@@ -48,16 +48,16 @@ typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           PutToDataHolder<passport::Maid>,
                           NoPost<passport::Maid>,
                           NoDelete<passport::Maid>> TemporaryClientMaidNfs;
+
+typedef NetworkFileSystem</*NoGet*/GetFromMaidAccountHolder<PersonaType::kMaidAccountHolder>,
+                          PutToDataHolder<passport::Pmid>,
+                          NoPost<passport::Pmid>,
+                          NoDelete<passport::Pmid>> MaidAccountHolderNfs;
 /*
 typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           PutToMaidAccountHolder,
                           NoPost<passport::Maid>,
                           DeleteFromMaidAccountHolder> ClientMaidNfs;
-
-typedef NetworkFileSystem<NoGet,
-                          PutToMetadataManager,
-                          NoPost<passport::Pmid>,
-                          DeleteFromMetadataManager> MaidAccountHolderNfs;
 
 typedef NetworkFileSystem<GetFromPmidAccountHolder,
                           PutToPmidAccountHolder,
