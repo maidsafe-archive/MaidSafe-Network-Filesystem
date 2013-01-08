@@ -109,6 +109,38 @@ class GetFromDataHolder {
   Message::Source source_;
 };
 
+template<PersonaType persona>
+class GetFromMaidAccountHolder {
+ public:
+  explicit GetFromMaidAccountHolder(routing::Routing& routing)
+      : routing_(routing),
+        source_(Message::Peer(persona, routing.kNodeId())) {}
+
+  template<typename Data>
+  std::future<Data> Get(const typename Data::name_type& name) {
+    auto promise(std::make_shared<std::promise<Data>>());  // NOLINT (Fraser)
+    std::future<Data> future(promise->get_future());
+    routing::ResponseFunctor callback =
+        [promise](const std::vector<std::string>& serialised_messages) {
+          HandleGetResponse(promise, serialised_messages);
+        };
+    Message::Destination destination(Message::Peer(PersonaType::kMaidAccountHolder,
+                                                   NodeId(name->string())));
+    Message message(ActionType::kGet, destination, source_, Data::name_type::tag_type::kEnumValue,
+                    NonEmptyString(), asymm::Signature());
+    routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
+                  routing::DestinationType::kGroup, IsCacheable<Data>());
+    return std::move(future);
+  }
+
+ protected:
+  ~GetFromMaidAccountHolder() {}
+
+ private:
+  routing::Routing& routing_;
+  Message::Source source_;
+};
+
 
 #ifdef TESTING
 

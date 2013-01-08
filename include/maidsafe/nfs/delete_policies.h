@@ -48,6 +48,41 @@ class NoDelete {
   SigningFob signing_fob_;
 };
 
+class DeleteFromMetadataManager {
+ public:
+  DeleteFromMetadataManager(routing::Routing& routing, const passport::Pmid& signing_pmid)
+    : routing_(routing),
+      signing_pmid_(signing_pmid),
+      source_(Message::Peer(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
+
+  template<typename Data>
+  void Delete(const Data& data, OnError on_error) {
+    NonEmptyString content(data.Serialise());
+    Message::Destination destination(Message::Peer(PersonaType::kMetadataManager,
+                                                   NodeId(data.name()->string())));
+    Message message(ActionType::kDelete,
+                    destination,
+                    source_,
+                    Data::name_type::tag_type::kEnumValue,
+                    content,
+                    asymm::Sign(content, signing_pmid_.private_key()));
+
+    routing::ResponseFunctor callback =
+        [on_error, message](const std::vector<std::string>& serialised_messages) {
+          HandleDeleteResponse<Data>(on_error, message, serialised_messages);
+        };
+    routing_.Send(NodeId(data.name()->string()), message.Serialise()->string(), callback,
+                  routing::DestinationType::kGroup, IsCacheable<Data>());
+  }
+
+ protected:
+  ~DeleteFromMetadataManager() {}
+
+ private:
+  routing::Routing& routing_;
+  passport::Pmid signing_pmid_;
+  Message::Source source_;
+};
 }  // namespace nfs
 
 }  // namespace maidsafe
