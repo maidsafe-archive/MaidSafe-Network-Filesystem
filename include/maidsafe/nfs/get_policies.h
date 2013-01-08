@@ -114,11 +114,12 @@ class GetFromDataHolder {
 
 class GetFromKeyFile {
  public:
-  explicit GetFromKeyFile(const std::vector<passport::Pmid>& all_pmids) : kAllPmids_(all_pmids) {}
+  explicit GetFromKeyFile(const std::vector<passport::PublicPmid>& all_pmids)
+      : kAllPmids_(all_pmids) {}
   std::future<passport::PublicPmid> Get(const passport::PublicPmid::name_type& name);
 
  private:
-  const std::vector<passport::Pmid> kAllPmids_;
+  const std::vector<passport::PublicPmid> kAllPmids_;
 };
 
 #endif

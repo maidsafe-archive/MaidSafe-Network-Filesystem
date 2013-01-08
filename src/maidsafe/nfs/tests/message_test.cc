@@ -34,7 +34,7 @@ Message::Peer GeneratePeer() {
   // matches PersonaType enum in types.h
   peer.persona_type = static_cast<PersonaType>(RandomUint32() % 7);
   peer.node_id = NodeId(NodeId::kRandomId);
-  return std::move(peer);
+  return peer;
 }
 
 class MessageTest : public testing::Test {

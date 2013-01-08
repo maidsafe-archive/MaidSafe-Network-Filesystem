@@ -20,12 +20,11 @@ namespace nfs {
 std::future<passport::PublicPmid> GetFromKeyFile::Get(const passport::PublicPmid::name_type& name) {
   std::promise<passport::PublicPmid> promise;
   try {
-    auto itr(std::find_if(kAllPmids_.begin(),
-                          kAllPmids_.end(),
-                          [&name](const passport::Pmid& pmid) { return pmid.name() == name; }));
+    auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
+        [&name](const passport::PublicPmid& pmid) { return pmid.name() == name; }));
     if (itr == kAllPmids_.end())
       ThrowError(NfsErrors::failed_to_get_data);
-    promise.set_value(passport::PublicPmid(*itr));
+    promise.set_value(*itr);
   }
   catch(...) {
     promise.set_exception(std::current_exception());
