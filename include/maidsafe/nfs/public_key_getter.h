@@ -85,14 +85,14 @@ void PublicKeyGetter::HandleGetKey(const typename Data::name_type& key_name,
 #ifdef TESTING
   if (key_getter_nfs_) {
 #endif
-    std::future<Data> future(std::move(key_getter_nfs_->Get<Data>(Data::name_type(key_name))));
+    std::future<Data> future(std::move(key_getter_nfs_->Get<Data>(key_name)));
     PendingKeyVariant pending_key(
         std::make_shared<PendingKey<Data>>(std::move(future), get_key_future));
     AddPendingKey(pending_key);
 #ifdef TESTING
   } else {
     std::future<passport::PublicPmid> future(
-        std::move(fake_key_getter_nfs_->Get(Data::name_type(key_name))));
+        std::move(fake_key_getter_nfs_->Get(key_name)));
     PendingKeyVariant pending_key(
         std::make_shared<PendingKey<passport::PublicPmid>>(std::move(future), get_key_future));
     AddPendingKey(pending_key);
