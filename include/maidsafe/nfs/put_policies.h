@@ -57,7 +57,7 @@ class PutToMetadataManager {
     Message::Destination destination(Message::Peer(PersonaType::kMetadataManager,
                                                    NodeId(data.name()->string())));
     Message message(ActionType::kPut, destination, source_, Data::name_type::tag_type::kEnumValue,
-                    content, asymm::Sign(content, signing_maid_.private_key()));
+                    content, asymm::Sign(content, signing_pmid_.private_key()));
     routing::ResponseFunctor callback =
         [on_error, message](const std::vector<std::string>& serialised_messages) {
           HandlePutResponse<Data>(on_error, message, serialised_messages);
