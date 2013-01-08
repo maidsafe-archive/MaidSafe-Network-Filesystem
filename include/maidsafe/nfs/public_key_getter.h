@@ -38,7 +38,7 @@ class PublicKeyGetter {
  public:
   // all_pmids_from_file should only be non-empty if TESTING is defined
   PublicKeyGetter(routing::Routing& routing,
-                  const std::vector<passport::PublicPmid>& pmids_from_file =
+                  const std::vector<passport::PublicPmid>& public_pmids_from_file =
                       std::vector<passport::PublicPmid>());
   ~PublicKeyGetter();
   template<typename Data>
@@ -71,7 +71,7 @@ class PublicKeyGetter {
   class InvokeFunctor;
 
   std::unique_ptr<KeyGetterNfs> key_getter_nfs_;
-  std::unique_ptr<KeyHelperNfs> key_helper_nfs_;
+  std::unique_ptr<FakeKeyGetterNfs> fake_key_getter_nfs_;
   bool running_;
   std::vector<PendingKeyVariant> pending_keys_;
   std::mutex flags_mutex_, mutex_;
@@ -92,7 +92,7 @@ void PublicKeyGetter::HandleGetKey(const typename Data::name_type& key_name,
 #ifdef TESTING
   } else {
     std::future<passport::PublicPmid> future(
-        std::move(key_helper_nfs_->Get(Data::name_type(key_name))));
+        std::move(fake_key_getter_nfs_->Get(Data::name_type(key_name))));
     PendingKeyVariant pending_key(
         std::make_shared<PendingKey<passport::PublicPmid>>(std::move(future), get_key_future));
     AddPendingKey(pending_key);

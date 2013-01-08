@@ -20,9 +20,10 @@ namespace maidsafe {
 namespace nfs {
 
 PublicKeyGetter::PublicKeyGetter(routing::Routing& routing,
-                                 const std::vector<passport::PublicPmid>& pmids_from_file)
-    : key_getter_nfs_(pmids_from_file.empty() ? new KeyGetterNfs(routing) : nullptr),
-      key_helper_nfs_(pmids_from_file.empty() ? nullptr : new KeyHelperNfs(pmids_from_file)),
+                                 const std::vector<passport::PublicPmid>& public_pmids_from_file)
+    : key_getter_nfs_(public_pmids_from_file.empty() ? new KeyGetterNfs(routing) : nullptr),
+      fake_key_getter_nfs_(public_pmids_from_file.empty() ?
+                           nullptr : new FakeKeyGetterNfs(public_pmids_from_file)),
       running_(true),
       pending_keys_(),
       flags_mutex_(),
@@ -30,7 +31,7 @@ PublicKeyGetter::PublicKeyGetter(routing::Routing& routing,
       condition_(),
       thread_([this] { Run(); }) {
 #ifndef TESTING
-  if (!pmids_from_file.empty()) {
+  if (!public_pmids_from_file.empty()) {
     LOG(kError) << "Cannot use fake key getter if TESTING is not defined";
     ThrowError(NfsErrors::invalid_parameter);
   }

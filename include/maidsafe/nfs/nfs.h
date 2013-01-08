@@ -79,7 +79,7 @@ class NetworkFileSystemGetter : public GetPolicy {
 typedef NetworkFileSystemGetter<GetFromDataHolder<PersonaType::kDataGetter>> KeyGetterNfs;
 
 #ifdef TESTING
-typedef GetFromKeyFile KeyHelperNfs;
+typedef GetFromKeyFile FakeKeyGetterNfs;
 #endif
 
 }  // namespace nfs
