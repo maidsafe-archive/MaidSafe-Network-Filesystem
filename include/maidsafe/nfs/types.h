@@ -25,7 +25,7 @@ class Message;
 
 enum class PersonaType : int {
   kMaidAccountHolder,
-  kMetadataManager,
+  kMetaDataManager,
   kPmidAccountHolder,
   kDataHolder,
   kClientMaid,
@@ -45,7 +45,7 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
     case PersonaType::kMaidAccountHolder:
       persona_type_str = "MAID Account Holder Persona";
       break;
-    case PersonaType::kMetadataManager:
+    case PersonaType::kMetaDataManager:
       persona_type_str = "Metadata Manager Persona";
       break;
     case PersonaType::kPmidAccountHolder:

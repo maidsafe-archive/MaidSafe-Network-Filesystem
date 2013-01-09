@@ -59,7 +59,7 @@ class GetFromMetadataManager {
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    Message::Destination destination(Message::Peer(PersonaType::kMetadataManager,
+    Message::Destination destination(Message::Peer(PersonaType::kMetaDataManager,
                                                    NodeId(name->string())));
     Message message(ActionType::kGet, destination, source_, Data::name_type::tag_type::kEnumValue,
                     NonEmptyString(), asymm::Signature());
