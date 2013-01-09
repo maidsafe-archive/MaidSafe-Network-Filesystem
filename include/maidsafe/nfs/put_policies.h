@@ -52,18 +52,23 @@ class PutToMetadataManager {
         source_(Message::Peer(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
 
   template<typename Data>
-  void Put(const Data& data, OnError on_error) {
-    NonEmptyString content(data.Serialise());
-    Message::Destination destination(Message::Peer(PersonaType::kMetadataManager,
-                                                   NodeId(data.name()->string())));
-    Message message(ActionType::kPut, destination, source_, Data::name_type::tag_type::kEnumValue,
-                    content, asymm::Sign(content, signing_pmid_.private_key()));
+  void Put(const Message& message, OnError on_error) {
+    Message new_message(message.action_type(),
+                        message.destination(),
+                        source_,
+                        message.data_type(),
+                        message.content(),
+                        asymm::Sign(message.content(), signing_pmid_.private_key()));
+
     routing::ResponseFunctor callback =
-        [on_error, message](const std::vector<std::string>& serialised_messages) {
-          HandlePutResponse<Data>(on_error, message, serialised_messages);
+        [on_error, new_message](const std::vector<std::string>& serialised_messages) {
+          HandlePutResponse<Data>(on_error, new_message, serialised_messages);
         };
-    routing_.Send(NodeId(data.name()->string()), message.Serialise()->string(), callback,
-                  routing::DestinationType::kGroup, IsCacheable<Data>());
+    routing_.Send(new_message.destination().data.node_id,
+                  message.Serialise()->string(),
+                  callback,
+                  routing::DestinationType::kGroup,
+                  IsCacheable<Data>());
   }
 
  protected:
