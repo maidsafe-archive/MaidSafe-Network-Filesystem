@@ -28,20 +28,20 @@ void PmidRegistration::Parse(const NonEmptyString& serialised_pmidregistration) 
     ThrowError(NfsErrors::pmid_registration_parsing_error);
   }
 
-  maid_id = Identity(proto_pmidregistration.maid_id());
-  pmid_id = Identity(proto_pmidregistration.pmid_id());
+  maid_id_ = Identity(proto_pmidregistration.maid_id());
+  pmid_id_ = Identity(proto_pmidregistration.pmid_id());
   register_ = proto_pmidregistration.register_();
-  maid_signature = NonEmptyString(proto_pmidregistration.maid_signature());
-  pmid_signature = NonEmptyString(proto_pmidregistration.pmid_signature());
+  maid_signature_ = NonEmptyString(proto_pmidregistration.maid_signature());
+  pmid_signature_ = NonEmptyString(proto_pmidregistration.pmid_signature());
 }
 
 NonEmptyString PmidRegistration::Serialise() {
   nfs::protobuf::PmidRegistration proto_pmidregistration;
-  proto_pmidregistration.set_maid_id(maid_id.string());
-  proto_pmidregistration.set_pmid_id(pmid_id.string());
+  proto_pmidregistration.set_maid_id(maid_id_.string());
+  proto_pmidregistration.set_pmid_id(pmid_id_.string());
   proto_pmidregistration.set_register_(register_);
-  proto_pmidregistration.set_maid_signature(maid_signature.string());
-  proto_pmidregistration.set_pmid_signature(pmid_signature.string());
+  proto_pmidregistration.set_maid_signature(maid_signature_.string());
+  proto_pmidregistration.set_pmid_signature(pmid_signature_.string());
   return NonEmptyString(proto_pmidregistration.SerializeAsString());
 }
 
@@ -97,7 +97,7 @@ void MaidAccount::Parse(const NonEmptyString& serialised_maidaccount) {
     ThrowError(NfsErrors::maid_account_parsing_error);
   }
 
-  maid_id = Identity(proto_maidaccount.maid_id());
+  maid_id_ = Identity(proto_maidaccount.maid_id());
 
   data_elements.clear();
   for (int i(0); i != proto_maidaccount.data_elements_size(); ++i) {
@@ -117,7 +117,7 @@ void MaidAccount::Parse(const NonEmptyString& serialised_maidaccount) {
 
 NonEmptyString MaidAccount::Serialise() {
   nfs::protobuf::MaidAccount proto_maidaccount;
-  proto_maidaccount.set_maid_id(maid_id.string());
+  proto_maidaccount.set_maid_id(maid_id_.string());
   for (auto& pmid_total : pmid_totals) {
     nfs::protobuf::PmidTotals proto_pmidtotal;
     proto_pmidtotal.ParseFromString(pmid_total.Serialise().string());

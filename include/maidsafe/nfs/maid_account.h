@@ -22,30 +22,32 @@ namespace nfs {
 
 class PmidRegistration {
  public:
-  PmidRegistration(Identity maid_id_in, Identity pmid_id_in)
-    : maid_id(maid_id_in),
-      pmid_id(pmid_id_in),
-      register_(false),
-      maid_signature(NonEmptyString()),
-      pmid_signature(NonEmptyString()) {}
+  PmidRegistration(Identity maid_id_in, Identity pmid_id_in, bool register_in,
+                   NonEmptyString maid_signature_in, NonEmptyString pmid_signature_in)
+    : maid_id_(maid_id_in),
+      pmid_id_(pmid_id_in),
+      register_(register_in),
+      maid_signature_(maid_signature_in),
+      pmid_signature_(pmid_signature_in) {}
   explicit PmidRegistration(const NonEmptyString& serialised_pmidregistration)
-    : maid_id(),
-      pmid_id(),
+    : maid_id_(),
+      pmid_id_(),
       register_(false),
-      maid_signature(NonEmptyString()),
-      pmid_signature(NonEmptyString()) {
+      maid_signature_(NonEmptyString()),
+      pmid_signature_(NonEmptyString()) {
     Parse(serialised_pmidregistration);
   }
 
   void Parse(const NonEmptyString& serialised_pmidregistration);
-
   NonEmptyString Serialise();
+  Identity maid_id() { return maid_id_; }
 
-  Identity maid_id;
-  Identity pmid_id;
+ private:
+  Identity maid_id_;
+  Identity pmid_id_;
   bool register_;
-  NonEmptyString maid_signature;
-  NonEmptyString pmid_signature;
+  NonEmptyString maid_signature_;
+  NonEmptyString pmid_signature_;
 };
 
 class PmidSize {
@@ -68,6 +70,7 @@ class PmidSize {
   void Parse(const NonEmptyString& serialised_pmidsize);
   NonEmptyString Serialise();
 
+ private:
   Identity pmid_id;
   int32_t num_data_elements;
   int64_t total_size;
@@ -77,13 +80,12 @@ class PmidSize {
 
 class PmidTotal {
  public:
-  PmidTotal(Identity maid_id_in, Identity pmid_id_in)
-    : registration(maid_id_in, pmid_id_in), pmid_size(pmid_id_in) {}
   PmidTotal(PmidRegistration registration_in, PmidSize pmid_size_in)
     : registration(registration_in), pmid_size(pmid_size_in) {}
 
   NonEmptyString Serialise();
 
+ private:
   PmidRegistration registration;
   PmidSize pmid_size;
 };
@@ -97,6 +99,7 @@ class DataElement {
 
   NonEmptyString Serialise();
 
+ private:
   Identity data_id;
   int32_t data_size;
 };
@@ -104,17 +107,17 @@ class DataElement {
 class MaidAccount {
  public:
   MaidAccount()
-    : maid_id(),
+    : maid_id_(),
       pmid_totals(),
       data_elements() {}
 
   explicit MaidAccount(Identity maid_id_in)
-    : maid_id(maid_id_in),
+    : maid_id_(maid_id_in),
       pmid_totals(),
       data_elements() {}
 
   explicit MaidAccount(const NonEmptyString& serialised_maidaccount)
-    : maid_id(),
+    : maid_id_(),
       pmid_totals(),
       data_elements() {
     Parse(serialised_maidaccount);
@@ -122,8 +125,16 @@ class MaidAccount {
 
   void Parse(const NonEmptyString& serialised_maidaccount);
   NonEmptyString Serialise();
+  void PushPmidTotal(const PmidTotal& pmid_total) {
+    pmid_totals.push_back(pmid_total);
+  }
+  void PushDataDlement(const DataElement& data_element) {
+    data_elements.push_back(data_element);
+  }
+  Identity maid_id() { return maid_id_; }
 
-  Identity maid_id;
+ private:
+  Identity maid_id_;
   std::vector<PmidTotal> pmid_totals;
   std::vector<DataElement> data_elements;
 };
