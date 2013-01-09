@@ -25,7 +25,7 @@ void PmidRegistration::Parse(const NonEmptyString& serialised_pmidregistration) 
   if (!proto_pmidregistration.ParseFromString(serialised_pmidregistration.string()) ||
       !proto_pmidregistration.IsInitialized()) {
     LOG(kError) << "Failed to parse pmid_registration.";
-    ThrowError(NfsErrors::pmidregistration_parsing_error);
+    ThrowError(NfsErrors::pmid_registration_parsing_error);
   }
 
   maid_id = Identity(proto_pmidregistration.maid_id());
@@ -50,7 +50,7 @@ void PmidSize::Parse(const NonEmptyString& serialised_pmidsize) {
   if (!proto_pmidsize.ParseFromString(serialised_pmidsize.string()) ||
       !proto_pmidsize.IsInitialized()) {
     LOG(kError) << "Failed to parse pmid_size.";
-    ThrowError(NfsErrors::pmidsize_parsing_error);
+    ThrowError(NfsErrors::pmid_size_parsing_error);
   }
 
   pmid_id = Identity(proto_pmidsize.pmid_id());
@@ -94,7 +94,7 @@ void MaidAccount::Parse(const NonEmptyString& serialised_maidaccount) {
   if (!proto_maidaccount.ParseFromString(serialised_maidaccount.string()) ||
       !proto_maidaccount.IsInitialized()) {
     LOG(kError) << "Failed to parse maid_account.";
-    ThrowError(NfsErrors::maidaccount_parsing_error);
+    ThrowError(NfsErrors::maid_account_parsing_error);
   }
 
   maid_id = Identity(proto_maidaccount.maid_id());
