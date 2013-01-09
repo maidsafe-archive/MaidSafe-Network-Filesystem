@@ -113,6 +113,13 @@ class MaidAccount {
       pmid_totals(),
       data_elements() {}
 
+  explicit MaidAccount(const NonEmptyString& serialised_maidaccount)
+    : maid_id(),
+      pmid_totals(),
+      data_elements() {
+    Parse(serialised_maidaccount);
+  }
+
   void Parse(const NonEmptyString& serialised_maidaccount);
   NonEmptyString Serialise();
 
