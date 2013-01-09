@@ -103,7 +103,7 @@ class DataElement {
     : data_id_(data_id_in), data_size(data_size_in) {}
 
   NonEmptyString Serialise();
-  Identity data_id() { return data_id_; }
+  Identity data_id() const { return data_id_; }
 
  private:
   Identity data_id_;
@@ -114,30 +114,30 @@ class MaidAccount {
  public:
   MaidAccount()
     : maid_id_(),
-      pmid_totals(),
-      data_elements() {}
+      pmid_totals_(),
+      data_elements_() {}
 
   explicit MaidAccount(Identity maid_id_in)
     : maid_id_(maid_id_in),
-      pmid_totals(),
-      data_elements() {}
+      pmid_totals_(),
+      data_elements_() {}
 
   explicit MaidAccount(const NonEmptyString& serialised_maidaccount)
     : maid_id_(),
-      pmid_totals(),
-      data_elements() {
+      pmid_totals_(),
+      data_elements_() {
     Parse(serialised_maidaccount);
   }
 
   void Parse(const NonEmptyString& serialised_maidaccount);
   NonEmptyString Serialise();
   void PushPmidTotal(PmidTotal pmid_total) {
-    pmid_totals.push_back(pmid_total);
+    pmid_totals_.push_back(pmid_total);
   }
   void RemovePmidTotal(Identity pmid_id) {
-    for (auto itr = pmid_totals.begin(); itr != pmid_totals.end(); ++itr) {
+    for (auto itr = pmid_totals_.begin(); itr != pmid_totals_.end(); ++itr) {
       if ((*itr).IsRecordOf(pmid_id)) {
-        pmid_totals.erase(itr);
+        pmid_totals_.erase(itr);
         return;
       }
     }
@@ -147,12 +147,12 @@ class MaidAccount {
     PushPmidTotal(pmid_total);
   }
   void PushDataElement(DataElement data_element) {
-    data_elements.push_back(data_element);
+    data_elements_.push_back(data_element);
   }
   void RemoveDataElement(Identity data_id) {
-    for (auto itr = data_elements.begin(); itr != data_elements.end(); ++itr) {
+    for (auto itr = data_elements_.begin(); itr != data_elements_.end(); ++itr) {
       if ((*itr).data_id() == data_id) {
-        data_elements.erase(itr);
+        data_elements_.erase(itr);
         return;
       }
     }
@@ -161,12 +161,13 @@ class MaidAccount {
     RemoveDataElement(data_element.data_id());
     PushDataElement(data_element);
   }
-  Identity maid_id() { return maid_id_; }
+  Identity maid_id() const { return maid_id_; }
+  std::vector<DataElement>& data_elements() { return data_elements_; }
 
  private:
   Identity maid_id_;
-  std::vector<PmidTotal> pmid_totals;
-  std::vector<DataElement> data_elements;
+  std::vector<PmidTotal> pmid_totals_;
+  std::vector<DataElement> data_elements_;
 };
 
 }  // namespace nfs

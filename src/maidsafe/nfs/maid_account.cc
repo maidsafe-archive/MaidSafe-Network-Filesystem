@@ -99,15 +99,15 @@ void MaidAccount::Parse(const NonEmptyString& serialised_maidaccount) {
 
   maid_id_ = Identity(proto_maidaccount.maid_id());
 
-  data_elements.clear();
+  data_elements_.clear();
   for (int i(0); i != proto_maidaccount.data_elements_size(); ++i) {
-    data_elements.push_back(DataElement(Identity(proto_maidaccount.data_elements(i).data_id()),
+    data_elements_.push_back(DataElement(Identity(proto_maidaccount.data_elements(i).data_id()),
                                         proto_maidaccount.data_elements(i).data_size()));
   }
 
-  pmid_totals.clear();
+  pmid_totals_.clear();
   for (int i(0); i != proto_maidaccount.data_elements_size(); ++i) {
-    pmid_totals.push_back(
+    pmid_totals_.push_back(
         PmidTotal(PmidRegistration(NonEmptyString(
                       proto_maidaccount.pmid_totals(i).registration().SerializeAsString())),
                   PmidSize(NonEmptyString(
@@ -118,12 +118,12 @@ void MaidAccount::Parse(const NonEmptyString& serialised_maidaccount) {
 NonEmptyString MaidAccount::Serialise() {
   nfs::protobuf::MaidAccount proto_maidaccount;
   proto_maidaccount.set_maid_id(maid_id_.string());
-  for (auto& pmid_total : pmid_totals) {
+  for (auto& pmid_total : pmid_totals_) {
     nfs::protobuf::PmidTotals proto_pmidtotal;
     proto_pmidtotal.ParseFromString(pmid_total.Serialise().string());
     *(proto_maidaccount.add_pmid_totals()) = proto_pmidtotal;
   }
-  for (auto& data_element : data_elements) {
+  for (auto& data_element : data_elements_) {
     nfs::protobuf::DataElements proto_dataelements;
     proto_dataelements.ParseFromString(data_element.Serialise().string());
     *(proto_maidaccount.add_data_elements()) = proto_dataelements;
