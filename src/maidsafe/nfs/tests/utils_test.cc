@@ -33,116 +33,111 @@ namespace nfs {
 
 namespace test {
 
-passport::PublicAnmid CreatePublicAnmid() {
+template<typename Data>
+std::pair<Identity, NonEmptyString> GetNameAndContent();
+
+template<typename Fob>
+std::pair<Identity, NonEmptyString> MakeNameAndContentPair(const Fob& fob) {
+  maidsafe::passport::detail::PublicFob<Fob::name_type::tag_type> public_fob(fob);
+  return std::make_pair(public_fob.name().data, public_fob.Serialise().data);
+}
+
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicAnmid>() {
   passport::Anmid anmid;
-  return passport::PublicAnmid(anmid);
+  return MakeNameAndContentPair(anmid);
 }
 
-passport::PublicAnsmid CreatePublicAnsmid() {
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicAnsmid>() {
   passport::Ansmid ansmid;
-  return passport::PublicAnsmid(ansmid);
+  return MakeNameAndContentPair(ansmid);
 }
 
-passport::PublicAntmid CreatePublicAntmid() {
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicAntmid>() {
   passport::Antmid antmid;
-  return passport::PublicAntmid(antmid);
+  return MakeNameAndContentPair(antmid);
 }
 
-passport::PublicAnmaid CreatePublicAnmaid() {
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicAnmaid>() {
   passport::Anmaid anmaid;
-  return passport::PublicAnmaid(anmaid);
+  return MakeNameAndContentPair(anmaid);
 }
 
-passport::PublicMaid CreatePublicMaid() {
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicMaid>() {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
-  return passport::PublicMaid(maid);
+  return MakeNameAndContentPair(maid);
 }
 
-passport::PublicPmid CreatePublicPmid() {
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicPmid>() {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   passport::Pmid pmid(maid);
-  return passport::PublicPmid(pmid);
+  return MakeNameAndContentPair(pmid);
 }
 
-passport::PublicAnmpid CreatePublicAnmpid() {
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicAnmpid>() {
   passport::Anmpid anmpid;
-  return passport::PublicAnmpid(anmpid);
+  return MakeNameAndContentPair(anmpid);
 }
 
-passport::PublicMpid CreatePublicMpid() {
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicMpid>() {
   passport::Anmpid anmpid;
   passport::Mpid mpid(NonEmptyString("Test"), anmpid);
-  return passport::PublicMpid(mpid);
+  return MakeNameAndContentPair(mpid);
 }
 
-template<typename Data>
-std::pair<Identity, NonEmptyString> GetNameAndContent() {
-  if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnmidValue) {
-      auto anmid(CreatePublicAnmid());
-      return std::make_pair(anmid.name().data, anmid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnsmidValue) {
-      auto ansmid(CreatePublicAnsmid());
-      return std::make_pair(ansmid.name().data, ansmid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAntmidValue) {
-      auto antmid(CreatePublicAntmid());
-      return std::make_pair(antmid.name().data, antmid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnmaidValue) {
-      auto anmaid(CreatePublicAnmaid());
-      return std::make_pair(anmaid.name().data, anmaid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kMaidValue) {
-      auto maid(CreatePublicMaid());
-      return std::make_pair(maid.name().data, maid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kPmidValue) {
-      auto pmid(CreatePublicPmid());
-      return std::make_pair(pmid.name().data, pmid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kMidValue) {
-      const UserPassword kKeyword(RandomAlphaNumericString(20));
-      const UserPassword kPassword(RandomAlphaNumericString(20));
-      const uint32_t kPin(RandomUint32() % 9999 + 1);
-      const NonEmptyString kMasterData(RandomString(34567));
-      auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
-      passport::Antmid antmid;
-      passport::Tmid tmid(encrypted_session, antmid);
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Mid>() {
+  const UserPassword kKeyword(RandomAlphaNumericString(20));
+  const UserPassword kPassword(RandomAlphaNumericString(20));
+  const uint32_t kPin(RandomUint32() % 9999 + 1);
+  const NonEmptyString kMasterData(RandomString(34567));
+  auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
+  passport::Antmid antmid;
+  passport::Tmid tmid(encrypted_session, antmid);
 
-      passport::Anmid anmid;
-      passport::Mid mid(passport::MidName(kKeyword, kPin),
-                        passport::EncryptTmidName(kKeyword, kPin, tmid.name()),
-                        anmid);
-      return std::make_pair(mid.name().data, mid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kSmidValue) {
-      const UserPassword kKeyword(RandomAlphaNumericString(20));
-      const UserPassword kPassword(RandomAlphaNumericString(20));
-      const uint32_t kPin(RandomUint32() % 9999 + 1);
-      const NonEmptyString kMasterData(RandomString(34567));
-      auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
-      passport::Antmid antmid;
-      passport::Tmid tmid(encrypted_session, antmid);
+  passport::Anmid anmid;
+  passport::Mid mid(passport::MidName(kKeyword, kPin),
+                    passport::EncryptTmidName(kKeyword, kPin, tmid.name()),
+                    anmid);
+  return std::make_pair(mid.name().data, mid.Serialise().data);
+}
 
-      passport::Ansmid ansmid;
-      passport::Smid smid(passport::SmidName(kKeyword, kPin),
-                          passport::EncryptTmidName(kKeyword, kPin, tmid.name()),
-                          ansmid);
-      return std::make_pair(smid.name().data, smid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kTmidValue) {
-      const UserPassword kKeyword(RandomAlphaNumericString(20));
-      const UserPassword kPassword(RandomAlphaNumericString(20));
-      const uint32_t kPin(RandomUint32() % 9999 + 1);
-      const NonEmptyString kMasterData(RandomString(34567));
-      auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
-      passport::Antmid antmid;
-      passport::Tmid tmid(encrypted_session, antmid);
-      return std::make_pair(tmid.name().data, tmid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kAnmpidValue) {
-      auto anmpid(CreatePublicAnmpid());
-      return std::make_pair(anmpid.name().data, anmpid.Serialise().data);
-    } else if (Data::name_type::tag_type::kEnumValue == detail::DataTagValue::kMpidValue) {
-      auto mpid(CreatePublicMpid());
-      return std::make_pair(mpid.name().data, mpid.Serialise().data);
-    } else {
-      return std::make_pair(Identity(), NonEmptyString());
-  }
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Smid>() {
+  const UserPassword kKeyword(RandomAlphaNumericString(20));
+  const UserPassword kPassword(RandomAlphaNumericString(20));
+  const uint32_t kPin(RandomUint32() % 9999 + 1);
+  const NonEmptyString kMasterData(RandomString(34567));
+  auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
+  passport::Antmid antmid;
+  passport::Tmid tmid(encrypted_session, antmid);
+
+  passport::Ansmid ansmid;
+  passport::Smid smid(passport::SmidName(kKeyword, kPin),
+                      passport::EncryptTmidName(kKeyword, kPin, tmid.name()),
+                      ansmid);
+  return std::make_pair(smid.name().data, smid.Serialise().data);
+}
+
+template<>
+std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Tmid>() {
+  const UserPassword kKeyword(RandomAlphaNumericString(20));
+  const UserPassword kPassword(RandomAlphaNumericString(20));
+  const uint32_t kPin(RandomUint32() % 9999 + 1);
+  const NonEmptyString kMasterData(RandomString(34567));
+  auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
+  passport::Antmid antmid;
+  passport::Tmid tmid(encrypted_session, antmid);
+  return std::make_pair(tmid.name().data, tmid.Serialise().data);
 }
 
 template<typename T>
