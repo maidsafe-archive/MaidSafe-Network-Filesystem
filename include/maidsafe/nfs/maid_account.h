@@ -41,6 +41,7 @@ class PmidRegistration {
   void Parse(const NonEmptyString& serialised_pmidregistration);
   NonEmptyString Serialise();
   Identity maid_id() { return maid_id_; }
+  Identity pmid_id() { return pmid_id_; }
 
  private:
   Identity maid_id_;
@@ -84,6 +85,10 @@ class PmidTotal {
     : registration(registration_in), pmid_size(pmid_size_in) {}
 
   NonEmptyString Serialise();
+  bool IsRecordOf(const Identity& pmid_id) {
+    return pmid_id == registration.pmid_id();
+  }
+  Identity pmid_id() { return registration.pmid_id(); }
 
  private:
   PmidRegistration registration;
@@ -92,15 +97,16 @@ class PmidTotal {
 
 class DataElement {
  public:
-  DataElement() : data_id(), data_size(0) {}
+  DataElement() : data_id_(), data_size(0) {}
 
   DataElement(Identity data_id_in, int32_t data_size_in)
-    : data_id(data_id_in), data_size(data_size_in) {}
+    : data_id_(data_id_in), data_size(data_size_in) {}
 
   NonEmptyString Serialise();
+  Identity data_id() { return data_id_; }
 
  private:
-  Identity data_id;
+  Identity data_id_;
   int32_t data_size;
 };
 
@@ -125,11 +131,35 @@ class MaidAccount {
 
   void Parse(const NonEmptyString& serialised_maidaccount);
   NonEmptyString Serialise();
-  void PushPmidTotal(const PmidTotal& pmid_total) {
+  void PushPmidTotal(PmidTotal pmid_total) {
     pmid_totals.push_back(pmid_total);
   }
-  void PushDataDlement(const DataElement& data_element) {
+  void RemovePmidTotal(Identity pmid_id) {
+    for (auto itr = pmid_totals.begin(); itr != pmid_totals.end(); ++itr) {
+      if ((*itr).IsRecordOf(pmid_id)) {
+        pmid_totals.erase(itr);
+        return;
+      }
+    }
+  }
+  void UpdatePmidTotal(PmidTotal pmid_total) {
+    RemovePmidTotal(pmid_total.pmid_id());
+    PushPmidTotal(pmid_total);
+  }
+  void PushDataElement(DataElement data_element) {
     data_elements.push_back(data_element);
+  }
+  void RemoveDataElement(Identity data_id) {
+    for (auto itr = data_elements.begin(); itr != data_elements.end(); ++itr) {
+      if ((*itr).data_id() == data_id) {
+        data_elements.erase(itr);
+        return;
+      }
+    }
+  }
+  void UpdateDataElement(DataElement data_element) {
+    RemoveDataElement(data_element.data_id());
+    PushDataElement(data_element);
   }
   Identity maid_id() { return maid_id_; }
 

@@ -84,7 +84,7 @@ NonEmptyString PmidTotal::Serialise() {
 
 NonEmptyString DataElement::Serialise() {
   nfs::protobuf::DataElements proto_dataelement;
-  proto_dataelement.set_data_id(data_id.string());
+  proto_dataelement.set_data_id(data_id_.string());
   proto_dataelement.set_data_size(data_size);
   return NonEmptyString(proto_dataelement.SerializeAsString());
 }
