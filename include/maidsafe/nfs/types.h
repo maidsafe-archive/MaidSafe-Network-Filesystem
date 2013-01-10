@@ -35,6 +35,13 @@ enum class PersonaType : int {
 
 enum class ActionType : int { kGet, kPut, kPost, kDelete };
 
+enum class PostActionType : int {
+  kRegisterPmid,
+  kConnect,
+  kGetPmidSize,
+  kNodeDown
+};
+
 typedef std::function<void(Message message)> OnError;
 
 template <typename Elem, typename Traits>
