@@ -59,7 +59,7 @@ bool RemovePmidFromOfflineList(const std::string& pmid, protobuf::DataElementsMa
   return found;
 }
 
-}
+}  // namespace
 
 const boost::filesystem::path kVaultDirectory("meta_data_manager");
 

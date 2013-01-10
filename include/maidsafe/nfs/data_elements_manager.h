@@ -24,7 +24,7 @@ namespace protobuf { class DataElementsManaged; }
 
 class DataElementsManager {
  public:
-  DataElementsManager(const boost::filesystem::path& vault_root_dir);
+  explicit DataElementsManager(const boost::filesystem::path& vault_root_dir);
   void AddDataElement(const Identity& data_id,
                       int32_t element_size,
                       const Identity& online_pmid_id,

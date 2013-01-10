@@ -30,50 +30,50 @@ namespace test {
 
 class PublicKeyGetterTest : public testing::Test {
  protected:
-  //typedef PublicKeyGetter::PublicDataType PublicDataType;
+//  typedef PublicKeyGetter::PublicDataType PublicDataType;
   typedef std::vector<passport::PublicPmid> PublicPmidVector;
   typedef std::vector<asymm::PublicKey> PublicKeyVector;
 
-  //struct GetPublicKey : public boost::static_visitor<asymm::PublicKey> {
-  //  template<typename Data>
-  //  asymm::PublicKey operator()(Data& data) {
-  //    return data.public_key();
-  //  }
-  //};
+//  struct GetPublicKey : public boost::static_visitor<asymm::PublicKey> {
+//    template<typename Data>
+//    asymm::PublicKey operator()(Data& data) {
+//      return data.public_key();
+//    }
+//  };
 
   PublicKeyGetterTest()
       : routing_(nullptr),
         public_key_getter_(new PublicKeyGetter(routing_, PublicPmidVector())) {}
 
-  //PublicDataType GetRandomPublicData() {
-  //  uint32_t number_of_types = boost::mpl::size<typename PublicDataType::types>::type::value,
-  //           type_number;
-  //  type_number = RandomUint32() % number_of_types;
-  //  switch (type_number) {
-  //    case 0: return passport::PublicAnmid(passport::Anmid());
-  //    case 1: return passport::PublicAnsmid(passport::Ansmid());
-  //    case 2: return passport::PublicAntmid(passport::Antmid());
-  //    case 3: return passport::PublicAnmaid(passport::Anmaid());
-  //    case 4: {
-  //      passport::Anmaid anmaid;
-  //      passport::Maid maid(anmaid);
-  //      return passport::PublicMaid(maid);
-  //    }
-  //    case 5: {
-  //      passport::Anmaid anmaid;
-  //      passport::Maid maid(anmaid);
-  //      passport::Pmid pmid(maid);
-  //      return passport::PublicPmid(pmid);
-  //    }
-  //    case 6: return passport::PublicAnmpid(passport::Anmpid());
-  //    case 7: {
-  //      passport::Anmpid anmpid;
-  //      passport::Mpid mpid(NonEmptyString(RandomAlphaNumericString(1 + RandomUint32() % 100)),
-  //                          anmpid);
-  //      return passport::PublicMpid(mpid);
-  //    }
-  //  }
-  //}
+//  PublicDataType GetRandomPublicData() {
+//    uint32_t number_of_types = boost::mpl::size<typename PublicDataType::types>::type::value,
+//             type_number;
+//    type_number = RandomUint32() % number_of_types;
+//    switch (type_number) {
+//      case 0: return passport::PublicAnmid(passport::Anmid());
+//      case 1: return passport::PublicAnsmid(passport::Ansmid());
+//      case 2: return passport::PublicAntmid(passport::Antmid());
+//      case 3: return passport::PublicAnmaid(passport::Anmaid());
+//      case 4: {
+//        passport::Anmaid anmaid;
+//        passport::Maid maid(anmaid);
+//        return passport::PublicMaid(maid);
+//      }
+//      case 5: {
+//        passport::Anmaid anmaid;
+//        passport::Maid maid(anmaid);
+//        passport::Pmid pmid(maid);
+//        return passport::PublicPmid(pmid);
+//      }
+//      case 6: return passport::PublicAnmpid(passport::Anmpid());
+//      case 7: {
+//        passport::Anmpid anmpid;
+//        passport::Mpid mpid(NonEmptyString(RandomAlphaNumericString(1 + RandomUint32() % 100)),
+//                            anmpid);
+//        return passport::PublicMpid(mpid);
+//      }
+//    }
+//  }
 
   PublicPmidVector GeneratePublicPmids() {
     uint32_t number = RandomUint32() % 20;
@@ -123,19 +123,19 @@ TEST_F(PublicKeyGetterTest, BEH_GetPublicPmidKeys) {
     public_key_getter_->HandleGetKey<passport::PublicPmid>(pmid.name(), get_key_future);
 }
 
-//TEST_F(PublicKeyGetterTest, BEH_GetPublicKeys) {
-//  auto get_key_future([this](std::future<PublicDataType> future) {
-//                        try {
-//                          GetPublicKey get_public_key;
-//                          PublicDataType public_data(future.get());
-//                          asymm::PublicKey public_key(boost::apply_visitor(get_public_key,
-//                                                                           public_data));
-//                        }
-//                        catch(...) {
-//                          LOG(kError) << "Exception thrown getting public key.";
-//                        }
-//                     });
-//}
+//  TEST_F(PublicKeyGetterTest, BEH_GetPublicKeys) {
+//    auto get_key_future([this](std::future<PublicDataType> future) {
+//                          try {
+//                            GetPublicKey get_public_key;
+//                            PublicDataType public_data(future.get());
+//                            asymm::PublicKey public_key(boost::apply_visitor(get_public_key,
+//                                                                             public_data));
+//                          }
+//                          catch(...) {
+//                            LOG(kError) << "Exception thrown getting public key.";
+//                          }
+//                       });
+//  }
 
 }  // namespace test
 

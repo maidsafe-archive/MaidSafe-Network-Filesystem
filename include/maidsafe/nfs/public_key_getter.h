@@ -111,27 +111,27 @@ class PublicKeyGetter::IsReady : public boost::static_visitor<bool> {
   bool operator()(std::shared_ptr<PendingKey<PublicKeyType>> pending_key) const {
     return is_ready(pending_key->future);
   }
-  //bool operator()(PendingKey<passport::PublicAnsmid>& pending_key) const {
-  //  return is_ready(pending_key.future);
-  //}
-  //bool operator()(PendingKey<passport::PublicAntmid>& pending_key) const {
-  //  return is_ready(pending_key.future);
-  //}
-  //bool operator()(PendingKey<passport::PublicAnmaid>& pending_key) const {
-  //  return is_ready(pending_key.future);
-  //}
-  //bool operator()(PendingKey<passport::PublicMaid>& pending_key) const {
-  //  return is_ready(pending_key.future);
-  //}
-  //bool operator()(const PendingKey<passport::PublicPmid>& pending_key) {
-  //  return is_ready(pending_key.future);
-  //}
-  //bool operator()(const PendingKey<passport::PublicAnmpid>& pending_key) {
-  //  return is_ready(pending_key.future);
-  //}
-  //bool operator()(const PendingKey<passport::PublicMpid>& pending_key) {
-  //  return is_ready(pending_key.future);
-  //}
+//  bool operator()(PendingKey<passport::PublicAnsmid>& pending_key) const {
+//    return is_ready(pending_key.future);
+//  }
+//  bool operator()(PendingKey<passport::PublicAntmid>& pending_key) const {
+//    return is_ready(pending_key.future);
+//  }
+//  bool operator()(PendingKey<passport::PublicAnmaid>& pending_key) const {
+//    return is_ready(pending_key.future);
+//  }
+//  bool operator()(PendingKey<passport::PublicMaid>& pending_key) const {
+//    return is_ready(pending_key.future);
+//  }
+//  bool operator()(const PendingKey<passport::PublicPmid>& pending_key) {
+//    return is_ready(pending_key.future);
+//  }
+//  bool operator()(const PendingKey<passport::PublicAnmpid>& pending_key) {
+//    return is_ready(pending_key.future);
+//  }
+//  bool operator()(const PendingKey<passport::PublicMpid>& pending_key) {
+//    return is_ready(pending_key.future);
+//  }
 };
 
 class PublicKeyGetter::InvokeFunctor : public boost::static_visitor<> {
