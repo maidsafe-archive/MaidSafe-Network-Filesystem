@@ -97,6 +97,7 @@ void MaidAccount::Parse(const NonEmptyString& serialised_maidaccount) {
     ThrowError(NfsErrors::maid_account_parsing_error);
   }
 
+  std::lock_guard<std::mutex> lock(mutex_);
   maid_id_ = Identity(proto_maidaccount.maid_id());
 
   data_elements_.clear();
@@ -116,6 +117,7 @@ void MaidAccount::Parse(const NonEmptyString& serialised_maidaccount) {
 }
 
 NonEmptyString MaidAccount::Serialise() {
+  std::lock_guard<std::mutex> lock(mutex_);
   nfs::protobuf::MaidAccount proto_maidaccount;
   proto_maidaccount.set_maid_id(maid_id_.string());
   for (auto& pmid_total : pmid_totals_) {
@@ -129,6 +131,71 @@ NonEmptyString MaidAccount::Serialise() {
     *(proto_maidaccount.add_data_elements()) = proto_dataelements;
   }
   return NonEmptyString(proto_maidaccount.SerializeAsString());
+}
+
+MaidAccount& MaidAccount::operator=(const MaidAccount& other) {
+  maid_id_ = other.maid_id_;
+  pmid_totals_ = other.pmid_totals_;
+  data_elements_ = other.data_elements_;
+  return *this;
+}
+
+void MaidAccount::PushPmidTotal(PmidTotal pmid_total) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  pmid_totals_.push_back(pmid_total);
+}
+
+void MaidAccount::RemovePmidTotal(Identity pmid_id) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  for (auto itr = pmid_totals_.begin(); itr != pmid_totals_.end(); ++itr) {
+    if ((*itr).IsRecordOf(pmid_id)) {
+      pmid_totals_.erase(itr);
+      return;
+    }
+  }
+}
+
+void MaidAccount::UpdatePmidTotal(PmidTotal pmid_total) {
+  RemovePmidTotal(pmid_total.pmid_id());
+  PushPmidTotal(pmid_total);
+}
+
+bool MaidAccount::HasPmidTotal(Identity pmid_id) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto pmid_total_it = std::find_if(pmid_totals_.begin(), pmid_totals_.end(),
+                                    [&pmid_id] (const PmidTotal& pmid_total) {
+                                      return pmid_total.IsRecordOf(pmid_id);
+                                    });
+  return (pmid_total_it != pmid_totals_.end());
+}
+
+void MaidAccount::PushDataElement(DataElement data_element) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  data_elements_.push_back(data_element);
+}
+
+void MaidAccount::RemoveDataElement(Identity data_id) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  for (auto itr = data_elements_.begin(); itr != data_elements_.end(); ++itr) {
+    if ((*itr).data_id() == data_id) {
+      data_elements_.erase(itr);
+      return;
+    }
+  }
+}
+
+void MaidAccount::UpdateDataElement(DataElement data_element) {
+  RemoveDataElement(data_element.data_id());
+  PushDataElement(data_element);
+}
+
+bool MaidAccount::HasDataElement(Identity data_id) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto data_element_it = std::find_if(data_elements_.begin(), data_elements_.end(),
+                                      [&data_id] (const DataElement& data_element) {
+                                        return data_element.data_id() == data_id;
+                                      });
+  return (data_element_it != data_elements_.end());
 }
 
 }  // namespace nfs
