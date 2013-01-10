@@ -9,44 +9,33 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_POST_POLICIES_H_
-#define MAIDSAFE_NFS_POST_POLICIES_H_
+#ifndef MAIDSAFE_NFS_REQUEST_QUEUE_H_
+#define MAIDSAFE_NFS_REQUEST_QUEUE_H_
 
-#include <future>
-#include <string>
-#include <vector>
-
-#include "maidsafe/common/rsa.h"
-#include "maidsafe/common/crypto.h"
-#include "maidsafe/common/types.h"
-
-#include "maidsafe/passport/types.h"
-
-#include "maidsafe/routing/routing_api.h"
+#include <deque>
+#include <utility>
 
 #include "maidsafe/nfs/utils.h"
-
 
 namespace maidsafe {
 
 namespace nfs {
 
-template<typename SigningFob>
-class NoPost {
+class RequestQueue {
  public:
-  NoPost() {}
-  explicit NoPost(routing::Routing& /*routing*/) {}
-  explicit NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+  typedef std::deque<std::pair<int, Identity>> Requests;
 
-  template<typename Data>
-  void Post(const typename Data::name_type& /*name*/) {}
+  RequestQueue();
 
- protected:
-  ~NoPost() {}
+  bool Push(int id, const Identity& name);
+
+ private:
+  Requests requests_;
+  mutable std::mutex mutex_;
 };
 
 }  // namespace nfs
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_POST_POLICIES_H_
+#endif  // MAIDSAFE_NFS_REQUEST_QUEUE_H_

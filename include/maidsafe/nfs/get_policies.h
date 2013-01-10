@@ -32,8 +32,15 @@ namespace maidsafe {
 
 namespace nfs {
 
+class GetFromPmidAccountHolder {
+ public:
+  explicit GetFromPmidAccountHolder(const routing::Routing&);
+};
+
+
 class NoGet {
  public:
+  NoGet() {}
   explicit NoGet(routing::Routing& /*routing*/) {}
 
   template<typename Data>
@@ -74,7 +81,6 @@ class GetFromMetadataManager {
   routing::Routing& routing_;
   Message::Source source_;
 };
-
 
 template<PersonaType persona>
 class GetFromDataHolder {

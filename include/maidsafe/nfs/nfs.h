@@ -36,12 +36,24 @@ class NetworkFileSystem : public GetPolicy,
                           public PostPolicy,
                           public DeletePolicy {
  public:
+  NetworkFileSystem()
+    : GetPolicy(),
+      PutPolicy(),
+      PostPolicy(),
+      DeletePolicy() {}
+
+  explicit NetworkFileSystem(routing::Routing& routing)
+    : GetPolicy(routing),
+      PutPolicy(routing),
+      PostPolicy(routing),
+      DeletePolicy(routing) {}
+
   template<typename SigningFob>
   NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
-      : GetPolicy(routing),
-        PutPolicy(routing, signing_fob),
-        PostPolicy(routing, signing_fob),
-        DeletePolicy(routing, signing_fob) {}
+    : GetPolicy(routing),
+      PutPolicy(routing, signing_fob),
+      PostPolicy(routing, signing_fob),
+      DeletePolicy(routing, signing_fob) {}
 };
 
 typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
@@ -53,16 +65,16 @@ typedef NetworkFileSystem<GetFromMaidAccountHolder<PersonaType::kMaidAccountHold
                           PutToMetadataManager,
                           NoPost<passport::Pmid>,
                           DeleteFromMetadataManager> MaidAccountHolderNfs;
-/*
-typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
-                          PutToMaidAccountHolder,
-                          NoPost<passport::Maid>,
-                          DeleteFromMaidAccountHolder> ClientMaidNfs;
 
 typedef NetworkFileSystem<GetFromPmidAccountHolder,
                           PutToPmidAccountHolder,
                           NoPost<passport::Pmid>,
                           DeleteFromPmidAccountHolder> MetadataManagerNfs;
+/*
+typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
+                          PutToMaidAccountHolder,
+                          NoPost<passport::Maid>,
+                          DeleteFromMaidAccountHolder> ClientMaidNfs;
 
 typedef NetworkFileSystem<GetFromVaultPmid,
                           PutToVaultPmid,

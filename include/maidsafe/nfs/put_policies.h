@@ -34,6 +34,8 @@ namespace nfs {
 template<typename SigningFob>
 class NoPut {
  public:
+  NoPut() {}
+  explicit NoPut(routing::Routing& /*routing*/) {}
   NoPut(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
 
   template<typename Data>
@@ -75,6 +77,38 @@ class PutToMetadataManager {
  private:
   routing::Routing& routing_;
   passport::Pmid signing_pmid_;
+  Message::Source source_;
+};
+
+class PutToPmidAccountHolder {
+ public:
+  explicit PutToPmidAccountHolder(routing::Routing& routing)
+      : routing_(routing),
+        source_(Message::Source(PersonaType::kMetadataManager, routing.kNodeId())) {}
+
+  template<typename Data>
+  void Put(const Message& message, OnError on_error) {
+    Message new_message(message.action_type(),
+                        message.destination_persona_type(),
+                        source_,
+                        message.data_type(),
+                        message.name(),
+                        message.content(),
+                        message.signature());
+
+    routing::ResponseFunctor callback =
+        [on_error, new_message](const std::vector<std::string>& serialised_messages) {
+          HandlePutResponse<Data>(on_error, new_message, serialised_messages);
+        };
+    routing_.Send(routing_.GetRandomExistingNode(), message.Serialise()->string(),
+                  callback, routing::DestinationType::kGroup, IsCacheable<Data>());
+  }
+
+ protected:
+  ~PutToPmidAccountHolder() {}
+
+ private:
+  routing::Routing& routing_;
   Message::Source source_;
 };
 

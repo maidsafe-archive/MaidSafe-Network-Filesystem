@@ -31,9 +31,16 @@ namespace maidsafe {
 
 namespace nfs {
 
+class DeleteFromPmidAccountHolder {
+ public:
+  explicit DeleteFromPmidAccountHolder(const routing::Routing&);
+};
+
+
 template<typename SigningFob>
 class NoDelete {
  public:
+  NoDelete() {}
   NoDelete(routing::Routing& routing, const SigningFob& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob) {}
@@ -81,6 +88,7 @@ class DeleteFromMetadataManager {
   passport::Pmid signing_pmid_;
   Message::Source source_;
 };
+
 }  // namespace nfs
 
 }  // namespace maidsafe

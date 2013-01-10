@@ -9,44 +9,31 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_POST_POLICIES_H_
-#define MAIDSAFE_NFS_POST_POLICIES_H_
-
-#include <future>
-#include <string>
-#include <vector>
-
-#include "maidsafe/common/rsa.h"
-#include "maidsafe/common/crypto.h"
-#include "maidsafe/common/types.h"
-
-#include "maidsafe/passport/types.h"
-
-#include "maidsafe/routing/routing_api.h"
-
-#include "maidsafe/nfs/utils.h"
-
+#include "maidsafe/nfs/request_queue.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
-template<typename SigningFob>
-class NoPost {
- public:
-  NoPost() {}
-  explicit NoPost(routing::Routing& /*routing*/) {}
-  explicit NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+RequestQueue::RequestQueue()
+  : requests_() {}
 
-  template<typename Data>
-  void Post(const typename Data::name_type& /*name*/) {}
-
- protected:
-  ~NoPost() {}
-};
+bool RequestQueue::Push(int id, const Identity& name) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto it = std::find_if(requests_.begin(),
+                         requests_.end(),
+                         [&id, &name](const Requests::value_type& request) {
+                            return request.first == id && request.second == name;
+                         });
+  if (it == requests_.end()) {
+    requests_.push_back(std::make_pair(id, name));
+    if (requests_.size() > 1000)
+      requests_.pop_front();
+    return true;
+  }
+  return false;
+}
 
 }  // namespace nfs
 
 }  // namespace maidsafe
-
-#endif  // MAIDSAFE_NFS_POST_POLICIES_H_
