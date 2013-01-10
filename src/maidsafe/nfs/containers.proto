@@ -34,7 +34,7 @@ message PmidAccount {
 // Metadata Manager
 message DataElementsManaged {
   required bytes data_id = 1;
-  required bytes element_size = 2;
+  required int32 element_size = 2;
   required int64 number_stored = 3;
   repeated bytes online_pmid_id = 4;
   repeated bytes offline_pmid_id = 5;
