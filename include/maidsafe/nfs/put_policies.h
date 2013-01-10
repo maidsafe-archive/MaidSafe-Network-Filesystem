@@ -49,14 +49,15 @@ class PutToMetadataManager {
   PutToMetadataManager(routing::Routing& routing, const passport::Pmid& signing_pmid)
       : routing_(routing),
         signing_pmid_(signing_pmid),
-        source_(Message::Peer(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
+        source_(Message::Source(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
 
   template<typename Data>
   void Put(const Message& message, OnError on_error) {
     Message new_message(message.action_type(),
-                        message.destination(),
+                        message.destination_persona_type(),
                         source_,
                         message.data_type(),
+                        message.name(),
                         message.content(),
                         asymm::Sign(message.content(), signing_pmid_.private_key()));
 
@@ -64,11 +65,8 @@ class PutToMetadataManager {
         [on_error, new_message](const std::vector<std::string>& serialised_messages) {
           HandlePutResponse<Data>(on_error, new_message, serialised_messages);
         };
-    routing_.Send(new_message.destination().data.node_id,
-                  message.Serialise()->string(),
-                  callback,
-                  routing::DestinationType::kGroup,
-                  IsCacheable<Data>());
+    routing_.Send(NodeId(new_message.name().string()), message.Serialise()->string(),
+                  callback, routing::DestinationType::kGroup, IsCacheable<Data>());
   }
 
  protected:
@@ -86,15 +84,14 @@ class PutToDataHolder {
   PutToDataHolder(routing::Routing& routing, const SigningFob& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(Message::Peer(PersonaType::kClientMaid, routing.kNodeId())) {}
+        source_(Message::Source(PersonaType::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
   void Put(const Data& data, OnError on_error) {
     NonEmptyString content(data.Serialise());
-    Message::Destination destination(Message::Peer(PersonaType::kDataHolder,
-                                                   NodeId(data.name()->string())));
-    Message message(ActionType::kPut, destination, source_, Data::name_type::tag_type::kEnumValue,
-                    content, asymm::Sign(content, signing_fob_.private_key()));
+    Message message(ActionType::kPut, PersonaType::kDataHolder, source_,
+                    Data::name_type::tag_type::kEnumValue, data.name(), content,
+                    asymm::Sign(content, signing_fob_.private_key()));
     routing::ResponseFunctor callback =
         [on_error, message](const std::vector<std::string>& serialised_messages) {
           HandlePutResponse<Data>(on_error, message, serialised_messages);

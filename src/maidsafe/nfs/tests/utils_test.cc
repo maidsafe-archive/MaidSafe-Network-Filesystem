@@ -155,10 +155,10 @@ TYPED_TEST_P(UtilsTest, BEH_TestHandleGetResponse) {
 
   std::pair<Identity, NonEmptyString> name_and_content(GetNameAndContent<TypeParam>());
 
-  Message::Destination destination(Message::Peer(PersonaType::kDataHolder,
-                                                 NodeId(name_and_content.first.string())));
-  Message::Source source(Message::Peer(PersonaType::kClientMaid, NodeId(NodeId::kRandomId)));
-  Message message(ActionType::kGet, destination, source, TypeParam::name_type::tag_type::kEnumValue,
+  PersonaType destination_persona_type(PersonaType::kDataHolder);
+  Message::Source source(PersonaType::kClientMaid, NodeId(NodeId::kRandomId));
+  Message message(ActionType::kGet, destination_persona_type, source,
+                  TypeParam::name_type::tag_type::kEnumValue, name_and_content.first,
                   name_and_content.second, asymm::Signature());
 
   promise = std::make_shared<std::promise<TypeParam>>();  // NOLINT (Fraser)

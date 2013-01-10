@@ -49,7 +49,7 @@ class GetFromMetadataManager {
  public:
   explicit GetFromMetadataManager(routing::Routing& routing)
       : routing_(routing),
-        source_(Message::Peer(persona, routing.kNodeId())) {}
+        source_(Message::Source(persona, routing.kNodeId())) {}
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
@@ -59,10 +59,9 @@ class GetFromMetadataManager {
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    Message::Destination destination(Message::Peer(PersonaType::kMetadataManager,
-                                                   NodeId(name->string())));
-    Message message(ActionType::kGet, destination, source_, Data::name_type::tag_type::kEnumValue,
-                    NonEmptyString(), asymm::Signature());
+    Message message(ActionType::kGet, PersonaType::kMetadataManager, source_,
+                    Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
+                    asymm::Signature());
     routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
     return std::move(future);
@@ -82,7 +81,7 @@ class GetFromDataHolder {
  public:
   explicit GetFromDataHolder(routing::Routing& routing)
       : routing_(routing),
-        source_(Message::Peer(persona, routing.kNodeId())) {}
+        source_(Message::Source(persona, routing.kNodeId())) {}
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
@@ -92,10 +91,9 @@ class GetFromDataHolder {
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    Message::Destination destination(Message::Peer(PersonaType::kDataHolder,
-                                                   NodeId(name->string())));
-    Message message(ActionType::kGet, destination, source_, Data::name_type::tag_type::kEnumValue,
-                    NonEmptyString(), asymm::Signature());
+    Message message(ActionType::kGet, PersonaType::kDataHolder, source_,
+                    Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
+                    asymm::Signature());
     routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
     return std::move(future);
@@ -114,7 +112,7 @@ class GetFromMaidAccountHolder {
  public:
   explicit GetFromMaidAccountHolder(routing::Routing& routing)
       : routing_(routing),
-        source_(Message::Peer(persona, routing.kNodeId())) {}
+        source_(Message::Source(persona, routing.kNodeId())) {}
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
@@ -124,10 +122,9 @@ class GetFromMaidAccountHolder {
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    Message::Destination destination(Message::Peer(PersonaType::kMaidAccountHolder,
-                                                   NodeId(name->string())));
-    Message message(ActionType::kGet, destination, source_, Data::name_type::tag_type::kEnumValue,
-                    NonEmptyString(), asymm::Signature());
+    Message message(ActionType::kGet, PersonaType::kMaidAccountHolder, source_,
+                    Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
+                    asymm::Signature());
     routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
     return std::move(future);

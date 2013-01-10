@@ -31,23 +31,22 @@ namespace protobuf { class Message; }
 
 class Message {
  public:
-  struct Peer {
-    Peer(PersonaType persona_type_in, const NodeId& node_id_in)
+  struct Source {
+    Source(PersonaType persona_type_in, const NodeId& node_id_in)
         : persona_type(persona_type_in),
           node_id(node_id_in) {}
-    Peer() : persona_type(), node_id() {}
+    Source() : persona_type(), node_id() {}
     PersonaType persona_type;
     NodeId node_id;
   };
-  typedef TaggedValue<Peer, struct DestinationTag> Destination;
-  typedef TaggedValue<Peer, struct SourceTag> Source;
 
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
   Message(ActionType action_type,
-          Destination destination,
+          PersonaType destination_persona_type,
           Source source,
           maidsafe::detail::DataTagValue data_type,
+          const Identity& name,
           const NonEmptyString& content,
           const asymm::Signature& signature);
   Message(const Message& other);
@@ -59,22 +58,21 @@ class Message {
   serialised_type Serialise() const;
 
   ActionType action_type() const { return action_type_; }
-  Destination destination() const { return destination_; }
+  PersonaType destination_persona_type() const { return destination_persona_type_; }
   Source source() const { return source_; }
   maidsafe::detail::DataTagValue data_type() const { return data_type_; }
+  Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
   asymm::Signature signature() const { return signature_; }
-
-  void set_content(const NonEmptyString& content) { content_ = content; }
-  void set_signature(const asymm::Signature& signature) { signature_ = signature; }
 
  private:
   bool ValidateInputs() const;
 
   ActionType action_type_;
-  Destination destination_;
+  PersonaType destination_persona_type_;
   Source source_;
   maidsafe::detail::DataTagValue data_type_;
+  Identity name_;
   NonEmptyString content_;
   asymm::Signature signature_;
 };

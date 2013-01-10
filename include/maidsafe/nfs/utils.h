@@ -40,8 +40,8 @@ bool IsCacheable() {
 
 template<typename Data>
 Data ValidateAndParse(const Message& message) {
-  return Data(typename Data::name_type(Identity(message.destination()->node_id.string())),
-              typename Data::serialised_type(NonEmptyString(message.content())));
+  return Data(typename Data::name_type(message.name()),
+              typename Data::serialised_type(message.content()));
 }
 
 // TODO(Fraser#5#): 2012-12-20 - This is executed on one of Routing's io_service threads.  If we
@@ -80,7 +80,7 @@ void HandlePutResponse(OnError on_error_functor,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
     LOG(kError) << "No responses received for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.destination()->node_id);
+                << "  " << DebugId(original_message.name());
     on_error_functor(std::move(original_message));
   }
 
@@ -95,7 +95,7 @@ void HandlePutResponse(OnError on_error_functor,
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Put "
                       << original_message.data_type() << " "
-                      << DebugId(original_message.destination()->node_id);
+                      << DebugId(original_message.name());
         ++failure_count;
       }
     }
@@ -107,12 +107,12 @@ void HandlePutResponse(OnError on_error_functor,
 
   if (success_count == 0) {
     LOG(kError) << "No successful responses received for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << "  " << DebugId(original_message.name()) << "  received "
                 << failure_count << " failures.";
     on_error_functor(std::move(original_message));
   }
   LOG(kVerbose) << "Overall success for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << "  " << DebugId(original_message.name()) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
@@ -122,7 +122,7 @@ void HandleDeleteResponse(OnError on_error_functor,
                           const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
     LOG(kError) << "No responses received for Delete " << original_message.data_type()
-                << "  " << DebugId(original_message.destination()->node_id);
+                << "  " << DebugId(original_message.name());
     on_error_functor(std::move(original_message));
   }
 
@@ -137,7 +137,7 @@ void HandleDeleteResponse(OnError on_error_functor,
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Delete "
                       << original_message.data_type() << " "
-                      << DebugId(original_message.destination()->node_id);
+                      << DebugId(original_message.name());
         ++failure_count;
       }
     }
@@ -149,12 +149,12 @@ void HandleDeleteResponse(OnError on_error_functor,
 
   if (success_count == 0) {
     LOG(kError) << "No successful responses received for Delete " << original_message.data_type()
-                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << "  " << DebugId(original_message.name()) << "  received "
                 << failure_count << " failures.";
     on_error_functor(std::move(original_message));
   }
   LOG(kVerbose) << "Overall success for Delete " << original_message.data_type()
-                << "  " << DebugId(original_message.destination()->node_id) << "  received "
+                << "  " << DebugId(original_message.name()) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
 

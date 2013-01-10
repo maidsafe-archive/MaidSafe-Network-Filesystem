@@ -53,14 +53,15 @@ class DeleteFromMetadataManager {
   DeleteFromMetadataManager(routing::Routing& routing, const passport::Pmid& signing_pmid)
     : routing_(routing),
       signing_pmid_(signing_pmid),
-      source_(Message::Peer(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
+      source_(Message::Source(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
 
   template<typename Data>
   void Delete(const Message& message, OnError on_error) {
     Message new_message(message.action_type(),
-                        message.destination(),
+                        message.destination_persona_type(),
                         source_,
                         message.data_type(),
+                        message.name(),
                         message.content(),
                         asymm::Sign(message.content(), signing_pmid_.private_key()));
 
@@ -68,11 +69,8 @@ class DeleteFromMetadataManager {
         [on_error, new_message](const std::vector<std::string>& serialised_messages) {
           HandleDeleteResponse<Data>(on_error, new_message, serialised_messages);
         };
-    routing_.Send(new_message.destination().data.node_id,
-                  message.Serialise()->string(),
-                  callback,
-                  routing::DestinationType::kGroup,
-                  IsCacheable<Data>());
+    routing_.Send(NodeId(new_message.name().string()), message.Serialise()->string(),
+                  callback, routing::DestinationType::kGroup, IsCacheable<Data>());
   }
 
  protected:
