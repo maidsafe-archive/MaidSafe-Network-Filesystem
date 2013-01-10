@@ -25,6 +25,7 @@
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/post_message.h"
 #include "maidsafe/nfs/return_code.h"
 #include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/types.h"
@@ -158,6 +159,10 @@ void HandleDeleteResponse(OnError on_error_functor,
                 << "  " << DebugId(original_message.name()) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
+
+void HandlePostResponse(OnPostError /*on_error_functor*/,
+                        PostMessage /*original_message*/,
+                        const std::vector<std::string>& /*serialised_messages*/);
 
 }  // namespace nfs
 

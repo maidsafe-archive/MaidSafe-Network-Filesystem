@@ -9,19 +9,33 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/utils.h"
+#ifndef MAIDSAFE_NFS_REQUEST_QUEUE_H_
+#define MAIDSAFE_NFS_REQUEST_QUEUE_H_
 
+#include <deque>
+#include <utility>
+
+#include "maidsafe/nfs/utils.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
-void HandlePostResponse(OnPostError /*on_error_functor*/,
-                        PostMessage /*original_message*/,
-                        const std::vector<std::string>& /*serialised_messages*/) {
-  // TODO(Team): BEFORE_RELEASE implement
-}
+class RequestQueue {
+ public:
+  typedef std::deque<std::pair<int, Identity>> Requests;
+
+  RequestQueue();
+
+  bool Push(int id, const Identity& name);
+
+ private:
+  Requests requests_;
+  mutable std::mutex mutex_;
+};
 
 }  // namespace nfs
 
 }  // namespace maidsafe
+
+#endif  // MAIDSAFE_NFS_REQUEST_QUEUE_H_

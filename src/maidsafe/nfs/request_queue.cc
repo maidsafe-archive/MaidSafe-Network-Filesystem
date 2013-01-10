@@ -9,17 +9,29 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/utils.h"
-
+#include "maidsafe/nfs/request_queue.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
-void HandlePostResponse(OnPostError /*on_error_functor*/,
-                        PostMessage /*original_message*/,
-                        const std::vector<std::string>& /*serialised_messages*/) {
-  // TODO(Team): BEFORE_RELEASE implement
+RequestQueue::RequestQueue()
+  : requests_() {}
+
+bool RequestQueue::Push(int id, const Identity& name) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto it = std::find_if(requests_.begin(),
+                         requests_.end(),
+                         [&id, &name](const Requests::value_type& request) {
+                            return request.first == id && request.second == name;
+                         });
+  if (it == requests_.end()) {
+    requests_.push_back(std::make_pair(id, name));
+    if (requests_.size() > 1000)
+      requests_.pop_front();
+    return true;
+  }
+  return false;
 }
 
 }  // namespace nfs
