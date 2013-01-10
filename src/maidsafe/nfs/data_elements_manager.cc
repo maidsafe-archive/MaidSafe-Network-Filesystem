@@ -13,10 +13,53 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "maidsafe/common/utils.h"
+#include "maidsafe/nfs/containers_pb.h"
 
 namespace maidsafe {
 
 namespace nfs {
+
+namespace {
+
+bool RemovePmidFromOnlineList(const std::string& pmid, protobuf::DataElementsManaged& element) {
+  std::vector<std::string> pmid_ids;
+  bool found(false);
+  for (int n(0); n < element.online_pmid_id_size(); ++n) {
+    if (element.online_pmid_id(n) == pmid)
+      found = true;
+    else
+      pmid_ids.push_back(element.online_pmid_id(n));
+  }
+
+  if (found) {
+    element.clear_online_pmid_id();
+    for (auto& pmid : pmid_ids)
+      element.add_online_pmid_id(pmid);
+  }
+
+  return found;
+}
+
+bool RemovePmidFromOfflineList(const std::string& pmid, protobuf::DataElementsManaged& element) {
+  std::vector<std::string> pmid_ids;
+  bool found(false);
+  for (int n(0); n < element.offline_pmid_id_size(); ++n) {
+    if (element.offline_pmid_id(n) == pmid)
+      found = true;
+    else
+      pmid_ids.push_back(element.offline_pmid_id(n));
+  }
+
+  if (found) {
+    element.clear_offline_pmid_id();
+    for (auto& pmid : pmid_ids)
+      element.add_offline_pmid_id(pmid);
+  }
+
+  return found;
+}
+
+}
 
 const boost::filesystem::path kVaultDirectory("meta_data_manager");
 
@@ -55,6 +98,31 @@ void DataElementsManager::RemoveDataElement(const Identity& data_id) {
   boost::filesystem::remove(vault_metadata_dir_ / EncodeToBase64(data_id));
 }
 
+void DataElementsManager::MoveNodeToOffline(const Identity& data_id,
+                                            const Identity& pmid_id,
+                                            int64_t& holders) {
+  CheckDataElementExists(data_id);
+  protobuf::DataElementsManaged element;
+  ReadAndParseElement(data_id, element);
+  bool found(RemovePmidFromOnlineList(pmid_id.string(), element));
+  if (found) {
+    holders = static_cast<int64_t>(element.online_pmid_id_size());
+    element.add_offline_pmid_id(pmid_id.string());
+    SerialiseAndSaveElement(element);
+  }
+}
+
+void DataElementsManager::MoveNodeToOnline(const Identity& data_id, const Identity& pmid_id) {
+  CheckDataElementExists(data_id);
+  protobuf::DataElementsManaged element;
+  ReadAndParseElement(data_id, element);
+  bool found(RemovePmidFromOfflineList(pmid_id.string(), element));
+  if (found) {
+    element.add_online_pmid_id(pmid_id.string());
+    SerialiseAndSaveElement(element);
+  }
+}
+
 void DataElementsManager::AddOnlinePmid(const Identity& data_id, const Identity& online_pmid_id) {
   CheckDataElementExists(data_id);
   protobuf::DataElementsManaged element;
@@ -68,19 +136,9 @@ void DataElementsManager::RemoveOnlinePmid(const Identity& data_id,
   CheckDataElementExists(data_id);
   protobuf::DataElementsManaged element;
   ReadAndParseElement(data_id, element);
-
-  // remove the pmid
-  std::vector<std::string> pmid_ids;
-  for (int n(0); n < element.online_pmid_id_size(); ++n) {
-    if (element.online_pmid_id(n) != online_pmid_id.string())
-      pmid_ids.push_back(element.online_pmid_id(n));
-  }
-  element.clear_online_pmid_id();
-  for (auto& pmid : pmid_ids)
-    element.add_online_pmid_id(pmid);
-
-  // Save the result
-  SerialiseAndSaveElement(element);
+  bool found(RemovePmidFromOnlineList(online_pmid_id.string(), element));
+  if (found)
+    SerialiseAndSaveElement(element);
 }
 
 void DataElementsManager::AddOfflinePmid(const Identity& data_id, const Identity& offline_pmid_id) {

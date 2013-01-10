@@ -16,11 +16,11 @@
 
 #include "maidsafe/common/types.h"
 
-#include "maidsafe/nfs/containers_pb.h"
-
 namespace maidsafe {
 
 namespace nfs {
+
+namespace protobuf { class DataElementsManaged; }
 
 class DataElementsManager {
  public:
@@ -30,6 +30,9 @@ class DataElementsManager {
                       const Identity& online_pmid_id,
                       const Identity& offline_pmid_id);
   void RemoveDataElement(const Identity& data_id);
+  void MoveNodeToOffline(const Identity& data_id, const Identity& pmid_id, int64_t& holders);
+  void MoveNodeToOnline(const Identity& data_id, const Identity& pmid_id);
+
   void AddOnlinePmid(const Identity& data_id, const Identity& online_pmid_id);
   void RemoveOnlinePmid(const Identity& data_id, const Identity& online_pmid_id);
   void AddOfflinePmid(const Identity& data_id, const Identity& offline_pmid_id);
@@ -40,7 +43,7 @@ class DataElementsManager {
 
   void CheckDataElementExists(const Identity& data_id);
   void ReadAndParseElement(const Identity& data_id, protobuf::DataElementsManaged& element);
-  void SerialiseAndSaveElement(const protobuf::DataElementsManaged& element);
+  void SerialiseAndSaveElement(const protobuf::DataElementsManaged & element);
 };
 
 }  // namespace nfs

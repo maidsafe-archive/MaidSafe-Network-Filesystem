@@ -38,6 +38,10 @@ message NodeDown {
   required bytes node_id = 1;
 }
 
+message NodeUp {
+  required bytes node_id = 1;
+}
+
 message PostMessage {
   required int32 post_action_type = 1;
   required int32 destination_persona_type = 2;
