@@ -21,9 +21,11 @@
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
+#include "maidsafe/common/utils.h"
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/post_message.h"
 #include "maidsafe/nfs/return_code.h"
 #include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/types.h"
@@ -80,7 +82,7 @@ void HandlePutResponse(OnError on_error_functor,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
     LOG(kError) << "No responses received for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.name());
+                << "  " << HexSubstr(original_message.name());
     on_error_functor(std::move(original_message));
   }
 
@@ -95,7 +97,7 @@ void HandlePutResponse(OnError on_error_functor,
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Put "
                       << original_message.data_type() << " "
-                      << DebugId(original_message.name());
+                      << HexSubstr(original_message.name());
         ++failure_count;
       }
     }
@@ -107,12 +109,12 @@ void HandlePutResponse(OnError on_error_functor,
 
   if (success_count == 0) {
     LOG(kError) << "No successful responses received for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.name()) << "  received "
+                << "  " << HexSubstr(original_message.name()) << "  received "
                 << failure_count << " failures.";
     on_error_functor(std::move(original_message));
   }
   LOG(kVerbose) << "Overall success for Put " << original_message.data_type()
-                << "  " << DebugId(original_message.name()) << "  received "
+                << "  " << HexSubstr(original_message.name()) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
@@ -157,6 +159,10 @@ void HandleDeleteResponse(OnError on_error_functor,
                 << "  " << DebugId(original_message.name()) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
+
+void HandlePostResponse(OnPostError /*on_error_functor*/,
+                        PostMessage /*original_message*/,
+                        const std::vector<std::string>& /*serialised_messages*/);
 
 }  // namespace nfs
 

@@ -13,6 +13,7 @@
 #define MAIDSAFE_NFS_MAID_ACCOUNT_H_
 
 #include <vector>
+#include <mutex>
 
 #include "maidsafe/common/types.h"
 
@@ -40,8 +41,8 @@ class PmidRegistration {
 
   void Parse(const NonEmptyString& serialised_pmidregistration);
   NonEmptyString Serialise();
-  Identity maid_id() { return maid_id_; }
-  Identity pmid_id() { return pmid_id_; }
+  Identity maid_id() const { return maid_id_; }
+  Identity pmid_id() const { return pmid_id_; }
 
  private:
   Identity maid_id_;
@@ -85,7 +86,7 @@ class PmidTotal {
     : registration(registration_in), pmid_size(pmid_size_in) {}
 
   NonEmptyString Serialise();
-  bool IsRecordOf(const Identity& pmid_id) {
+  bool IsRecordOf(Identity& pmid_id) const {
     return pmid_id == registration.pmid_id();
   }
   Identity pmid_id() { return registration.pmid_id(); }
@@ -112,62 +113,44 @@ class DataElement {
 
 class MaidAccount {
  public:
-  MaidAccount()
-    : maid_id_(),
-      pmid_totals_(),
-      data_elements_() {}
+  MaidAccount() : maid_id_(), pmid_totals_(), data_elements_(), mutex_() {}
 
   explicit MaidAccount(Identity maid_id_in)
-    : maid_id_(maid_id_in),
-      pmid_totals_(),
-      data_elements_() {}
+    : maid_id_(maid_id_in), pmid_totals_(), data_elements_(), mutex_() {}
 
   explicit MaidAccount(const NonEmptyString& serialised_maidaccount)
-    : maid_id_(),
-      pmid_totals_(),
-      data_elements_() {
+    : maid_id_(), pmid_totals_(), data_elements_(), mutex_() {
     Parse(serialised_maidaccount);
   }
 
+  MaidAccount(const MaidAccount& other)
+    : maid_id_(other.maid_id_),
+      pmid_totals_(other.pmid_totals_),
+      data_elements_(other.data_elements_),
+      mutex_() {}
+
+  MaidAccount& operator=(const MaidAccount& other);
+
   void Parse(const NonEmptyString& serialised_maidaccount);
   NonEmptyString Serialise();
-  void PushPmidTotal(PmidTotal pmid_total) {
-    pmid_totals_.push_back(pmid_total);
-  }
-  void RemovePmidTotal(Identity pmid_id) {
-    for (auto itr = pmid_totals_.begin(); itr != pmid_totals_.end(); ++itr) {
-      if ((*itr).IsRecordOf(pmid_id)) {
-        pmid_totals_.erase(itr);
-        return;
-      }
-    }
-  }
-  void UpdatePmidTotal(PmidTotal pmid_total) {
-    RemovePmidTotal(pmid_total.pmid_id());
-    PushPmidTotal(pmid_total);
-  }
-  void PushDataElement(DataElement data_element) {
-    data_elements_.push_back(data_element);
-  }
-  void RemoveDataElement(Identity data_id) {
-    for (auto itr = data_elements_.begin(); itr != data_elements_.end(); ++itr) {
-      if ((*itr).data_id() == data_id) {
-        data_elements_.erase(itr);
-        return;
-      }
-    }
-  }
-  void UpdateDataElement(DataElement data_element) {
-    RemoveDataElement(data_element.data_id());
-    PushDataElement(data_element);
-  }
+
+  void PushPmidTotal(PmidTotal pmid_total);
+  void RemovePmidTotal(Identity pmid_id);
+  void UpdatePmidTotal(PmidTotal pmid_total);
+  bool HasPmidTotal(Identity pmid_id);
+
+  void PushDataElement(DataElement data_element);
+  void RemoveDataElement(Identity data_id);
+  void UpdateDataElement(DataElement data_element);
+  bool HasDataElement(Identity data_id);
+
   Identity maid_id() const { return maid_id_; }
-  std::vector<DataElement>& data_elements() { return data_elements_; }
 
  private:
   Identity maid_id_;
   std::vector<PmidTotal> pmid_totals_;
   std::vector<DataElement> data_elements_;
+  std::mutex mutex_;
 };
 
 }  // namespace nfs

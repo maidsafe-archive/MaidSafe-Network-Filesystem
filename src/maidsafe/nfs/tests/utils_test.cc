@@ -38,7 +38,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent();
 
 template<typename Fob>
 std::pair<Identity, NonEmptyString> MakeNameAndContentPair(const Fob& fob) {
-  maidsafe::passport::detail::PublicFob<Fob::name_type::tag_type> public_fob(fob);
+  maidsafe::passport::detail::PublicFob<typename Fob::name_type::tag_type> public_fob(fob);
   return std::make_pair(public_fob.name().data, public_fob.Serialise().data);
 }
 

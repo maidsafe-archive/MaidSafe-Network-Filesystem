@@ -63,7 +63,7 @@ typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
 
 typedef NetworkFileSystem<GetFromMaidAccountHolder<PersonaType::kMaidAccountHolder>,
                           PutToMetadataManager,
-                          NoPost<passport::Pmid>,
+                          PostSynchronisation<PersonaType::kMaidAccountHolder>,
                           DeleteFromMetadataManager> MaidAccountHolderNfs;
 
 typedef NetworkFileSystem<GetFromPmidAccountHolder,
