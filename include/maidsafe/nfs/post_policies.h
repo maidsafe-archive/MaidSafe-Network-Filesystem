@@ -26,7 +26,6 @@
 
 #include "maidsafe/nfs/utils.h"
 
-
 namespace maidsafe {
 
 namespace nfs {
@@ -41,6 +40,37 @@ class NoPost {
 
  protected:
   ~NoPost() {}
+};
+
+template<PersonaType persona>
+class PostSynchronisation {
+ public:
+  PostSynchronisation(routing::Routing& routing, const passport::Pmid& /*signing_pmid*/)
+      : routing_(routing),
+        source_(Message::Source(persona, routing.kNodeId())) {}
+
+  void PostSyncData(const PostMessage& message, OnPostError on_error) {
+    PostMessage new_message(message.post_action_type(),
+                            message.destination_persona_type(),
+                            source_,
+                            message.name(),
+                            message.content(),
+                            maidsafe::rsa::Signature());
+
+    routing::ResponseFunctor callback =
+        [on_error, new_message](const std::vector<std::string>& serialised_messages) {
+          HandlePostResponse(on_error, new_message, serialised_messages);
+        };
+    routing_.Send(NodeId(new_message.name().string()), message.Serialise()->string(),
+                  callback, routing::DestinationType::kGroup, false);
+  }
+
+ protected:
+  ~PostSynchronisation() {}
+
+ private:
+  routing::Routing& routing_;
+  Message::Source source_;
 };
 
 }  // namespace nfs
