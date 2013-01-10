@@ -40,8 +40,8 @@ class PmidRegistration {
 
   void Parse(const NonEmptyString& serialised_pmidregistration);
   NonEmptyString Serialise();
-  Identity maid_id() { return maid_id_; }
-  Identity pmid_id() { return pmid_id_; }
+  Identity maid_id() const { return maid_id_; }
+  Identity pmid_id() const { return pmid_id_; }
 
  private:
   Identity maid_id_;
@@ -85,7 +85,7 @@ class PmidTotal {
     : registration(registration_in), pmid_size(pmid_size_in) {}
 
   NonEmptyString Serialise();
-  bool IsRecordOf(const Identity& pmid_id) {
+  bool IsRecordOf(Identity& pmid_id) const {
     return pmid_id == registration.pmid_id();
   }
   Identity pmid_id() { return registration.pmid_id(); }
@@ -146,6 +146,14 @@ class MaidAccount {
     RemovePmidTotal(pmid_total.pmid_id());
     PushPmidTotal(pmid_total);
   }
+  bool HasPmidTotal(Identity pmid_id) {
+    auto pmid_total_it = std::find_if(pmid_totals_.begin(), pmid_totals_.end(),
+                                      [&pmid_id] (const PmidTotal& pmid_total) {
+                                        return pmid_total.IsRecordOf(pmid_id);
+                                      });
+    return (pmid_total_it != pmid_totals_.end());
+  }
+
   void PushDataElement(DataElement data_element) {
     data_elements_.push_back(data_element);
   }
@@ -161,8 +169,14 @@ class MaidAccount {
     RemoveDataElement(data_element.data_id());
     PushDataElement(data_element);
   }
+  bool HasDataElement(Identity data_id) {
+    auto data_element_it = std::find_if(data_elements_.begin(), data_elements_.end(),
+                                        [&data_id] (const DataElement& data_element) {
+                                          return data_element.data_id() == data_id;
+                                        });
+    return (data_element_it != data_elements_.end());
+  }
   Identity maid_id() const { return maid_id_; }
-  std::vector<DataElement>& data_elements() { return data_elements_; }
 
  private:
   Identity maid_id_;
