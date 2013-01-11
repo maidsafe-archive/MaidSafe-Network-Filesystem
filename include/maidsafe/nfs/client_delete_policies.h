@@ -31,12 +31,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-class DeleteFromPmidAccountHolder {
- public:
-  explicit DeleteFromPmidAccountHolder(const routing::Routing&);
-};
-
-
 template<typename SigningFob>
 class NoDelete {
  public:
@@ -53,40 +47,6 @@ class NoDelete {
  private:
   routing::Routing& routing_;
   SigningFob signing_fob_;
-};
-
-class DeleteFromMetadataManager {
- public:
-  DeleteFromMetadataManager(routing::Routing& routing, const passport::Pmid& signing_pmid)
-    : routing_(routing),
-      signing_pmid_(signing_pmid),
-      source_(Message::Source(PersonaType::kMaidAccountHolder, routing.kNodeId())) {}
-
-  template<typename Data>
-  void Delete(const Message& message, OnError on_error) {
-    Message new_message(message.action_type(),
-                        message.destination_persona_type(),
-                        source_,
-                        message.data_type(),
-                        message.name(),
-                        message.content(),
-                        asymm::Sign(message.content(), signing_pmid_.private_key()));
-
-    routing::ResponseFunctor callback =
-        [on_error, new_message](const std::vector<std::string>& serialised_messages) {
-          HandleDeleteResponse<Data>(on_error, new_message, serialised_messages);
-        };
-    routing_.Send(NodeId(new_message.name().string()), message.Serialise()->string(),
-                  callback, routing::DestinationType::kGroup, IsCacheable<Data>());
-  }
-
- protected:
-  ~DeleteFromMetadataManager() {}
-
- private:
-  routing::Routing& routing_;
-  passport::Pmid signing_pmid_;
-  Message::Source source_;
 };
 
 }  // namespace nfs

@@ -9,8 +9,8 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_POST_POLICIES_H_
-#define MAIDSAFE_NFS_POST_POLICIES_H_
+#ifndef MAIDSAFE_NFS_PUT_POLICIES_H_
+#define MAIDSAFE_NFS_PUT_POLICIES_H_
 
 #include <future>
 #include <string>
@@ -26,52 +26,55 @@
 
 #include "maidsafe/nfs/utils.h"
 
+
 namespace maidsafe {
 
 namespace nfs {
 
 template<typename SigningFob>
-class NoPost {
+class NoPut {
  public:
-  NoPost() {}
-  explicit NoPost(routing::Routing& /*routing*/) {}
-  explicit NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+  NoPut() {}
+  explicit NoPut(routing::Routing& /*routing*/) {}
+  NoPut(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
 
   template<typename Data>
-  void Post(const typename Data::name_type& /*name*/) {}
+  void Put(const Data& /*data*/, OnError /*on_error*/) {}
 
  protected:
-  ~NoPost() {}
+  ~NoPut() {}
 };
 
-template<PersonaType persona>
-class PostSynchronisation {
+
+// TODO(Fraser#5#): 2013-01-11 - BEFORE_RELEASE - Remove this class.  Should be in Vault project.
+template<typename SigningFob>
+class PutToDataHolder {
  public:
-  PostSynchronisation(routing::Routing& routing, const passport::Pmid& /*signing_pmid*/)
+  PutToDataHolder(routing::Routing& routing, const SigningFob& signing_fob)
       : routing_(routing),
-        source_(Message::Source(persona, routing.kNodeId())) {}
+        signing_fob_(signing_fob),
+        source_(Message::Source(PersonaType::kClientMaid, routing.kNodeId())) {}
 
-  void PostSyncData(const PostMessage& message, OnPostError on_error) {
-    PostMessage new_message(message.post_action_type(),
-                            message.destination_persona_type(),
-                            source_,
-                            message.name(),
-                            message.content(),
-                            maidsafe::rsa::Signature());
-
+  template<typename Data>
+  void Put(const Data& data, OnError on_error) {
+    NonEmptyString content(data.Serialise());
+    Message message(ActionType::kPut, PersonaType::kDataHolder, source_,
+                    Data::name_type::tag_type::kEnumValue, data.name(), content,
+                    asymm::Sign(content, signing_fob_.private_key()));
     routing::ResponseFunctor callback =
-        [on_error, new_message](const std::vector<std::string>& serialised_messages) {
-          HandlePostResponse(on_error, new_message, serialised_messages);
+        [on_error, message](const std::vector<std::string>& serialised_messages) {
+          HandlePutResponse<Data>(on_error, message, serialised_messages);
         };
-    routing_.Send(NodeId(new_message.name().string()), message.Serialise()->string(),
-                  callback, routing::DestinationType::kGroup, false);
+    routing_.Send(NodeId(data.name()->string()), message.Serialise()->string(), callback,
+                  routing::DestinationType::kGroup, IsCacheable<Data>());
   }
 
  protected:
-  ~PostSynchronisation() {}
+  ~PutToDataHolder() {}
 
  private:
   routing::Routing& routing_;
+  SigningFob signing_fob_;
   Message::Source source_;
 };
 
@@ -79,4 +82,4 @@ class PostSynchronisation {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_POST_POLICIES_H_
+#endif  // MAIDSAFE_NFS_PUT_POLICIES_H_

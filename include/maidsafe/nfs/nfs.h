@@ -17,10 +17,10 @@
 #include "maidsafe/passport/types.h"
 
 #include "maidsafe/nfs/types.h"
-#include "maidsafe/nfs/get_policies.h"
-#include "maidsafe/nfs/put_policies.h"
-#include "maidsafe/nfs/post_policies.h"
-#include "maidsafe/nfs/delete_policies.h"
+#include "maidsafe/nfs/client_get_policies.h"
+#include "maidsafe/nfs/client_put_policies.h"
+#include "maidsafe/nfs/client_post_policies.h"
+#include "maidsafe/nfs/client_delete_policies.h"
 
 
 namespace maidsafe {
@@ -36,24 +36,20 @@ class NetworkFileSystem : public GetPolicy,
                           public PostPolicy,
                           public DeletePolicy {
  public:
-  NetworkFileSystem()
-    : GetPolicy(),
-      PutPolicy(),
-      PostPolicy(),
-      DeletePolicy() {}
+  NetworkFileSystem() : GetPolicy(), PutPolicy(), PostPolicy(), DeletePolicy() {}
 
   explicit NetworkFileSystem(routing::Routing& routing)
-    : GetPolicy(routing),
-      PutPolicy(routing),
-      PostPolicy(routing),
-      DeletePolicy(routing) {}
+      : GetPolicy(routing),
+        PutPolicy(routing),
+        PostPolicy(routing),
+        DeletePolicy(routing) {}
 
   template<typename SigningFob>
   NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
-    : GetPolicy(routing),
-      PutPolicy(routing, signing_fob),
-      PostPolicy(routing, signing_fob),
-      DeletePolicy(routing, signing_fob) {}
+      : GetPolicy(routing),
+        PutPolicy(routing, signing_fob),
+        PostPolicy(routing, signing_fob),
+        DeletePolicy(routing, signing_fob) {}
 };
 
 typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
@@ -61,15 +57,6 @@ typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           NoPost<passport::Maid>,
                           NoDelete<passport::Maid>> TemporaryClientMaidNfs;
 
-typedef NetworkFileSystem<GetFromMaidAccountHolder<PersonaType::kMaidAccountHolder>,
-                          PutToMetadataManager,
-                          PostSynchronisation<PersonaType::kMaidAccountHolder>,
-                          DeleteFromMetadataManager> MaidAccountHolderNfs;
-
-typedef NetworkFileSystem<GetFromPmidAccountHolder,
-                          PutToPmidAccountHolder,
-                          NoPost<passport::Pmid>,
-                          DeleteFromPmidAccountHolder> MetadataManagerNfs;
 /*
 typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           PutToMaidAccountHolder,

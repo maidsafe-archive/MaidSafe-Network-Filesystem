@@ -9,16 +9,43 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_CONTAINERS_PB_H_
-#define MAIDSAFE_NFS_CONTAINERS_PB_H_
+#ifndef MAIDSAFE_NFS_POST_POLICIES_H_
+#define MAIDSAFE_NFS_POST_POLICIES_H_
 
-#ifdef __MSVC__
-#  pragma warning(push)
-#  pragma warning(disable: 4127 4244 4267)
-#endif
-#include "maidsafe/nfs/containers.pb.h"
-#ifdef __MSVC__
-#  pragma warning(pop)
-#endif
+#include <future>
+#include <string>
+#include <vector>
 
-#endif  // MAIDSAFE_NFS_CONTAINERS_PB_H_
+#include "maidsafe/common/rsa.h"
+#include "maidsafe/common/crypto.h"
+#include "maidsafe/common/types.h"
+
+#include "maidsafe/passport/types.h"
+
+#include "maidsafe/routing/routing_api.h"
+
+#include "maidsafe/nfs/utils.h"
+
+namespace maidsafe {
+
+namespace nfs {
+
+template<typename SigningFob>
+class NoPost {
+ public:
+  NoPost() {}
+  explicit NoPost(routing::Routing& /*routing*/) {}
+  explicit NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+
+  template<typename Data>
+  void Post(const typename Data::name_type& /*name*/) {}
+
+ protected:
+  ~NoPost() {}
+};
+
+}  // namespace nfs
+
+}  // namespace maidsafe
+
+#endif  // MAIDSAFE_NFS_POST_POLICIES_H_

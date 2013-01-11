@@ -32,12 +32,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-class GetFromPmidAccountHolder {
- public:
-  explicit GetFromPmidAccountHolder(const routing::Routing&);
-};
-
-
 class NoGet {
  public:
   NoGet() {}
@@ -76,68 +70,6 @@ class GetFromMetadataManager {
 
  protected:
   ~GetFromMetadataManager() {}
-
- private:
-  routing::Routing& routing_;
-  Message::Source source_;
-};
-
-template<PersonaType persona>
-class GetFromDataHolder {
- public:
-  explicit GetFromDataHolder(routing::Routing& routing)
-      : routing_(routing),
-        source_(Message::Source(persona, routing.kNodeId())) {}
-
-  template<typename Data>
-  std::future<Data> Get(const typename Data::name_type& name) {
-    auto promise(std::make_shared<std::promise<Data>>());  // NOLINT (Fraser)
-    std::future<Data> future(promise->get_future());
-    routing::ResponseFunctor callback =
-        [promise](const std::vector<std::string>& serialised_messages) {
-          HandleGetResponse(promise, serialised_messages);
-        };
-    Message message(ActionType::kGet, PersonaType::kDataHolder, source_,
-                    Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
-                    asymm::Signature());
-    routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
-                  routing::DestinationType::kGroup, IsCacheable<Data>());
-    return std::move(future);
-  }
-
- protected:
-  ~GetFromDataHolder() {}
-
- private:
-  routing::Routing& routing_;
-  Message::Source source_;
-};
-
-template<PersonaType persona>
-class GetFromMaidAccountHolder {
- public:
-  explicit GetFromMaidAccountHolder(routing::Routing& routing)
-      : routing_(routing),
-        source_(Message::Source(persona, routing.kNodeId())) {}
-
-  template<typename Data>
-  std::future<Data> Get(const typename Data::name_type& name) {
-    auto promise(std::make_shared<std::promise<Data>>());  // NOLINT (Fraser)
-    std::future<Data> future(promise->get_future());
-    routing::ResponseFunctor callback =
-        [promise](const std::vector<std::string>& serialised_messages) {
-          HandleGetResponse(promise, serialised_messages);
-        };
-    Message message(ActionType::kGet, PersonaType::kMaidAccountHolder, source_,
-                    Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
-                    asymm::Signature());
-    routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
-                  routing::DestinationType::kGroup, IsCacheable<Data>());
-    return std::move(future);
-  }
-
- protected:
-  ~GetFromMaidAccountHolder() {}
 
  private:
   routing::Routing& routing_;

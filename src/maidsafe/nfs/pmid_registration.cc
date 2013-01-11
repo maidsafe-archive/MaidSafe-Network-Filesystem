@@ -9,40 +9,40 @@
  *  permission of the board of directors of MaidSafe.net.                                          *
  **************************************************************************************************/
 
+#include "maidsafe/nfs/pmid_registration.h"
+
 #include "maidsafe/common/utils.h"
 
-#include "maidsafe/nfs/maid_account.h"
-
-#include "maidsafe/nfs/containers_pb.h"
 #include "maidsafe/nfs/post_messages_pb.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
-void PmidRegistration::Parse(const NonEmptyString& serialised_pmidregistration) {
-  nfs::protobuf::PmidRegistration proto_pmidregistration;
-  if (!proto_pmidregistration.ParseFromString(serialised_pmidregistration.string()) ||
-      !proto_pmidregistration.IsInitialized()) {
+void PmidRegistration::Parse(const NonEmptyString& serialised_pmid_registration) {
+  nfs::protobuf::PmidRegistration proto_pmid_registration;
+  if (!proto_pmid_registration.ParseFromString(serialised_pmid_registration.string()) ||
+      !proto_pmid_registration.IsInitialized()) {
     LOG(kError) << "Failed to parse pmid_registration.";
     ThrowError(NfsErrors::pmid_registration_parsing_error);
   }
 
-  maid_id_ = Identity(proto_pmidregistration.maid_id());
-  pmid_id_ = Identity(proto_pmidregistration.pmid_id());
-  register_ = proto_pmidregistration.register_();
-  maid_signature_ = NonEmptyString(proto_pmidregistration.maid_signature());
-  pmid_signature_ = NonEmptyString(proto_pmidregistration.pmid_signature());
+  maid_id_ = Identity(proto_pmid_registration.maid_id());
+  pmid_id_ = Identity(proto_pmid_registration.pmid_id());
+  register_ = proto_pmid_registration.register_();
+  maid_signature_ = NonEmptyString(proto_pmid_registration.maid_signature());
+  pmid_signature_ = NonEmptyString(proto_pmid_registration.pmid_signature());
 }
 
 NonEmptyString PmidRegistration::Serialise() {
-  nfs::protobuf::PmidRegistration proto_pmidregistration;
-  proto_pmidregistration.set_maid_id(maid_id_.string());
-  proto_pmidregistration.set_pmid_id(pmid_id_.string());
-  proto_pmidregistration.set_register_(register_);
-  proto_pmidregistration.set_maid_signature(maid_signature_.string());
-  proto_pmidregistration.set_pmid_signature(pmid_signature_.string());
-  return NonEmptyString(proto_pmidregistration.SerializeAsString());
+  nfs::protobuf::PmidRegistration proto_pmid_registration;
+  proto_pmid_registration.set_maid_id(maid_id_.string());
+  proto_pmid_registration.set_pmid_id(pmid_id_.string());
+  proto_pmid_registration.set_register_(register_);
+  proto_pmid_registration.set_maid_signature(maid_signature_.string());
+  proto_pmid_registration.set_pmid_signature(pmid_signature_.string());
+  return NonEmptyString(proto_pmid_registration.SerializeAsString());
 }
 
 void PmidSize::Parse(const NonEmptyString& serialised_pmidsize) {
@@ -73,12 +73,12 @@ NonEmptyString PmidSize::Serialise() {
 NonEmptyString PmidTotal::Serialise() {
   nfs::protobuf::PmidSize proto_pmidsize;
   proto_pmidsize.ParseFromString(pmid_size.Serialise().string());
-  nfs::protobuf::PmidRegistration proto_pmidregistration;
-  proto_pmidregistration.ParseFromString(registration.Serialise().string());
+  nfs::protobuf::PmidRegistration proto_pmid_registration;
+  proto_pmid_registration.ParseFromString(registration.Serialise().string());
 
   nfs::protobuf::PmidTotals proto_pmidtotal;
   *(proto_pmidtotal.mutable_pmid_size()) = proto_pmidsize;
-  *(proto_pmidtotal.mutable_registration()) = proto_pmidregistration;
+  *(proto_pmidtotal.mutable_registration()) = proto_pmid_registration;
   return NonEmptyString(proto_pmidtotal.SerializeAsString());
 }
 
