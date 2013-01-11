@@ -9,7 +9,7 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/get_policies.h"
+#include "maidsafe/nfs/client_get_policies.h"
 
 namespace maidsafe {
 
