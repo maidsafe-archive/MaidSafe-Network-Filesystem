@@ -34,7 +34,7 @@ namespace nfs {
 
 class GetFromPmidAccountHolder {
  public:
-  explicit GetFromPmidAccountHolder(const routing::Routing&);
+  explicit GetFromPmidAccountHolder(const routing::Routing& /*routing*/) {}
 };
 
 

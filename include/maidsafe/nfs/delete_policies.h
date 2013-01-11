@@ -33,7 +33,7 @@ namespace nfs {
 
 class DeleteFromPmidAccountHolder {
  public:
-  explicit DeleteFromPmidAccountHolder(const routing::Routing&);
+  explicit DeleteFromPmidAccountHolder(const routing::Routing& /*routing*/) {}
 };
 
 
