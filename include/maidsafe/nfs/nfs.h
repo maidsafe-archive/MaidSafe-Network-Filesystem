@@ -61,12 +61,6 @@ typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
                           PutToMaidAccountHolder,
                           NoPost<passport::Maid>,
                           DeleteFromMaidAccountHolder> ClientMaidNfs;
-/*
-typedef NetworkFileSystem<GetFromVaultPmid,
-                          PutToVaultPmid,
-                          NoPost<passport::Pmid>,
-                          DeleteFromVaultPmid> PmidAccountHolderNfs;
-*/
 
 template<typename GetPolicy>
 class NetworkFileSystemGetter : public GetPolicy {
@@ -74,7 +68,7 @@ class NetworkFileSystemGetter : public GetPolicy {
   explicit NetworkFileSystemGetter(routing::Routing& routing) : GetPolicy(routing) {}
 };
 
-typedef NetworkFileSystemGetter<GetFromDataHolder<PersonaType::kDataGetter>> KeyGetterNfs;
+typedef NetworkFileSystemGetter<GetFromMetadataManager<PersonaType::kDataGetter>> KeyGetterNfs;
 
 #ifdef TESTING
 typedef GetFromKeyFile FakeKeyGetterNfs;
