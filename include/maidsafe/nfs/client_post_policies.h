@@ -35,7 +35,7 @@ class NoPost {
  public:
   NoPost() {}
   explicit NoPost(routing::Routing& /*routing*/) {}
-  explicit NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+  NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
 
   template<typename Data>
   void Post(const typename Data::name_type& /*name*/) {}

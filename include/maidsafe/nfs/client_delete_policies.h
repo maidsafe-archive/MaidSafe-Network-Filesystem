@@ -12,10 +12,6 @@
 #ifndef MAIDSAFE_NFS_DELETE_POLICIES_H_
 #define MAIDSAFE_NFS_DELETE_POLICIES_H_
 
-#include <future>
-#include <string>
-#include <vector>
-
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
@@ -34,19 +30,31 @@ namespace nfs {
 template<typename SigningFob>
 class NoDelete {
  public:
-  NoDelete() {}
-  NoDelete(routing::Routing& routing, const SigningFob& signing_fob)
-      : routing_(routing),
-        signing_fob_(signing_fob) {}
+  NoDelete(routing::Routing& routing, const SigningFob& signing_fob) {}
   template<typename Data>
   void Delete(const Message& /*message*/, OnError /*on_error*/) {}
 
  protected:
   ~NoDelete() {}
+};
+
+class DeleteFromMaidAccountHolder {
+ public:
+  DeleteFromMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
+      : routing_(routing),
+        signing_fob_(signing_fob),
+        source_(Message::Source(PersonaType::kClientMaid, routing.kNodeId())) {}
+
+  template<typename Data>
+  void Delete(const Message& /*message*/, OnError /*on_error*/) {}
+
+ protected:
+  ~DeleteFromMaidAccountHolder() {}
 
  private:
   routing::Routing& routing_;
-  SigningFob signing_fob_;
+  passport::Maid signing_fob_;
+  Message::Source source_;
 };
 
 }  // namespace nfs

@@ -78,6 +78,38 @@ class PutToDataHolder {
   Message::Source source_;
 };
 
+class PutToMaidAccountHolder {
+ public:
+  PutToMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
+      : routing_(routing),
+        signing_fob_(signing_fob),
+        source_(Message::Source(PersonaType::kClientMaid, routing.kNodeId())) {}
+
+  template<typename Data>
+  void Put(const Data& data, OnError on_error) {
+    NonEmptyString content(data.Serialise());
+    Message message(ActionType::kPut, PersonaType::kDataHolder, source_,
+                    Data::name_type::tag_type::kEnumValue, data.name(), content,
+                    asymm::Sign(content, signing_fob_.private_key()));
+    routing::ResponseFunctor callback =
+        [on_error, message](const std::vector<std::string>& serialised_messages) {
+          HandlePutResponse<Data>(on_error, message, serialised_messages);
+        };
+    routing_.Send(routing_.kNodeId(), message.Serialise()->string(), callback,
+                  routing::DestinationType::kGroup, IsCacheable<Data>());
+  }
+
+ protected:
+  ~PutToMaidAccountHolder() {}
+
+ private:
+  routing::Routing& routing_;
+  passport::Maid signing_fob_;
+  Message::Source source_;
+};
+
+
+
 }  // namespace nfs
 
 }  // namespace maidsafe
