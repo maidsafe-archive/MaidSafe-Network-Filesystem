@@ -9,8 +9,8 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_DELETE_POLICIES_H_
-#define MAIDSAFE_NFS_DELETE_POLICIES_H_
+#ifndef MAIDSAFE_NFS_CLIENT_DELETE_POLICIES_H_
+#define MAIDSAFE_NFS_CLIENT_DELETE_POLICIES_H_
 
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"
@@ -61,4 +61,4 @@ class DeleteFromMaidAccountHolder {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_DELETE_POLICIES_H_
+#endif  // MAIDSAFE_NFS_CLIENT_DELETE_POLICIES_H_

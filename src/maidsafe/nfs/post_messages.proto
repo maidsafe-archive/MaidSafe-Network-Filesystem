@@ -4,14 +4,17 @@ option optimize_for = LITE_RUNTIME;
 
 // MAID Client send to MAID Account Holder
 message PmidRegistration {
-  message Details {
-    required bytes maid_name = 1;
-    required bytes pmid_name = 2;
-    required bool register = 3;
+  message SignedDetails {
+    message Details {
+      required bytes maid_name = 1;
+      required bytes pmid_name = 2;
+      required bool unregister = 3;
+    }
+    required bytes serialised_details = 1;
+    required bytes pmid_signature = 2;
   }
-  required bytes serialised_details = 1;
-  required bytes pmid_signature = 2;
-  required bytes maid_signature = 3;
+  required bytes serialised_signed_details = 1;
+  required bytes maid_signature = 2;
 }
 
 // MPID Client to MPID Client (or MPID Account Holders)

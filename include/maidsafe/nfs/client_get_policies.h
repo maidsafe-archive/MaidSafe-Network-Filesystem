@@ -9,16 +9,14 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_GET_POLICIES_H_
-#define MAIDSAFE_NFS_GET_POLICIES_H_
+#ifndef MAIDSAFE_NFS_CLIENT_GET_POLICIES_H_
+#define MAIDSAFE_NFS_CLIENT_GET_POLICIES_H_
 
-#include <algorithm>
 #include <future>
 #include <string>
 #include <vector>
 
 #include "maidsafe/common/rsa.h"
-#include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/passport/types.h"
@@ -96,4 +94,4 @@ class GetFromKeyFile {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_GET_POLICIES_H_
+#endif  // MAIDSAFE_NFS_CLIENT_GET_POLICIES_H_

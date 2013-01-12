@@ -9,22 +9,10 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_POST_POLICIES_H_
-#define MAIDSAFE_NFS_POST_POLICIES_H_
-
-#include <future>
-#include <string>
-#include <vector>
-
-#include "maidsafe/common/rsa.h"
-#include "maidsafe/common/crypto.h"
-#include "maidsafe/common/types.h"
-
-#include "maidsafe/passport/types.h"
+#ifndef MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_
+#define MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_
 
 #include "maidsafe/routing/routing_api.h"
-
-#include "maidsafe/nfs/utils.h"
 
 namespace maidsafe {
 
@@ -35,7 +23,7 @@ class NoPost {
  public:
   NoPost() {}
   explicit NoPost(routing::Routing& /*routing*/) {}
-  NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+  NoPost(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
 
   template<typename Data>
   void Post(const typename Data::name_type& /*name*/) {}
@@ -48,4 +36,4 @@ class NoPost {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_POST_POLICIES_H_
+#endif  // MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_

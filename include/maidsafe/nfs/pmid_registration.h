@@ -14,6 +14,8 @@
 
 #include "maidsafe/common/types.h"
 
+#include "maidsafe/passport/types.h"
+
 
 namespace maidsafe {
 
@@ -21,36 +23,23 @@ namespace nfs {
 
 class PmidRegistration {
  public:
-  PmidRegistration(Identity maid_id_in,
-                   Identity pmid_id_in,
-                   bool register_in,
-                   NonEmptyString maid_signature_in,
-                   NonEmptyString pmid_signature_in)
-      : maid_id_(maid_id_in),
-        pmid_id_(pmid_id_in),
-        register_(register_in),
-        maid_signature_(maid_signature_in),
-        pmid_signature_(pmid_signature_in) {}
-  explicit PmidRegistration(const NonEmptyString& serialised_pmid_registration)
-      : maid_id_(),
-        pmid_id_(),
-        register_(false),
-        maid_signature_(NonEmptyString()),
-        pmid_signature_(NonEmptyString()) {
-    Parse(serialised_pmid_registration);
-  }
-
-  void Parse(const NonEmptyString& serialised_pmid_registration);
-  NonEmptyString Serialise();
-  Identity maid_id() const { return maid_id_; }
-  Identity pmid_id() const { return pmid_id_; }
+  PmidRegistration(const passport::Maid& maid,
+                   const passport::Pmid& pmid,
+                   bool unregister);
+  explicit PmidRegistration(const NonEmptyString& serialised_pmid_registration);
+  bool Validate(const passport::PublicMaid& public_maid,
+                const passport::PublicPmid& public_pmid) const;
+  NonEmptyString Serialise() const;
+  passport::PublicMaid::name_type maid_name() const { return maid_name_; }
+  passport::PublicPmid::name_type pmid_name() const { return pmid_name_; }
+  bool unregister() const { return unregister_; }
 
  private:
-  Identity maid_id_;
-  Identity pmid_id_;
-  bool register_;
-  NonEmptyString maid_signature_;
-  NonEmptyString pmid_signature_;
+  passport::PublicMaid::name_type maid_name_;
+  passport::PublicPmid::name_type pmid_name_;
+  bool unregister_;
+  asymm::Signature maid_signature_;
+  asymm::Signature pmid_signature_;
 };
 
 }  // namespace nfs
