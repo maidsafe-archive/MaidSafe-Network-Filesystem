@@ -82,7 +82,7 @@ PostMessage::PostMessage(const serialised_type& serialised_message)
       name_(),
       content_(),
       signature_() {
-  protobuf::PostMessage proto_post_message;
+  protobuf::PostMessage_ proto_post_message;
   if (!proto_post_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
   post_action_type_ = static_cast<PostActionType>(proto_post_message.post_action_type());
@@ -105,7 +105,7 @@ bool PostMessage::ValidateInputs() const {
 PostMessage::serialised_type PostMessage::Serialise() const {
   serialised_type serialised_message;
   try {
-    protobuf::PostMessage proto_post_message;
+    protobuf::PostMessage_ proto_post_message;
     proto_post_message.set_post_action_type(static_cast<int32_t>(post_action_type_));
     proto_post_message.set_destination_persona_type(
         static_cast<int32_t>(destination_persona_type_));
