@@ -41,6 +41,7 @@ enum class PostActionType : int {
   kConnect,
   kGetPmidSize,
   kNodeDown,
+  kNodeUp,
   kSynchronise
 };
 
