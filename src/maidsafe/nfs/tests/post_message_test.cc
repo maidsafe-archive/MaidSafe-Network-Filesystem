@@ -31,8 +31,8 @@ PostActionType GenerateActionType() {
   return static_cast<PostActionType>(RandomUint32() % 6);  // matches PostActionType enum in types.h
 }
 
-Message::Source GenerateSource() {
-  Message::Source source;
+DataMessage::Source GenerateSource() {
+  DataMessage::Source source;
   // matches PersonaType enum in types.h
   source.persona_type = static_cast<PersonaType>(RandomUint32() % 7);
   source.node_id = NodeId(NodeId::kRandomId);
@@ -55,7 +55,7 @@ class PostMessageTest : public testing::Test {
 
   PostActionType post_action_type_;
   PersonaType destination_persona_type_;
-  Message::Source source_;
+  DataMessage::Source source_;
   Identity name_;
   NonEmptyString content_;
   asymm::Signature signature_;
@@ -145,7 +145,7 @@ TEST_F(PostMessageTest, BEH_AssignMessage) {
 }
 
 TEST_F(PostMessageTest, BEH_InvalidSource) {
-  Message::Source bad_source(GenerateSource());
+  DataMessage::Source bad_source(GenerateSource());
   bad_source.node_id = NodeId();
   EXPECT_THROW(PostMessage(post_action_type_, destination_persona_type_, bad_source, name_,
                            content_, signature_),

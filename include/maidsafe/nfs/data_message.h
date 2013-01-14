@@ -75,6 +75,7 @@ class DataMessage {
   Identity name_;
   NonEmptyString content_;
   asymm::Signature signature_;
+  int32_t message_id_;
 };
 
 }  // namespace nfs

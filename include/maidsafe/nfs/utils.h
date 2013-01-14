@@ -24,6 +24,7 @@
 #include "maidsafe/common/utils.h"
 #include "maidsafe/common/types.h"
 
+#include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/post_message.h"
 #include "maidsafe/nfs/return_code.h"
@@ -40,10 +41,11 @@ bool IsCacheable() {
   return is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value;
 }
 
-template<typename Data>
-Data ValidateAndParse(const Message& message) {
-  return Data(typename Data::name_type(message.name()),
-              typename Data::serialised_type(message.content()));
+template<typename Data, typename MessageType>
+Data ValidateAndParse(Message& message) {
+  MessageType data_message(message.inner_message<MessageType>());
+  return Data(typename Data::name_type(data_message.name()),
+              typename Data::serialised_type(data_message.content()));
 }
 
 // TODO(Fraser#5#): 2012-12-20 - This is executed on one of Routing's io_service threads.  If we
@@ -60,7 +62,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
       try {
         // Need '((' when constructing Message to avoid most vexing parse.
         Message message((Message::serialised_type(NonEmptyString(serialised_message))));
-        Data data(ValidateAndParse<Data>(message));
+        Data data(ValidateAndParse<Data, DataMessage>(message));
         promise->set_value(std::move(data));
         return;
       }
@@ -78,12 +80,12 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
 
 template<typename Data>
 void HandlePutResponse(OnError on_error_functor,
-                       Message original_message,
+                       DataMessage original_data_message,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
-    LOG(kError) << "No responses received for Put " << original_message.data_type()
-                << "  " << HexSubstr(original_message.name());
-    on_error_functor(std::move(original_message));
+    LOG(kError) << "No responses received for Put " << original_data_message.data_type()
+                << "  " << HexSubstr(original_data_message.name());
+    on_error_functor(std::move(original_data_message));
   }
 
   // TODO(Fraser#5#): 2012-12-21 - Confirm this is OK as a means of deciding overall success
@@ -96,8 +98,8 @@ void HandlePutResponse(OnError on_error_functor,
         ++success_count;
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Put "
-                      << original_message.data_type() << " "
-                      << HexSubstr(original_message.name());
+                      << original_data_message.data_type() << " "
+                      << HexSubstr(original_data_message.name());
         ++failure_count;
       }
     }
@@ -108,24 +110,24 @@ void HandlePutResponse(OnError on_error_functor,
   }
 
   if (success_count == 0) {
-    LOG(kError) << "No successful responses received for Put " << original_message.data_type()
-                << "  " << HexSubstr(original_message.name()) << "  received "
+    LOG(kError) << "No successful responses received for Put " << original_data_message.data_type()
+                << "  " << HexSubstr(original_data_message.name()) << "  received "
                 << failure_count << " failures.";
-    on_error_functor(std::move(original_message));
+    on_error_functor(std::move(original_data_message));
   }
-  LOG(kVerbose) << "Overall success for Put " << original_message.data_type()
-                << "  " << HexSubstr(original_message.name()) << "  received "
+  LOG(kVerbose) << "Overall success for Put " << original_data_message.data_type()
+                << "  " << HexSubstr(original_data_message.name()) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
 template<typename Data>
 void HandleDeleteResponse(OnError on_error_functor,
-                          Message original_message,
+                          DataMessage original_data_message,
                           const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
-    LOG(kError) << "No responses received for Delete " << original_message.data_type()
-                << "  " << DebugId(original_message.name());
-    on_error_functor(std::move(original_message));
+    LOG(kError) << "No responses received for Delete " << original_data_message.data_type()
+                << "  " << DebugId(original_data_message.name());
+    on_error_functor(std::move(original_data_message));
   }
 
   // TODO(Fraser#5#): 2012-12-21 - Confirm this is OK as a means of deciding overall success
@@ -138,8 +140,8 @@ void HandleDeleteResponse(OnError on_error_functor,
         ++success_count;
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Delete "
-                      << original_message.data_type() << " "
-                      << DebugId(original_message.name());
+                      << original_data_message.data_type() << " "
+                      << DebugId(original_data_message.name());
         ++failure_count;
       }
     }
@@ -150,18 +152,19 @@ void HandleDeleteResponse(OnError on_error_functor,
   }
 
   if (success_count == 0) {
-    LOG(kError) << "No successful responses received for Delete " << original_message.data_type()
-                << "  " << DebugId(original_message.name()) << "  received "
+    LOG(kError) << "No successful responses received for Delete "
+                << original_data_message.data_type()
+                << "  " << DebugId(original_data_message.name()) << "  received "
                 << failure_count << " failures.";
-    on_error_functor(std::move(original_message));
+    on_error_functor(std::move(original_data_message));
   }
-  LOG(kVerbose) << "Overall success for Delete " << original_message.data_type()
-                << "  " << DebugId(original_message.name()) << "  received "
+  LOG(kVerbose) << "Overall success for Delete " << original_data_message.data_type()
+                << "  " << DebugId(original_data_message.name()) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
 void HandlePostResponse(OnPostError /*on_error_functor*/,
-                        PostMessage /*original_message*/,
+                        PostMessage /*original_post_message*/,
                         const std::vector<std::string>& /*serialised_messages*/);
 
 }  // namespace nfs

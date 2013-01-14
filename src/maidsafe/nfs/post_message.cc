@@ -22,7 +22,7 @@ namespace nfs {
 
 PostMessage::PostMessage(PostActionType post_action_type,
                          PersonaType destination_persona_type,
-                         DataMessage::Source::Source source,
+                         DataMessage::Source source,
                          const Identity& name,
                          const NonEmptyString& content,
                          const asymm::Signature& signature)
@@ -31,7 +31,8 @@ PostMessage::PostMessage(PostActionType post_action_type,
       source_(source),
       name_(name),
       content_(content),
-      signature_(signature) {
+      signature_(signature),
+      message_id_(2) {  //FIXME get sequential message from a common function
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
@@ -42,7 +43,8 @@ PostMessage::PostMessage(const PostMessage& other)
       source_(other.source_),
       name_(other.name_),
       content_(other.content_),
-      signature_(other.signature_) {}
+      signature_(other.signature_),
+      message_id_(other.message_id_) {}
 
 PostMessage& PostMessage::operator=(const PostMessage& other) {
   post_action_type_ = other.post_action_type_;
@@ -51,6 +53,7 @@ PostMessage& PostMessage::operator=(const PostMessage& other) {
   name_ = other.name_;
   content_ = other.content_;
   signature_ = other.signature_;
+  message_id_ = other.message_id_;
   return *this;
 }
 
@@ -60,7 +63,8 @@ PostMessage::PostMessage(PostMessage&& other)
       source_(std::move(other.source_)),
       name_(std::move(other.name_)),
       content_(std::move(other.content_)),
-      signature_(std::move(other.signature_)) {}
+      signature_(std::move(other.signature_)),
+      message_id_(std::move(other.message_id_)) {}
 
 PostMessage& PostMessage::operator=(PostMessage&& other) {
   post_action_type_ = std::move(other.post_action_type_);
@@ -69,6 +73,7 @@ PostMessage& PostMessage::operator=(PostMessage&& other) {
   name_ = std::move(other.name_);
   content_ = std::move(other.content_);
   signature_ = std::move(other.signature_);
+  message_id_ = std::move(other.message_id_);
   return *this;
 }
 
@@ -81,7 +86,8 @@ PostMessage::PostMessage(const serialised_type& serialised_message)
       source_(),
       name_(),
       content_(),
-      signature_() {
+      signature_(),
+      message_id_() {
   protobuf::PostMessage_ proto_post_message;
   if (!proto_post_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
@@ -94,6 +100,7 @@ PostMessage::PostMessage(const serialised_type& serialised_message)
   content_ = NonEmptyString(proto_post_message.content());
   if (proto_post_message.has_signature())
     signature_ = asymm::Signature(proto_post_message.signature());
+  message_id_ = proto_post_message.message_id();
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
@@ -116,7 +123,7 @@ PostMessage::serialised_type PostMessage::Serialise() const {
     proto_post_message.set_content(content_.string());
     if (signature_.IsInitialised())
       proto_post_message.set_signature(signature_.string());
-
+    proto_post_message.set_message_id(message_id_);
     serialised_message = serialised_type(NonEmptyString(proto_post_message.SerializeAsString()));
   }
   catch(const std::system_error&) {

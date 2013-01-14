@@ -20,14 +20,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-Message::Message(const DataMessage& data_message)
-    : is_data_message_(true),
-      data_message_(serialised_message_type(NonEmptyString(data_message.Serialise()))) {}
-
-Message::Message(const PostMessage& post_message)
-    : is_data_message_(false),
-      serialised_message_(serialised_message_type(NonEmptyString(post_message.Serialise()))) {}
-
 Message::Message(const Message& other)
     : is_data_message_(other.is_data_message_),
       serialised_message_(other.serialised_message_) {}
@@ -49,30 +41,25 @@ Message::Message(const serialised_type& serialised_message)
   if (!proto_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
   is_data_message_ = (proto_message.has_data_message() ? true : false);
-  serialised_message_ = NonEmptyString(proto_message.content());
+  if (is_data_message_) {
+    serialised_message_ = serialised_type(NonEmptyString(proto_message.data_message().SerializeAsString()));
+  } else {
+    serialised_message_ = serialised_type(NonEmptyString(proto_message.post_message().SerializeAsString()));
+  }
 }
-
-
-
-  //  throws
-DataMessage Message::data_message() const {
-  return DataMessage(DataMessage::serialised_type(NonEmptyString(serialised_message_)));
-}
-
-  //  throws
-PostMessage post_message() const {
-  return PostMessage(PostMessage::serialised_type(NonEmptyString(serialised_message_)));
-}
-
 
 Message::serialised_type Message::Serialise() const {
   serialised_type serialised_message;
   try {
     protobuf::Message proto_message;
     if (is_data_message()) {
-      proto_message.mutable_data_message() = serialised_message->string();
+      protobuf::DataMessage *data_message = proto_message.mutable_data_message();
+      if (!data_message->ParseFromString(serialised_message_->string()))
+        ThrowError(NfsErrors::message_parsing_error);
     } else {
-      proto_message.mutable_post_message() = serialised_message->string();
+      protobuf::PostMessage_ *post_message = proto_message.mutable_post_message();
+      if (!post_message->ParseFromString(serialised_message_->string()))
+        ThrowError(NfsErrors::message_parsing_error);
     }
     serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
   }

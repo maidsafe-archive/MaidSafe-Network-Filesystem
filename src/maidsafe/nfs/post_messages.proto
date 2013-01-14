@@ -31,4 +31,5 @@ message PostMessage_ {
   required bytes name = 4;
   required bytes content = 5;
   optional bytes signature = 6;
+  required int32 message_id = 7;
 }

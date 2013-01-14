@@ -35,8 +35,9 @@ class Message {
  public:
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
-  explicit Message(const DataMessage& data_message);
-  explicit Message(const PostMessage& post_message);
+  template<typename MessageType>
+  Message(const MessageType& message);
+
   explicit Message(const serialised_type& serialised_message);
 
   Message(const Message& other);
@@ -45,15 +46,26 @@ class Message {
 
   serialised_type Serialise() const;
   bool is_data_message() const { return is_data_message_; }
-  //  throws
-  DataMessage data_message() const;
-  //  throws
-  PostMessage post_message() const;
+
+  template<typename MessageType>
+  MessageType inner_message();
 
  private:
-  const bool is_data_message_;
+  bool is_data_message_;
   serialised_type serialised_message_;
 };
+
+template<typename MessageType>
+Message::Message(const MessageType& message)
+    : is_data_message_(false),
+      serialised_message_(Message::serialised_type(NonEmptyString(message.Serialise()))) {}
+
+
+template<typename MessageType>
+MessageType Message::inner_message() {
+  return MessageType(typename MessageType::serialised_type(
+                       NonEmptyString(serialised_message_->string())));
+}
 
 }  // namespace nfs
 

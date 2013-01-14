@@ -9,19 +9,16 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/utils.h"
+#ifndef MAIDSAFE_NFS_DATA_MESSAGE_PB_H_
+#define MAIDSAFE_NFS_DATA_MESSAGE_PB_H_
 
+#ifdef __MSVC__
+#  pragma warning(push)
+#  pragma warning(disable: 4127 4244 4267)
+#endif
+#include "maidsafe/nfs/data_message.pb.h"
+#ifdef __MSVC__
+#  pragma warning(pop)
+#endif
 
-namespace maidsafe {
-
-namespace nfs {
-
-void HandlePostResponse(OnPostError /*on_error_functor*/,
-                        PostMessage /*original_post_message*/,
-                        const std::vector<std::string>& /*serialised_messages*/) {
-  // TODO(Team): BEFORE_RELEASE implement
-}
-
-}  // namespace nfs
-
-}  // namespace maidsafe
+#endif  // MAIDSAFE_NFS_DATA_MESSAGE_PB_H_
