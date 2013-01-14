@@ -1,16 +1,10 @@
 package maidsafe.nfs.protobuf;
 option optimize_for = LITE_RUNTIME;
+import "maidsafe/nfs/data_message.proto";
+import "maidsafe/nfs/post_messages.proto";
 
 message Message {
-  message Source {
-    required int32 persona_type = 1;
-    required bytes node_id = 2;
-  }
-  required int32 action_type = 1;
-  required int32 destination_persona_type = 2;
-  required Source source = 3;
-  required int32 data_type = 4;
-  required bytes name = 5;
-  optional bytes content = 6;
-  optional bytes signature = 7;
+  required bool is_data_message = 1;
+  optional DataMessage data_message = 2;
+  optional PostMessage_ post_message = 3;
 }

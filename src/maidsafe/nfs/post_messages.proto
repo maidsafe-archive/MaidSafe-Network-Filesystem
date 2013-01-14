@@ -1,5 +1,5 @@
 package maidsafe.nfs.protobuf;
-import "maidsafe/nfs/message.proto";
+import "maidsafe/nfs/data_message.proto";
 option optimize_for = LITE_RUNTIME;
 
 // MAID Client send to MAID Account Holder
@@ -27,7 +27,7 @@ message ConnectMessage {
 message PostMessage_ {
   required int32 post_action_type = 1;
   required int32 destination_persona_type = 2;
-  required Message.Source source = 3;
+  required DataMessage.Source source = 3;
   required bytes name = 4;
   required bytes content = 5;
   optional bytes signature = 6;
