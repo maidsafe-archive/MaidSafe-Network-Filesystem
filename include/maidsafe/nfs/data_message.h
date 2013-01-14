@@ -9,8 +9,8 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_POST_MESSAGE_H_
-#define MAIDSAFE_NFS_POST_MESSAGE_H_
+#ifndef MAIDSAFE_NFS_DATA_MESSAGE_H_
+#define MAIDSAFE_NFS_DATA_MESSAGE_H_
 
 #include <string>
 
@@ -20,7 +20,6 @@
 
 #include "maidsafe/detail/data_type_values.h"
 
-#include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -28,29 +27,40 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace protobuf { class PostMessage; }
+namespace protobuf { class DataMessage; }
 
-class PostMessage {
+class DataMessage {
  public:
-  typedef TaggedValue<NonEmptyString, struct SerialisedPostMessageTag> serialised_type;
+  struct Source {
+    Source(PersonaType persona_type_in, const NodeId& node_id_in)
+        : persona_type(persona_type_in),
+          node_id(node_id_in) {}
+    Source() : persona_type(), node_id() {}
+    PersonaType persona_type;
+    NodeId node_id;
+  };
 
-  PostMessage(PostActionType post_action_type,
+  typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
+
+  DataMessage(ActionType action_type,
               PersonaType destination_persona_type,
-              DataMessage::Source source,
+              Source source,
+              maidsafe::detail::DataTagValue data_type,
               const Identity& name,
               const NonEmptyString& content,
               const asymm::Signature& signature);
-  PostMessage(const PostMessage& other);
-  PostMessage& operator=(const PostMessage& other);
-  PostMessage(PostMessage&& other);
-  PostMessage& operator=(PostMessage&& other);
+  DataMessage(const DataMessage& other);
+  DataMessage& operator=(const DataMessage& other);
+  DataMessage(DataMessage&& other);
+  DataMessage& operator=(DataMessage&& other);
 
-  explicit PostMessage(const serialised_type& serialised_message);
+  explicit DataMessage(const serialised_type& serialised_message);
   serialised_type Serialise() const;
 
-  PostActionType post_action_type() const { return post_action_type_; }
+  ActionType action_type() const { return action_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
-  DataMessage::Source source() const { return source_; }
+  Source source() const { return source_; }
+  maidsafe::detail::DataTagValue data_type() const { return data_type_; }
   Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
   asymm::Signature signature() const { return signature_; }
@@ -58,9 +68,10 @@ class PostMessage {
  private:
   bool ValidateInputs() const;
 
-  PostActionType post_action_type_;
+  ActionType action_type_;
   PersonaType destination_persona_type_;
-  DataMessage::Source source_;
+  Source source_;
+  maidsafe::detail::DataTagValue data_type_;
   Identity name_;
   NonEmptyString content_;
   asymm::Signature signature_;
@@ -70,4 +81,4 @@ class PostMessage {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_POST_MESSAGE_H_
+#endif  // MAIDSAFE_NFS_DATA_MESSAGE_H_

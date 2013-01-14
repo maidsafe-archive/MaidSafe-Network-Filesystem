@@ -9,26 +9,28 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/post_message.h"
+#include "maidsafe/nfs/data_message.h"
 
 #include "maidsafe/common/error.h"
 
-#include "maidsafe/nfs/post_messages_pb.h"
+#include "maidsafe/nfs/message_pb.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
 
-PostMessage::PostMessage(PostActionType post_action_type,
+DataMessage::DataMessage(ActionType action_type,
                          PersonaType destination_persona_type,
-                         DataMessage::Source::Source source,
+                         Source source,
+                         maidsafe::detail::DataTagValue data_type,
                          const Identity& name,
                          const NonEmptyString& content,
                          const asymm::Signature& signature)
-    : post_action_type_(post_action_type),
+    : action_type_(action_type),
       destination_persona_type_(destination_persona_type),
       source_(source),
+      data_type_(data_type),
       name_(name),
       content_(content),
       signature_(signature) {
@@ -36,36 +38,40 @@ PostMessage::PostMessage(PostActionType post_action_type,
     ThrowError(NfsErrors::invalid_parameter);
 }
 
-PostMessage::PostMessage(const PostMessage& other)
-    : post_action_type_(other.post_action_type_),
+DataMessage::DataMessage(const DataMessage& other)
+    : action_type_(other.action_type_),
       destination_persona_type_(other.destination_persona_type_),
       source_(other.source_),
+      data_type_(other.data_type_),
       name_(other.name_),
       content_(other.content_),
       signature_(other.signature_) {}
 
-PostMessage& PostMessage::operator=(const PostMessage& other) {
-  post_action_type_ = other.post_action_type_;
+DataMessage& DataMessage::operator=(const DataMessage& other) {
+  action_type_ = other.action_type_;
   destination_persona_type_ = other.destination_persona_type_;
   source_ = other.source_;
+  data_type_ = other.data_type_;
   name_ = other.name_;
   content_ = other.content_;
   signature_ = other.signature_;
   return *this;
 }
 
-PostMessage::PostMessage(PostMessage&& other)
-    : post_action_type_(std::move(other.post_action_type_)),
+DataMessage::DataMessage(DataMessage&& other)
+    : action_type_(std::move(other.action_type_)),
       destination_persona_type_(std::move(other.destination_persona_type_)),
       source_(std::move(other.source_)),
+      data_type_(std::move(other.data_type_)),
       name_(std::move(other.name_)),
       content_(std::move(other.content_)),
       signature_(std::move(other.signature_)) {}
 
-PostMessage& PostMessage::operator=(PostMessage&& other) {
-  post_action_type_ = std::move(other.post_action_type_);
+DataMessage& DataMessage::operator=(DataMessage&& other) {
+  action_type_ = std::move(other.action_type_);
   destination_persona_type_ = std::move(other.destination_persona_type_);
   source_ = std::move(other.source_);
+  data_type_ = std::move(other.data_type_);
   name_ = std::move(other.name_);
   content_ = std::move(other.content_);
   signature_ = std::move(other.signature_);
@@ -75,49 +81,56 @@ PostMessage& PostMessage::operator=(PostMessage&& other) {
 // TODO(Fraser#5#): 2012-12-24 - Once MSVC eventually handles delegating constructors, we can make
 //                  this more efficient by using a lambda which returns the parsed protobuf
 //                  inside a private constructor taking a single arg of type protobuf.
-PostMessage::PostMessage(const serialised_type& serialised_message)
-    : post_action_type_(),
+DataMessage::DataMessage(const serialised_type& serialised_message)
+    : action_type_(),
       destination_persona_type_(),
       source_(),
+      data_type_(),
       name_(),
       content_(),
       signature_() {
-  protobuf::PostMessage_ proto_post_message;
-  if (!proto_post_message.ParseFromString(serialised_message->string()))
+  protobuf::DataMessage proto_data_message;
+  if (!proto_data_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
-  post_action_type_ = static_cast<PostActionType>(proto_post_message.post_action_type());
+  action_type_ = static_cast<ActionType>(proto_data_message.action_type());
   destination_persona_type_ =
-      static_cast<PersonaType>(proto_post_message.destination_persona_type());
-  source_.persona_type = static_cast<PersonaType>(proto_post_message.source().persona_type());
-  source_.node_id = NodeId(proto_post_message.source().node_id());
-  name_ = Identity(proto_post_message.name());
-  content_ = NonEmptyString(proto_post_message.content());
-  if (proto_post_message.has_signature())
-    signature_ = asymm::Signature(proto_post_message.signature());
+      static_cast<PersonaType>(proto_data_message.destination_persona_type());
+  source_.persona_type = static_cast<PersonaType>(proto_data_message.source().persona_type());
+  source_.node_id = NodeId(proto_data_message.source().node_id());
+  data_type_ = static_cast<maidsafe::detail::DataTagValue>(proto_data_message.data_type());
+  name_ = Identity(proto_data_message.name());
+  if (proto_data_message.has_content())
+    content_ = NonEmptyString(proto_data_message.content());
+  if (proto_data_message.has_signature())
+    signature_ = asymm::Signature(proto_data_message.signature());
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
 
-bool PostMessage::ValidateInputs() const {
-  return name_.IsInitialised() && !source_.node_id.IsZero();
+bool DataMessage::ValidateInputs() const {
+  return (static_cast<int32_t>(data_type_) >= 0) &&
+         name_.IsInitialised() &&
+         !source_.node_id.IsZero();
 }
 
-PostMessage::serialised_type PostMessage::Serialise() const {
+DataMessage::serialised_type DataMessage::Serialise() const {
   serialised_type serialised_message;
   try {
-    protobuf::PostMessage_ proto_post_message;
-    proto_post_message.set_post_action_type(static_cast<int32_t>(post_action_type_));
-    proto_post_message.set_destination_persona_type(
+    protobuf::DataMessage proto_data_message;
+    proto_data_message.set_action_type(static_cast<int32_t>(action_type_));
+    proto_data_message.set_destination_persona_type(
         static_cast<int32_t>(destination_persona_type_));
-    proto_post_message.mutable_source()->set_persona_type(
+    proto_data_message.mutable_source()->set_persona_type(
         static_cast<int32_t>(source_.persona_type));
-    proto_post_message.mutable_source()->set_node_id(source_.node_id.string());
-    proto_post_message.set_name(name_.string());
-    proto_post_message.set_content(content_.string());
+    proto_data_message.mutable_source()->set_node_id(source_.node_id.string());
+    proto_data_message.set_data_type(static_cast<int32_t>(data_type_));
+    proto_data_message.set_name(name_.string());
+    if (content_.IsInitialised())
+      proto_data_message.set_content(content_.string());
     if (signature_.IsInitialised())
-      proto_post_message.set_signature(signature_.string());
+      proto_data_message.set_signature(signature_.string());
 
-    serialised_message = serialised_type(NonEmptyString(proto_post_message.SerializeAsString()));
+    serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
   }
   catch(const std::system_error&) {
     ThrowError(NfsErrors::invalid_parameter);

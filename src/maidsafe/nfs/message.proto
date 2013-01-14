@@ -4,7 +4,6 @@ import "maidsafe/nfs/data_message.proto";
 import "maidsafe/nfs/post_messages.proto";
 
 message Message {
-  required bool is_data_message = 1;
-  optional DataMessage data_message = 2;
-  optional PostMessage_ post_message = 3;
+  optional DataMessage data_message = 1;
+  optional PostMessage_ post_message = 2;
 }

@@ -20,6 +20,8 @@
 
 #include "maidsafe/detail/data_type_values.h"
 
+#include "maidsafe/nfs/data_message.h"
+#include "maidsafe/nfs/post_message.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -31,50 +33,26 @@ namespace protobuf { class Message; }
 
 class Message {
  public:
-  struct Source {
-    Source(PersonaType persona_type_in, const NodeId& node_id_in)
-        : persona_type(persona_type_in),
-          node_id(node_id_in) {}
-    Source() : persona_type(), node_id() {}
-    PersonaType persona_type;
-    NodeId node_id;
-  };
-
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
-  Message(ActionType action_type,
-          PersonaType destination_persona_type,
-          Source source,
-          maidsafe::detail::DataTagValue data_type,
-          const Identity& name,
-          const NonEmptyString& content,
-          const asymm::Signature& signature);
+  explicit Message(const DataMessage& data_message);
+  explicit Message(const PostMessage& post_message);
+  explicit Message(const serialised_type& serialised_message);
+
   Message(const Message& other);
   Message& operator=(const Message& other);
   Message(Message&& other);
-  Message& operator=(Message&& other);
 
-  explicit Message(const serialised_type& serialised_message);
   serialised_type Serialise() const;
-
-  ActionType action_type() const { return action_type_; }
-  PersonaType destination_persona_type() const { return destination_persona_type_; }
-  Source source() const { return source_; }
-  maidsafe::detail::DataTagValue data_type() const { return data_type_; }
-  Identity name() const { return name_; }
-  NonEmptyString content() const { return content_; }
-  asymm::Signature signature() const { return signature_; }
+  bool is_data_message() const { return is_data_message_; }
+  //  throws
+  DataMessage data_message() const;
+  //  throws
+  PostMessage post_message() const;
 
  private:
-  bool ValidateInputs() const;
-
-  ActionType action_type_;
-  PersonaType destination_persona_type_;
-  Source source_;
-  maidsafe::detail::DataTagValue data_type_;
-  Identity name_;
-  NonEmptyString content_;
-  asymm::Signature signature_;
+  const bool is_data_message_;
+  serialised_type serialised_message_;
 };
 
 }  // namespace nfs
