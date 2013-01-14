@@ -146,44 +146,44 @@ class UtilsTest : public testing::Test {
 
 TYPED_TEST_CASE_P(UtilsTest);
 
-//  TYPED_TEST_P(UtilsTest, BEH_TestHandleGetResponse) {
-//    auto promise(std::make_shared<std::promise<TypeParam>>());  // NOLINT (Fraser)
-//    std::future<TypeParam> future1(promise->get_future());
-//    std::vector<std::string> serialised_messages;
-//    HandleGetResponse<TypeParam>(promise, serialised_messages);
-//    EXPECT_THROW(future1.get(), nfs_error);
-//
-//    std::pair<Identity, NonEmptyString> name_and_content(GetNameAndContent<TypeParam>());
-//
-//    PersonaType destination_persona_type(PersonaType::kDataHolder);
-//    Message::Source source(PersonaType::kClientMaid, NodeId(NodeId::kRandomId));
-//    Message message(ActionType::kGet, destination_persona_type, source,
-//                    TypeParam::name_type::tag_type::kEnumValue, name_and_content.first,
-//                    name_and_content.second, asymm::Signature());
-//
-//    promise = std::make_shared<std::promise<TypeParam>>();  // NOLINT (Fraser)
-//    std::future<TypeParam> future2(promise->get_future());
-//    serialised_messages.push_back(message.Serialise()->string());
-//    HandleGetResponse<TypeParam>(promise, serialised_messages);
-//    auto data(future2.get());
-//    EXPECT_EQ(data.name().data, name_and_content.first);
-//  }
-//
-//  REGISTER_TYPED_TEST_CASE_P(UtilsTest,
-//                             BEH_TestHandleGetResponse);
-//
-//  typedef testing::Types<passport::PublicAnmid,
-//                         passport::PublicAnsmid,
-//                         passport::PublicAntmid,
-//                         passport::PublicAnmaid,
-//                         passport::PublicMaid,
-//                         passport::PublicPmid,
-//                         passport::Mid,
-//                         passport::Smid,
-//                         passport::Tmid,
-//                         passport::PublicAnmpid,
-//                         passport::PublicMpid> DataTypes;
-//  INSTANTIATE_TYPED_TEST_CASE_P(All, UtilsTest, DataTypes);
+TYPED_TEST_P(UtilsTest, BEH_TestHandleGetResponse) {
+  auto promise(std::make_shared<std::promise<TypeParam>>());  // NOLINT (Fraser)
+  std::future<TypeParam> future1(promise->get_future());
+  std::vector<std::string> serialised_messages;
+  HandleGetResponse<TypeParam>(promise, serialised_messages);
+  EXPECT_THROW(future1.get(), nfs_error);
+
+  std::pair<Identity, NonEmptyString> name_and_content(GetNameAndContent<TypeParam>());
+
+  PersonaType destination_persona_type(PersonaType::kDataHolder);
+  Message::Source source(PersonaType::kClientMaid, NodeId(NodeId::kRandomId));
+  Message message(ActionType::kGet, destination_persona_type, source,
+                  TypeParam::name_type::tag_type::kEnumValue, name_and_content.first,
+                  name_and_content.second, asymm::Signature());
+
+  promise = std::make_shared<std::promise<TypeParam>>();  // NOLINT (Fraser)
+  std::future<TypeParam> future2(promise->get_future());
+  serialised_messages.push_back(message.Serialise()->string());
+  HandleGetResponse<TypeParam>(promise, serialised_messages);
+  auto data(future2.get());
+  EXPECT_EQ(data.name().data, name_and_content.first);
+}
+
+REGISTER_TYPED_TEST_CASE_P(UtilsTest,
+                           BEH_TestHandleGetResponse);
+
+typedef testing::Types<passport::PublicAnmid,
+                       passport::PublicAnsmid,
+                       passport::PublicAntmid,
+                       passport::PublicAnmaid,
+                       passport::PublicMaid,
+                       passport::PublicPmid,
+                       passport::Mid,
+                       passport::Smid,
+                       passport::Tmid,
+                       passport::PublicAnmpid,
+                       passport::PublicMpid> DataTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(All, UtilsTest, DataTypes);
 
 }  // namespace test
 
