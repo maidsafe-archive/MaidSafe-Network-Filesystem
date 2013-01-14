@@ -30,7 +30,7 @@ namespace nfs {
 template<typename SigningFob>
 class NoDelete {
  public:
-  NoDelete(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+  NoDelete(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
   template<typename Data>
   void Delete(const Message& /*message*/, OnError /*on_error*/) {}
 

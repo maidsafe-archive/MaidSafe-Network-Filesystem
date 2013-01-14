@@ -42,7 +42,6 @@ class NoGet {
   ~NoGet() {}
 };
 
-
 template<PersonaType persona>
 class GetFromMetadataManager {
  public:
@@ -52,18 +51,15 @@ class GetFromMetadataManager {
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
-    auto promise(std::make_shared<std::promise<Data>>());  // NOLINT (Fraser)
-    std::future<Data> future(promise->get_future());
-    routing::ResponseFunctor callback =
-        [promise](const std::vector<std::string>& serialised_messages) {
-          HandleGetResponse(promise, serialised_messages);
-        };
     Message message(ActionType::kGet, PersonaType::kMetadataManager, source_,
                     Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
                     asymm::Signature());
-    routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
-                  routing::DestinationType::kGroup, IsCacheable<Data>());
-    return std::move(future);
+    auto routing_futures(std::make_shared<std::vector<std::future<std::string>>>(
+        routing_.SendGroup(NodeId(name->string()), message.Serialise()->string(),
+                           IsCacheable<Data>())));
+    auto promise(std::make_shared<std::promise<Data>>());
+    HandleGetFutures(promise, routing_futures);
+    return promise->get_future();
   }
 
  protected:
