@@ -4,6 +4,7 @@ import "maidsafe/nfs/data_message.proto";
 import "maidsafe/nfs/post_messages.proto";
 
 message Message {
-  optional DataMessage data_message = 1;
-  optional PostMessage_ post_message = 2;
+  required int32 message_type = 1;
+  required bytes serialised_message = 2;
+  optional bytes signature = 3;
 }

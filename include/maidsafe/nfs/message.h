@@ -35,7 +35,7 @@ class Message {
  public:
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
-  template<typename MessageType>
+  template<typename SerialisedType>
   Message(const MessageType& message);
 
   explicit Message(const serialised_type& serialised_message);
@@ -52,7 +52,7 @@ class Message {
 
  private:
   bool is_data_message_;
-  serialised_type serialised_message_;
+  SerialisedType serialised_message_;
 };
 
 template<typename MessageType>

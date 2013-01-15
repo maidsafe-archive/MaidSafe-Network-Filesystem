@@ -12,6 +12,6 @@ message DataMessage {
   required int32 data_type = 4;
   required bytes name = 5;
   optional bytes content = 6;
-  optional bytes signature = 7;
+  optional int32 version = 7;
   required int32 message_id = 8;
 }
