@@ -36,7 +36,7 @@ class Message {
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
   template<typename SerialisedType>
-  Message(const MessageType& message);
+  Message(const SerialisedType& serialised_inner_message);
 
   explicit Message(const serialised_type& serialised_message);
 
@@ -47,24 +47,23 @@ class Message {
   serialised_type Serialise() const;
   bool is_data_message() const { return is_data_message_; }
 
-  template<typename MessageType>
-  MessageType inner_message();
+  template<typename SerialisedType>
+  SerialisedType inner_message();
 
  private:
   bool is_data_message_;
-  SerialisedType serialised_message_;
+  NonEmptyString serialised_inner_message_;
 };
 
-template<typename MessageType>
-Message::Message(const MessageType& message)
-    : is_data_message_(false),
-      serialised_message_(Message::serialised_type(NonEmptyString(message.Serialise()))) {}
+template<typename SerialisedType>
+Message::Message(const SerialisedType& serialised_inner_message)
+    : is_data_message_(false), // FIXME
+      serialised_inner_message_(NonEmptyString(serialised_inner_message->string())) {}
 
 
-template<typename MessageType>
-MessageType Message::inner_message() {
-  return MessageType(typename MessageType::serialised_type(
-                       NonEmptyString(serialised_message_->string())));
+template<typename SerialisedType>
+SerialisedType Message::inner_message() {
+  return (SerialisedType(serialised_inner_message_));
 }
 
 }  // namespace nfs

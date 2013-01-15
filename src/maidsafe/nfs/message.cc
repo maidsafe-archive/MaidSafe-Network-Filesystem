@@ -22,45 +22,34 @@ namespace nfs {
 
 Message::Message(const Message& other)
     : is_data_message_(other.is_data_message_),
-      serialised_message_(other.serialised_message_) {}
+      serialised_inner_message_(other.serialised_inner_message_) {}
 
 Message& Message::operator=(const Message& other) {
   is_data_message_ = other.is_data_message_;
-  serialised_message_ = other.serialised_message_;
+  serialised_inner_message_ = other.serialised_inner_message_;
   return *this;
 }
 
 Message::Message(Message&& other)
     : is_data_message_(std::move(other.is_data_message_)),
-      serialised_message_(std::move(other.serialised_message_)) {}
+      serialised_inner_message_(std::move(other.serialised_inner_message_)) {}
 
 Message::Message(const serialised_type& serialised_message)
     : is_data_message_(false),
-      serialised_message_() {
+      serialised_inner_message_() {
   protobuf::Message proto_message;
   if (!proto_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
-  is_data_message_ = (proto_message.has_data_message() ? true : false);
-  if (is_data_message_) {
-    serialised_message_ = serialised_type(NonEmptyString(proto_message.data_message().SerializeAsString()));
-  } else {
-    serialised_message_ = serialised_type(NonEmptyString(proto_message.post_message().SerializeAsString()));
-  }
+  is_data_message_ = (proto_message.message_type() == 0);
+  serialised_inner_message_ = NonEmptyString(proto_message.serialised_message());
 }
 
 Message::serialised_type Message::Serialise() const {
   serialised_type serialised_message;
   try {
     protobuf::Message proto_message;
-    if (is_data_message()) {
-      protobuf::DataMessage *data_message = proto_message.mutable_data_message();
-      if (!data_message->ParseFromString(serialised_message_->string()))
-        ThrowError(NfsErrors::message_parsing_error);
-    } else {
-      protobuf::PostMessage_ *post_message = proto_message.mutable_post_message();
-      if (!post_message->ParseFromString(serialised_message_->string()))
-        ThrowError(NfsErrors::message_parsing_error);
-    }
+    proto_message.set_message_type(static_cast<protobuf::Message::MessageType>(!is_data_message_)); // FIXME
+    proto_message.set_serialised_message(serialised_inner_message_.string());
     serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
   }
   catch(const std::system_error&) {

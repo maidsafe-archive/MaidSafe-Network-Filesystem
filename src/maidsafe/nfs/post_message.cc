@@ -32,7 +32,7 @@ PostMessage::PostMessage(PostActionType post_action_type,
       name_(name),
       content_(content),
       signature_(signature),
-      message_id_(2) {  //FIXME get sequential message from a common function
+      message_id_(2) {  // FIXME get sequential message from a common function
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }

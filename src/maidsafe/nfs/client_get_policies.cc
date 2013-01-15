@@ -21,7 +21,7 @@ std::future<passport::PublicPmid> GetFromKeyFile::Get(const passport::PublicPmid
   std::promise<passport::PublicPmid> promise;
   try {
     auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
-        [&name](const passport::PublicPmid& pmid) { return pmid.name() == name; }));
+        [&name](const passport::PublicPmid& pmid) { return pmid.name() == name; }));  //NOLINT
     if (itr == kAllPmids_.end())
       ThrowError(NfsErrors::failed_to_get_data);
     promise.set_value(*itr);
