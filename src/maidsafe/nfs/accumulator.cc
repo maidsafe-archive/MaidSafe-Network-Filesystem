@@ -9,30 +9,30 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/request_queue.h"
+#include "maidsafe/nfs/accumulator.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
-RequestQueue::RequestQueue()
-  : requests_() {}
+Accumulator::Accumulator()
+  : pending_requests_(), handled_requests_(), mutex_() {}
 
-bool RequestQueue::Push(int id, const Identity& name) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  auto it = std::find_if(requests_.begin(),
-                         requests_.end(),
-                         [&id, &name](const Requests::value_type& request) {
-                            return request.first == id && request.second == name;
-                         });
-  if (it == requests_.end()) {
-    requests_.push_back(std::make_pair(id, name));
-    if (requests_.size() > 1000)
-      requests_.pop_front();
-    return true;
-  }
-  return false;
-}
+// bool Accumulator::Push(int id, const Identity& name) {
+//   std::lock_guard<std::mutex> lock(mutex_);
+//   auto it = std::find_if(requests_.begin(),
+//                          requests_.end(),
+//                          [&id, &name](const Requests::value_type& request) {
+//                             return request.first == id && request.second == name;
+//                          });
+//   if (it == requests_.end()) {
+//     requests_.push_back(std::make_pair(id, name));
+//     if (requests_.size() > 1000)
+//       requests_.pop_front();
+//     return true;
+//   }
+//   return false;
+// }
 
 }  // namespace nfs
 
