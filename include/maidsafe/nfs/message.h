@@ -64,6 +64,8 @@ class Message {
   Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
   asymm::Signature signature() const { return signature_; }
+  // TODO(Team) : implementation of id()
+  NonEmptyString id() const { return NonEmptyString(); }
 
  private:
   bool ValidateInputs() const;

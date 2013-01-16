@@ -34,20 +34,19 @@ class Accumulator {
     ReturnCode ret_code;
   };
   // Identity part is id() and personal_type()
-  typedef std::deque<std::tuple<NonEmptyString, PersonaType, Request>> Requests;
-  typedef std::deque<std::tuple<NonEmptyString, PersonaType, ReturnCode>> HandledRequests;
+  typedef std::pair<NonEmptyString, PersonaType> RequestsIdentity;
 
   Accumulator();
 
-  bool CheckHandled(const NonEmptyString& id,
-                    const PersonaType& personal_type,
-                    ReturnCode& ret_code);
+  bool CheckHandled(const RequestsIdentity& request_identity, ReturnCode& ret_code);
   std::vector<ReturnCode> PushRequest(const Request& request);
-  std::vector<Request> SetHandled(const NonEmptyString& msg_id,
-                                  const PersonaType& personal_type,
+  std::vector<Request> SetHandled(const RequestsIdentity& request_identity,
                                   const ReturnCode& ret_code);
 
  private:
+  typedef std::deque<std::pair<RequestsIdentity, Request>> Requests;
+  typedef std::deque<std::pair<RequestsIdentity, ReturnCode>> HandledRequests;
+
   Requests pending_requests_;
   HandledRequests handled_requests_;
   mutable std::mutex mutex_;
