@@ -1,14 +1,10 @@
 package maidsafe.nfs.protobuf;
 option optimize_for = LITE_RUNTIME;
 import "maidsafe/nfs/data_message.proto";
-import "maidsafe/nfs/post_messages.proto";
+import "maidsafe/nfs/generic_messages.proto";
 
 message Message {
-  enum MessageType {
-    kDataMessage = 0;
-    kGenericMessage = 1;
-  }
-  required MessageType message_type = 1;
+  required int32 message_type = 1;
   required bytes serialised_message = 2;
   optional bytes signature = 3;
 }

@@ -21,7 +21,7 @@
 #include "maidsafe/detail/data_type_values.h"
 
 #include "maidsafe/nfs/data_message.h"
-#include "maidsafe/nfs/post_message.h"
+#include "maidsafe/nfs/generic_message.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -31,39 +31,48 @@ namespace nfs {
 
 namespace protobuf { class Message; }
 
+enum class MessageType : int32_t {
+  kDataMessage = 1,
+  kGenericMessage = 2
+};
+
 class Message {
  public:
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
   template<typename SerialisedType>
   Message(const SerialisedType& serialised_inner_message);
-
+  template<typename SerialisedType>
+  Message(const SerialisedType& serialised_inner_message, const asymm::Signature& signature);
   explicit Message(const serialised_type& serialised_message);
-
   Message(const Message& other);
   Message& operator=(const Message& other);
   Message(Message&& other);
 
   serialised_type Serialise() const;
-  bool is_data_message() const { return is_data_message_; }
+  MessageType message_type() const { return message_type_; }
 
   template<typename SerialisedType>
   SerialisedType inner_message();
 
+  asymm::Signature signature() const { return signature_; }
+
  private:
-  bool is_data_message_;
+  MessageType message_type_;
   NonEmptyString serialised_inner_message_;
+  asymm::Signature signature_;
 };
 
 template<typename SerialisedType>
-Message::Message(const SerialisedType& serialised_inner_message)
-    : is_data_message_(false), // FIXME
-      serialised_inner_message_(NonEmptyString(serialised_inner_message->string())) {}
-
+Message::Message(const SerialisedType& serialised_inner_message,
+                 const asymm::Signature& signature)
+    : message_type_(MessageType::kDataMessage), // FIXME Fraser
+      serialised_inner_message_(NonEmptyString(serialised_inner_message->string())),
+      signature_(signature) {}
 
 template<typename SerialisedType>
 SerialisedType Message::inner_message() {
-  return (SerialisedType(serialised_inner_message_));
+  return SerialisedType(serialised_inner_message_);
 }
 
 }  // namespace nfs

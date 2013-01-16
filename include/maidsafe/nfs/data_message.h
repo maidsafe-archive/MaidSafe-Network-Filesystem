@@ -47,8 +47,7 @@ class DataMessage {
               Source source,
               maidsafe::detail::DataTagValue data_type,
               const Identity& name,
-              const NonEmptyString& content,
-              const asymm::Signature& signature);
+              const NonEmptyString& content);
   DataMessage(const DataMessage& other);
   DataMessage& operator=(const DataMessage& other);
   DataMessage(DataMessage&& other);
@@ -63,7 +62,6 @@ class DataMessage {
   maidsafe::detail::DataTagValue data_type() const { return data_type_; }
   Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
-  asymm::Signature signature() const { return signature_; }
 
  private:
   bool ValidateInputs() const;
@@ -74,7 +72,6 @@ class DataMessage {
   maidsafe::detail::DataTagValue data_type_;
   Identity name_;
   NonEmptyString content_;
-  asymm::Signature signature_;
   int32_t message_id_;
 };
 

@@ -14,7 +14,7 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/utils.h"
 
-#include "maidsafe/nfs/post_messages_pb.h"
+#include "maidsafe/nfs/generic_messages_pb.h"
 
 
 namespace maidsafe {

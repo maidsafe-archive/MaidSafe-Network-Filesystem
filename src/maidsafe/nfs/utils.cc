@@ -17,7 +17,7 @@ namespace maidsafe {
 namespace nfs {
 
 void HandlePostResponse(OnPostError /*on_error_functor*/,
-                        PostMessage /*original_post_message*/,
+                        GenericMessage /*original_generic_message*/,
                         const std::vector<std::string>& /*serialised_messages*/) {
   // TODO(Team): BEFORE_RELEASE implement
 }

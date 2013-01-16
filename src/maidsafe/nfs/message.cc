@@ -21,36 +21,44 @@ namespace maidsafe {
 namespace nfs {
 
 Message::Message(const Message& other)
-    : is_data_message_(other.is_data_message_),
-      serialised_inner_message_(other.serialised_inner_message_) {}
+    : message_type_(other.message_type_),
+      serialised_inner_message_(other.serialised_inner_message_),
+      signature_(other.signature_) {}
 
 Message& Message::operator=(const Message& other) {
-  is_data_message_ = other.is_data_message_;
+  message_type_ = other.message_type_;
   serialised_inner_message_ = other.serialised_inner_message_;
+  signature_ = other.signature_;
   return *this;
 }
 
 Message::Message(Message&& other)
-    : is_data_message_(std::move(other.is_data_message_)),
-      serialised_inner_message_(std::move(other.serialised_inner_message_)) {}
+    : message_type_(std::move(other.message_type_)),
+      serialised_inner_message_(std::move(other.serialised_inner_message_)),
+      signature_(std::move(other.signature_)) {}
 
 Message::Message(const serialised_type& serialised_message)
-    : is_data_message_(false),
-      serialised_inner_message_() {
+    : message_type_(MessageType::kDataMessage),
+      serialised_inner_message_(),
+      signature_() {
   protobuf::Message proto_message;
   if (!proto_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
-  is_data_message_ = (proto_message.message_type() == 0);
+  message_type_ = static_cast<MessageType>(proto_message.message_type());
   serialised_inner_message_ = NonEmptyString(proto_message.serialised_message());
+  if (proto_message.has_signature())
+    signature_ = asymm::Signature(proto_message.signature());
 }
 
 Message::serialised_type Message::Serialise() const {
   serialised_type serialised_message;
   try {
     protobuf::Message proto_message;
-    proto_message.set_message_type(static_cast<protobuf::Message::MessageType>(!is_data_message_)); // FIXME
+    proto_message.set_message_type(static_cast<int32_t>(message_type_));
     proto_message.set_serialised_message(serialised_inner_message_.string());
     serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
+    if (signature_.IsInitialised())
+      proto_message.set_signature(signature_.string());
   }
   catch(const std::system_error&) {
     ThrowError(NfsErrors::invalid_parameter);

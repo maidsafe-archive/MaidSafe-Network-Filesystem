@@ -24,7 +24,7 @@ message ConnectMessage {
 }
 
 // Trailing underscore to avoid name conflict with MSVC's #define PostMessage in WinUser.h
-message PostMessage_ {
+message GenericMessage {
   required int32 post_action_type = 1;
   required int32 destination_persona_type = 2;
   required DataMessage.Source source = 3;

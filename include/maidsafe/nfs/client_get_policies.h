@@ -59,9 +59,8 @@ class GetFromMetadataManager {
           HandleGetResponse(promise, serialised_messages);
         };
     DataMessage data_message(ActionType::kGet, PersonaType::kMetadataManager, source_,
-                             Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
-                             asymm::Signature());
-    Message message(data_message);
+                             Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
+    Message message(data_message.Serialise());
     routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
     return std::move(future);

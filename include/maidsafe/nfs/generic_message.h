@@ -9,8 +9,8 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_POST_MESSAGE_H_
-#define MAIDSAFE_NFS_POST_MESSAGE_H_
+#ifndef MAIDSAFE_NFS_GENERIC_MESSAGE_H_
+#define MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 
 #include <string>
 
@@ -28,24 +28,23 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace protobuf { class PostMessage; }
+namespace protobuf { class GenericMessage; }
 
-class PostMessage {
+class GenericMessage {
  public:
-  typedef TaggedValue<NonEmptyString, struct SerialisedPostMessageTag> serialised_type;
+  typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
 
-  PostMessage(PostActionType post_action_type,
-              PersonaType destination_persona_type,
-              DataMessage::Source source,
-              const Identity& name,
-              const NonEmptyString& content,
-              const asymm::Signature& signature);
-  PostMessage(const PostMessage& other);
-  PostMessage& operator=(const PostMessage& other);
-  PostMessage(PostMessage&& other);
-  PostMessage& operator=(PostMessage&& other);
+  GenericMessage(PostActionType post_action_type,
+                 PersonaType destination_persona_type,
+                 DataMessage::Source source,
+                 const Identity& name,
+                 const NonEmptyString& content);
+  GenericMessage(const GenericMessage& other);
+  GenericMessage& operator=(const GenericMessage& other);
+  GenericMessage(GenericMessage&& other);
+  GenericMessage& operator=(GenericMessage&& other);
 
-  explicit PostMessage(const serialised_type& serialised_message);
+  explicit GenericMessage(const serialised_type& serialised_message);
   serialised_type Serialise() const;
 
   PostActionType post_action_type() const { return post_action_type_; }
@@ -53,7 +52,6 @@ class PostMessage {
   DataMessage::Source source() const { return source_; }
   Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
-  asymm::Signature signature() const { return signature_; }
 
  private:
   bool ValidateInputs() const;
@@ -63,7 +61,6 @@ class PostMessage {
   DataMessage::Source source_;
   Identity name_;
   NonEmptyString content_;
-  asymm::Signature signature_;
   int32_t message_id_;
 };
 
@@ -71,4 +68,4 @@ class PostMessage {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_POST_MESSAGE_H_
+#endif  // MAIDSAFE_NFS_GENERIC_MESSAGE_H_

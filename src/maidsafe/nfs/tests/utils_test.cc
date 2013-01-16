@@ -159,8 +159,8 @@ TYPED_TEST_P(UtilsTest, BEH_TestHandleGetResponse) {
   DataMessage::Source source(PersonaType::kClientMaid, NodeId(NodeId::kRandomId));
   DataMessage data_message(ActionType::kGet, destination_persona_type, source,
                            TypeParam::name_type::tag_type::kEnumValue, name_and_content.first,
-                           name_and_content.second, asymm::Signature());
-  Message message(data_message);
+                           name_and_content.second/*, asymm::Signature()*/);
+  Message message(data_message.Serialise(), asymm::Signature());
   promise = std::make_shared<std::promise<TypeParam>>();  // NOLINT (Fraser)
   std::future<TypeParam> future2(promise->get_future());
   serialised_messages.push_back(message.Serialise()->string());

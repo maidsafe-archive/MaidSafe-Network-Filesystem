@@ -26,7 +26,7 @@
 
 #include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/message.h"
-#include "maidsafe/nfs/post_message.h"
+#include "maidsafe/nfs/generic_message.h"
 #include "maidsafe/nfs/return_code.h"
 #include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/types.h"
@@ -41,9 +41,9 @@ bool IsCacheable() {
   return is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value;
 }
 
-template<typename Data, typename MessageType>
+template<typename Data, typename MessageType, typename SerialisedType>
 Data ValidateAndParse(Message& message) {
-  MessageType data_message(message.inner_message<MessageType>());
+  MessageType data_message((message.inner_message<SerialisedType>()));
   return Data(typename Data::name_type(data_message.name()),
               typename Data::serialised_type(data_message.content()));
 }
@@ -62,7 +62,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
       try {
         // Need '((' when constructing Message to avoid most vexing parse.
         Message message((Message::serialised_type(NonEmptyString(serialised_message))));
-        Data data(ValidateAndParse<Data, DataMessage>(message));
+        Data data(ValidateAndParse<Data, DataMessage, DataMessage::serialised_type>(message));
         promise->set_value(std::move(data));
         return;
       }
@@ -163,9 +163,9 @@ void HandleDeleteResponse(OnError on_error_functor,
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
-void HandlePostResponse(OnPostError /*on_error_functor*/,
-                        PostMessage /*original_post_message*/,
-                        const std::vector<std::string>& /*serialised_messages*/);
+void HandleGenericResponse(OnPostError /*on_error_functor*/,
+                           GenericMessage /*original_generic_message*/,
+                           const std::vector<std::string>& /*serialised_messages*/);
 
 }  // namespace nfs
 

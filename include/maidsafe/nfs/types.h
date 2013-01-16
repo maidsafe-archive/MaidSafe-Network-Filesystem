@@ -22,7 +22,8 @@ namespace maidsafe {
 namespace nfs {
 
 class Message;
-class PostMessage;
+class DataMessage;
+class GenericMessage;
 
 enum class PersonaType : int {
   kMaidAccountHolder,
@@ -45,8 +46,8 @@ enum class PostActionType : int {
   kSynchronise
 };
 
-typedef std::function<void(Message message)> OnError;
-typedef std::function<void(PostMessage message)> OnPostError;
+typedef std::function<void(DataMessage message)> OnError;
+typedef std::function<void(GenericMessage message)> OnPostError;
 
 template <typename Elem, typename Traits>
 std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,

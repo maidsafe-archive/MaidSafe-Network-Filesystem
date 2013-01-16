@@ -25,16 +25,14 @@ DataMessage::DataMessage(ActionType action_type,
                          Source source,
                          maidsafe::detail::DataTagValue data_type,
                          const Identity& name,
-                         const NonEmptyString& content,
-                         const asymm::Signature& signature)
+                         const NonEmptyString& content)
     : action_type_(action_type),
       destination_persona_type_(destination_persona_type),
       source_(source),
       data_type_(data_type),
       name_(name),
       content_(content),
-      signature_(signature),
-      message_id_(1) {  // FIXME get sequential message from a common function
+      message_id_(1) {  // FIXME Fraser get sequential message from a common function
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
@@ -46,7 +44,6 @@ DataMessage::DataMessage(const DataMessage& other)
       data_type_(other.data_type_),
       name_(other.name_),
       content_(other.content_),
-      signature_(other.signature_),
       message_id_(other.message_id_) {}
 
 DataMessage& DataMessage::operator=(const DataMessage& other) {
@@ -56,7 +53,6 @@ DataMessage& DataMessage::operator=(const DataMessage& other) {
   data_type_ = other.data_type_;
   name_ = other.name_;
   content_ = other.content_;
-  signature_ = other.signature_;
   message_id_ = other.message_id_;
   return *this;
 }
@@ -68,7 +64,6 @@ DataMessage::DataMessage(DataMessage&& other)
       data_type_(std::move(other.data_type_)),
       name_(std::move(other.name_)),
       content_(std::move(other.content_)),
-      signature_(std::move(other.signature_)),
       message_id_(std::move(other.message_id_)) {}
 
 DataMessage& DataMessage::operator=(DataMessage&& other) {
@@ -78,7 +73,6 @@ DataMessage& DataMessage::operator=(DataMessage&& other) {
   data_type_ = std::move(other.data_type_);
   name_ = std::move(other.name_);
   content_ = std::move(other.content_);
-  signature_ = std::move(other.signature_);
   message_id_ = std::move(other.message_id_);
   return *this;
 }
@@ -93,7 +87,6 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
       data_type_(),
       name_(),
       content_(),
-      signature_(),
       message_id_() {
   protobuf::DataMessage proto_data_message;
   if (!proto_data_message.ParseFromString(serialised_message->string()))
@@ -107,8 +100,6 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
   name_ = Identity(proto_data_message.name());
   if (proto_data_message.has_content())
     content_ = NonEmptyString(proto_data_message.content());
-  if (proto_data_message.has_signature())
-    signature_ = asymm::Signature(proto_data_message.signature());
   message_id_ = proto_data_message.message_id();
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
@@ -134,8 +125,6 @@ DataMessage::serialised_type DataMessage::Serialise() const {
     proto_data_message.set_name(name_.string());
     if (content_.IsInitialised())
       proto_data_message.set_content(content_.string());
-    if (signature_.IsInitialised())
-      proto_data_message.set_signature(signature_.string());
     proto_data_message.set_message_id(message_id_);
     serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
   }
