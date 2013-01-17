@@ -49,6 +49,8 @@ class Message {
   template<typename InnerMessageType>
   typename InnerMessageType::serialised_type serialised_inner_message() const;
   asymm::Signature signature() const { return signature_; }
+  // TODO(Team) : implementation of id()
+  NonEmptyString id() const { return NonEmptyString(); }
 
  private:
   int32_t inner_message_type_;

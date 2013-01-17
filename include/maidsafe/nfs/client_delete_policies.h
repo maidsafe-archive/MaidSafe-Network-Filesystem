@@ -30,9 +30,9 @@ namespace nfs {
 template<typename SigningFob>
 class NoDelete {
  public:
-  NoDelete(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
+  NoDelete(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
   template<typename Data>
-  void Delete(const Message& /*message*/, DataMessage::OnError /*on_error*/) {}
+  void Delete(const typename Data::name_type& /*name*/, DataMessage::OnError /*on_error*/) {}
 
  protected:
   ~NoDelete() {}
@@ -46,7 +46,7 @@ class DeleteFromMaidAccountHolder {
         source_(MessageSource(PersonaType::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
-  void Delete(const Message& /*message*/, DataMessage::OnError /*on_error*/) {}
+  void Delete(const typename Data::name_type& /*name*/, DataMessage::OnError /*on_error*/) {}
 
  protected:
   ~DeleteFromMaidAccountHolder() {}
