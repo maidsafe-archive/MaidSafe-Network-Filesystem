@@ -58,7 +58,7 @@ class Message {
 
 template<typename InnerMessageType>
 typename InnerMessageType::serialised_type Message::serialised_inner_message() const {
-  return InnerMessageType::serialised_type(serialised_inner_message_);
+  return typename InnerMessageType::serialised_type(serialised_inner_message_);
 }
 
 }  // namespace nfs

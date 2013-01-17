@@ -57,9 +57,10 @@ class PutToDataHolder {
 
   template<typename Data>
   void Put(const Data& data, DataMessage::OnError on_error) {
-    DataMessage::Data data(Data::name_type::tag_type::kEnumValue, data.name(), data.Serialise());
+    DataMessage::Data message_data(Data::name_type::tag_type::kEnumValue, data.name(),
+                                   data.Serialise());
     DataMessage data_message(DataMessage::ActionType::kPut, PersonaType::kDataHolder, source_,
-                             data);
+                             message_data);
     auto serialised_and_signed(data_message.SerialiseAndSign(signing_fob_.private_key()));
     Message message(serialised_and_signed.first, serialised_and_signed.second);
     routing::ResponseFunctor callback =
@@ -89,7 +90,7 @@ class PutToMaidAccountHolder {
   template<typename Data>
   void Put(const Data& data, DataMessage::OnError on_error) {
     NonEmptyString content(data.Serialise());
-    Message message(ActionType::kPut, PersonaType::kDataHolder, source_,
+    Message message(DataMessage::ActionType::kPut, PersonaType::kDataHolder, source_,
                     Data::name_type::tag_type::kEnumValue, data.name(), content,
                     asymm::Sign(content, signing_fob_.private_key()));
     routing::ResponseFunctor callback =
