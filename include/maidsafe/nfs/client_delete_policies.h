@@ -32,7 +32,7 @@ class NoDelete {
  public:
   NoDelete(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}
   template<typename Data>
-  void Delete(const Message& /*message*/, OnError /*on_error*/) {}
+  void Delete(const typename Data::name_type& /*name*/, OnError /*on_error*/) {}
 
  protected:
   ~NoDelete() {}
@@ -46,7 +46,7 @@ class DeleteFromMaidAccountHolder {
         source_(Message::Source(PersonaType::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
-  void Delete(const Message& /*message*/, OnError /*on_error*/) {}
+  void Delete(const typename Data::name_type& /*name*/, OnError /*on_error*/) {}
 
  protected:
   ~DeleteFromMaidAccountHolder() {}
