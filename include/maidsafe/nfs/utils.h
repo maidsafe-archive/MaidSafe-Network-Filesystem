@@ -90,8 +90,8 @@ void HandlePutResponse(DataMessage::OnError on_error_functor,
                        DataMessage original_data_message,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
-    LOG(kError) << "No responses received for Put " << original_data_message.data_type()
-                << "  " << HexSubstr(original_data_message.name());
+    LOG(kError) << "No responses received for Put " << original_data_message.data().type
+                << "  " << HexSubstr(original_data_message.data().name);
     on_error_functor(std::move(original_data_message));
   }
 
@@ -105,8 +105,8 @@ void HandlePutResponse(DataMessage::OnError on_error_functor,
         ++success_count;
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Put "
-                      << original_data_message.data_type() << " "
-                      << HexSubstr(original_data_message.name());
+                      << original_data_message.data().type << " "
+                      << HexSubstr(original_data_message.data().name);
         ++failure_count;
       }
     }
@@ -117,13 +117,13 @@ void HandlePutResponse(DataMessage::OnError on_error_functor,
   }
 
   if (success_count == 0) {
-    LOG(kError) << "No successful responses received for Put " << original_data_message.data_type()
-                << "  " << HexSubstr(original_data_message.name()) << "  received "
+    LOG(kError) << "No successful responses received for Put " << original_data_message.data().type
+                << "  " << HexSubstr(original_data_message.data().name) << "  received "
                 << failure_count << " failures.";
     on_error_functor(std::move(original_data_message));
   }
-  LOG(kVerbose) << "Overall success for Put " << original_data_message.data_type()
-                << "  " << HexSubstr(original_data_message.name()) << "  received "
+  LOG(kVerbose) << "Overall success for Put " << original_data_message.data().type
+                << "  " << HexSubstr(original_data_message.data().name) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
@@ -132,8 +132,8 @@ void HandleDeleteResponse(DataMessage::OnError on_error_functor,
                           DataMessage original_data_message,
                           const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
-    LOG(kError) << "No responses received for Delete " << original_data_message.data_type()
-                << "  " << DebugId(original_data_message.name());
+    LOG(kError) << "No responses received for Delete " << original_data_message.data().type
+                << "  " << DebugId(original_data_message.data().name);
     on_error_functor(std::move(original_data_message));
   }
 
@@ -147,8 +147,8 @@ void HandleDeleteResponse(DataMessage::OnError on_error_functor,
         ++success_count;
       } else {
         LOG(kWarning) << "Received an error " << return_code.value() << " for Delete "
-                      << original_data_message.data_type() << " "
-                      << DebugId(original_data_message.name());
+                      << original_data_message.data().type << " "
+                      << DebugId(original_data_message.data().name);
         ++failure_count;
       }
     }
@@ -160,13 +160,13 @@ void HandleDeleteResponse(DataMessage::OnError on_error_functor,
 
   if (success_count == 0) {
     LOG(kError) << "No successful responses received for Delete "
-                << original_data_message.data_type()
-                << "  " << DebugId(original_data_message.name()) << "  received "
+                << original_data_message.data().type
+                << "  " << DebugId(original_data_message.data().name) << "  received "
                 << failure_count << " failures.";
     on_error_functor(std::move(original_data_message));
   }
-  LOG(kVerbose) << "Overall success for Delete " << original_data_message.data_type()
-                << "  " << DebugId(original_data_message.name()) << "  received "
+  LOG(kVerbose) << "Overall success for Delete " << original_data_message.data().type
+                << "  " << DebugId(original_data_message.data().name) << "  received "
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
