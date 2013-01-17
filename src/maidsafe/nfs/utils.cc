@@ -11,12 +11,28 @@
 
 #include "maidsafe/nfs/utils.h"
 
+#include <cstdint>
+
+#include "maidsafe/common/utils.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
-void HandlePostResponse(OnPostError /*on_error_functor*/,
+namespace detail {
+
+MessageIdType GetNewMessageId(const NodeId& source_node_id) {
+  static int32_t random_element(RandomInt32());
+  std::string id(source_node_id.string() + std::to_string(random_element++));
+  return MessageIdType(Identity(crypto::Hash<crypto::SHA512>(source_node_id.string() +
+                                                             std::to_string(random_element++))));
+}
+
+}  // namespace detail
+
+
+void HandlePostResponse(GenericMessage::OnError /*on_error_functor*/,
                         GenericMessage /*original_generic_message*/,
                         const std::vector<std::string>& /*serialised_messages*/) {
   // TODO(Team): BEFORE_RELEASE implement

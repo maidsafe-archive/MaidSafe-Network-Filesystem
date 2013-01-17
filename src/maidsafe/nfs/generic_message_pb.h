@@ -16,7 +16,7 @@
 #  pragma warning(push)
 #  pragma warning(disable: 4127 4244 4267)
 #endif
-#include "maidsafe/nfs/generic_messages.pb.h"
+#include "maidsafe/nfs/generic_message.pb.h"
 #ifdef __MSVC__
 #  pragma warning(pop)
 #endif

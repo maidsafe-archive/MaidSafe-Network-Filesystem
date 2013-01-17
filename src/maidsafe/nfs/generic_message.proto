@@ -23,13 +23,11 @@ message ConnectMessage {
   optional int32 parent_id = 2;
 }
 
-// Trailing underscore to avoid name conflict with MSVC's #define PostMessage in WinUser.h
 message GenericMessage {
-  required int32 post_action_type = 1;
-  required int32 destination_persona_type = 2;
-  required DataMessage.Source source = 3;
-  required bytes name = 4;
-  required bytes content = 5;
-  optional bytes signature = 6;
-  required int32 message_id = 7;
+  required bytes message_id = 1;
+  required int32 action_type = 2;
+  required int32 destination_persona_type = 3;
+  required DataMessage.Source source = 4;
+  required bytes name = 5;
+  required bytes content = 6;
 }

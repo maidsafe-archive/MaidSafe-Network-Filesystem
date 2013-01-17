@@ -31,48 +31,34 @@ namespace nfs {
 
 namespace protobuf { class Message; }
 
-enum class MessageType : int32_t {
-  kDataMessage = 1,
-  kGenericMessage = 2
-};
-
 class Message {
  public:
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
-  template<typename SerialisedType>
-  Message(const SerialisedType& serialised_inner_message);
-  template<typename SerialisedType>
-  Message(const SerialisedType& serialised_inner_message, const asymm::Signature& signature);
+  Message(int32_t inner_message_type,
+          const NonEmptyString& serialised_inner_message,
+          const asymm::Signature& signature);
   explicit Message(const serialised_type& serialised_message);
   Message(const Message& other);
   Message& operator=(const Message& other);
   Message(Message&& other);
+  Message& operator=(Message&& other);
 
   serialised_type Serialise() const;
-  MessageType message_type() const { return message_type_; }
 
-  template<typename SerialisedType>
-  SerialisedType inner_message();
-
+  template<typename InnerMessageType>
+  typename InnerMessageType::serialised_type serialised_inner_message() const;
   asymm::Signature signature() const { return signature_; }
 
  private:
-  MessageType message_type_;
+  int32_t inner_message_type_;
   NonEmptyString serialised_inner_message_;
   asymm::Signature signature_;
 };
 
-template<typename SerialisedType>
-Message::Message(const SerialisedType& serialised_inner_message,
-                 const asymm::Signature& signature)
-    : message_type_(MessageType::kDataMessage), // FIXME Fraser
-      serialised_inner_message_(NonEmptyString(serialised_inner_message->string())),
-      signature_(signature) {}
-
-template<typename SerialisedType>
-SerialisedType Message::inner_message() {
-  return SerialisedType(serialised_inner_message_);
+template<typename InnerMessageType>
+typename InnerMessageType::serialised_type Message::serialised_inner_message() const {
+  return InnerMessageType::serialised_type(serialised_inner_message_);
 }
 
 }  // namespace nfs

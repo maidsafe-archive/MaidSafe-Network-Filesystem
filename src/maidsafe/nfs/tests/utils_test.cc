@@ -25,6 +25,7 @@
 #include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/nfs.h"
+#include "maidsafe/nfs/message.h"
 
 
 namespace maidsafe {
@@ -156,11 +157,12 @@ TYPED_TEST_P(UtilsTest, BEH_TestHandleGetResponse) {
   std::pair<Identity, NonEmptyString> name_and_content(GetNameAndContent<TypeParam>());
 
   PersonaType destination_persona_type(PersonaType::kDataHolder);
-  DataMessage::Source source(PersonaType::kClientMaid, NodeId(NodeId::kRandomId));
-  DataMessage data_message(ActionType::kGet, destination_persona_type, source,
-                           TypeParam::name_type::tag_type::kEnumValue, name_and_content.first,
-                           name_and_content.second/*, asymm::Signature()*/);
-  Message message(data_message.Serialise(), asymm::Signature());
+  MessageSource source(PersonaType::kClientMaid, NodeId(NodeId::kRandomId));
+  DataMessage data_message(DataMessage::ActionType::kGet, destination_persona_type, source,
+                           DataMessage::Data(TypeParam::name_type::tag_type::kEnumValue,
+                                             name_and_content.first, name_and_content.second));
+  Message message(DataMessage::message_type_identifier, data_message.Serialise().data,
+                  asymm::Signature());
   promise = std::make_shared<std::promise<TypeParam>>();  // NOLINT (Fraser)
   std::future<TypeParam> future2(promise->get_future());
   serialised_messages.push_back(message.Serialise()->string());

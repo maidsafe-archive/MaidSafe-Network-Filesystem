@@ -48,7 +48,7 @@ class GetFromMetadataManager {
  public:
   explicit GetFromMetadataManager(routing::Routing& routing)
       : routing_(routing),
-        source_(DataMessage::Source(persona, routing.kNodeId())) {}
+        source_(MessageSource(persona, routing.kNodeId())) {}
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
@@ -58,8 +58,9 @@ class GetFromMetadataManager {
         [promise](const std::vector<std::string>& serialised_messages) {
           HandleGetResponse(promise, serialised_messages);
         };
-    DataMessage data_message(ActionType::kGet, PersonaType::kMetadataManager, source_,
-                             Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
+    DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
+    DataMessage data_message(DataMessage::ActionType::kGet, PersonaType::kMetadataManager, source_,
+                             data);
     Message message(data_message.Serialise());
     routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
                   routing::DestinationType::kGroup, IsCacheable<Data>());
@@ -71,7 +72,7 @@ class GetFromMetadataManager {
 
  private:
   routing::Routing& routing_;
-  DataMessage::Source source_;
+  MessageSource source_;
 };
 
 

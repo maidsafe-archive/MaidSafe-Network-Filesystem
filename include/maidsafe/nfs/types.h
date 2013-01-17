@@ -21,10 +21,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-class Message;
-class DataMessage;
-class GenericMessage;
-
 enum class PersonaType : int {
   kMaidAccountHolder,
   kMetadataManager,
@@ -34,20 +30,6 @@ enum class PersonaType : int {
   kClientMpid,
   kDataGetter
 };
-
-enum class ActionType : int { kGet, kPut, kPost, kDelete };
-
-enum class PostActionType : int {
-  kRegisterPmid,
-  kConnect,
-  kGetPmidSize,
-  kNodeDown,
-  kNodeUp,
-  kSynchronise
-};
-
-typedef std::function<void(DataMessage message)> OnError;
-typedef std::function<void(GenericMessage message)> OnPostError;
 
 template <typename Elem, typename Traits>
 std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
@@ -85,32 +67,16 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
   return ostream;
 }
 
-template <typename Elem, typename Traits>
-std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
-                                             const ActionType &action_type) {
-  std::string action_type_str;
-  switch (action_type) {
-    case ActionType::kGet:
-      action_type_str = "Get";
-      break;
-    case ActionType::kPut:
-      action_type_str = "Put";
-      break;
-    case ActionType::kPost:
-      action_type_str = "Post";
-      break;
-    case ActionType::kDelete:
-      action_type_str = "Delete";
-      break;
-    default:
-      action_type_str = "Invalid action type";
-      break;
-  }
+struct MessageSource {
+  MessageSource(PersonaType persona_type_in, const NodeId& node_id_in)
+      : persona_type(persona_type_in),
+        node_id(node_id_in) {}
+  MessageSource() : persona_type(), node_id() {}
+  PersonaType persona_type;
+  NodeId node_id;
+};
 
-  for (std::string::iterator itr(action_type_str.begin()); itr != action_type_str.end(); ++itr)
-    ostream << ostream.widen(*itr);
-  return ostream;
-}
+typedef TaggedValue<Identity, struct MessageIdTag> MessageIdType;
 
 
 }  // namespace nfs

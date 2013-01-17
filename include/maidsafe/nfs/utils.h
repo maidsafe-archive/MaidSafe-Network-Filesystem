@@ -36,16 +36,23 @@ namespace maidsafe {
 
 namespace nfs {
 
+namespace detail {
+
+MessageIdType GetNewMessageId(const NodeId& source_node_id);
+
+}  // namespace detail
+
+
 template<typename Data>
 bool IsCacheable() {
   return is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value;
 }
 
-template<typename Data, typename MessageType, typename SerialisedType>
+template<typename Data>
 Data ValidateAndParse(Message& message) {
-  MessageType data_message((message.inner_message<SerialisedType>()));
-  return Data(typename Data::name_type(data_message.name()),
-              typename Data::serialised_type(data_message.content()));
+  DataMessage data_message((message.serialised_inner_message<DataMessage>()));
+  return Data(typename Data::name_type(data_message.data().name),
+              typename Data::serialised_type(data_message.data().content));
 }
 
 // TODO(Fraser#5#): 2012-12-20 - This is executed on one of Routing's io_service threads.  If we
@@ -62,7 +69,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
       try {
         // Need '((' when constructing Message to avoid most vexing parse.
         Message message((Message::serialised_type(NonEmptyString(serialised_message))));
-        Data data(ValidateAndParse<Data, DataMessage, DataMessage::serialised_type>(message));
+        Data data(ValidateAndParse<Data>(message));
         promise->set_value(std::move(data));
         return;
       }
@@ -79,7 +86,7 @@ void HandleGetResponse(std::shared_ptr<std::promise<Data>> promise,
 }
 
 template<typename Data>
-void HandlePutResponse(OnError on_error_functor,
+void HandlePutResponse(DataMessage::OnError on_error_functor,
                        DataMessage original_data_message,
                        const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
@@ -121,7 +128,7 @@ void HandlePutResponse(OnError on_error_functor,
 }
 
 template<typename Data>
-void HandleDeleteResponse(OnError on_error_functor,
+void HandleDeleteResponse(DataMessage::OnError on_error_functor,
                           DataMessage original_data_message,
                           const std::vector<std::string>& serialised_messages) {
   if (serialised_messages.empty()) {
@@ -163,7 +170,7 @@ void HandleDeleteResponse(OnError on_error_functor,
                 << success_count << " successes and " << failure_count << " failures.";
 }
 
-void HandleGenericResponse(OnPostError /*on_error_functor*/,
+void HandleGenericResponse(GenericMessage::OnError /*on_error_functor*/,
                            GenericMessage /*original_generic_message*/,
                            const std::vector<std::string>& /*serialised_messages*/);
 

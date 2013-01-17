@@ -12,7 +12,10 @@
 #ifndef MAIDSAFE_NFS_DATA_MESSAGE_H_
 #define MAIDSAFE_NFS_DATA_MESSAGE_H_
 
+#include <functional>
+#include <ostream>
 #include <string>
+#include <utility>
 
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
@@ -27,27 +30,35 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace protobuf { class DataMessage; }
-
 class DataMessage {
  public:
-  struct Source {
-    Source(PersonaType persona_type_in, const NodeId& node_id_in)
-        : persona_type(persona_type_in),
-          node_id(node_id_in) {}
-    Source() : persona_type(), node_id() {}
-    PersonaType persona_type;
-    NodeId node_id;
+  enum class ActionType : int { kGet, kPut, kDelete };
+  struct Data {
+    Data();
+    Data(maidsafe::detail::DataTagValue type_in,
+         const Identity& name_in,
+         const NonEmptyString& content_in,
+         int32_t version_in = NoVersion());
+    Data(const Data& other);
+    Data& operator=(const Data& other);
+    Data(Data&& other);
+    Data& operator=(Data&& other);
+    static int32_t NoVersion() { return -1; }
+
+    maidsafe::detail::DataTagValue type;
+    Identity name;
+    NonEmptyString content;
+    int32_t version;
   };
 
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
+  typedef std::function<void(DataMessage message)> OnError;
+  static const int32_t message_type_identifier = 0;
 
   DataMessage(ActionType action_type,
               PersonaType destination_persona_type,
-              Source source,
-              maidsafe::detail::DataTagValue data_type,
-              const Identity& name,
-              const NonEmptyString& content);
+              const MessageSource& source,
+              const Data& data);
   DataMessage(const DataMessage& other);
   DataMessage& operator=(const DataMessage& other);
   DataMessage(DataMessage&& other);
@@ -55,25 +66,53 @@ class DataMessage {
 
   explicit DataMessage(const serialised_type& serialised_message);
   serialised_type Serialise() const;
+  std::pair<serialised_type, asymm::Signature> SerialiseAndSign(
+      const asymm::PrivateKey& signer_private_key) const;
+  bool Validate(const asymm::Signature& signature,
+                const asymm::PublicKey& signer_public_key) const;
 
+  MessageIdType message_id() const { return message_id_; }
   ActionType action_type() const { return action_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
-  Source source() const { return source_; }
-  maidsafe::detail::DataTagValue data_type() const { return data_type_; }
-  Identity name() const { return name_; }
-  NonEmptyString content() const { return content_; }
+  MessageSource source() const { return source_; }
+  Data data() const { return data_; }
 
  private:
   bool ValidateInputs() const;
 
+  MessageIdType message_id_;
   ActionType action_type_;
   PersonaType destination_persona_type_;
-  Source source_;
-  maidsafe::detail::DataTagValue data_type_;
-  Identity name_;
-  NonEmptyString content_;
-  int32_t message_id_;
+  MessageSource source_;
+  Data data_;
 };
+
+
+template <typename Elem, typename Traits>
+std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
+                                             const DataMessage::ActionType &action_type) {
+  std::string action_type_str;
+  switch (action_type) {
+    case DataMessage::ActionType::kGet:
+      action_type_str = "Get";
+      break;
+    case DataMessage::ActionType::kPut:
+      action_type_str = "Put";
+      break;
+    case DataMessage::ActionType::kDelete:
+      action_type_str = "Delete";
+      break;
+    default:
+      action_type_str = "Invalid DataMessage action type";
+      break;
+  }
+
+  for (std::string::iterator itr(action_type_str.begin()); itr != action_type_str.end(); ++itr)
+    ostream << ostream.widen(*itr);
+  return ostream;
+}
+
+
 
 }  // namespace nfs
 

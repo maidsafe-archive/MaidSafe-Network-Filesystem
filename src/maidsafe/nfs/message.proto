@@ -1,7 +1,5 @@
 package maidsafe.nfs.protobuf;
 option optimize_for = LITE_RUNTIME;
-import "maidsafe/nfs/data_message.proto";
-import "maidsafe/nfs/generic_messages.proto";
 
 message Message {
   required int32 message_type = 1;
