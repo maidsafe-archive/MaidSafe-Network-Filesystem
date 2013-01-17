@@ -92,7 +92,7 @@ GenericMessage::GenericMessage(const serialised_type& serialised_message)
   source_.node_id = NodeId(proto_generic_message.source().node_id());
   name_ = Identity(proto_generic_message.name());
   content_ = NonEmptyString(proto_generic_message.content());
-  message_id_ = MessageIdType(Identity(proto_generic_message.message_id()));
+  message_id_ = MessageId(Identity(proto_generic_message.message_id()));
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }

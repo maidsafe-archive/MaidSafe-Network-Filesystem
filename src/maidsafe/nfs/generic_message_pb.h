@@ -9,8 +9,8 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_POST_MESSAGES_PB_H_
-#define MAIDSAFE_NFS_POST_MESSAGES_PB_H_
+#ifndef MAIDSAFE_NFS_GENERIC_MESSAGE_PB_H_
+#define MAIDSAFE_NFS_GENERIC_MESSAGE_PB_H_
 
 #ifdef __MSVC__
 #  pragma warning(push)
@@ -21,4 +21,4 @@
 #  pragma warning(pop)
 #endif
 
-#endif  // MAIDSAFE_NFS_POST_MESSAGES_PB_H_
+#endif  // MAIDSAFE_NFS_GENERIC_MESSAGE_PB_H_

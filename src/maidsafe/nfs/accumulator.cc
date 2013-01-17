@@ -11,21 +11,27 @@
 
 #include "maidsafe/nfs/accumulator.h"
 
+#include <algorithm>
+
+
 namespace maidsafe {
 
 namespace nfs {
 
 Accumulator::Accumulator()
-  : pending_requests_(), handled_requests_(), mutex_() {}
+    : pending_requests_(),
+      handled_requests_(),
+      kMaxPendingRequestsCount_(300),
+      kMaxHandledRequestsCount_(1000),
+      mutex_() {}
 
-bool Accumulator::CheckHandled(const RequestsIdentity& request_identity,
-                               ReturnCode& ret_code) {
+bool Accumulator::CheckHandled(const RequestIdentity& request_identity,
+                               ReturnCode& ret_code) const {
   std::lock_guard<std::mutex> lock(mutex_);
   auto it = std::find_if(handled_requests_.begin(),
                          handled_requests_.end(),
                          [&request_identity](const HandledRequests::value_type& request) {
-                            return request.first.first == request_identity.first &&
-                                   request.first.second == request_identity.second;
+                            return request.first == request_identity;
                          });
   if (it != handled_requests_.end()) {
     ret_code = it->second;
@@ -35,36 +41,37 @@ bool Accumulator::CheckHandled(const RequestsIdentity& request_identity,
 }
 
 std::vector<ReturnCode> Accumulator::PushRequest(const Request& request) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  RequestsIdentity request_identity = std::make_pair(request.msg.id(),
-                                                     request.msg.source().persona_type);
-  pending_requests_.push_back(std::make_pair(request_identity, request));
+  RequestIdentity request_identity = std::make_pair(request.msg.message_id(),
+                                                    request.msg.source().persona_type);
+  auto pending_request = std::make_pair(request_identity, request);
   std::vector<ReturnCode> ret_codes;
+  std::lock_guard<std::mutex> lock(mutex_);
+  pending_requests_.push_back(pending_request);
   for (auto& request : pending_requests_) {
-    if ((request.first.first == request_identity.first) &&
-        (request.first.second == request_identity.second))
+    if (request.first == request_identity)
       ret_codes.push_back(request.second.ret_code);
   }
+  if (pending_requests_.size() > kMaxPendingRequestsCount_)
+    pending_requests_.pop_front();
   return ret_codes;
 }
 
-std::vector<Accumulator::Request> Accumulator::SetHandled(
-    const RequestsIdentity& request_identity, const ReturnCode& ret_code) {
-  std::lock_guard<std::mutex> lock(mutex_);
+std::vector<Accumulator::Request> Accumulator::SetHandled(const RequestIdentity& request_identity,
+                                                          const ReturnCode& ret_code) {
   std::vector<Request> ret_requests;
+  std::lock_guard<std::mutex> lock(mutex_);
   auto itr = pending_requests_.begin();
-  do {
-    if ((itr->first.first == request_identity.first) &&
-        (itr->first.second == request_identity.second)) {
+  while (itr != pending_requests_.end()) {
+    if (itr->first == request_identity) {
       ret_requests.push_back(itr->second);
       itr = pending_requests_.erase(itr);
     } else {
       ++itr;
     }
-  } while (itr != pending_requests_.end());
+  }
 
   handled_requests_.push_back(std::make_pair(request_identity, ret_code));
-  if (handled_requests_.size() > 1000)
+  if (handled_requests_.size() > kMaxHandledRequestsCount_)
     handled_requests_.pop_front();
   return ret_requests;
 }

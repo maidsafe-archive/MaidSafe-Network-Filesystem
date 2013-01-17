@@ -22,11 +22,9 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace protobuf { class ReturnCode; }
-
 class ReturnCode {
  public:
-  typedef detail::BoundedString<1, 4096> Info;
+  typedef maidsafe::detail::BoundedString<1, 4096> Info;
   typedef TaggedValue<NonEmptyString, struct SerialisedReturnCodeTag> serialised_type;
   ReturnCode(int value, const Info& info = Info());
   ReturnCode(const ReturnCode& other);

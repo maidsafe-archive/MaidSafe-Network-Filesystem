@@ -126,7 +126,7 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
   if (!proto_data_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
 
-  message_id_ = MessageIdType(Identity(proto_data_message.message_id()));
+  message_id_ = MessageId(Identity(proto_data_message.message_id()));
   action_type_ = static_cast<ActionType>(proto_data_message.action_type());
   destination_persona_type_ =
       static_cast<PersonaType>(proto_data_message.destination_persona_type());

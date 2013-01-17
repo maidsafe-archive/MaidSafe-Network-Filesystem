@@ -16,6 +16,9 @@
 #include <ostream>
 #include <string>
 
+#include "maidsafe/common/node_id.h"
+#include "maidsafe/common/types.h"
+
 
 namespace maidsafe {
 
@@ -76,7 +79,7 @@ struct MessageSource {
   NodeId node_id;
 };
 
-typedef TaggedValue<Identity, struct MessageIdTag> MessageIdType;
+typedef TaggedValue<Identity, struct MessageIdTag> MessageId;
 
 
 }  // namespace nfs

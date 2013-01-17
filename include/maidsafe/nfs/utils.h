@@ -38,7 +38,7 @@ namespace nfs {
 
 namespace detail {
 
-MessageIdType GetNewMessageId(const NodeId& source_node_id);
+MessageId GetNewMessageId(const NodeId& source_node_id);
 
 }  // namespace detail
 

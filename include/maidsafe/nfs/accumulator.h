@@ -16,9 +16,13 @@
 #include <utility>
 #include <vector>
 
+#include "maidsafe/routing/routing_api.h"
+
+#include "maidsafe/nfs/data_message.h"
+#include "maidsafe/nfs/return_code.h"
+#include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/utils.h"
 
-#include "maidsafe/routing/routing_api.h"
 
 namespace maidsafe {
 
@@ -27,28 +31,28 @@ namespace nfs {
 class Accumulator {
  public:
   struct Request {
-    Request(Message msg_in, routing::ReplyFunctor reply_functor_in, ReturnCode ret_code_in)
-      : msg(msg_in), reply_functor(reply_functor_in), ret_code(ret_code_in) {}
-    Message msg;
+    Request(DataMessage msg_in, routing::ReplyFunctor reply_functor_in, ReturnCode ret_code_in)
+        : msg(msg_in), reply_functor(reply_functor_in), ret_code(ret_code_in) {}
+    DataMessage msg;
     routing::ReplyFunctor reply_functor;
     ReturnCode ret_code;
   };
-  // Identity part is id() and personal_type()
-  typedef std::pair<NonEmptyString, PersonaType> RequestsIdentity;
+  typedef std::pair<MessageId, PersonaType> RequestIdentity;
 
   Accumulator();
 
-  bool CheckHandled(const RequestsIdentity& request_identity, ReturnCode& ret_code);
+  bool CheckHandled(const RequestIdentity& request_identity, ReturnCode& ret_code) const;
   std::vector<ReturnCode> PushRequest(const Request& request);
-  std::vector<Request> SetHandled(const RequestsIdentity& request_identity,
+  std::vector<Request> SetHandled(const RequestIdentity& request_identity,
                                   const ReturnCode& ret_code);
 
  private:
-  typedef std::deque<std::pair<RequestsIdentity, Request>> Requests;
-  typedef std::deque<std::pair<RequestsIdentity, ReturnCode>> HandledRequests;
+  typedef std::deque<std::pair<RequestIdentity, Request>> Requests;
+  typedef std::deque<std::pair<RequestIdentity, ReturnCode>> HandledRequests;
 
   Requests pending_requests_;
   HandledRequests handled_requests_;
+  const size_t kMaxPendingRequestsCount_, kMaxHandledRequestsCount_;
   mutable std::mutex mutex_;
 };
 

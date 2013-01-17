@@ -71,7 +71,7 @@ class DataMessage {
   bool Validate(const asymm::Signature& signature,
                 const asymm::PublicKey& signer_public_key) const;
 
-  MessageIdType message_id() const { return message_id_; }
+  MessageId message_id() const { return message_id_; }
   ActionType action_type() const { return action_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
   MessageSource source() const { return source_; }
@@ -80,7 +80,7 @@ class DataMessage {
  private:
   bool ValidateInputs() const;
 
-  MessageIdType message_id_;
+  MessageId message_id_;
   ActionType action_type_;
   PersonaType destination_persona_type_;
   MessageSource source_;

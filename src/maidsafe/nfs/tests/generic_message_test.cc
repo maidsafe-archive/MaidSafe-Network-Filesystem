@@ -28,7 +28,7 @@ namespace test {
 namespace {
 
 GenericMessage::ActionType GenerateActionType() {
-  return static_cast<GenericMessage::ActionType>(RandomUint32() % 6);  // matches GenericMessage::ActionType enum in types.h
+  return static_cast<GenericMessage::ActionType>(RandomUint32() % 6);
 }
 
 MessageSource GenerateSource() {
@@ -50,8 +50,7 @@ class GenericMessageTest : public testing::Test {
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
 //        signature_(RandomString(1 + RandomUint32() % 50)),
-        generic_message_(action_type_, destination_persona_type_, source_, name_, content_/*,
-                      signature_*/) {}
+        generic_message_(action_type_, destination_persona_type_, source_, name_, content_) {}
 
   GenericMessage::ActionType action_type_;
   PersonaType destination_persona_type_;

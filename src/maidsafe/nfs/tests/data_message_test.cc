@@ -28,7 +28,7 @@ namespace test {
 namespace {
 
 DataMessage::ActionType GenerateActionType() {
-  return static_cast<DataMessage::ActionType>(RandomUint32() % 4);  // matches ActionType enum in types.h
+  return static_cast<DataMessage::ActionType>(RandomUint32() % 3);
 }
 
 MessageSource GenerateSource() {

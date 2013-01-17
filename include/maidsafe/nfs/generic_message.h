@@ -57,7 +57,7 @@ class GenericMessage {
   explicit GenericMessage(const serialised_type& serialised_message);
   serialised_type Serialise() const;
 
-  MessageIdType message_id() const { return message_id_; }
+  MessageId message_id() const { return message_id_; }
   ActionType action_type() const { return action_type_; }
   PersonaType destination_persona_type() const { return destination_persona_type_; }
   MessageSource source() const { return source_; }
@@ -67,7 +67,7 @@ class GenericMessage {
  private:
   bool ValidateInputs() const;
 
-  MessageIdType message_id_;
+  MessageId message_id_;
   ActionType action_type_;
   PersonaType destination_persona_type_;
   MessageSource source_;
