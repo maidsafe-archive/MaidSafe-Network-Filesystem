@@ -32,9 +32,9 @@ MessageId GetNewMessageId(const NodeId& source_node_id) {
 }  // namespace detail
 
 
-void HandlePostResponse(GenericMessage::OnError /*on_error_functor*/,
-                        GenericMessage /*original_generic_message*/,
-                        const std::vector<std::string>& /*serialised_messages*/) {
+void HandleGenericResponse(GenericMessage::OnError /*on_error_functor*/,
+                           GenericMessage /*original_generic_message*/,
+                           const std::vector<std::string>& /*serialised_messages*/) {
   // TODO(Team): BEFORE_RELEASE implement
 }
 

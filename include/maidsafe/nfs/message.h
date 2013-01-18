@@ -39,6 +39,7 @@ class Message {
 
   serialised_type Serialise() const;
 
+  int32_t inner_message_type() const { return inner_message_type_; }
   template<typename InnerMessageType>
   typename InnerMessageType::serialised_type serialised_inner_message() const;
   asymm::Signature signature() const { return signature_; }
