@@ -98,7 +98,7 @@ void HandlePutResponse(DataMessage::OnError on_error_functor,
         auto itr(routing_futures->begin());
         while (itr != routing_futures->end()) {
           if (IsReady(*itr)) {
-            GetReturnCode(success_count, failure_count, *itr);
+            detail::GetReturnCode(success_count, failure_count, *itr);
             itr = routing_futures->erase(itr);
           } else {
             ++itr;
@@ -108,13 +108,13 @@ void HandlePutResponse(DataMessage::OnError on_error_functor,
       }
       if (success_count == 0) {
         LOG(kError) << "No successful responses received for Put "
-                    << original_data_message.data_type() << "  "
-                    << HexSubstr(original_data_message.name()) << "  received "
+                    << original_data_message.data().type << "  "
+                    << HexSubstr(original_data_message.data().name) << "  received "
                     << failure_count << " failures.";
         on_error_functor(std::move(original_data_message));
       }
-      LOG(kVerbose) << "Overall success for Put " << original_data_message.data_type()
-                    << "  " << HexSubstr(original_data_message.name()) << "  received "
+      LOG(kVerbose) << "Overall success for Put " << original_data_message.data().type
+                    << "  " << HexSubstr(original_data_message.data().name) << "  received "
                     << success_count << " successes and " << failure_count << " failures.";
   });
 }

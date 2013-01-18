@@ -40,6 +40,8 @@ namespace nfs {
 
 namespace test {
 
+typedef std::vector<std::future<std::string>> RoutingFutures;
+
 template<typename Data>
 std::pair<Identity, NonEmptyString> GetNameAndContent();
 
@@ -168,8 +170,6 @@ std::pair<Identity, NonEmptyString> GetNameAndContent<MutableData>() {
 template<typename T>
 class UtilsTest : public testing::Test {
  protected:
-  typedef std::vector<std::future<std::string>> RoutingFutures;
-
   std::string MakeSerialisedMessage(const std::pair<Identity, NonEmptyString>& name_and_content) {
     Persona destination_persona(Persona::kMetadataManager);
     MessageSource source(Persona::kClientMaid, NodeId(NodeId::kRandomId));
@@ -235,7 +235,7 @@ TYPED_TEST_CASE_P(UtilsTest);
 TYPED_TEST_P(UtilsTest, BEH_HandleGetFuturesAllFail) {
   auto promise(std::make_shared<std::promise<TypeParam>>());
   std::future<TypeParam> future(promise->get_future());
-  auto routing_futures(std::make_shared<RoutingFutures>(SendReturnsAllFailed()));
+  auto routing_futures(std::make_shared<RoutingFutures>(this->SendReturnsAllFailed()));
 
   HandleGetFutures<TypeParam>(promise, routing_futures);
   EXPECT_THROW(future.get(), nfs_error);
@@ -246,8 +246,9 @@ TYPED_TEST_P(UtilsTest, BEH_HandleGetFuturesOneSucceeds) {
   std::future<TypeParam> future(promise->get_future());
 
   std::pair<Identity, NonEmptyString> name_and_content(GetNameAndContent<TypeParam>());
-  auto serialised_message(MakeSerialisedMessage(name_and_content));
-  auto routing_futures(std::make_shared<RoutingFutures>(SendReturnsOneSuccess(serialised_message)));
+  auto serialised_message(this->MakeSerialisedMessage(name_and_content));
+  auto routing_futures(std::make_shared<RoutingFutures>(
+                           this->SendReturnsOneSuccess(serialised_message)));
 
   HandleGetFutures<TypeParam>(promise, routing_futures);
   auto data(future.get());
@@ -259,8 +260,9 @@ TYPED_TEST_P(UtilsTest, BEH_HandleGetFuturesAllSucceed) {
   std::future<TypeParam> future(promise->get_future());
 
   std::pair<Identity, NonEmptyString> name_and_content(GetNameAndContent<TypeParam>());
-  auto serialised_message(MakeSerialisedMessage(name_and_content));
-  auto routing_futures(std::make_shared<RoutingFutures>(SendReturnsOneSuccess(serialised_message)));
+  auto serialised_message(this->MakeSerialisedMessage(name_and_content));
+  auto routing_futures(std::make_shared<RoutingFutures>(
+                           this->SendReturnsOneSuccess(serialised_message)));
 
   HandleGetFutures<TypeParam>(promise, routing_futures);
   auto data(future.get());
