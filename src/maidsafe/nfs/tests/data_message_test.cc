@@ -15,7 +15,7 @@
 
 #include "maidsafe/detail/data_type_values.h"
 
-#include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/types.h"
 
 

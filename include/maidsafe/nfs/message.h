@@ -12,24 +12,17 @@
 #ifndef MAIDSAFE_NFS_MESSAGE_H_
 #define MAIDSAFE_NFS_MESSAGE_H_
 
-#include <string>
+#include <cstdint>
 
-#include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 
-#include "maidsafe/detail/data_type_values.h"
-
-#include "maidsafe/nfs/data_message.h"
-#include "maidsafe/nfs/generic_message.h"
 #include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
-
-namespace protobuf { class Message; }
 
 class Message {
  public:
@@ -49,8 +42,6 @@ class Message {
   template<typename InnerMessageType>
   typename InnerMessageType::serialised_type serialised_inner_message() const;
   asymm::Signature signature() const { return signature_; }
-  // TODO(Team) : implementation of id()
-  NonEmptyString id() const { return NonEmptyString(); }
 
  private:
   int32_t inner_message_type_;
