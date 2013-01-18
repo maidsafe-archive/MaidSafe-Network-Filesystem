@@ -3,7 +3,7 @@ option optimize_for = LITE_RUNTIME;
 
 message DataMessage {
   message Source {
-    required int32 persona_type = 1;
+    required int32 persona = 1;
     required bytes node_id = 2;
   }
   message Data {
@@ -13,8 +13,8 @@ message DataMessage {
     optional int32 version = 4;
   }
   required bytes message_id = 1;
-  required int32 action_type = 2;
-  required int32 destination_persona_type = 3;
+  required int32 action = 2;
+  required int32 destination_persona = 3;
   required Source source = 4;
   required Data data = 5;
 }

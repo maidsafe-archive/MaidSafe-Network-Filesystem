@@ -53,13 +53,13 @@ class PutToDataHolder {
   PutToDataHolder(routing::Routing& routing, const SigningFob& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(MessageSource(PersonaType::kClientMaid, routing.kNodeId())) {}
+        source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
   void Put(const Data& data, DataMessage::OnError on_error) {
     DataMessage::Data message_data(Data::name_type::tag_type::kEnumValue, data.name(),
                                    data.Serialise());
-    DataMessage data_message(DataMessage::ActionType::kPut, PersonaType::kDataHolder, source_,
+    DataMessage data_message(DataMessage::Action::kPut, Persona::kDataHolder, source_,
                              message_data);
     auto serialised_and_signed(data_message.SerialiseAndSign(signing_fob_.private_key()));
     Message message(serialised_and_signed.first, serialised_and_signed.second);
@@ -85,12 +85,12 @@ class PutToMaidAccountHolder {
   PutToMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(MessageSource(PersonaType::kClientMaid, routing.kNodeId())) {}
+        source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
   void Put(const Data& data, DataMessage::OnError on_error) {
     NonEmptyString content(data.Serialise());
-    Message message(DataMessage::ActionType::kPut, PersonaType::kDataHolder, source_,
+    Message message(DataMessage::Action::kPut, Persona::kDataHolder, source_,
                     Data::name_type::tag_type::kEnumValue, data.name(), content,
                     asymm::Sign(content, signing_fob_.private_key()));
     routing::ResponseFunctor callback =

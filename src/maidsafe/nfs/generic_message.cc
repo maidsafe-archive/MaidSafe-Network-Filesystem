@@ -21,14 +21,14 @@ namespace maidsafe {
 
 namespace nfs {
 
-GenericMessage::GenericMessage(ActionType action_type,
-                               PersonaType destination_persona_type,
+GenericMessage::GenericMessage(Action action,
+                               Persona destination_persona,
                                const MessageSource& source,
                                const Identity& name,
                                const NonEmptyString& content)
     : message_id_(detail::GetNewMessageId(source.node_id)),
-      action_type_(action_type),
-      destination_persona_type_(destination_persona_type),
+      action_(action),
+      destination_persona_(destination_persona),
       source_(source),
       name_(name),
       content_(content) {
@@ -38,16 +38,16 @@ GenericMessage::GenericMessage(ActionType action_type,
 
 GenericMessage::GenericMessage(const GenericMessage& other)
     : message_id_(other.message_id_),
-      action_type_(other.action_type_),
-      destination_persona_type_(other.destination_persona_type_),
+      action_(other.action_),
+      destination_persona_(other.destination_persona_),
       source_(other.source_),
       name_(other.name_),
       content_(other.content_) {}
 
 GenericMessage& GenericMessage::operator=(const GenericMessage& other) {
   message_id_ = other.message_id_;
-  action_type_ = other.action_type_;
-  destination_persona_type_ = other.destination_persona_type_;
+  action_ = other.action_;
+  destination_persona_ = other.destination_persona_;
   source_ = other.source_;
   name_ = other.name_;
   content_ = other.content_;
@@ -56,16 +56,16 @@ GenericMessage& GenericMessage::operator=(const GenericMessage& other) {
 
 GenericMessage::GenericMessage(GenericMessage&& other)
     : message_id_(std::move(other.message_id_)),
-      action_type_(std::move(other.action_type_)),
-      destination_persona_type_(std::move(other.destination_persona_type_)),
+      action_(std::move(other.action_)),
+      destination_persona_(std::move(other.destination_persona_)),
       source_(std::move(other.source_)),
       name_(std::move(other.name_)),
       content_(std::move(other.content_)) {}
 
 GenericMessage& GenericMessage::operator=(GenericMessage&& other) {
   message_id_ = std::move(other.message_id_);
-  action_type_ = std::move(other.action_type_);
-  destination_persona_type_ = std::move(other.destination_persona_type_);
+  action_ = std::move(other.action_);
+  destination_persona_ = std::move(other.destination_persona_);
   source_ = std::move(other.source_);
   name_ = std::move(other.name_);
   content_ = std::move(other.content_);
@@ -77,18 +77,17 @@ GenericMessage& GenericMessage::operator=(GenericMessage&& other) {
 //                  inside a private constructor taking a single arg of type protobuf.
 GenericMessage::GenericMessage(const serialised_type& serialised_message)
     : message_id_(),
-      action_type_(),
-      destination_persona_type_(),
+      action_(),
+      destination_persona_(),
       source_(),
       name_(),
       content_() {
   protobuf::GenericMessage proto_generic_message;
   if (!proto_generic_message.ParseFromString(serialised_message->string()))
     ThrowError(NfsErrors::message_parsing_error);
-  action_type_ = static_cast<GenericMessage::ActionType>(proto_generic_message.action_type());
-  destination_persona_type_ =
-      static_cast<PersonaType>(proto_generic_message.destination_persona_type());
-  source_.persona_type = static_cast<PersonaType>(proto_generic_message.source().persona_type());
+  action_ = static_cast<GenericMessage::Action>(proto_generic_message.action());
+  destination_persona_ = static_cast<Persona>(proto_generic_message.destination_persona());
+  source_.persona = static_cast<Persona>(proto_generic_message.source().persona());
   source_.node_id = NodeId(proto_generic_message.source().node_id());
   name_ = Identity(proto_generic_message.name());
   content_ = NonEmptyString(proto_generic_message.content());
@@ -106,11 +105,9 @@ GenericMessage::serialised_type GenericMessage::Serialise() const {
   try {
     protobuf::GenericMessage proto_generic_message;
     proto_generic_message.set_message_id(message_id_->string());
-    proto_generic_message.set_action_type(static_cast<int32_t>(action_type_));
-    proto_generic_message.set_destination_persona_type(
-        static_cast<int32_t>(destination_persona_type_));
-    proto_generic_message.mutable_source()->set_persona_type(
-        static_cast<int32_t>(source_.persona_type));
+    proto_generic_message.set_action(static_cast<int32_t>(action_));
+    proto_generic_message.set_destination_persona(static_cast<int32_t>(destination_persona_));
+    proto_generic_message.mutable_source()->set_persona(static_cast<int32_t>(source_.persona));
     proto_generic_message.mutable_source()->set_node_id(source_.node_id.string());
     proto_generic_message.set_name(name_.string());
     proto_generic_message.set_content(content_.string());

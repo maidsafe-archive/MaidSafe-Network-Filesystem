@@ -71,7 +71,7 @@ target_link_libraries(maidsafe_nfs maidsafe_routing)
 
 if(MAIDSAFE_TESTING)
   ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})
-  target_link_libraries(TESTnfs maidsafe_nfs)
+  target_link_libraries(TESTnfs maidsafe_nfs maidsafe_private)
 endif()
 
 rename_outdated_built_exes()

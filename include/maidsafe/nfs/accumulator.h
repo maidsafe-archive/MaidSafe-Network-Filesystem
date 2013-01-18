@@ -37,7 +37,7 @@ class Accumulator {
     routing::ReplyFunctor reply_functor;
     ReturnCode ret_code;
   };
-  typedef std::pair<MessageId, PersonaType> RequestIdentity;
+  typedef std::pair<MessageId, Persona> RequestIdentity;
 
   Accumulator();
 

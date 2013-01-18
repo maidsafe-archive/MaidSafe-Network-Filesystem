@@ -43,7 +43,7 @@ class NoGet {
 };
 
 
-template<PersonaType persona>
+template<Persona persona>
 class GetFromMetadataManager {
  public:
   explicit GetFromMetadataManager(routing::Routing& routing)
@@ -52,19 +52,16 @@ class GetFromMetadataManager {
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
-    auto promise(std::make_shared<std::promise<Data>>());  // NOLINT (Fraser)
-    std::future<Data> future(promise->get_future());
-    routing::ResponseFunctor callback =
-        [promise](const std::vector<std::string>& serialised_messages) {
-          HandleGetResponse(promise, serialised_messages);
-        };
     DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
-    DataMessage data_message(DataMessage::ActionType::kGet, PersonaType::kMetadataManager, source_,
+    DataMessage data_message(DataMessage::Action::kGet, Persona::kMetadataManager, source_,
                              data);
-    Message message(data_message.Serialise());
-    routing_.Send(NodeId(name->string()), message.Serialise()->string(), callback,
-                  routing::DestinationType::kGroup, IsCacheable<Data>());
-    return std::move(future);
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());
+    auto routing_futures(std::make_shared<std::vector<std::future<std::string>>>(
+        routing_.SendGroup(NodeId(name->string()), message.Serialise()->string(),
+                           IsCacheable<Data>())));
+    auto promise(std::make_shared<std::promise<Data>>());
+    HandleGetFutures(promise, routing_futures);
+    return promise->get_future();
   }
 
  protected:

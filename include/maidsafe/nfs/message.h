@@ -30,7 +30,7 @@ class Message {
 
   Message(int32_t inner_message_type,
           const NonEmptyString& serialised_inner_message,
-          const asymm::Signature& signature);
+          const asymm::Signature& signature = asymm::Signature());
   explicit Message(const serialised_type& serialised_message);
   Message(const Message& other);
   Message& operator=(const Message& other);

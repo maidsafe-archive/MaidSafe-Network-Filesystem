@@ -68,13 +68,13 @@ DataMessage::Data& DataMessage::Data::operator=(Data&& other) {
 
 
 
-DataMessage::DataMessage(ActionType action_type,
-                         PersonaType destination_persona_type,
+DataMessage::DataMessage(Action action,
+                         Persona destination_persona,
                          const MessageSource& source,
                          const Data& data)
     : message_id_(detail::GetNewMessageId(source.node_id)),
-      action_type_(action_type),
-      destination_persona_type_(destination_persona_type),
+      action_(action),
+      destination_persona_(destination_persona),
       source_(source),
       data_(data) {
   if (!ValidateInputs())
@@ -83,15 +83,15 @@ DataMessage::DataMessage(ActionType action_type,
 
 DataMessage::DataMessage(const DataMessage& other)
     : message_id_(other.message_id_),
-      action_type_(other.action_type_),
-      destination_persona_type_(other.destination_persona_type_),
+      action_(other.action_),
+      destination_persona_(other.destination_persona_),
       source_(other.source_),
       data_(other.data_) {}
 
 DataMessage& DataMessage::operator=(const DataMessage& other) {
   message_id_ = other.message_id_;
-  action_type_ = other.action_type_;
-  destination_persona_type_ = other.destination_persona_type_;
+  action_ = other.action_;
+  destination_persona_ = other.destination_persona_;
   source_ = other.source_;
   data_ = other.data_;
   return *this;
@@ -99,15 +99,15 @@ DataMessage& DataMessage::operator=(const DataMessage& other) {
 
 DataMessage::DataMessage(DataMessage&& other)
     : message_id_(std::move(other.message_id_)),
-      action_type_(std::move(other.action_type_)),
-      destination_persona_type_(std::move(other.destination_persona_type_)),
+      action_(std::move(other.action_)),
+      destination_persona_(std::move(other.destination_persona_)),
       source_(std::move(other.source_)),
       data_(std::move(other.data_)) {}
 
 DataMessage& DataMessage::operator=(DataMessage&& other) {
   message_id_ = std::move(other.message_id_);
-  action_type_ = std::move(other.action_type_);
-  destination_persona_type_ = std::move(other.destination_persona_type_);
+  action_ = std::move(other.action_);
+  destination_persona_ = std::move(other.destination_persona_);
   source_ = std::move(other.source_);
   data_ = std::move(other.data_);
   return *this;
@@ -118,8 +118,8 @@ DataMessage& DataMessage::operator=(DataMessage&& other) {
 //                  inside a private constructor taking a single arg of type protobuf.
 DataMessage::DataMessage(const serialised_type& serialised_message)
     : message_id_(),
-      action_type_(),
-      destination_persona_type_(),
+      action_(),
+      destination_persona_(),
       source_(),
       data_() {
   protobuf::DataMessage proto_data_message;
@@ -127,10 +127,9 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
     ThrowError(CommonErrors::parsing_error);
 
   message_id_ = MessageId(Identity(proto_data_message.message_id()));
-  action_type_ = static_cast<ActionType>(proto_data_message.action_type());
-  destination_persona_type_ =
-      static_cast<PersonaType>(proto_data_message.destination_persona_type());
-  source_.persona_type = static_cast<PersonaType>(proto_data_message.source().persona_type());
+  action_ = static_cast<Action>(proto_data_message.action());
+  destination_persona_ = static_cast<Persona>(proto_data_message.destination_persona());
+  source_.persona = static_cast<Persona>(proto_data_message.source().persona());
   source_.node_id = NodeId(proto_data_message.source().node_id());
 
   auto& data(proto_data_message.data());
@@ -156,11 +155,9 @@ DataMessage::serialised_type DataMessage::Serialise() const {
   try {
     protobuf::DataMessage proto_data_message;
     proto_data_message.set_message_id(message_id_->string());
-    proto_data_message.set_action_type(static_cast<int32_t>(action_type_));
-    proto_data_message.set_destination_persona_type(
-        static_cast<int32_t>(destination_persona_type_));
-    proto_data_message.mutable_source()->set_persona_type(
-        static_cast<int32_t>(source_.persona_type));
+    proto_data_message.set_action(static_cast<int32_t>(action_));
+    proto_data_message.set_destination_persona(static_cast<int32_t>(destination_persona_));
+    proto_data_message.mutable_source()->set_persona(static_cast<int32_t>(source_.persona));
     proto_data_message.mutable_source()->set_node_id(source_.node_id.string());
     proto_data_message.mutable_data()->set_type(static_cast<int32_t>(data_.type));
     proto_data_message.mutable_data()->set_name(data_.name.string());

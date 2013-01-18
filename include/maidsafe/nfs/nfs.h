@@ -52,12 +52,12 @@ class NetworkFileSystem : public GetPolicy,
         DeletePolicy(routing, signing_fob) {}
 };
 
-typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
+typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
                           PutToDataHolder<passport::Maid>,
                           NoPost<passport::Maid>,
                           NoDelete<passport::Maid>> TemporaryClientMaidNfs;
 
-typedef NetworkFileSystem<GetFromMetadataManager<PersonaType::kClientMaid>,
+typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
                           PutToMaidAccountHolder,
                           NoPost<passport::Maid>,
                           DeleteFromMaidAccountHolder> ClientMaidNfs;
@@ -68,7 +68,7 @@ class NetworkFileSystemGetter : public GetPolicy {
   explicit NetworkFileSystemGetter(routing::Routing& routing) : GetPolicy(routing) {}
 };
 
-typedef NetworkFileSystemGetter<GetFromMetadataManager<PersonaType::kDataGetter>> KeyGetterNfs;
+typedef NetworkFileSystemGetter<GetFromMetadataManager<Persona::kDataGetter>> KeyGetterNfs;
 
 #ifdef TESTING
 typedef GetFromKeyFile FakeKeyGetterNfs;

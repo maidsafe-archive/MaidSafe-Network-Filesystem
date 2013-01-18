@@ -27,14 +27,14 @@ namespace test {
 
 namespace {
 
-DataMessage::ActionType GenerateActionType() {
-  return static_cast<DataMessage::ActionType>(RandomUint32() % 3);
+DataMessage::Action GenerateAction() {
+  return static_cast<DataMessage::Action>(RandomUint32() % 3);
 }
 
 MessageSource GenerateSource() {
   MessageSource source;
-  // matches PersonaType enum in types.h
-  source.persona_type = static_cast<PersonaType>(RandomUint32() % 7);
+  // matches Persona enum in types.h
+  source.persona = static_cast<Persona>(RandomUint32() % 7);
   source.node_id = NodeId(NodeId::kRandomId);
   return source;
 }
@@ -44,19 +44,19 @@ MessageSource GenerateSource() {
 class DataMessageTest : public testing::Test {
  protected:
   DataMessageTest()
-      : action_type_(GenerateActionType()),
-        destination_persona_type_(static_cast<PersonaType>(RandomUint32() % 7)),
+      : action_(GenerateAction()),
+        destination_persona_(static_cast<Persona>(RandomUint32() % 7)),
         source_(GenerateSource()),
         data_type_(static_cast<detail::DataTagValue>(RandomUint32() % 13)),
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
         version_(RandomInt32() % 100),
 //        signature_(RandomString(1 + RandomUint32() % 50)),
-        data_message_(action_type_, destination_persona_type_, source_,
+        data_message_(action_, destination_persona_, source_,
                       DataMessage::Data(data_type_, name_, content_, version_)) {}
 
-  DataMessage::ActionType action_type_;
-  PersonaType destination_persona_type_;
+  DataMessage::Action action_;
+  Persona destination_persona_;
   MessageSource source_;
   DataMessage::Data data_;
   detail::DataTagValue data_type_;
@@ -68,9 +68,9 @@ class DataMessageTest : public testing::Test {
 };
 
 TEST_F(DataMessageTest, BEH_CheckGetters) {
-  EXPECT_EQ(action_type_, data_message_.action_type());
-  EXPECT_EQ(destination_persona_type_, data_message_.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, data_message_.source().persona_type);
+  EXPECT_EQ(action_, data_message_.action());
+  EXPECT_EQ(destination_persona_, data_message_.destination_persona());
+  EXPECT_EQ(source_.persona, data_message_.source().persona);
   EXPECT_EQ(source_.node_id, data_message_.source().node_id);
   EXPECT_EQ(data_type_, data_message_.data().type);
   EXPECT_EQ(name_, data_message_.data().name);
@@ -82,9 +82,9 @@ TEST_F(DataMessageTest, BEH_SerialiseThenParse) {
   auto serialised_message(data_message_.Serialise());
   DataMessage recovered_message(serialised_message);
 
-  EXPECT_EQ(action_type_, recovered_message.action_type());
-  EXPECT_EQ(destination_persona_type_, recovered_message.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, recovered_message.source().persona_type);
+  EXPECT_EQ(action_, recovered_message.action());
+  EXPECT_EQ(destination_persona_, recovered_message.destination_persona());
+  EXPECT_EQ(source_.persona, recovered_message.source().persona);
   EXPECT_EQ(source_.node_id, recovered_message.source().node_id);
   EXPECT_EQ(data_type_, recovered_message.data().type);
   EXPECT_EQ(name_, recovered_message.data().name);
@@ -100,9 +100,9 @@ TEST_F(DataMessageTest, BEH_SerialiseParseReserialiseReparse) {
   DataMessage recovered_message2(serialised_message2);
 
   EXPECT_EQ(serialised_message, serialised_message2);
-  EXPECT_EQ(action_type_, recovered_message2.action_type());
-  EXPECT_EQ(destination_persona_type_, recovered_message2.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, recovered_message2.source().persona_type);
+  EXPECT_EQ(action_, recovered_message2.action());
+  EXPECT_EQ(destination_persona_, recovered_message2.destination_persona());
+  EXPECT_EQ(source_.persona, recovered_message2.source().persona);
   EXPECT_EQ(source_.node_id, recovered_message2.source().node_id);
   EXPECT_EQ(data_type_, recovered_message2.data().type);
   EXPECT_EQ(name_, recovered_message2.data().name);
@@ -113,9 +113,9 @@ TEST_F(DataMessageTest, BEH_SerialiseParseReserialiseReparse) {
 TEST_F(DataMessageTest, BEH_AssignMessage) {
   DataMessage message2 = data_message_;
 
-  EXPECT_EQ(action_type_, message2.action_type());
-  EXPECT_EQ(destination_persona_type_, message2.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message2.source().persona_type);
+  EXPECT_EQ(action_, message2.action());
+  EXPECT_EQ(destination_persona_, message2.destination_persona());
+  EXPECT_EQ(source_.persona, message2.source().persona);
   EXPECT_EQ(source_.node_id, message2.source().node_id);
   EXPECT_EQ(data_type_, message2.data().type);
   EXPECT_EQ(name_, message2.data().name);
@@ -124,9 +124,9 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
 
   DataMessage message3(data_message_);
 
-  EXPECT_EQ(action_type_, message3.action_type());
-  EXPECT_EQ(destination_persona_type_, message3.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message3.source().persona_type);
+  EXPECT_EQ(action_, message3.action());
+  EXPECT_EQ(destination_persona_, message3.destination_persona());
+  EXPECT_EQ(source_.persona, message3.source().persona);
   EXPECT_EQ(source_.node_id, message3.source().node_id);
   EXPECT_EQ(data_type_, message3.data().type);
   EXPECT_EQ(name_, message3.data().name);
@@ -135,9 +135,9 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
 
   DataMessage message4 = std::move(message3);
 
-  EXPECT_EQ(action_type_, message4.action_type());
-  EXPECT_EQ(destination_persona_type_, message4.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message4.source().persona_type);
+  EXPECT_EQ(action_, message4.action());
+  EXPECT_EQ(destination_persona_, message4.destination_persona());
+  EXPECT_EQ(source_.persona, message4.source().persona);
   EXPECT_EQ(source_.node_id, message4.source().node_id);
   EXPECT_EQ(data_type_, message4.data().type);
   EXPECT_EQ(name_, message4.data().name);
@@ -146,9 +146,9 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
 
   DataMessage message5(std::move(message4));
 
-  EXPECT_EQ(action_type_, message5.action_type());
-  EXPECT_EQ(destination_persona_type_, message5.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message5.source().persona_type);
+  EXPECT_EQ(action_, message5.action());
+  EXPECT_EQ(destination_persona_, message5.destination_persona());
+  EXPECT_EQ(source_.persona, message5.source().persona);
   EXPECT_EQ(source_.node_id, message5.source().node_id);
   EXPECT_EQ(data_type_, message5.data().type);
   EXPECT_EQ(name_, message5.data().name);
@@ -162,7 +162,7 @@ TEST_F(DataMessageTest, BEH_InvalidDataType) {
     bad_data_type = RandomInt32();
   if (bad_data_type > 0)
     bad_data_type = -bad_data_type;
-  EXPECT_THROW(DataMessage(action_type_, destination_persona_type_, source_,
+  EXPECT_THROW(DataMessage(action_, destination_persona_, source_,
                            DataMessage::Data(static_cast<detail::DataTagValue>(bad_data_type),
                                              name_, content_, version_)),
                nfs_error);
@@ -171,13 +171,12 @@ TEST_F(DataMessageTest, BEH_InvalidDataType) {
 TEST_F(DataMessageTest, BEH_InvalidSource) {
   MessageSource bad_source(GenerateSource());
   bad_source.node_id = NodeId();
-  EXPECT_THROW(DataMessage(action_type_, destination_persona_type_, bad_source,
-                           data_message_.data()),
+  EXPECT_THROW(DataMessage(action_, destination_persona_, bad_source, data_message_.data()),
                nfs_error);
 }
 
 TEST_F(DataMessageTest, BEH_InvalidName) {
-  EXPECT_THROW(DataMessage(action_type_, destination_persona_type_, source_,
+  EXPECT_THROW(DataMessage(action_, destination_persona_, source_,
                            DataMessage::Data(data_type_, Identity(), content_, version_)),
                nfs_error);
 }

@@ -32,7 +32,7 @@ namespace nfs {
 
 class DataMessage {
  public:
-  enum class ActionType : int { kGet, kPut, kDelete };
+  enum class Action : int { kGet, kPut, kDelete };
   struct Data {
     Data();
     Data(maidsafe::detail::DataTagValue type_in,
@@ -55,8 +55,8 @@ class DataMessage {
   typedef std::function<void(DataMessage message)> OnError;
   static const int32_t message_type_identifier = 0;
 
-  DataMessage(ActionType action_type,
-              PersonaType destination_persona_type,
+  DataMessage(Action action,
+              Persona destination_persona,
               const MessageSource& source,
               const Data& data);
   DataMessage(const DataMessage& other);
@@ -72,8 +72,8 @@ class DataMessage {
                 const asymm::PublicKey& signer_public_key) const;
 
   MessageId message_id() const { return message_id_; }
-  ActionType action_type() const { return action_type_; }
-  PersonaType destination_persona_type() const { return destination_persona_type_; }
+  Action action() const { return action_; }
+  Persona destination_persona() const { return destination_persona_; }
   MessageSource source() const { return source_; }
   Data data() const { return data_; }
 
@@ -81,8 +81,8 @@ class DataMessage {
   bool ValidateInputs() const;
 
   MessageId message_id_;
-  ActionType action_type_;
-  PersonaType destination_persona_type_;
+  Action action_;
+  Persona destination_persona_;
   MessageSource source_;
   Data data_;
 };
@@ -90,24 +90,24 @@ class DataMessage {
 
 template <typename Elem, typename Traits>
 std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
-                                             const DataMessage::ActionType &action_type) {
-  std::string action_type_str;
-  switch (action_type) {
-    case DataMessage::ActionType::kGet:
-      action_type_str = "Get";
+                                             const DataMessage::Action &action) {
+  std::string action_str;
+  switch (action) {
+    case DataMessage::Action::kGet:
+      action_str = "Get";
       break;
-    case DataMessage::ActionType::kPut:
-      action_type_str = "Put";
+    case DataMessage::Action::kPut:
+      action_str = "Put";
       break;
-    case DataMessage::ActionType::kDelete:
-      action_type_str = "Delete";
+    case DataMessage::Action::kDelete:
+      action_str = "Delete";
       break;
     default:
-      action_type_str = "Invalid DataMessage action type";
+      action_str = "Invalid DataMessage action type";
       break;
   }
 
-  for (std::string::iterator itr(action_type_str.begin()); itr != action_type_str.end(); ++itr)
+  for (std::string::iterator itr(action_str.begin()); itr != action_str.end(); ++itr)
     ostream << ostream.widen(*itr);
   return ostream;
 }

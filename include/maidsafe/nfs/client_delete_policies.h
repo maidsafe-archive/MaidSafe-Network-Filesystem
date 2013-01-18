@@ -43,7 +43,7 @@ class DeleteFromMaidAccountHolder {
   DeleteFromMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(MessageSource(PersonaType::kClientMaid, routing.kNodeId())) {}
+        source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
   void Delete(const typename Data::name_type& /*name*/, DataMessage::OnError /*on_error*/) {}

@@ -32,7 +32,7 @@ namespace protobuf { class GenericMessage; }
 
 class GenericMessage {
  public:
-  enum class ActionType : int {
+  enum class Action : int {
     kRegisterPmid,
     kConnect,
     kGetPmidSize,
@@ -44,8 +44,8 @@ class GenericMessage {
   typedef std::function<void(GenericMessage message)> OnError;
   static const int32_t message_type_identifier = 1;
 
-  GenericMessage(ActionType action_type,
-                 PersonaType destination_persona_type,
+  GenericMessage(Action action,
+                 Persona destination_persona,
                  const MessageSource& source,
                  const Identity& name,
                  const NonEmptyString& content);
@@ -58,8 +58,8 @@ class GenericMessage {
   serialised_type Serialise() const;
 
   MessageId message_id() const { return message_id_; }
-  ActionType action_type() const { return action_type_; }
-  PersonaType destination_persona_type() const { return destination_persona_type_; }
+  Action action() const { return action_; }
+  Persona destination_persona() const { return destination_persona_; }
   MessageSource source() const { return source_; }
   Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
@@ -68,8 +68,8 @@ class GenericMessage {
   bool ValidateInputs() const;
 
   MessageId message_id_;
-  ActionType action_type_;
-  PersonaType destination_persona_type_;
+  Action action_;
+  Persona destination_persona_;
   MessageSource source_;
   Identity name_;
   NonEmptyString content_;
@@ -78,33 +78,33 @@ class GenericMessage {
 
 template <typename Elem, typename Traits>
 std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
-                                             const GenericMessage::ActionType &action_type) {
-  std::string action_type_str;
-  switch (action_type) {
-    case GenericMessage::ActionType::kRegisterPmid:
-      action_type_str = "Register PMID";
+                                             const GenericMessage::Action &action) {
+  std::string action_str;
+  switch (action) {
+    case GenericMessage::Action::kRegisterPmid:
+      action_str = "Register PMID";
       break;
-    case GenericMessage::ActionType::kConnect:
-      action_type_str = "Connect";
+    case GenericMessage::Action::kConnect:
+      action_str = "Connect";
       break;
-    case GenericMessage::ActionType::kGetPmidSize:
-      action_type_str = "Get PMID Size";
+    case GenericMessage::Action::kGetPmidSize:
+      action_str = "Get PMID Size";
       break;
-    case GenericMessage::ActionType::kNodeDown:
-      action_type_str = "Node Down";
+    case GenericMessage::Action::kNodeDown:
+      action_str = "Node Down";
       break;
-    case GenericMessage::ActionType::kNodeUp:
-      action_type_str = "Node Up";
+    case GenericMessage::Action::kNodeUp:
+      action_str = "Node Up";
       break;
-    case GenericMessage::ActionType::kSynchronise:
-      action_type_str = "Synchronise";
+    case GenericMessage::Action::kSynchronise:
+      action_str = "Synchronise";
       break;
     default:
-      action_type_str = "Invalid GenericMessage action type";
+      action_str = "Invalid GenericMessage action type";
       break;
   }
 
-  for (std::string::iterator itr(action_type_str.begin()); itr != action_type_str.end(); ++itr)
+  for (std::string::iterator itr(action_str.begin()); itr != action_str.end(); ++itr)
     ostream << ostream.widen(*itr);
   return ostream;
 }

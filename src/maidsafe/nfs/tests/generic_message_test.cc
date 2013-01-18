@@ -27,14 +27,14 @@ namespace test {
 
 namespace {
 
-GenericMessage::ActionType GenerateActionType() {
-  return static_cast<GenericMessage::ActionType>(RandomUint32() % 6);
+GenericMessage::Action GenerateAction() {
+  return static_cast<GenericMessage::Action>(RandomUint32() % 6);
 }
 
 MessageSource GenerateSource() {
   MessageSource source;
-  // matches PersonaType enum in types.h
-  source.persona_type = static_cast<PersonaType>(RandomUint32() % 7);
+  // matches Persona enum in types.h
+  source.persona = static_cast<Persona>(RandomUint32() % 7);
   source.node_id = NodeId(NodeId::kRandomId);
   return source;
 }
@@ -44,16 +44,16 @@ MessageSource GenerateSource() {
 class GenericMessageTest : public testing::Test {
  protected:
   GenericMessageTest()
-      : action_type_(GenerateActionType()),
-        destination_persona_type_(static_cast<PersonaType>(RandomUint32() % 7)),
+      : action_(GenerateAction()),
+        destination_persona_(static_cast<Persona>(RandomUint32() % 7)),
         source_(GenerateSource()),
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
 //        signature_(RandomString(1 + RandomUint32() % 50)),
-        generic_message_(action_type_, destination_persona_type_, source_, name_, content_) {}
+        generic_message_(action_, destination_persona_, source_, name_, content_) {}
 
-  GenericMessage::ActionType action_type_;
-  PersonaType destination_persona_type_;
+  GenericMessage::Action action_;
+  Persona destination_persona_;
   MessageSource source_;
   Identity name_;
   NonEmptyString content_;
@@ -62,9 +62,9 @@ class GenericMessageTest : public testing::Test {
 };
 
 TEST_F(GenericMessageTest, BEH_CheckGetters) {
-  EXPECT_EQ(action_type_, generic_message_.action_type());
-  EXPECT_EQ(destination_persona_type_, generic_message_.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, generic_message_.source().persona_type);
+  EXPECT_EQ(action_, generic_message_.action());
+  EXPECT_EQ(destination_persona_, generic_message_.destination_persona());
+  EXPECT_EQ(source_.persona, generic_message_.source().persona);
   EXPECT_EQ(source_.node_id, generic_message_.source().node_id);
   EXPECT_EQ(name_, generic_message_.name());
   EXPECT_EQ(content_, generic_message_.content());
@@ -75,9 +75,9 @@ TEST_F(GenericMessageTest, BEH_SerialiseThenParse) {
   auto serialised_message(generic_message_.Serialise());
   GenericMessage recovered_message(serialised_message);
 
-  EXPECT_EQ(action_type_, recovered_message.action_type());
-  EXPECT_EQ(destination_persona_type_, recovered_message.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, recovered_message.source().persona_type);
+  EXPECT_EQ(action_, recovered_message.action());
+  EXPECT_EQ(destination_persona_, recovered_message.destination_persona());
+  EXPECT_EQ(source_.persona, recovered_message.source().persona);
   EXPECT_EQ(source_.node_id, recovered_message.source().node_id);
   EXPECT_EQ(name_, recovered_message.name());
   EXPECT_EQ(content_, recovered_message.content());
@@ -92,9 +92,9 @@ TEST_F(GenericMessageTest, BEH_SerialiseParseReserialiseReparse) {
   GenericMessage recovered_message2(serialised_message2);
 
   EXPECT_EQ(serialised_message, serialised_message2);
-  EXPECT_EQ(action_type_, recovered_message2.action_type());
-  EXPECT_EQ(destination_persona_type_, recovered_message2.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, recovered_message2.source().persona_type);
+  EXPECT_EQ(action_, recovered_message2.action());
+  EXPECT_EQ(destination_persona_, recovered_message2.destination_persona());
+  EXPECT_EQ(source_.persona, recovered_message2.source().persona);
   EXPECT_EQ(source_.node_id, recovered_message2.source().node_id);
   EXPECT_EQ(name_, recovered_message2.name());
   EXPECT_EQ(content_, recovered_message2.content());
@@ -104,9 +104,9 @@ TEST_F(GenericMessageTest, BEH_SerialiseParseReserialiseReparse) {
 TEST_F(GenericMessageTest, BEH_AssignMessage) {
   GenericMessage message2 = generic_message_;
 
-  EXPECT_EQ(action_type_, message2.action_type());
-  EXPECT_EQ(destination_persona_type_, message2.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message2.source().persona_type);
+  EXPECT_EQ(action_, message2.action());
+  EXPECT_EQ(destination_persona_, message2.destination_persona());
+  EXPECT_EQ(source_.persona, message2.source().persona);
   EXPECT_EQ(source_.node_id, message2.source().node_id);
   EXPECT_EQ(name_, message2.name());
   EXPECT_EQ(content_, message2.content());
@@ -114,9 +114,9 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
 
   GenericMessage message3(generic_message_);
 
-  EXPECT_EQ(action_type_, message3.action_type());
-  EXPECT_EQ(destination_persona_type_, message3.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message3.source().persona_type);
+  EXPECT_EQ(action_, message3.action());
+  EXPECT_EQ(destination_persona_, message3.destination_persona());
+  EXPECT_EQ(source_.persona, message3.source().persona);
   EXPECT_EQ(source_.node_id, message3.source().node_id);
   EXPECT_EQ(name_, message3.name());
   EXPECT_EQ(content_, message3.content());
@@ -124,9 +124,9 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
 
   GenericMessage message4 = std::move(message3);
 
-  EXPECT_EQ(action_type_, message4.action_type());
-  EXPECT_EQ(destination_persona_type_, message4.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message4.source().persona_type);
+  EXPECT_EQ(action_, message4.action());
+  EXPECT_EQ(destination_persona_, message4.destination_persona());
+  EXPECT_EQ(source_.persona, message4.source().persona);
   EXPECT_EQ(source_.node_id, message4.source().node_id);
   EXPECT_EQ(name_, message4.name());
   EXPECT_EQ(content_, message4.content());
@@ -134,9 +134,9 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
 
   GenericMessage message5(std::move(message4));
 
-  EXPECT_EQ(action_type_, message5.action_type());
-  EXPECT_EQ(destination_persona_type_, message5.destination_persona_type());
-  EXPECT_EQ(source_.persona_type, message5.source().persona_type);
+  EXPECT_EQ(action_, message5.action());
+  EXPECT_EQ(destination_persona_, message5.destination_persona());
+  EXPECT_EQ(source_.persona, message5.source().persona);
   EXPECT_EQ(source_.node_id, message5.source().node_id);
   EXPECT_EQ(name_, message5.name());
   EXPECT_EQ(content_, message5.content());
@@ -146,14 +146,12 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
 TEST_F(GenericMessageTest, BEH_InvalidSource) {
   MessageSource bad_source(GenerateSource());
   bad_source.node_id = NodeId();
-  EXPECT_THROW(GenericMessage(action_type_, destination_persona_type_, bad_source, name_,
-                              content_/*, signature_*/),
+  EXPECT_THROW(GenericMessage(action_, destination_persona_, bad_source, name_, content_),
                nfs_error);
 }
 
 TEST_F(GenericMessageTest, BEH_InvalidName) {
-  EXPECT_THROW(GenericMessage(action_type_, destination_persona_type_, source_, Identity(),
-                              content_/*, signature_*/),
+  EXPECT_THROW(GenericMessage(action_, destination_persona_, source_, Identity(), content_),
                nfs_error);
 }
 
