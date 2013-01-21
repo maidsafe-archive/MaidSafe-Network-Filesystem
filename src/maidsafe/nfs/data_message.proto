@@ -17,4 +17,5 @@ message DataMessage {
   required int32 destination_persona = 3;
   required Source source = 4;
   required Data data = 5;
+  optional bytes data_holder_hint = 6;
 }

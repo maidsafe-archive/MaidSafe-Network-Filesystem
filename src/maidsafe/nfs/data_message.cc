@@ -71,12 +71,14 @@ DataMessage::Data& DataMessage::Data::operator=(Data&& other) {
 DataMessage::DataMessage(Action action,
                          Persona destination_persona,
                          const MessageSource& source,
-                         const Data& data)
+                         const Data& data,
+                         const passport::PublicPmid::name_type& data_holder_hint)
     : message_id_(detail::GetNewMessageId(source.node_id)),
       action_(action),
       destination_persona_(destination_persona),
       source_(source),
-      data_(data) {
+      data_(data),
+      data_holder_hint_(data_holder_hint) {
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
@@ -86,7 +88,8 @@ DataMessage::DataMessage(const DataMessage& other)
       action_(other.action_),
       destination_persona_(other.destination_persona_),
       source_(other.source_),
-      data_(other.data_) {}
+      data_(other.data_),
+      data_holder_hint_(other.data_holder_hint_) {}
 
 DataMessage& DataMessage::operator=(const DataMessage& other) {
   message_id_ = other.message_id_;
@@ -94,6 +97,7 @@ DataMessage& DataMessage::operator=(const DataMessage& other) {
   destination_persona_ = other.destination_persona_;
   source_ = other.source_;
   data_ = other.data_;
+  data_holder_hint_ = other.data_holder_hint_;
   return *this;
 }
 
@@ -102,7 +106,8 @@ DataMessage::DataMessage(DataMessage&& other)
       action_(std::move(other.action_)),
       destination_persona_(std::move(other.destination_persona_)),
       source_(std::move(other.source_)),
-      data_(std::move(other.data_)) {}
+      data_(std::move(other.data_)),
+      data_holder_hint_(std::move(other.data_holder_hint_)) {}
 
 DataMessage& DataMessage::operator=(DataMessage&& other) {
   message_id_ = std::move(other.message_id_);
@@ -110,6 +115,7 @@ DataMessage& DataMessage::operator=(DataMessage&& other) {
   destination_persona_ = std::move(other.destination_persona_);
   source_ = std::move(other.source_);
   data_ = std::move(other.data_);
+  data_holder_hint_ = std::move(other.data_holder_hint_);
   return *this;
 }
 
@@ -140,6 +146,11 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
   if (data.has_version())
     data_.version = data.version();
 
+  if (proto_data_message.has_data_holder_hint()) {
+    data_holder_hint_ =
+        passport::PublicPmid::name_type((Identity(proto_data_message.data_holder_hint())));
+  }
+
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
@@ -165,6 +176,8 @@ DataMessage::serialised_type DataMessage::Serialise() const {
       proto_data_message.mutable_data()->set_content(data_.content.string());
     if (data_.version != Data::NoVersion())
       proto_data_message.mutable_data()->set_version(data_.version);
+    if (data_holder_hint_->IsInitialised())
+      proto_data_message.set_data_holder_hint(data_holder_hint_->string());
     serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
   }
   catch(const std::system_error&) {

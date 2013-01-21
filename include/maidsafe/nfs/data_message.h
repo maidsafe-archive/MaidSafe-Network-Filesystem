@@ -22,6 +22,7 @@
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/detail/data_type_values.h"
+#include "maidsafe/passport/types.h"
 
 #include "maidsafe/nfs/types.h"
 
@@ -58,7 +59,9 @@ class DataMessage {
   DataMessage(Action action,
               Persona destination_persona,
               const MessageSource& source,
-              const Data& data);
+              const Data& data,
+              const passport::PublicPmid::name_type& data_holder_hint =
+                  passport::PublicPmid::name_type());
   DataMessage(const DataMessage& other);
   DataMessage& operator=(const DataMessage& other);
   DataMessage(DataMessage&& other);
@@ -76,6 +79,8 @@ class DataMessage {
   Persona destination_persona() const { return destination_persona_; }
   MessageSource source() const { return source_; }
   Data data() const { return data_; }
+  passport::PublicPmid::name_type data_holder_hint() const { return data_holder_hint_; }
+  bool HasDataHolderHint() const { return data_holder_hint_->IsInitialised(); }
 
  private:
   bool ValidateInputs() const;
@@ -85,6 +90,7 @@ class DataMessage {
   Persona destination_persona_;
   MessageSource source_;
   Data data_;
+  passport::PublicPmid::name_type data_holder_hint_;
 };
 
 
