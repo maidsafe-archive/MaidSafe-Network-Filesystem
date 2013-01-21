@@ -29,6 +29,23 @@ MessageId GetNewMessageId(const NodeId& source_node_id) {
                                                          std::to_string(random_element++))));
 }
 
+void GetReturnCode(int& success_count, int& failure_count, std::future<std::string>& future) {
+  try {
+    // Need '((' when constructing ReturnCode to avoid most vexing parse.
+    ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(future.get()))));
+    if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
+      ++success_count;
+    } else {
+      LOG(kWarning) << "Received an error " << return_code.value();
+      ++failure_count;
+    }
+  }
+  catch(const std::exception& e) {
+    ++failure_count;
+    LOG(kError) <<  e.what();
+  }
+}
+
 }  // namespace detail
 
 

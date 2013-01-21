@@ -64,12 +64,12 @@ class PutToDataHolder {
     auto serialised_and_signed(data_message.SerialiseAndSign(signing_fob_.private_key()));
     Message message(DataMessage::message_type_identifier, serialised_and_signed.first,
                     serialised_and_signed.second);
-    routing::ResponseFunctor callback =
-        [on_error, data_message](const std::vector<std::string>& serialised_messages) {
-          HandlePutResponse<Data>(on_error, data_message, serialised_messages);
-        };
-    routing_.Send(NodeId(data.name()->string()), message.Serialise()->string(), callback,
-                  routing::DestinationType::kGroup, IsCacheable<Data>());
+//    routing::ResponseFunctor callback =
+//        [on_error, data_message](const std::vector<std::string>& serialised_messages) {
+//          HandlePutResponse<Data>(on_error, data_message, serialised_messages);
+//        };
+//    routing_.Send(NodeId(data.name()->string()), message.Serialise()->string(), callback,
+//                  routing::DestinationType::kGroup, IsCacheable<Data>());
   }
 
  protected:
