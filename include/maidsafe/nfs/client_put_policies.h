@@ -56,7 +56,7 @@ class PutToDataHolder {
         source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
-  void Put(const Data& data, DataMessage::OnError on_error) {
+  void Put(const Data& data, DataMessage::OnError /*on_error*/) {
     DataMessage::Data message_data(Data::name_type::tag_type::kEnumValue, data.name(),
                                    data.Serialise());
     DataMessage data_message(DataMessage::Action::kPut, Persona::kDataHolder, source_,
