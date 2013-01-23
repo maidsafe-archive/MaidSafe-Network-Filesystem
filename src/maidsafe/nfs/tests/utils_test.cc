@@ -152,8 +152,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Tmid>() {
 template<>
 std::pair<Identity, NonEmptyString> GetNameAndContent<ImmutableData>() {
   NonEmptyString value(RandomString(RandomUint32() % 10000 + 10));
-  Identity name(crypto::Hash<crypto::SHA512>(value));
-  ImmutableData immutable(ImmutableData::name_type(name), value);
+  ImmutableData immutable(value);
   return std::make_pair(immutable.name().data, immutable.Serialise().data);
 }
 
@@ -162,8 +161,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent<MutableData>() {
   NonEmptyString value(RandomString(RandomUint32() % 10000 + 10));
   Identity name(crypto::Hash<crypto::SHA512>(value));
   passport::Anmid anmid;
-  auto signature(asymm::Sign(value, anmid.private_key()));
-  MutableData mutable_data(MutableData::name_type(name), value, signature, 99);
+  MutableData mutable_data(MutableData::name_type(name), value, anmid.private_key());
   return std::make_pair(mutable_data.name().data, mutable_data.Serialise().data);
 }
 
