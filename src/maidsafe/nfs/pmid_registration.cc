@@ -58,7 +58,7 @@ PmidRegistration::PmidRegistration(const passport::Maid& maid,
   maid_signature_ = asymm::Sign(serialised_signed_details, maid.private_key());
 }
 
-PmidRegistration::PmidRegistration(const NonEmptyString& serialised_pmid_registration)
+PmidRegistration::PmidRegistration(const serialised_type& serialised_pmid_registration)
     : maid_name_(),
       pmid_name_(),
       unregister_(),
@@ -69,7 +69,7 @@ PmidRegistration::PmidRegistration(const NonEmptyString& serialised_pmid_registr
     ThrowError(NfsErrors::pmid_registration_parsing_error);
   });
   protobuf::PmidRegistration proto_pmid_registration;
-  if (!proto_pmid_registration.ParseFromString(serialised_pmid_registration.string()))
+  if (!proto_pmid_registration.ParseFromString(serialised_pmid_registration->string()))
     fail();
   protobuf::PmidRegistration::SignedDetails signed_details;
   if (!signed_details.ParseFromString(proto_pmid_registration.serialised_signed_details()))
@@ -101,13 +101,13 @@ bool PmidRegistration::Validate(const passport::PublicMaid& public_maid,
   return true;
 }
 
-NonEmptyString PmidRegistration::Serialise() const {
+PmidRegistration::serialised_type PmidRegistration::Serialise() const {
   protobuf::PmidRegistration proto_pmid_registration;
   proto_pmid_registration.set_serialised_signed_details(
       GetSerialisedSignedDetails(GetSerialisedDetails(maid_name_, pmid_name_, unregister_),
                                  pmid_signature_).string());
   proto_pmid_registration.set_maid_signature(maid_signature_.string());
-  return NonEmptyString(proto_pmid_registration.SerializeAsString());
+  return serialised_type(NonEmptyString(proto_pmid_registration.SerializeAsString()));
 }
 
 }  // namespace nfs

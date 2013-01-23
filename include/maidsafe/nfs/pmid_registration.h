@@ -23,13 +23,14 @@ namespace nfs {
 
 class PmidRegistration {
  public:
+  typedef TaggedValue<NonEmptyString, struct SerialisedPmidRegistrationTag> serialised_type;
   PmidRegistration(const passport::Maid& maid,
                    const passport::Pmid& pmid,
                    bool unregister);
-  explicit PmidRegistration(const NonEmptyString& serialised_pmid_registration);
+  explicit PmidRegistration(const serialised_type& serialised_pmid_registration);
   bool Validate(const passport::PublicMaid& public_maid,
                 const passport::PublicPmid& public_pmid) const;
-  NonEmptyString Serialise() const;
+  serialised_type Serialise() const;
   passport::PublicMaid::name_type maid_name() const { return maid_name_; }
   passport::PublicPmid::name_type pmid_name() const { return pmid_name_; }
   bool unregister() const { return unregister_; }
