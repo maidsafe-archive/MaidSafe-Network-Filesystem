@@ -40,7 +40,7 @@ void HandlePutFutures(std::shared_ptr<ReturnCodePromiseVector> promises,
           std::vector<StringFuture>::iterator itr(routing_futures->begin());
           while ((itr = FindNextReadyFuture(itr, *routing_futures)) != routing_futures->end()) {
             ProcessReadyFuture(*itr, *promises, next_promise_index);
-            ++itr;
+            itr = routing_futures->erase(itr);
           }
 
           std::this_thread::yield();
