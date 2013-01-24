@@ -31,8 +31,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace {
-
 typedef std::future<ReturnCode> ReturnCodeFuture;
 typedef std::vector<ReturnCodeFuture> ReturnCodeFutureVector;
 typedef std::promise<ReturnCode> ReturnCodePromise;
@@ -40,38 +38,10 @@ typedef std::vector<ReturnCodePromise> ReturnCodePromiseVector;
 
 void ProcessReadyFuture(StringFuture& future,
                         ReturnCodePromiseVector& promises,
-                        size_t& index) {
-  try {
-    std::string serialised_message(future.get());
-    // Need '((' when constructing ReturnCode to avoid most vexing parse.
-    ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(serialised_message))));
-    promises.at(index++).set_value(std::move(return_code));
-  }
-  catch(const std::system_error& error) {
-    LOG(kWarning) << "Put future problem: " << error.code() << " - " << error.what();
-    promises.at(index++).set_exception(std::current_exception());
-  }
-}
+                        size_t& index);
 
 void HandlePutFutures(std::shared_ptr<ReturnCodePromiseVector> promises,
-                      std::shared_ptr<StringFutureVector> routing_futures) {
-  std::async(
-      std::launch::async,
-      [promises, routing_futures] {
-        size_t next_promise_index(0);
-        while (!routing_futures->empty()) {
-          std::vector<StringFuture>::iterator itr(routing_futures->begin());
-          while ((itr = FindNextReadyFuture(itr, *routing_futures)) != routing_futures->end()) {
-            ProcessReadyFuture(*itr, *promises, next_promise_index);
-            ++itr;
-          }
-
-          std::this_thread::yield();
-        }
-      });
-}
-
-}  // namespace
+                      std::shared_ptr<StringFutureVector> routing_futures);
 
 template<typename SigningFob>
 class NoPut {
@@ -132,15 +102,8 @@ class PutToMaidAccountHolder {
 
   template<typename Data>
   ReturnCodeFutureVector Put(const Data& data) {
-    NonEmptyString content(data.Serialise());
-    Message message(DataMessage::Action::kPut,
-                    Persona::kDataHolder,
-                    source_,
-                    Data::name_type::tag_type::kEnumValue,
-                    data.name(),
-                    content,
-                    asymm::Sign(content, signing_fob_.private_key()));
-
+    DataMessage data_message(DataMessage::Action::kPut, Persona::kMaidAccountHolder, source_, data);
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());
     auto routing_futures(std::make_shared<StringFutureVector>(
                              routing_.SendGroup(routing_.kNodeId(),
                                                 message.Serialise()->string(),

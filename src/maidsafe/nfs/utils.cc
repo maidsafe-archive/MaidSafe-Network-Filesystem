@@ -50,9 +50,9 @@ void GetReturnCode(int& success_count, int& failure_count, std::future<std::stri
 
 std::vector<StringFuture>::iterator FindNextReadyFuture(const StringFutureVector::iterator& begin,
                                                         StringFutureVector& routing_futures) {
- return std::find_if(begin,
-                     routing_futures.end(),
-                     [] (StringFuture& future) { return IsReady(future); });  // NOLINT (Dan)
+  return std::find_if(begin,
+                      routing_futures.end(),
+                      [] (StringFuture& future) { return IsReady(future); });  // NOLINT (Dan)
 }
 
 void HandleGenericResponse(GenericMessage::OnError /*on_error_functor*/,

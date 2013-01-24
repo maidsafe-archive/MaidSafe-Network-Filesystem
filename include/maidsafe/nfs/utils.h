@@ -59,52 +59,8 @@ Data ValidateAndParse(const Message& message) {
 
 typedef std::future<std::string> StringFuture;
 typedef std::vector<StringFuture> StringFutureVector;
-
 std::vector<StringFuture>::iterator FindNextReadyFuture(const StringFutureVector::iterator& begin,
                                                         StringFutureVector& routing_futures);
-
-template<typename Data>
-void HandleDeleteResponse(DataMessage::OnError on_error_functor,
-                          DataMessage original_data_message,
-                          const std::vector<std::string>& serialised_messages) {
-  if (serialised_messages.empty()) {
-    LOG(kError) << "No responses received for Delete " << original_data_message.data().type
-                << "  " << DebugId(original_data_message.data().name);
-    on_error_functor(std::move(original_data_message));
-  }
-
-  // TODO(Fraser#5#): 2012-12-21 - Confirm this is OK as a means of deciding overall success
-  int success_count(0), failure_count(0);
-  for (auto& serialised_message : serialised_messages) {
-    try {
-      // Need '((' when constructing ReturnCode to avoid most vexing parse.
-      ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(serialised_message))));
-      if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
-        ++success_count;
-      } else {
-        LOG(kWarning) << "Received an error " << return_code.value() << " for Delete "
-                      << original_data_message.data().type << " "
-                      << DebugId(original_data_message.data().name);
-        ++failure_count;
-      }
-    }
-    catch(const std::exception& e) {
-      ++failure_count;
-      LOG(kError) <<  e.what();
-    }
-  }
-
-  if (success_count == 0) {
-    LOG(kError) << "No successful responses received for Delete "
-                << original_data_message.data().type
-                << "  " << DebugId(original_data_message.data().name) << "  received "
-                << failure_count << " failures.";
-    on_error_functor(std::move(original_data_message));
-  }
-  LOG(kVerbose) << "Overall success for Delete " << original_data_message.data().type
-                << "  " << DebugId(original_data_message.data().name) << "  received "
-                << success_count << " successes and " << failure_count << " failures.";
-}
 
 void HandleGenericResponse(GenericMessage::OnError /*on_error_functor*/,
                            GenericMessage /*original_generic_message*/,

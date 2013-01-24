@@ -12,6 +12,8 @@
 #ifndef MAIDSAFE_NFS_CLIENT_DELETE_POLICIES_H_
 #define MAIDSAFE_NFS_CLIENT_DELETE_POLICIES_H_
 
+#include <string>
+
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
@@ -46,7 +48,17 @@ class DeleteFromMaidAccountHolder {
         source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
-  void Delete(const typename Data::name_type& /*name*/, DataMessage::OnError /*on_error*/) {}
+  void Delete(const typename Data::name_type& name) {
+    DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
+    DataMessage data_message(DataMessage::Action::kDelete,
+                             Persona::kMaidAccountHolder,
+                             source_,
+                             data);
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());
+    std::make_shared<StringFutureVector>(routing_.SendGroup(NodeId(name->string()),
+                                                            message.Serialise()->string(),
+                                                            IsCacheable<Data>()));
+  }
 
  protected:
   ~DeleteFromMaidAccountHolder() {}

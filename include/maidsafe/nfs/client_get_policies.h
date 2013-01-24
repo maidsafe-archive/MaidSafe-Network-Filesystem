@@ -30,8 +30,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace {
-
 template<typename Data>
 bool ProcessReadyFutureSuccessfully(StringFuture& future, std::promise<Data>& promise) {
   try {
@@ -47,8 +45,6 @@ bool ProcessReadyFutureSuccessfully(StringFuture& future, std::promise<Data>& pr
     return false;
   }
 }
-
-}  // namespace
 
 template<typename Data>
 void HandleGetFutures(std::shared_ptr<std::promise<Data> > promise,
