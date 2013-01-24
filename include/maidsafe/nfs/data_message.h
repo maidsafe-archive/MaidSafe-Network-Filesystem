@@ -38,21 +38,18 @@ class DataMessage {
     Data();
     Data(maidsafe::detail::DataTagValue type_in,
          const Identity& name_in,
-         const NonEmptyString& content_in,
-         int32_t version_in = NoVersion());
+         const NonEmptyString& content_in);
     Data(const Data& other);
     Data& operator=(const Data& other);
     Data(Data&& other);
     Data& operator=(Data&& other);
-    static int32_t NoVersion() { return -1; }
 
     maidsafe::detail::DataTagValue type;
     Identity name;
     NonEmptyString content;
-    int32_t version;
   };
 
-  typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
+  typedef TaggedValue<NonEmptyString, struct SerialisedDataMessageTag> serialised_type;
   typedef std::function<void(DataMessage message)> OnError;
   static const int32_t message_type_identifier = 0;
 

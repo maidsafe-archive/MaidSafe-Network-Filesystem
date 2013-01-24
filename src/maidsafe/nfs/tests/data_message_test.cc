@@ -50,10 +50,8 @@ class DataMessageTest : public testing::Test {
         data_type_(static_cast<detail::DataTagValue>(RandomUint32() % 13)),
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
-        version_(RandomInt32() % 100),
-//        signature_(RandomString(1 + RandomUint32() % 50)),
         data_message_(action_, destination_persona_, source_,
-                      DataMessage::Data(data_type_, name_, content_, version_)) {}
+                      DataMessage::Data(data_type_, name_, content_)) {}
 
   DataMessage::Action action_;
   Persona destination_persona_;
@@ -62,8 +60,6 @@ class DataMessageTest : public testing::Test {
   detail::DataTagValue data_type_;
   Identity name_;
   NonEmptyString content_;
-  int32_t version_;
-//  asymm::Signature signature_;
   DataMessage data_message_;
 };
 
@@ -75,7 +71,6 @@ TEST_F(DataMessageTest, BEH_CheckGetters) {
   EXPECT_EQ(data_type_, data_message_.data().type);
   EXPECT_EQ(name_, data_message_.data().name);
   EXPECT_EQ(content_, data_message_.data().content);
-//  EXPECT_EQ(signature_, data_message_.signature());
 }
 
 TEST_F(DataMessageTest, BEH_SerialiseThenParse) {
@@ -89,7 +84,6 @@ TEST_F(DataMessageTest, BEH_SerialiseThenParse) {
   EXPECT_EQ(data_type_, recovered_message.data().type);
   EXPECT_EQ(name_, recovered_message.data().name);
   EXPECT_EQ(content_, recovered_message.data().content);
-//  EXPECT_EQ(signature_, recovered_message.signature());
 }
 
 TEST_F(DataMessageTest, BEH_SerialiseParseReserialiseReparse) {
@@ -107,7 +101,6 @@ TEST_F(DataMessageTest, BEH_SerialiseParseReserialiseReparse) {
   EXPECT_EQ(data_type_, recovered_message2.data().type);
   EXPECT_EQ(name_, recovered_message2.data().name);
   EXPECT_EQ(content_, recovered_message2.data().content);
-//  EXPECT_EQ(signature_, recovered_message2.signature());
 }
 
 TEST_F(DataMessageTest, BEH_AssignMessage) {
@@ -120,7 +113,6 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message2.data().type);
   EXPECT_EQ(name_, message2.data().name);
   EXPECT_EQ(content_, message2.data().content);
-//  EXPECT_EQ(signature_, message2.signature());
 
   DataMessage message3(data_message_);
 
@@ -131,7 +123,6 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message3.data().type);
   EXPECT_EQ(name_, message3.data().name);
   EXPECT_EQ(content_, message3.data().content);
-//  EXPECT_EQ(signature_, message3.signature());
 
   DataMessage message4 = std::move(message3);
 
@@ -142,7 +133,6 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message4.data().type);
   EXPECT_EQ(name_, message4.data().name);
   EXPECT_EQ(content_, message4.data().content);
-//  EXPECT_EQ(signature_, message4.signature());
 
   DataMessage message5(std::move(message4));
 
@@ -153,7 +143,6 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message5.data().type);
   EXPECT_EQ(name_, message5.data().name);
   EXPECT_EQ(content_, message5.data().content);
-//  EXPECT_EQ(signature_, message5.signature());
 }
 
 TEST_F(DataMessageTest, BEH_InvalidDataType) {
@@ -164,7 +153,7 @@ TEST_F(DataMessageTest, BEH_InvalidDataType) {
     bad_data_type = -bad_data_type;
   EXPECT_THROW(DataMessage(action_, destination_persona_, source_,
                            DataMessage::Data(static_cast<detail::DataTagValue>(bad_data_type),
-                                             name_, content_, version_)),
+                                             name_, content_)),
                nfs_error);
 }
 
@@ -177,7 +166,7 @@ TEST_F(DataMessageTest, BEH_InvalidSource) {
 
 TEST_F(DataMessageTest, BEH_InvalidName) {
   EXPECT_THROW(DataMessage(action_, destination_persona_, source_,
-                           DataMessage::Data(data_type_, Identity(), content_, version_)),
+                           DataMessage::Data(data_type_, Identity(), content_)),
                nfs_error);
 }
 

@@ -10,7 +10,6 @@ message DataMessage {
     required int32 type = 1;
     required bytes name = 2;
     optional bytes content = 3;
-    optional int32 version = 4;
   }
   required bytes message_id = 1;
   required int32 action = 2;

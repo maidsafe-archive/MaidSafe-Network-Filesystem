@@ -26,43 +26,36 @@ namespace nfs {
 DataMessage::Data::Data()
     : type(static_cast<maidsafe::detail::DataTagValue>(-1)),
       name(),
-      content(),
-      version(NoVersion()) {}
+      content() {}
 
 DataMessage::Data::Data(maidsafe::detail::DataTagValue type_in,
                         const Identity& name_in,
-                        const NonEmptyString& content_in,
-                        int32_t version_in)
+                        const NonEmptyString& content_in)
     : type(type_in),
       name(name_in),
-      content(content_in),
-      version(version_in) {}
+      content(content_in) {}
 
 DataMessage::Data::Data(const Data& other)
     : type(other.type),
       name(other.name),
-      content(other.content),
-      version(other.version) {}
+      content(other.content) {}
 
 DataMessage::Data& DataMessage::Data::operator=(const Data& other) {
   type = other.type;
   name = other.name;
   content = other.content;
-  version = other.version;
   return *this;
 }
 
 DataMessage::Data::Data(Data&& other)
     : type(std::move(other.type)),
       name(std::move(other.name)),
-      content(std::move(other.content)),
-      version(std::move(other.version)) {}
+      content(std::move(other.content)) {}
 
 DataMessage::Data& DataMessage::Data::operator=(Data&& other) {
   type = std::move(other.type);
   name = std::move(other.name);
   content = std::move(other.content);
-  version = std::move(other.version);
   return *this;
 }
 
@@ -143,8 +136,6 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
   data_.name = Identity(data.name());
   if (data.has_content())
     data_.content = NonEmptyString(data.content());
-  if (data.has_version())
-    data_.version = data.version();
 
   if (proto_data_message.has_data_holder_hint()) {
     data_holder_hint_ =
@@ -174,8 +165,6 @@ DataMessage::serialised_type DataMessage::Serialise() const {
     proto_data_message.mutable_data()->set_name(data_.name.string());
     if (data_.content.IsInitialised())
       proto_data_message.mutable_data()->set_content(data_.content.string());
-    if (data_.version != Data::NoVersion())
-      proto_data_message.mutable_data()->set_version(data_.version);
     if (data_holder_hint_->IsInitialised())
       proto_data_message.set_data_holder_hint(data_holder_hint_->string());
     serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
