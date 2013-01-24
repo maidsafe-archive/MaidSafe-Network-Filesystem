@@ -57,35 +57,6 @@ Data ValidateAndParse(const Message& message) {
               typename Data::serialised_type(data_message.data().content));
 }
 
-template<typename Data>
-void HandleGetFutures(std::shared_ptr<std::promise<Data>> promise,
-                      std::shared_ptr<std::vector<std::future<std::string>>> routing_futures) {
-  std::async(std::launch::async, [=] {
-      while (!routing_futures->empty()) {
-        auto itr(routing_futures->begin());
-        while (itr != routing_futures->end()) {
-          if (IsReady(*itr)) {
-            try {
-              std::string serialised_message((*itr).get());
-              // Need '((' when constructing Message to avoid most vexing parse.
-              Message message((Message::serialised_type(NonEmptyString(serialised_message))));
-              Data data(ValidateAndParse<Data>(message));
-              promise->set_value(std::move(data));
-              return;
-            }
-            catch(const std::system_error& error) {
-              LOG(kError) << error.code() << " - " << error.what();
-              itr = routing_futures->erase(itr);
-            }
-          } else {
-            ++itr;
-          }
-        }
-        std::this_thread::yield();
-      }
-      promise->set_exception(std::make_exception_ptr(MakeError(NfsErrors::failed_to_get_data)));
-  });
-}
 
 template<typename Data>
 void HandlePutResponse(DataMessage::OnError on_error_functor,

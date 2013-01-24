@@ -30,6 +30,55 @@ namespace maidsafe {
 
 namespace nfs {
 
+namespace {
+
+typedef std::future<std::string> StringFuture;
+typedef std::vector<StringFuture> StringFutureVector;
+
+std::vector<StringFuture>::iterator FindNextReadyFuture(const StringFutureVector::iterator& begin,
+                                                        StringFutureVector& routing_futures) {
+  return std::find_if(begin,
+                      routing_futures.end(),
+                      [] (StringFuture& future) { return IsReady(future); });  // NOLINT (Dan)
+}
+
+template<typename Data>
+bool ProcessReadyFutureSuccessfully(StringFuture& future, std::promise<Data>& promise) {
+  try {
+    std::string serialised_message(future.get());
+    // Need '((' when constructing Message to avoid most vexing parse.
+    Message message((Message::serialised_type(NonEmptyString(serialised_message))));
+    Data data(ValidateAndParse<Data>(message));
+    promise.set_value(std::move(data));
+    return true;
+  }
+  catch(const std::system_error& error) {
+    LOG(kWarning) << "Get future problem: " << error.code() << " - " << error.what();
+    return false;
+  }
+}
+
+}  // namespace
+
+template<typename Data>
+void HandleGetFutures(std::shared_ptr<std::promise<Data> > promise,
+                      std::shared_ptr<StringFutureVector> routing_futures) {
+  std::async(
+      std::launch::async,
+      [promise, routing_futures] {
+        while (!routing_futures->empty()) {
+          std::vector<StringFuture>::iterator itr(routing_futures->begin());
+          while ((itr = FindNextReadyFuture(itr, *routing_futures)) != routing_futures->end()) {
+            if (ProcessReadyFutureSuccessfully<Data>(*itr, *promise))
+              return;
+            ++itr;
+          }
+          std::this_thread::yield();
+        }
+        promise->set_exception(std::make_exception_ptr(MakeError(NfsErrors::failed_to_get_data)));
+      });
+}
+
 class NoGet {
  public:
   NoGet() {}
@@ -53,13 +102,13 @@ class GetFromMetadataManager {
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
     DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
-    DataMessage data_message(DataMessage::Action::kGet, Persona::kMetadataManager, source_,
-                             data);
+    DataMessage data_message(DataMessage::Action::kGet, Persona::kMetadataManager, source_, data);
     Message message(DataMessage::message_type_identifier, data_message.Serialise());
-    auto routing_futures(std::make_shared<std::vector<std::future<std::string>>>(
-        routing_.SendGroup(NodeId(name->string()), message.Serialise()->string(),
-                           IsCacheable<Data>())));
-    auto promise(std::make_shared<std::promise<Data>>());
+    auto routing_futures(std::make_shared<StringFutureVector>(
+                             routing_.SendGroup(NodeId(name->string()),
+                                                message.Serialise()->string(),
+                                                IsCacheable<Data>())));
+    auto promise(std::make_shared<std::promise<Data> >());
     HandleGetFutures(promise, routing_futures);
     return promise->get_future();
   }
