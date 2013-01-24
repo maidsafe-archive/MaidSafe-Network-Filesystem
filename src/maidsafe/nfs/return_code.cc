@@ -22,6 +22,10 @@ namespace nfs {
 
 ReturnCode::ReturnCode(int value, const Info& info) : value_(value), info_(info) {}
 
+ReturnCode::ReturnCode(const std::system_error& error)
+    : value_(error.code().value()),
+      info_(error.code().message()) {}
+
 ReturnCode::ReturnCode(const ReturnCode& other) : value_(other.value_), info_(other.info_) {}
 
 ReturnCode& ReturnCode::operator=(const ReturnCode& other) {
@@ -46,7 +50,7 @@ ReturnCode& ReturnCode::operator=(ReturnCode&& other) {
 ReturnCode::ReturnCode(const serialised_type& serialised_return_code) : value_(), info_() {
   protobuf::ReturnCode proto_return_code;
   if (!proto_return_code.ParseFromString(serialised_return_code->string()))
-    ThrowError(NfsErrors::return_code_parsing_error);
+    ThrowError(CommonErrors::parsing_error);
   value_ = proto_return_code.value();
   if (proto_return_code.has_info())
     info_ = Info(proto_return_code.info());

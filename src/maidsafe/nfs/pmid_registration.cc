@@ -66,7 +66,7 @@ PmidRegistration::PmidRegistration(const serialised_type& serialised_pmid_regist
       pmid_signature_() {
   auto fail([]() {
     LOG(kError) << "Failed to parse pmid_registration.";
-    ThrowError(NfsErrors::pmid_registration_parsing_error);
+    ThrowError(CommonErrors::parsing_error);
   });
   protobuf::PmidRegistration proto_pmid_registration;
   if (!proto_pmid_registration.ParseFromString(serialised_pmid_registration->string()))

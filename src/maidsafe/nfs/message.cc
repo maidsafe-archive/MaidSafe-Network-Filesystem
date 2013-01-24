@@ -57,7 +57,7 @@ Message::Message(const serialised_type& serialised_message)
       signature_() {
   protobuf::Message proto_message;
   if (!proto_message.ParseFromString(serialised_message->string()))
-    ThrowError(NfsErrors::message_parsing_error);
+    ThrowError(CommonErrors::parsing_error);
   inner_message_type_ = proto_message.message_type();
   serialised_inner_message_ = NonEmptyString(proto_message.serialised_message());
   if (proto_message.has_signature())

@@ -84,7 +84,7 @@ GenericMessage::GenericMessage(const serialised_type& serialised_message)
       content_() {
   protobuf::GenericMessage proto_generic_message;
   if (!proto_generic_message.ParseFromString(serialised_message->string()))
-    ThrowError(NfsErrors::message_parsing_error);
+    ThrowError(CommonErrors::parsing_error);
   action_ = static_cast<GenericMessage::Action>(proto_generic_message.action());
   destination_persona_ = static_cast<Persona>(proto_generic_message.destination_persona());
   source_.persona = static_cast<Persona>(proto_generic_message.source().persona());

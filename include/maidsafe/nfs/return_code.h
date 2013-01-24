@@ -13,6 +13,7 @@
 #define MAIDSAFE_NFS_RETURN_CODE_H_
 
 #include <string>
+#include <system_error>
 
 #include "maidsafe/common/bounded_string.h"
 #include "maidsafe/common/types.h"
@@ -27,6 +28,7 @@ class ReturnCode {
   typedef maidsafe::detail::BoundedString<1, 4096> Info;
   typedef TaggedValue<NonEmptyString, struct SerialisedReturnCodeTag> serialised_type;
   ReturnCode(int value, const Info& info = Info());
+  explicit ReturnCode(const std::system_error& error);
   ReturnCode(const ReturnCode& other);
   ReturnCode& operator=(const ReturnCode& other);
   ReturnCode(ReturnCode&& other);
