@@ -32,16 +32,6 @@ namespace nfs {
 
 namespace {
 
-typedef std::future<std::string> StringFuture;
-typedef std::vector<StringFuture> StringFutureVector;
-
-std::vector<StringFuture>::iterator FindNextReadyFuture(const StringFutureVector::iterator& begin,
-                                                        StringFutureVector& routing_futures) {
-  return std::find_if(begin,
-                      routing_futures.end(),
-                      [] (StringFuture& future) { return IsReady(future); });  // NOLINT (Dan)
-}
-
 template<typename Data>
 bool ProcessReadyFutureSuccessfully(StringFuture& future, std::promise<Data>& promise) {
   try {

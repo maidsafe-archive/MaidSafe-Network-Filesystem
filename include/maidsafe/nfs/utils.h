@@ -57,38 +57,11 @@ Data ValidateAndParse(const Message& message) {
               typename Data::serialised_type(data_message.data().content));
 }
 
+typedef std::future<std::string> StringFuture;
+typedef std::vector<StringFuture> StringFutureVector;
 
-template<typename Data>
-void HandlePutResponse(DataMessage::OnError on_error_functor,
-                       DataMessage original_data_message,
-                       std::shared_ptr<std::vector<std::future<std::string>>> routing_futures) {
-  std::async(std::launch::async, [=] {
-      // TODO(Fraser#5#): 2012-12-21 - Confirm this is OK as a means of deciding overall success
-      int success_count(0), failure_count(0);
-      while (!routing_futures->empty()) {
-        auto itr(routing_futures->begin());
-        while (itr != routing_futures->end()) {
-          if (IsReady(*itr)) {
-            detail::GetReturnCode(success_count, failure_count, *itr);
-            itr = routing_futures->erase(itr);
-          } else {
-            ++itr;
-          }
-        }
-        std::this_thread::yield();
-      }
-      if (success_count == 0) {
-        LOG(kError) << "No successful responses received for Put "
-                    << original_data_message.data().type << "  "
-                    << HexSubstr(original_data_message.data().name) << "  received "
-                    << failure_count << " failures.";
-        on_error_functor(std::move(original_data_message));
-      }
-      LOG(kVerbose) << "Overall success for Put " << original_data_message.data().type
-                    << "  " << HexSubstr(original_data_message.data().name) << "  received "
-                    << success_count << " successes and " << failure_count << " failures.";
-  });
-}
+std::vector<StringFuture>::iterator FindNextReadyFuture(const StringFutureVector::iterator& begin,
+                                                        StringFutureVector& routing_futures);
 
 template<typename Data>
 void HandleDeleteResponse(DataMessage::OnError on_error_functor,
