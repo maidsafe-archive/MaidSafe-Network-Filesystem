@@ -24,11 +24,11 @@ namespace maidsafe {
 namespace nfs {
 
 DataMessage::Data::Data()
-    : type(static_cast<maidsafe::detail::DataTagValue>(-1)),
+    : type(static_cast<DataTagValue>(-1)),
       name(),
       content() {}
 
-DataMessage::Data::Data(maidsafe::detail::DataTagValue type_in,
+DataMessage::Data::Data(DataTagValue type_in,
                         const Identity& name_in,
                         const NonEmptyString& content_in)
     : type(type_in),
@@ -132,7 +132,7 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
   source_.node_id = NodeId(proto_data_message.source().node_id());
 
   auto& data(proto_data_message.data());
-  data_.type = static_cast<maidsafe::detail::DataTagValue>(data.type());
+  data_.type = static_cast<DataTagValue>(data.type());
   data_.name = Identity(data.name());
   if (data.has_content())
     data_.content = NonEmptyString(data.content());

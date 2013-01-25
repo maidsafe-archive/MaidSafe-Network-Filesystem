@@ -13,7 +13,7 @@
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
 
-#include "maidsafe/data_types/detail/data_type_values.h"
+#include "maidsafe/data_types/data_type_values.h"
 
 #include "maidsafe/nfs/generic_message.h"
 #include "maidsafe/nfs/types.h"

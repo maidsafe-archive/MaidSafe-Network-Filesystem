@@ -9,13 +9,13 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
+#include "maidsafe/nfs/data_message.h"
+
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
+#include "maidsafe/data_types/data_type_values.h"
 
-#include "maidsafe/data_types/detail/data_type_values.h"
-
-#include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -47,7 +47,7 @@ class DataMessageTest : public testing::Test {
       : action_(GenerateAction()),
         destination_persona_(static_cast<Persona>(RandomUint32() % 7)),
         source_(GenerateSource()),
-        data_type_(static_cast<detail::DataTagValue>(RandomUint32() % 13)),
+        data_type_(static_cast<DataTagValue>(RandomUint32() % 13)),
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
         data_message_(action_, destination_persona_, source_,
@@ -57,7 +57,7 @@ class DataMessageTest : public testing::Test {
   Persona destination_persona_;
   MessageSource source_;
   DataMessage::Data data_;
-  detail::DataTagValue data_type_;
+  DataTagValue data_type_;
   Identity name_;
   NonEmptyString content_;
   DataMessage data_message_;
@@ -152,7 +152,7 @@ TEST_F(DataMessageTest, BEH_InvalidDataType) {
   if (bad_data_type > 0)
     bad_data_type = -bad_data_type;
   EXPECT_THROW(DataMessage(action_, destination_persona_, source_,
-                           DataMessage::Data(static_cast<detail::DataTagValue>(bad_data_type),
+                           DataMessage::Data(static_cast<DataTagValue>(bad_data_type),
                                              name_, content_)),
                nfs_error);
 }

@@ -12,13 +12,13 @@
 #ifndef MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 #define MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 
+#include <ostream>
 #include <string>
 
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
-
-#include "maidsafe/data_types/detail/data_type_values.h"
+#include "maidsafe/data_types/data_type_values.h"
 
 #include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/types.h"

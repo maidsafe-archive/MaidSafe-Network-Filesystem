@@ -20,8 +20,7 @@
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
-
-#include "maidsafe/data_types/detail/data_type_values.h"
+#include "maidsafe/data_types/data_type_values.h"
 #include "maidsafe/passport/types.h"
 
 #include "maidsafe/nfs/types.h"
@@ -36,7 +35,7 @@ class DataMessage {
   enum class Action : int { kGet, kPut, kDelete };
   struct Data {
     Data();
-    Data(maidsafe::detail::DataTagValue type_in,
+    Data(DataTagValue type_in,
          const Identity& name_in,
          const NonEmptyString& content_in);
     Data(const Data& other);
@@ -44,7 +43,7 @@ class DataMessage {
     Data(Data&& other);
     Data& operator=(Data&& other);
 
-    maidsafe::detail::DataTagValue type;
+    DataTagValue type;
     Identity name;
     NonEmptyString content;
   };
