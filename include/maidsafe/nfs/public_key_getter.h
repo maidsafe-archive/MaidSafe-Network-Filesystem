@@ -23,6 +23,8 @@
 #include "boost/variant/variant.hpp"
 #include "boost/variant/static_visitor.hpp"
 
+#include "maidsafe/common/utils.h"
+
 #include "maidsafe/nfs/nfs.h"
 
 #include "maidsafe/passport/types.h"
@@ -100,38 +102,12 @@ void PublicKeyGetter::HandleGetKey(const typename Data::name_type& key_name,
 #endif
 }
 
-template<typename Future>
-bool is_ready(std::future<Future>& f) {
-  return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
-}
-
 class PublicKeyGetter::IsReady : public boost::static_visitor<bool> {
  public:
   template<typename PublicKeyType>
   bool operator()(std::shared_ptr<PendingKey<PublicKeyType>> pending_key) const {
-    return is_ready(pending_key->future);
+    return maidsafe::IsReady(pending_key->future);
   }
-//  bool operator()(PendingKey<passport::PublicAnsmid>& pending_key) const {
-//    return is_ready(pending_key.future);
-//  }
-//  bool operator()(PendingKey<passport::PublicAntmid>& pending_key) const {
-//    return is_ready(pending_key.future);
-//  }
-//  bool operator()(PendingKey<passport::PublicAnmaid>& pending_key) const {
-//    return is_ready(pending_key.future);
-//  }
-//  bool operator()(PendingKey<passport::PublicMaid>& pending_key) const {
-//    return is_ready(pending_key.future);
-//  }
-//  bool operator()(const PendingKey<passport::PublicPmid>& pending_key) {
-//    return is_ready(pending_key.future);
-//  }
-//  bool operator()(const PendingKey<passport::PublicAnmpid>& pending_key) {
-//    return is_ready(pending_key.future);
-//  }
-//  bool operator()(const PendingKey<passport::PublicMpid>& pending_key) {
-//    return is_ready(pending_key.future);
-//  }
 };
 
 class PublicKeyGetter::InvokeFunctor : public boost::static_visitor<> {
