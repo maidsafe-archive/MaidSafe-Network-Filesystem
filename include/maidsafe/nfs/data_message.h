@@ -21,7 +21,7 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 
-#include "maidsafe/detail/data_type_values.h"
+#include "maidsafe/data_types/detail/data_type_values.h"
 #include "maidsafe/passport/types.h"
 
 #include "maidsafe/nfs/types.h"
