@@ -42,7 +42,7 @@ class GenericMessage {
   };
   typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
   typedef std::function<void(GenericMessage message)> OnError;
-  static const int32_t message_type_identifier = 1;
+  static const int32_t message_type_identifier;
 
   GenericMessage(Action action,
                  Persona destination_persona,

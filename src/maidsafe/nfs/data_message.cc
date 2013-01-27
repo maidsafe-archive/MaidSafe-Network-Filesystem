@@ -23,6 +23,8 @@ namespace maidsafe {
 
 namespace nfs {
 
+const int32_t DataMessage::message_type_identifier = 0;
+
 DataMessage::Data::Data()
     : type(static_cast<DataTagValue>(-1)),
       name(),

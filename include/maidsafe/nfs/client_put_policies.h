@@ -58,7 +58,7 @@ class NoPut {
 };
 
 
-// TODO(Fraser#5#): 2013-01-11 - BEFORE_RELEASE - Remove this class.  Should be in Vault project.
+// TODO(Fraser#5#): 2013-01-11 - BEFORE_RELEASE - Remove this class.
 template<typename SigningFob>
 class PutToDataHolder {
  public:
@@ -73,9 +73,8 @@ class PutToDataHolder {
                                    data.Serialise());
     DataMessage data_message(DataMessage::Action::kPut, Persona::kDataHolder, source_,
                              message_data);
-    auto serialised_and_signed(data_message.SerialiseAndSign(signing_fob_.private_key()));
-    Message message(DataMessage::message_type_identifier, serialised_and_signed.first,
-                    serialised_and_signed.second);
+    data_message.SignData(signing_fob_.private_key());
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());
 //    routing::ResponseFunctor callback =
 //        [on_error, data_message](const std::vector<std::string>& serialised_messages) {
 //          HandlePutResponse<Data>(on_error, data_message, serialised_messages);
@@ -103,6 +102,7 @@ class PutToMaidAccountHolder {
   template<typename Data>
   ReturnCodeFutureVector Put(const Data& data) {
     DataMessage data_message(DataMessage::Action::kPut, Persona::kMaidAccountHolder, source_, data);
+    data_message.SignData(signing_fob_.private_key());
     Message message(DataMessage::message_type_identifier, data_message.Serialise());
     auto routing_futures(std::make_shared<StringFutureVector>(
                              routing_.SendGroup(routing_.kNodeId(),

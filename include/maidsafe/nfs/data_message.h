@@ -46,15 +46,27 @@ class DataMessage {
     DataTagValue type;
     Identity name;
     NonEmptyString content;
+    Action action;
+  };
+  struct Originator {
+    Originator();
+    Originator(const passport::PublicMaid::name_type& name_in,
+               const asymm::Signature& signature_in);
+    Originator(const Originator& other);
+    Originator& operator=(const Originator& other);
+    Originator(Originator&& other);
+    Originator& operator=(Originator&& other);
+
+    Identity name;
+    asymm::Signature signature;
   };
 
   typedef TaggedValue<NonEmptyString, struct SerialisedDataMessageTag> serialised_type;
   typedef std::function<void(DataMessage message)> OnError;
-  static const int32_t message_type_identifier = 0;
+  static const int32_t message_type_identifier;
 
-  DataMessage(Action action,
-              Persona destination_persona,
-              const MessageSource& source,
+  DataMessage(Persona next_persona,
+              const MessageSource& previous_persona,
               const Data& data,
               const passport::PublicPmid::name_type& data_holder_hint =
                   passport::PublicPmid::name_type());
@@ -64,6 +76,8 @@ class DataMessage {
   DataMessage& operator=(DataMessage&& other);
 
   explicit DataMessage(const serialised_type& serialised_message);
+  // This should only be called from client NFS.  It serialises the Data, and adds an Originator.
+  void SignData(const asymm::PrivateKey& signer_private_key);
   serialised_type Serialise() const;
   std::pair<serialised_type, asymm::Signature> SerialiseAndSign(
       const asymm::PrivateKey& signer_private_key) const;
@@ -71,10 +85,11 @@ class DataMessage {
                 const asymm::PublicKey& signer_public_key) const;
 
   MessageId message_id() const { return message_id_; }
-  Action action() const { return action_; }
-  Persona destination_persona() const { return destination_persona_; }
-  MessageSource source() const { return source_; }
+  Persona next_persona() const { return next_persona_; }
+  MessageSource previous_persona() const { return previous_persona_; }
   Data data() const { return data_; }
+  Originator originator() const { return originator_; }
+  bool HasOriginator() const { return originator_.name.IsInitialised(); }
   passport::PublicPmid::name_type data_holder_hint() const { return data_holder_hint_; }
   bool HasDataHolderHint() const { return data_holder_hint_->IsInitialised(); }
 
@@ -82,10 +97,10 @@ class DataMessage {
   bool ValidateInputs() const;
 
   MessageId message_id_;
-  Action action_;
-  Persona destination_persona_;
-  MessageSource source_;
+  Persona next_persona_;
+  MessageSource previous_persona_;
   Data data_;
+  Originator originator_;
   passport::PublicPmid::name_type data_holder_hint_;
 };
 
