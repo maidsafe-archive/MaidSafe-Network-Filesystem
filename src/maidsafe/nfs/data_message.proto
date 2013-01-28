@@ -14,11 +14,11 @@ message DataMessage {
   }
   message Originator {
     required bytes name = 1;
-    required bytes signature = 2;
+    required bytes data_signature = 2;
   }
   required bytes message_id = 1;
   required int32 next_persona = 2;
-  required Source previous_persona = 3;
+  required Source this_persona = 3;
   required Data data = 4;
   optional Originator originator = 5;
   optional bytes data_holder_hint = 6;
