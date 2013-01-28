@@ -87,8 +87,9 @@ class GetFromMetadataManager {
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
-    DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
-    DataMessage data_message(DataMessage::Action::kGet, Persona::kMetadataManager, source_, data);
+    DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data,
+                           NonEmptyString(), DataMessage::Action::kGet);
+    DataMessage data_message(Persona::kMetadataManager, source_, data);
     Message message(DataMessage::message_type_identifier, data_message.Serialise());
     auto routing_futures(std::make_shared<StringFutureVector>(
                              routing_.SendGroup(NodeId(name->string()),

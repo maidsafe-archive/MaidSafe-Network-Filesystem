@@ -70,7 +70,8 @@ class DataMessage {
               const PersonaId& this_persona,
               const Data& data,
               const passport::PublicPmid::name_type& data_holder_hint =
-                  passport::PublicPmid::name_type());
+                  passport::PublicPmid::name_type(),
+              const Identity& target_id = Identity());
   DataMessage(const DataMessage& other);
   DataMessage& operator=(const DataMessage& other);
   DataMessage(DataMessage&& other);
@@ -94,6 +95,8 @@ class DataMessage {
   bool HasOriginator() const { return originator_.name.IsInitialised(); }
   passport::PublicPmid::name_type data_holder_hint() const { return data_holder_hint_; }
   bool HasDataHolderHint() const { return data_holder_hint_->IsInitialised(); }
+  Identity target_id() const { return target_id_; }
+  bool HasTargetId() const { return target_id_.IsInitialised(); }
 
  private:
   bool ValidateInputs() const;
@@ -104,6 +107,7 @@ class DataMessage {
   Data data_;
   Originator originator_;
   passport::PublicPmid::name_type data_holder_hint_;
+  Identity target_id_;
 };
 
 

@@ -22,4 +22,5 @@ message DataMessage {
   required Data data = 4;
   optional Originator originator = 5;
   optional bytes data_holder_hint = 6;
+  optional bytes target_id = 7;
 }
