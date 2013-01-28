@@ -26,8 +26,8 @@ message ConnectMessage {
 message GenericMessage {
   required bytes message_id = 1;
   required int32 action = 2;
-  required int32 destination_persona = 3;
-  required DataMessage.Source source = 4;
+  required int32 next_persona = 3;
+  required DataMessage.PersonaId this_persona = 4;
   required bytes name = 5;
   required bytes content = 6;
 }
