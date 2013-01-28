@@ -63,7 +63,7 @@ void ResponseMapper<FutureType, PromiseType>::push_back(RequestPair&& pending_pa
 
 template <typename FutureType, typename PromiseType>
 void ResponseMapper<FutureType, PromiseType>::Run() {
-  if (IsReady(worker_future_) || !running()) {  // FIXME extra check to avoid race condition
+  if (!running()) {
     worker_future_ = std::async(std::launch::async, Poll);
   }
 }
@@ -77,15 +77,24 @@ bool ResponseMapper<FutureType, PromiseType>::running() {
 template <typename FutureType, typename PromiseType>
 void ResponseMapper<FutureType, PromiseType>::Poll() {
   while (running()) {
-    for (auto& requests : active_requests_) {
-      if (IsReady(requests.first)) {
-        // Set promise
-      }
-    }
-    {
+    active_requests_.erase(std::remove_if(active_requests_.begin(), active_requests_->end(),
+        [](RequestPair& request_pair)->bool {
+          if (IsReady(request_pair.first)) {
+            try {
+              request_pair.second.set_value(std::move(request_pair.first.get()));
+            } catch(std::exception& /*ex*/) {
+              request_pair.second.set_exception(std::current_exception());
+            }
+            return true;
+          } else  {
+            return false;
+          }
+        }), active_requests_->end());
+      std::this_thread::yield();
+    {  // moving new  requests
       std::lock_guard<std::mutex> lock(mutex_);
-      active_requests_.insert(active_requests_.end(), pending_requests_.begin(),  // FIXME need move
-                              pending_requests_.end());
+      std::move(pending_requests_.begin(), pending_requests_.end(), active_requests_.end());
+      pending_requests_.resize(0);  // FIXME
     }
   }
 }
