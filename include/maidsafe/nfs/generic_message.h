@@ -46,7 +46,7 @@ class GenericMessage {
 
   GenericMessage(Action action,
                  Persona destination_persona,
-                 const MessageSource& source,
+                 const PersonaId& source,
                  const Identity& name,
                  const NonEmptyString& content);
   GenericMessage(const GenericMessage& other);
@@ -60,7 +60,7 @@ class GenericMessage {
   MessageId message_id() const { return message_id_; }
   Action action() const { return action_; }
   Persona destination_persona() const { return destination_persona_; }
-  MessageSource source() const { return source_; }
+  PersonaId source() const { return source_; }
   Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
 
@@ -70,7 +70,7 @@ class GenericMessage {
   MessageId message_id_;
   Action action_;
   Persona destination_persona_;
-  MessageSource source_;
+  PersonaId source_;
   Identity name_;
   NonEmptyString content_;
 };

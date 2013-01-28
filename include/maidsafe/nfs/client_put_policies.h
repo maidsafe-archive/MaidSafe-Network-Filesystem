@@ -65,7 +65,7 @@ class PutToDataHolder {
   PutToDataHolder(routing::Routing& routing, const SigningFob& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
+        source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
   void Put(const Data& data) {
@@ -89,7 +89,7 @@ class PutToDataHolder {
  private:
   routing::Routing& routing_;
   SigningFob signing_fob_;
-  MessageSource source_;
+  PersonaId source_;
 };
 
 class PutToMaidAccountHolder {
@@ -97,7 +97,7 @@ class PutToMaidAccountHolder {
   PutToMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
+        source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
   ReturnCodeFutureVector Put(const Data& data) {
@@ -124,7 +124,7 @@ class PutToMaidAccountHolder {
  private:
   routing::Routing& routing_;
   passport::Maid signing_fob_;
-  MessageSource source_;
+  PersonaId source_;
 };
 
 

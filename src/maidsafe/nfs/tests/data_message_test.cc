@@ -31,8 +31,8 @@ DataMessage::Action GenerateAction() {
   return static_cast<DataMessage::Action>(RandomUint32() % 3);
 }
 
-MessageSource GenerateSource() {
-  MessageSource source;
+PersonaId GenerateSource() {
+  PersonaId source;
   // matches Persona enum in types.h
   source.persona = static_cast<Persona>(RandomUint32() % 7);
   source.node_id = NodeId(NodeId::kRandomId);
@@ -55,7 +55,7 @@ class DataMessageTest : public testing::Test {
 
   DataMessage::Action action_;
   Persona destination_persona_;
-  MessageSource source_;
+  PersonaId source_;
   DataMessage::Data data_;
   DataTagValue data_type_;
   Identity name_;
@@ -158,7 +158,7 @@ TEST_F(DataMessageTest, BEH_InvalidDataType) {
 }
 
 TEST_F(DataMessageTest, BEH_InvalidSource) {
-  MessageSource bad_source(GenerateSource());
+  PersonaId bad_source(GenerateSource());
   bad_source.node_id = NodeId();
   EXPECT_THROW(DataMessage(action_, destination_persona_, bad_source, data_message_.data()),
                nfs_error);

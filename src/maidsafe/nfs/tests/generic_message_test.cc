@@ -31,8 +31,8 @@ GenericMessage::Action GenerateAction() {
   return static_cast<GenericMessage::Action>(RandomUint32() % 6);
 }
 
-MessageSource GenerateSource() {
-  MessageSource source;
+PersonaId GenerateSource() {
+  PersonaId source;
   // matches Persona enum in types.h
   source.persona = static_cast<Persona>(RandomUint32() % 7);
   source.node_id = NodeId(NodeId::kRandomId);
@@ -54,7 +54,7 @@ class GenericMessageTest : public testing::Test {
 
   GenericMessage::Action action_;
   Persona destination_persona_;
-  MessageSource source_;
+  PersonaId source_;
   Identity name_;
   NonEmptyString content_;
 //  asymm::Signature signature_;
@@ -144,7 +144,7 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
 }
 
 TEST_F(GenericMessageTest, BEH_InvalidSource) {
-  MessageSource bad_source(GenerateSource());
+  PersonaId bad_source(GenerateSource());
   bad_source.node_id = NodeId();
   EXPECT_THROW(GenericMessage(action_, destination_persona_, bad_source, name_, content_),
                nfs_error);

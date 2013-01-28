@@ -67,7 +67,7 @@ class DataMessage {
   static const int32_t message_type_identifier;
 
   DataMessage(Persona next_persona,
-              const MessageSource& this_persona,
+              const PersonaId& this_persona,
               const Data& data,
               const passport::PublicPmid::name_type& data_holder_hint =
                   passport::PublicPmid::name_type());
@@ -88,7 +88,7 @@ class DataMessage {
 
   MessageId message_id() const { return message_id_; }
   Persona next_persona() const { return next_persona_; }
-  MessageSource this_persona() const { return this_persona_; }
+  PersonaId this_persona() const { return this_persona_; }
   Data data() const { return data_; }
   Originator originator() const { return originator_; }
   bool HasOriginator() const { return originator_.name.IsInitialised(); }
@@ -100,7 +100,7 @@ class DataMessage {
 
   MessageId message_id_;
   Persona next_persona_;
-  MessageSource this_persona_;
+  PersonaId this_persona_;
   Data data_;
   Originator originator_;
   passport::PublicPmid::name_type data_holder_hint_;

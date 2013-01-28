@@ -101,7 +101,7 @@ DataMessage::Originator& DataMessage::Originator::operator=(Originator&& other) 
 
 
 DataMessage::DataMessage(Persona next_persona,
-                         const MessageSource& this_persona,
+                         const PersonaId& this_persona,
                          const Data& data,
                          const passport::PublicPmid::name_type& data_holder_hint)
     : message_id_(detail::GetNewMessageId(this_persona.node_id)),

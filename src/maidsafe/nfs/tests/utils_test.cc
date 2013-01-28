@@ -170,7 +170,7 @@ class UtilsTest : public testing::Test {
  protected:
   std::string MakeSerialisedMessage(const std::pair<Identity, NonEmptyString>& name_and_content) {
     Persona destination_persona(Persona::kMetadataManager);
-    MessageSource source(Persona::kClientMaid, NodeId(NodeId::kRandomId));
+    PersonaId source(Persona::kClientMaid, NodeId(NodeId::kRandomId));
     DataMessage::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
                            name_and_content.second);
     DataMessage data_message(DataMessage::Action::kGet, destination_persona, source, data);

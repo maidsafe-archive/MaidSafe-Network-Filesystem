@@ -45,7 +45,7 @@ class DeleteFromMaidAccountHolder {
   DeleteFromMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(MessageSource(Persona::kClientMaid, routing.kNodeId())) {}
+        source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
   void Delete(const typename Data::name_type& name) {
@@ -65,7 +65,7 @@ class DeleteFromMaidAccountHolder {
  private:
   routing::Routing& routing_;
   passport::Maid signing_fob_;
-  MessageSource source_;
+  PersonaId source_;
 };
 
 }  // namespace nfs

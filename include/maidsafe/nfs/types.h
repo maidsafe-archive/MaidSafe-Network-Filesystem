@@ -70,22 +70,22 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
   return ostream;
 }
 
-struct MessageSource {
-  MessageSource(Persona persona_in, const NodeId& node_id_in)
+struct PersonaId {
+  PersonaId(Persona persona_in, const NodeId& node_id_in)
       : persona(persona_in),
         node_id(node_id_in) {}
-  MessageSource() : persona(), node_id() {}
-  MessageSource(const MessageSource& other)
+  PersonaId() : persona(), node_id() {}
+  PersonaId(const PersonaId& other)
       : persona(other.persona),
         node_id(other.node_id) {}
-  MessageSource& operator=(const MessageSource& other) {
+  PersonaId& operator=(const PersonaId& other) {
     persona = other.persona;
     node_id = other.node_id;
     return *this;
   }
-  MessageSource(MessageSource&& other)
+  PersonaId(PersonaId&& other)
       : persona(std::move(other.persona)), node_id(std::move(other.node_id)) {}
-  MessageSource& operator=(MessageSource&& other) {
+  PersonaId& operator=(PersonaId&& other) {
     persona = std::move(other.persona);
     node_id = std::move(other.node_id);
     return *this;
