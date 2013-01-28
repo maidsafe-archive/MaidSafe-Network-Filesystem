@@ -172,8 +172,8 @@ class UtilsTest : public testing::Test {
     Persona destination_persona(Persona::kMetadataManager);
     PersonaId source(Persona::kClientMaid, NodeId(NodeId::kRandomId));
     DataMessage::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
-                           name_and_content.second);
-    DataMessage data_message(DataMessage::Action::kGet, destination_persona, source, data);
+                           name_and_content.second, DataMessage::Action::kGet);
+    DataMessage data_message(destination_persona, source, data);
     Message message(DataMessage::message_type_identifier, data_message.Serialise().data);
     return message.Serialise()->string();
   }
