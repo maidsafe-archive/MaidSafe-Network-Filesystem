@@ -12,13 +12,13 @@
 #ifndef MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 #define MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 
+#include <ostream>
 #include <string>
 
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
-
-#include "maidsafe/data_types/detail/data_type_values.h"
+#include "maidsafe/data_types/data_type_values.h"
 
 #include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/types.h"
@@ -42,11 +42,11 @@ class GenericMessage {
   };
   typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
   typedef std::function<void(GenericMessage message)> OnError;
-  static const int32_t message_type_identifier = 1;
+  static const int32_t message_type_identifier;
 
   GenericMessage(Action action,
                  Persona destination_persona,
-                 const MessageSource& source,
+                 const PersonaId& source,
                  const Identity& name,
                  const NonEmptyString& content);
   GenericMessage(const GenericMessage& other);
@@ -60,7 +60,7 @@ class GenericMessage {
   MessageId message_id() const { return message_id_; }
   Action action() const { return action_; }
   Persona destination_persona() const { return destination_persona_; }
-  MessageSource source() const { return source_; }
+  PersonaId source() const { return source_; }
   Identity name() const { return name_; }
   NonEmptyString content() const { return content_; }
 
@@ -70,7 +70,7 @@ class GenericMessage {
   MessageId message_id_;
   Action action_;
   Persona destination_persona_;
-  MessageSource source_;
+  PersonaId source_;
   Identity name_;
   NonEmptyString content_;
 };

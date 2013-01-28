@@ -2,7 +2,7 @@ package maidsafe.nfs.protobuf;
 option optimize_for = LITE_RUNTIME;
 
 message DataMessage {
-  message Source {
+  message PersonaId {
     required int32 persona = 1;
     required bytes node_id = 2;
   }
@@ -10,11 +10,16 @@ message DataMessage {
     required int32 type = 1;
     required bytes name = 2;
     optional bytes content = 3;
+    required int32 action = 4;
+  }
+  message Originator {
+    required bytes name = 1;
+    required bytes data_signature = 2;
   }
   required bytes message_id = 1;
-  required int32 action = 2;
-  required int32 destination_persona = 3;
-  required Source source = 4;
-  required Data data = 5;
+  required int32 next_persona = 2;
+  required PersonaId this_persona = 3;
+  required Data data = 4;
+  optional Originator originator = 5;
   optional bytes data_holder_hint = 6;
 }

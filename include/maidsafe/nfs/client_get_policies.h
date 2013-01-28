@@ -83,7 +83,7 @@ class GetFromMetadataManager {
  public:
   explicit GetFromMetadataManager(routing::Routing& routing)
       : routing_(routing),
-        source_(MessageSource(persona, routing.kNodeId())) {}
+        source_(PersonaId(persona, routing.kNodeId())) {}
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& name) {
@@ -104,7 +104,7 @@ class GetFromMetadataManager {
 
  private:
   routing::Routing& routing_;
-  MessageSource source_;
+  PersonaId source_;
 };
 
 

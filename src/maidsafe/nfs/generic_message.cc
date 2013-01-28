@@ -21,9 +21,11 @@ namespace maidsafe {
 
 namespace nfs {
 
+const int32_t GenericMessage::message_type_identifier = 1;
+
 GenericMessage::GenericMessage(Action action,
                                Persona destination_persona,
-                               const MessageSource& source,
+                               const PersonaId& source,
                                const Identity& name,
                                const NonEmptyString& content)
     : message_id_(detail::GetNewMessageId(source.node_id)),

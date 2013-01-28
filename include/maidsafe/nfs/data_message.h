@@ -20,8 +20,7 @@
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
-
-#include "maidsafe/data_types/detail/data_type_values.h"
+#include "maidsafe/data_types/data_type_values.h"
 #include "maidsafe/passport/types.h"
 
 #include "maidsafe/nfs/types.h"
@@ -36,26 +35,39 @@ class DataMessage {
   enum class Action : int { kGet, kPut, kDelete };
   struct Data {
     Data();
-    Data(maidsafe::detail::DataTagValue type_in,
+    Data(DataTagValue type_in,
          const Identity& name_in,
-         const NonEmptyString& content_in);
+         const NonEmptyString& content_in,
+         Action action_in);
     Data(const Data& other);
     Data& operator=(const Data& other);
     Data(Data&& other);
     Data& operator=(Data&& other);
 
-    maidsafe::detail::DataTagValue type;
+    DataTagValue type;
     Identity name;
     NonEmptyString content;
+    Action action;
+  };
+  struct Originator {
+    Originator();
+    Originator(const passport::PublicMaid::name_type& name_in,
+               const asymm::Signature& data_signature_in);
+    Originator(const Originator& other);
+    Originator& operator=(const Originator& other);
+    Originator(Originator&& other);
+    Originator& operator=(Originator&& other);
+
+    Identity name;
+    asymm::Signature data_signature;
   };
 
   typedef TaggedValue<NonEmptyString, struct SerialisedDataMessageTag> serialised_type;
   typedef std::function<void(DataMessage message)> OnError;
-  static const int32_t message_type_identifier = 0;
+  static const int32_t message_type_identifier;
 
-  DataMessage(Action action,
-              Persona destination_persona,
-              const MessageSource& source,
+  DataMessage(Persona next_persona,
+              const PersonaId& this_persona,
               const Data& data,
               const passport::PublicPmid::name_type& data_holder_hint =
                   passport::PublicPmid::name_type());
@@ -65,6 +77,9 @@ class DataMessage {
   DataMessage& operator=(DataMessage&& other);
 
   explicit DataMessage(const serialised_type& serialised_message);
+  // This should only be called from client NFS.  It adds an Originator containing this_persona's
+  // node ID, and a signature of the data serialised.
+  void SignData(const asymm::PrivateKey& signer_private_key);
   serialised_type Serialise() const;
   std::pair<serialised_type, asymm::Signature> SerialiseAndSign(
       const asymm::PrivateKey& signer_private_key) const;
@@ -72,10 +87,11 @@ class DataMessage {
                 const asymm::PublicKey& signer_public_key) const;
 
   MessageId message_id() const { return message_id_; }
-  Action action() const { return action_; }
-  Persona destination_persona() const { return destination_persona_; }
-  MessageSource source() const { return source_; }
+  Persona next_persona() const { return next_persona_; }
+  PersonaId this_persona() const { return this_persona_; }
   Data data() const { return data_; }
+  Originator originator() const { return originator_; }
+  bool HasOriginator() const { return originator_.name.IsInitialised(); }
   passport::PublicPmid::name_type data_holder_hint() const { return data_holder_hint_; }
   bool HasDataHolderHint() const { return data_holder_hint_->IsInitialised(); }
 
@@ -83,10 +99,10 @@ class DataMessage {
   bool ValidateInputs() const;
 
   MessageId message_id_;
-  Action action_;
-  Persona destination_persona_;
-  MessageSource source_;
+  Persona next_persona_;
+  PersonaId this_persona_;
   Data data_;
+  Originator originator_;
   passport::PublicPmid::name_type data_holder_hint_;
 };
 

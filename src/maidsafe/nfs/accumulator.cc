@@ -42,7 +42,7 @@ bool Accumulator::CheckHandled(const RequestIdentity& request_identity,
 
 std::vector<ReturnCode> Accumulator::PushRequest(const Request& request) {
   RequestIdentity request_identity = std::make_pair(request.msg.message_id(),
-                                                    request.msg.source().persona);
+                                                    request.msg.this_persona().persona);
   auto pending_request = std::make_pair(request_identity, request);
   std::vector<ReturnCode> ret_codes;
   std::lock_guard<std::mutex> lock(mutex_);
