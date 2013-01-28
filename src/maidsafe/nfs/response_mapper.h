@@ -24,12 +24,12 @@ namespace maidsafe {
 
 namespace nfs {
 
-template <typename FutureType, typename PromiseType>
+template <typename FutureType, typename PromiseType, typename Converter>
 class ResponseMapper {
  public:
-  ResponseMapper();
+  explicit ResponseMapper(Converter converter);
 
-  typedef std::pair<FutureType, PromiseType>  RequestPair;
+  typedef std::pair<std::future<FutureType>, std::promise<PromiseType>>  RequestPair;
 
   void push_back(RequestPair&& pending_pair);
 
@@ -39,21 +39,23 @@ class ResponseMapper {
   void Poll();
 
   mutable std::mutex mutex_;
+  Converter converter_;
   std::vector<RequestPair> active_requests_, pending_requests_;
   std::future<void> worker_future_;
 };
 
-template <typename FutureType, typename PromiseType>
-ResponseMapper<FutureType, PromiseType>::ResponseMapper()
+template <typename FutureType, typename PromiseType, typename Converter>
+ResponseMapper<FutureType, PromiseType, Converter>::ResponseMapper(Converter converter)
     : mutex_(),
+      converter_(converter),
       active_requests_(),
       pending_requests_(),
       worker_future_() {
   Run();
 }
 
-template <typename FutureType, typename PromiseType>
-void ResponseMapper<FutureType, PromiseType>::push_back(RequestPair&& pending_pair) {
+template <typename FutureType, typename PromiseType, typename Converter>
+void ResponseMapper<FutureType, PromiseType, Converter>::push_back(RequestPair&& pending_pair) {
   {
     std::lock_guard<std::mutex> lock(mutex_);
     pending_requests_.push_back(std::move(pending_pair));
@@ -61,27 +63,28 @@ void ResponseMapper<FutureType, PromiseType>::push_back(RequestPair&& pending_pa
   Run();
 }
 
-template <typename FutureType, typename PromiseType>
-void ResponseMapper<FutureType, PromiseType>::Run() {
+template <typename FutureType, typename PromiseType, typename Converter>
+void ResponseMapper<FutureType, PromiseType, Converter>::Run() {
   if (!running()) {
-    worker_future_ = std::async(std::launch::async, Poll);
+    worker_future_ = std::async(std::launch::async, [this]() { this->Poll(); });  // NOLINT Prakash
   }
 }
 
-template <typename FutureType, typename PromiseType>
-bool ResponseMapper<FutureType, PromiseType>::running() {
+template <typename FutureType, typename PromiseType, typename Converter>
+bool ResponseMapper<FutureType, PromiseType, Converter>::running() {
   std::lock_guard<std::mutex> lock(mutex_);
   return (!active_requests_.empty());
 }
 
-template <typename FutureType, typename PromiseType>
-void ResponseMapper<FutureType, PromiseType>::Poll() {
+template <typename FutureType, typename PromiseType, typename Converter>
+void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
   while (running()) {
-    active_requests_.erase(std::remove_if(active_requests_.begin(), active_requests_->end(),
-        [](RequestPair& request_pair)->bool {
+    active_requests_.erase(std::remove_if(active_requests_.begin(), active_requests_.end(),
+        [this](RequestPair& request_pair)->bool {
           if (IsReady(request_pair.first)) {
             try {
-              request_pair.second.set_value(std::move(request_pair.first.get()));
+              //  request_pair.second.set_value(std::move(request_pair.first.get()));
+       //  request_pair.second.set_value(converter_(std::move(request_pair.first.get())));  // FIXME
             } catch(std::exception& /*ex*/) {
               request_pair.second.set_exception(std::current_exception());
             }
@@ -89,12 +92,13 @@ void ResponseMapper<FutureType, PromiseType>::Poll() {
           } else  {
             return false;
           }
-        }), active_requests_->end());
+        }), active_requests_.end());
       std::this_thread::yield();
     {  // moving new  requests
       std::lock_guard<std::mutex> lock(mutex_);
-      std::move(pending_requests_.begin(), pending_requests_.end(), active_requests_.end());
-      pending_requests_.resize(0);  // FIXME
+      std::move(pending_requests_.begin(), pending_requests_.end(),
+                std::back_inserter(active_requests_));
+      pending_requests_.resize(0);
     }
   }
 }
