@@ -103,13 +103,15 @@ DataMessage::Originator& DataMessage::Originator::operator=(Originator&& other) 
 DataMessage::DataMessage(Persona next_persona,
                          const PersonaId& this_persona,
                          const Data& data,
-                         const passport::PublicPmid::name_type& data_holder_hint)
+                         const passport::PublicPmid::name_type& data_holder_hint,
+                         const Identity& target_id)
     : message_id_(detail::GetNewMessageId(this_persona.node_id)),
       next_persona_(next_persona),
       this_persona_(this_persona),
       data_(data),
       originator_(),
-      data_holder_hint_(data_holder_hint) {
+      data_holder_hint_(data_holder_hint),
+      target_id_(target_id) {
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
@@ -120,7 +122,8 @@ DataMessage::DataMessage(const DataMessage& other)
       this_persona_(other.this_persona_),
       data_(other.data_),
       originator_(other.originator_),
-      data_holder_hint_(other.data_holder_hint_) {}
+      data_holder_hint_(other.data_holder_hint_),
+      target_id_(other.target_id_) {}
 
 DataMessage& DataMessage::operator=(const DataMessage& other) {
   message_id_ = other.message_id_;
@@ -129,6 +132,7 @@ DataMessage& DataMessage::operator=(const DataMessage& other) {
   data_ = other.data_;
   originator_ = other.originator_;
   data_holder_hint_ = other.data_holder_hint_;
+  target_id_ = other.target_id_;
   return *this;
 }
 
@@ -138,7 +142,8 @@ DataMessage::DataMessage(DataMessage&& other)
       this_persona_(std::move(other.this_persona_)),
       data_(std::move(other.data_)),
       originator_(std::move(other.originator_)),
-      data_holder_hint_(std::move(other.data_holder_hint_)) {}
+      data_holder_hint_(std::move(other.data_holder_hint_)),
+      target_id_(std::move(other.target_id_)) {}
 
 DataMessage& DataMessage::operator=(DataMessage&& other) {
   message_id_ = std::move(other.message_id_);
@@ -147,6 +152,7 @@ DataMessage& DataMessage::operator=(DataMessage&& other) {
   data_ = std::move(other.data_);
   originator_ = std::move(other.originator_);
   data_holder_hint_ = std::move(other.data_holder_hint_);
+  target_id_ = std::move(other.target_id_);
   return *this;
 }
 
@@ -159,7 +165,8 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
       this_persona_(),
       data_(),
       originator_(),
-      data_holder_hint_() {
+      data_holder_hint_(),
+      target_id_() {
   protobuf::DataMessage proto_data_message;
   if (!proto_data_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
@@ -185,6 +192,10 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
   if (proto_data_message.has_data_holder_hint()) {
     data_holder_hint_ =
         passport::PublicPmid::name_type((Identity(proto_data_message.data_holder_hint())));
+  }
+
+  if (proto_data_message.has_target_id()) {
+    target_id_ = Identity(proto_data_message.target_id());
   }
 
   if (!ValidateInputs())
@@ -230,6 +241,8 @@ DataMessage::serialised_type DataMessage::Serialise() const {
     }
     if (HasDataHolderHint())
       proto_data_message.set_data_holder_hint(data_holder_hint_->string());
+    if (HasTargetId())
+      proto_data_message.set_target_id(target_id_.string());
     serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
   }
   catch(const std::system_error&) {
