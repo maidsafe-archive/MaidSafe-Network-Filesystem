@@ -16,6 +16,7 @@
 #include "maidsafe/common/utils.h"
 #include "maidsafe/data_types/data_type_values.h"
 
+#include "maidsafe/nfs/data_message_pb.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -168,6 +169,47 @@ TEST_F(DataMessageTest, BEH_InvalidName) {
   EXPECT_THROW(DataMessage(destination_persona_, source_,
                            DataMessage::Data(data_type_, Identity(), content_, action_)),
                nfs_error);
+}
+
+TEST_F(DataMessageTest, BEH_SignData) {
+  EXPECT_FALSE(data_message_.originator().name.IsInitialised());
+  EXPECT_FALSE(data_message_.originator().data_signature.IsInitialised());
+
+  asymm::Keys keys(asymm::GenerateKeyPair());
+
+  DataMessage::Data stored_data(data_message_.data());
+  protobuf::DataMessage::Data data;
+  data.set_type(static_cast<int32_t>(stored_data.type));
+  data.set_name(stored_data.name.string());
+  if (stored_data.content.IsInitialised())
+    data.set_content(stored_data.content.string());
+  data.set_action(static_cast<int32_t>(stored_data.action));
+  asymm::PlainText serialised_data(data.SerializeAsString());
+//   asymm::Signature expected_signature = asymm::Sign(serialised_data, keys.private_key);
+
+  data_message_.SignData(keys.private_key);
+  EXPECT_TRUE(data_message_.originator().name.IsInitialised());
+  EXPECT_TRUE(data_message_.originator().data_signature.IsInitialised());
+  DataMessage::Originator originator(data_message_.originator());
+  EXPECT_EQ(data_message_.this_persona().node_id.string(), originator.name.string());
+  EXPECT_TRUE(asymm::CheckSignature(serialised_data, originator.data_signature, keys.public_key));
+//   EXPECT_TRUE(asymm::CheckSignature(serialised_data, expected_signature, keys.public_key));
+}
+
+TEST_F(DataMessageTest, BEH_SerialiseAndSignThenValidate) {
+  DataMessage::serialised_type serialised_message(data_message_.Serialise());
+  asymm::Keys keys(asymm::GenerateKeyPair());
+  auto result(data_message_.SerialiseAndSign(keys.private_key));
+  EXPECT_EQ(serialised_message.data.string(), result.first.data.string());
+  asymm::PlainText serialised_data(result.first.data.string());
+  EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
+  serialised_data = asymm::PlainText(serialised_message.data.string());
+  EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
+
+  EXPECT_TRUE(data_message_.Validate(result.second, keys.public_key));
+  EXPECT_FALSE(data_message_.Validate(asymm::Signature(RandomString(256)), keys.public_key));
+  asymm::Keys false_keys(asymm::GenerateKeyPair());
+  EXPECT_FALSE(data_message_.Validate(asymm::Signature(result.second), false_keys.public_key));
 }
 
 }  // namespace test
