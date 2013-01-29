@@ -26,15 +26,15 @@ namespace test {
 
 class ResponseMapperTest : public testing::Test {
  protected:
-  typedef std::function<std::string(std::string && input)> converter;
+  typedef std::function<std::string(std::string&& input)> converter;
 
   ResponseMapperTest()
-    : converter_([](std::string && input)->std::string {
+    : converter_([](std::string &&input)->std::string {
                      return input;}),
       response_mapper_(converter_) {}
 
   converter converter_;
-  ResponseMapper<std::future<std::string>, std::promise<std::string>, converter> response_mapper_;
+  ResponseMapper<std::string, std::string, converter> response_mapper_;
 };
 
 TEST_F(ResponseMapperTest, BEH_push_back) {
