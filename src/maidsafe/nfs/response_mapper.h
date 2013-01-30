@@ -34,7 +34,6 @@ class ResponseMapper {
   void push_back(RequestPair&& pending_pair);
 
  private:
-  bool running();
   void Run();
   void Poll();
 
@@ -61,22 +60,17 @@ void ResponseMapper<FutureType, PromiseType, Converter>::push_back(RequestPair&&
   {
     std::lock_guard<std::mutex> lock(mutex_);
     pending_requests_.push_back(std::move(pending_pair));
+    Run();
   }
-  Run();
 }
 
 template <typename FutureType, typename PromiseType, typename Converter>
 void ResponseMapper<FutureType, PromiseType, Converter>::Run() {
-  if (!active_requests_.empty()) {
+  if (!running_) {
     worker_future_ = std::async(std::launch::async, [this]() { this->Poll(); });  // NOLINT Prakash
+    running_ = true;
   }
 }
-
-// template <typename FutureType, typename PromiseType, typename Converter>
-// bool ResponseMapper<FutureType, PromiseType, Converter>::running() {
-//   std::lock_guard<std::mutex> lock(mutex_);
-//   return (!active_requests_.empty());
-// }
 
 template <typename FutureType, typename PromiseType, typename Converter>
 void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
@@ -101,10 +95,8 @@ void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
       std::move(pending_requests_.begin(), pending_requests_.end(),
                 std::back_inserter(active_requests_));
       pending_requests_.resize(0);
-      if (active_requests.empty():)
+      if (active_requests_.empty())
         running_ = false;
-      else
-        running = true;
     }
   }
 }
