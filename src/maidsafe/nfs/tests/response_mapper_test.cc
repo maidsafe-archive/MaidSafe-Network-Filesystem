@@ -27,10 +27,10 @@ namespace test {
 
 class ResponseMapperTest : public testing::Test {
  protected:
-  typedef std::function<std::string(std::string && input)> converter;
+  typedef std::function<std::string(std::string&& input)> converter;
 
   ResponseMapperTest()
-    : converter_([](std::string && input)->std::string {
+    : converter_([](std::string &&input)->std::string {
                      return input;}),
       response_mapper_(converter_) {}
 
