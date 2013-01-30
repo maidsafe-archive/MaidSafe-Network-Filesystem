@@ -67,14 +67,14 @@ void ResponseMapper<FutureType, PromiseType, Converter>::push_back(RequestPair&&
 template <typename FutureType, typename PromiseType, typename Converter>
 void ResponseMapper<FutureType, PromiseType, Converter>::Run() {
   if (!running_) {
-    worker_future_ = std::async(std::launch::async, [this]() { this->Poll(); });  // NOLINT Prakash
     running_ = true;
+    worker_future_ = std::async(std::launch::async, [this]() { this->Poll(); });  // NOLINT Prakash
   }
 }
 
 template <typename FutureType, typename PromiseType, typename Converter>
 void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
-  while (running_) {
+  do {
     active_requests_.erase(std::remove_if(active_requests_.begin(), active_requests_.end(),
         [this](RequestPair& request_pair)->bool {
           if (IsReady(request_pair.first)) {
@@ -98,7 +98,7 @@ void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
       if (active_requests_.empty())
         running_ = false;
     }
-  }
+  } while (!active_requests_.empty());
 }
 
 }  // namespace nfs

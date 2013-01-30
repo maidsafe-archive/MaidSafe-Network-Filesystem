@@ -46,6 +46,31 @@ class ResponseMapperTest : public testing::Test {
   ResponseMapper<std::string, std::string, converter> response_mapper_;
 };
 
+TEST_F(ResponseMapperTest, BEH_Simple) {
+  std::promise<std::string> promise_nfs1, promise_nfs2, promise_routing1, promise_routing2;
+  std::future<std::string> future_nfs1(promise_nfs1.get_future());
+  std::future<std::string> future_nfs2(promise_nfs2.get_future());
+  std::future<std::string> future_routing1(promise_routing1.get_future());
+  std::future<std::string> future_routing2(promise_routing2.get_future());
+  std::pair<std::future<std::string>, std::promise<std::string>>
+      request1(std::move(future_routing1), std::move(promise_nfs1));
+  response_mapper_.push_back(std::move(request1));
+  std::pair<std::future<std::string>, std::promise<std::string>>
+      request2(std::move(future_routing2), std::move(promise_nfs2));
+  response_mapper_.push_back(std::move(request2));
+  LOG(kInfo) << "Sleep(boost::posix_time::seconds(4))";
+  Sleep(boost::posix_time::seconds(4));
+  promise_routing1.set_value("routing response 1");
+  LOG(kInfo) << "set first value for promise_routing1";
+  promise_routing2.set_value("routing response 2");
+  LOG(kInfo) << "set first value for promise_routing2";
+  std::string response_nfs_string1(future_nfs1.get());
+  std::string response_nfs_string2(future_nfs2.get());
+  LOG(kInfo) << "got NFS response -- " << response_nfs_string1;
+  LOG(kInfo) << "got NFS response -- " << response_nfs_string2;
+}
+
+
 TEST_F(ResponseMapperTest, BEH_push_back) {
   uint16_t num_responses(1);
   std::vector<std::string> responses;
@@ -59,7 +84,7 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
   while (!promise1.empty()) {
     responses.push_back(RandomString(16));
     future1.emplace_back((*promise1_itr).get_future());
-    std::future<std::string> future2 = (*promise2_itr).get_future(); 
+    std::future<std::string> future2 = (*promise2_itr).get_future();
     std::promise<std::string> promise(std::move(*promise1_itr));
     FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
     response_mapper_.push_back(std::move(pair));
