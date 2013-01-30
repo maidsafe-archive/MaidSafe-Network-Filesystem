@@ -36,6 +36,7 @@ class ResponseMapper {
  private:
   void Run();
   void Poll();
+  void AppendPendingRequests();
 
   mutable std::mutex mutex_;
   Converter converter_;
@@ -92,13 +93,18 @@ void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
       std::this_thread::yield();
     {  // moving new  requests
       std::lock_guard<std::mutex> lock(mutex_);
-      std::move(pending_requests_.begin(), pending_requests_.end(),
-                std::back_inserter(active_requests_));
-      pending_requests_.resize(0);
+      AppendPendingRequests();
       if (active_requests_.empty())
         running_ = false;
     }
   } while (!active_requests_.empty());
+}
+
+template <typename FutureType, typename PromiseType, typename Converter>
+void ResponseMapper<FutureType, PromiseType, Converter>::AppendPendingRequests() {
+  std::move(pending_requests_.begin(), pending_requests_.end(),
+            std::back_inserter(active_requests_));
+  pending_requests_.resize(0);
 }
 
 }  // namespace nfs
