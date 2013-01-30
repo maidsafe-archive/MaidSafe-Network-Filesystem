@@ -29,7 +29,6 @@ namespace test {
 class ResponseMapperTest : public testing::Test {
  protected:
   typedef std::function<ReturnCode(std::string&& input)> converter;
-
   ResponseMapperTest()
     : converter_([](std::string &&input)->ReturnCode {
                         ReturnCode return_code(
@@ -38,12 +37,20 @@ class ResponseMapperTest : public testing::Test {
                     }),
       response_mapper_(converter_) {}
 
-  void SetPromise(std::vector<std::promise<std::string>> &promise2, std::string response) {
+  void SetPromise(std::vector<std::promise<std::string>> &promise2, std::string input) {
     if (promise2.empty())
       return;
     uint32_t index = (RandomUint32() % promise2.size());
-    promise2.at(index).set_value(response);
+    promise2.at(index).set_value(input);
     promise2.erase(promise2.begin() + index);
+  }
+
+  bool CheckOutput(std::vector<std::string> &inputs, ReturnCode::serialised_type output) {
+    return (std::find_if(inputs.begin(), inputs.end(),
+                         [output] (const std::string& element) {
+                         return output ==
+                             ReturnCode::serialised_type(NonEmptyString(element)); }) !=
+           inputs.end());
   }
 
   converter converter_;
@@ -51,14 +58,15 @@ class ResponseMapperTest : public testing::Test {
 };
 
 TEST_F(ResponseMapperTest, BEH_push_back) {
-  uint16_t num_responses(1);
-  std::vector<std::string> responses;
-  std::vector<std::promise<ReturnCode>> promise1(num_responses);
-  std::vector<std::promise<std::string>> promise2(num_responses);
+  uint16_t num_inputs(1);
+  std::vector<std::string> inputs;
+  std::vector<std::promise<ReturnCode>> promise1(num_inputs);
+  std::vector<std::promise<std::string>> promise2(num_inputs);
   std::vector<std::future<ReturnCode>> future1;
   auto promise2_itr = promise2.begin();
   auto promise1_itr = promise1.begin();
   while (!promise1.empty()) {
+    inputs.push_back(RandomAlphaNumericString(16));
     future1.emplace_back((*promise1_itr).get_future());
     std::future<std::string> future2 = (*promise2_itr).get_future();
     std::promise<ReturnCode> promise(std::move(*promise1_itr));
@@ -68,18 +76,24 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
   }
   //  Set promises values
   while (!promise2.empty())
-    SetPromise(promise2, responses.at(RandomInt32() % responses.size()));
+    SetPromise(promise2, inputs.at(RandomInt32() % inputs.size()));
 
   auto future_itr = future1.begin();
-  while (future_itr != future1.end()) {
-    if (IsReady(*future_itr)) {
-      ReturnCode return_code = (*future_itr).get();
-      // std::string resp; Convert returncode into string
-      // auto itr = std::find(responses.begin(), responses.end(), resp);
-      // EXPECT_NE(responses.end(), itr);
-      future_itr = future1.erase(future_itr);
+  bool done(true);
+  while (done) {
+    auto future_itr = future1.begin();
+    while (future_itr != future1.end()) {
+      if (IsReady(*future_itr)) {
+        ReturnCode return_code = (*future_itr).get();
+        ReturnCode::serialised_type serialised_resp = return_code.Serialise();
+        EXPECT_TRUE(CheckOutput(inputs, serialised_resp));
+        future_itr = future1.erase(future_itr);
+      } else {
+        ++future_itr;
+      }
     }
-    ++future_itr;
+    if (future1.empty())
+      done = false;
   }
 }
 
