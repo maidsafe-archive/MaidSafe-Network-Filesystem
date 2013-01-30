@@ -34,7 +34,6 @@ class ResponseMapper {
   void push_back(RequestPair&& pending_pair);
 
  private:
-  bool running();
   void Run();
   void Poll();
 
@@ -42,6 +41,7 @@ class ResponseMapper {
   Converter converter_;
   std::vector<RequestPair> active_requests_, pending_requests_;
   std::future<void> worker_future_;
+  std::atomic<bool> running_;
 };
 
 template <typename FutureType, typename PromiseType, typename Converter>
@@ -50,7 +50,8 @@ ResponseMapper<FutureType, PromiseType, Converter>::ResponseMapper(Converter con
       converter_(converter),
       active_requests_(),
       pending_requests_(),
-      worker_future_() {
+      worker_future_(),
+      running_(false) {
   Run();
 }
 
@@ -59,26 +60,21 @@ void ResponseMapper<FutureType, PromiseType, Converter>::push_back(RequestPair&&
   {
     std::lock_guard<std::mutex> lock(mutex_);
     pending_requests_.push_back(std::move(pending_pair));
+    Run();
   }
-  Run();
 }
 
 template <typename FutureType, typename PromiseType, typename Converter>
 void ResponseMapper<FutureType, PromiseType, Converter>::Run() {
-  if (!running()) {
+  if (!running_) {
     worker_future_ = std::async(std::launch::async, [this]() { this->Poll(); });  // NOLINT Prakash
+    running_ = true;
   }
 }
 
 template <typename FutureType, typename PromiseType, typename Converter>
-bool ResponseMapper<FutureType, PromiseType, Converter>::running() {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return (!active_requests_.empty());
-}
-
-template <typename FutureType, typename PromiseType, typename Converter>
 void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
-  while (running()) {
+  while (running_) {
     active_requests_.erase(std::remove_if(active_requests_.begin(), active_requests_.end(),
         [this](RequestPair& request_pair)->bool {
           if (IsReady(request_pair.first)) {
@@ -99,6 +95,8 @@ void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
       std::move(pending_requests_.begin(), pending_requests_.end(),
                 std::back_inserter(active_requests_));
       pending_requests_.resize(0);
+      if (active_requests_.empty())
+        running_ = false;
     }
   }
 }
