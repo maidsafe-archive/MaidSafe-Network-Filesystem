@@ -47,7 +47,6 @@ class ResponseMapperTest : public testing::Test {
 };
 
 TEST_F(ResponseMapperTest, BEH_push_back) {
-  std::cout<<"\nResponseMapperTest\n";
   uint16_t num_responses(1);
   std::vector<std::string> responses;
   std::vector<std::promise<std::string>> promise1(num_responses);
@@ -66,10 +65,8 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
     response_mapper_.push_back(std::move(pair));
     promise1.erase(promise1_itr);
   }
-  std::cout<<"\nResponseMapper 0000000000000\n";
   SetPromise(promise2, "First Attempt");
   while (!future1.empty()) {
-    std::cout<<"\nResponseMapper 1111111111111\n";
     for (auto& future : future1) {
       if (IsReady(future)) {
         std::string resp = future.get();
@@ -78,8 +75,6 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
       }
     }
   }
-  std::cout<<"\nResponseMapper 22222222222222\n";
-
 }
 
 }  // namespace test

@@ -84,7 +84,7 @@ void ResponseMapper<FutureType, PromiseType, Converter>::Poll() {
           if (IsReady(request_pair.first)) {
             try {
               request_pair.second.set_value(std::move(converter_(
-                                                        std::move(request_pair.first.get()))));
+                                                          std::move(request_pair.first.get()))));
             } catch(std::exception& /*ex*/) {
               request_pair.second.set_exception(std::current_exception());
             }
