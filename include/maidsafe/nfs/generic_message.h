@@ -38,6 +38,7 @@ class GenericMessage {
     kGetPmidSize,
     kNodeDown,
     kNodeUp,
+    kGetElementList,
     kSynchronise
   };
   typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
