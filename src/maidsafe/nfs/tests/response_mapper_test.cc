@@ -41,7 +41,6 @@ class ResponseMapperTest : public testing::Test {
       no_exception_count_(0) {}
 
   void SetPromise(std::vector<std::promise<std::string>> &promise2, std::string input) {
-    std::cout<<"\nSetPromise\n";
     std::lock_guard<std::mutex> lock(mutex_);
     if (promise2.empty())
       return;
@@ -49,7 +48,6 @@ class ResponseMapperTest : public testing::Test {
     uint32_t index = (RandomUint32() % promise2.size());
     promise2.at(index).set_value(input);
     promise2.erase(promise2.begin() + index);
-    std::cout<<"\nSetPromise end\n";
   }
 
   void SetExceptionPromise(std::vector<std::promise<std::string>> &promise2) {
@@ -93,12 +91,12 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
     std::promise<ReturnCode> promise(std::move(*promise1_itr));
     FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
     response_mapper_.push_back(std::move(pair));
-    promise1.erase(promise1_itr);
+    promise1_itr = promise1.erase(promise1_itr);
+    ++promise2_itr;
   }
   //  Set promises values
   while (!promise2.empty())
     SetPromise(promise2, inputs.at(RandomInt32() % inputs.size()));
-
 //  auto future_itr = future1.begin();
   bool done(true);
   while (done) {
@@ -124,7 +122,6 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
     if (future1.empty())
       done = false;
   }
-  std::cout<<"\nChecking future end\n";
 }
 
 TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
@@ -140,32 +137,31 @@ TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
     std::promise<ReturnCode> promise(std::move(*promise1_itr));
     FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
     response_mapper_.push_back(std::move(pair));
-    promise1.erase(promise1_itr);
+    promise1_itr = promise1.erase(promise1_itr);
+    ++promise2_itr;
   }
   //  Set promises values
   while (!promise2.empty())
     SetExceptionPromise(promise2);
 
-//  auto future_itr = future1.begin();
   bool done(true);
   while (done) {
     auto future_itr = future1.begin();
     while (future_itr != future1.end()) {
-      try {
-        if (IsReady(*future_itr)) {
+      if (IsReady(*future_itr)) {
+        try {
           ReturnCode return_code = (*future_itr).get();
           ReturnCode::serialised_type serialised_resp = return_code.Serialise();
-          future_itr = future1.erase(future_itr);
-        } else {
-          ++future_itr;
         }
+        catch(const NfsErrors &error) {
+          EXPECT_EQ(error, NfsErrors::failed_to_get_data);
+        }
+      } else {
+        future_itr = future1.erase(future_itr);
       }
-      catch(const NfsErrors &error) {
-        EXPECT_EQ(error, NfsErrors::failed_to_get_data);
-      }
-      if (future1.empty())
-        done = false;
     }
+    if (future1.empty())
+      done = false;
   }
 }
 
@@ -201,7 +197,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
           std::future<ReturnCode> fut1 = prom1.get_future();
           future1.push_back(std::move(fut1));
           pair = std::make_pair(std::move(future2), std::move(prom1));
-          promise1.erase(promise1_itr);
+          promise1_itr = promise1.erase(promise1_itr);
         }
         result_futures.push_back(std::async([this, &pair] {
                                             this->response_mapper_.push_back(std::move(pair));
