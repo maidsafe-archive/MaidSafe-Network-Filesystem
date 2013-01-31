@@ -99,7 +99,7 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
   while (!promise2.empty())
     SetPromise(promise2, inputs.at(RandomInt32() % inputs.size()));
 
-  auto future_itr = future1.begin();
+//  auto future_itr = future1.begin();
   bool done(true);
   while (done) {
     auto future_itr = future1.begin();
@@ -146,7 +146,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
   while (!promise2.empty())
     SetExceptionPromise(promise2);
 
-  auto future_itr = future1.begin();
+//  auto future_itr = future1.begin();
   bool done(true);
   while (done) {
     auto future_itr = future1.begin();
@@ -181,7 +181,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
   }
 
   auto promise1_itr = promise1.begin();
-  auto promise2_itr = promise2.begin();
+//  auto promise2_itr = promise2.begin();
   bool pending(true);
   std::mutex mutex;
   std::vector<std::future<void>> result_futures;
@@ -235,7 +235,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
 
   uint16_t exception_count(0);
   uint16_t no_exception_count(0);
-  auto future_itr = future1.begin();
+//  auto future_itr = future1.begin();
   bool done(true);
   while (done) {
     auto future_itr = future1.begin();
