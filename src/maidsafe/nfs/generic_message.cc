@@ -119,7 +119,7 @@ GenericMessage::serialised_type GenericMessage::Serialise() const {
       proto_generic_message.set_content(content_.string());
     serialised_message = serialised_type(NonEmptyString(proto_generic_message.SerializeAsString()));
   }
-  catch(const std::system_error&) {
+  catch(const std::exception&) {
     ThrowError(NfsErrors::invalid_parameter);
   }
   return serialised_message;

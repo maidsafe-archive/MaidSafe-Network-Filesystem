@@ -22,7 +22,7 @@ namespace nfs {
 
 namespace {
 
-std::system_error GetError(int error_value, const std::string& error_category_name) {
+maidsafe_error GetError(int error_value, const std::string& error_category_name) {
   if (error_category_name == std::string(GetCommonCategory().name()))
     return MakeError(static_cast<CommonErrors>(error_value));
   if (error_category_name == std::string(GetAsymmCategory().name()))
@@ -37,6 +37,7 @@ std::system_error GetError(int error_value, const std::string& error_category_na
     return MakeError(static_cast<VaultErrors>(error_value));
   if (error_category_name == std::string(GetLifeStuffCategory().name()))
     return MakeError(static_cast<LifeStuffErrors>(error_value));
+
   ThrowError(CommonErrors::parsing_error);
   return MakeError(CommonErrors::parsing_error);
 }
@@ -45,10 +46,6 @@ std::system_error GetError(int error_value, const std::string& error_category_na
 
 const MessageCategory ReturnCode::message_type_identifier = MessageCategory::kReply;
 
-
-ReturnCode::ReturnCode(std::system_error error, const NonEmptyString& data)
-    : error_(error),
-      data_(data) {}
 
 ReturnCode::ReturnCode(const ReturnCode& other) : error_(other.error_), data_(other.data_) {}
 

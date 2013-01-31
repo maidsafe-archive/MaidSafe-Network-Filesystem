@@ -62,7 +62,7 @@ class ReturnCodeTest : public testing::TestWithParam<bool> {
     }
   }
 
-  std::system_error error_;
+  maidsafe_error error_;
   NonEmptyString data_;
   ReturnCode return_code_;
 };
@@ -137,13 +137,13 @@ TEST_P(ReturnCodeTest, BEH_ParseFromBadString) {
       NonEmptyString(good_string->string().substr(0, good_string->string().size() - 2))));
 
   for (auto& bad_string : bad_strings)
-    EXPECT_THROW(ReturnCode parsed(bad_string), std::system_error);
+    EXPECT_THROW(ReturnCode parsed(bad_string), maidsafe_error);
 }
 
 INSTANTIATE_TEST_CASE_P(NonEmptyAndEmptyInfo, ReturnCodeTest, testing::Bool());
 
 TEST(SingleReturnCodeTest, BEH_BadDataSize) {
-  EXPECT_THROW(ReturnCode(CommonErrors::success, NonEmptyString("")), std::system_error);
+  EXPECT_THROW(ReturnCode(CommonErrors::success, NonEmptyString("")), maidsafe_error);
 }
 
 }  // namespace test

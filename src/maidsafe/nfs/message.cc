@@ -74,7 +74,7 @@ Message::serialised_type Message::Serialise() const {
     if (signature_.IsInitialised())
       proto_message.set_signature(signature_.string());
   }
-  catch(const std::system_error&) {
+  catch(const std::exception&) {
     ThrowError(NfsErrors::invalid_parameter);
   }
   return serialised_message;

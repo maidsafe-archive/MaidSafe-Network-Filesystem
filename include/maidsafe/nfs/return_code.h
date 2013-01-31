@@ -14,6 +14,7 @@
 
 #include <string>
 #include <system_error>
+#include <type_traits>
 
 #include "maidsafe/common/bounded_string.h"
 #include "maidsafe/common/error.h"
@@ -33,10 +34,21 @@ class ReturnCode {
 
   // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
   template<typename ErrorCode>
-  ReturnCode(ErrorCode error_code, const NonEmptyString& data = NonEmptyString())
+  ReturnCode(ErrorCode error_code,
+             const NonEmptyString& data = NonEmptyString(),
+             typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
       : error_(MakeError(error_code)),
         data_(data) {}
-  ReturnCode(std::system_error error, const NonEmptyString& data = NonEmptyString());
+  template<typename Error>
+  ReturnCode(Error error,
+             const NonEmptyString& data = NonEmptyString(),
+             typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
+      : error_(error),
+        data_(data) {
+    static_assert(std::is_same<Error, maidsafe_error>::value ||
+                  std::is_base_of<maidsafe_error, Error>::value,
+                  "Error type must be a MaidSafe-specific type");
+  }
 
   ReturnCode(const ReturnCode& other);
   ReturnCode& operator=(const ReturnCode& other);
@@ -46,12 +58,12 @@ class ReturnCode {
   explicit ReturnCode(const serialised_type& serialised_return_code);
   serialised_type Serialise() const;
 
-  std::system_error error() const { return error_; }
+  maidsafe_error error() const { return error_; }
   NonEmptyString data() const { return data_; }
   bool IsSuccess() const;
 
  private:
-  std::system_error error_;
+  maidsafe_error error_;
   NonEmptyString data_;
 };
 

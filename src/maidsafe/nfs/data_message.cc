@@ -245,7 +245,7 @@ DataMessage::serialised_type DataMessage::Serialise() const {
       proto_data_message.set_target_id(target_id_.string());
     serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
   }
-  catch(const std::system_error&) {
+  catch(const std::exception&) {
     ThrowError(NfsErrors::invalid_parameter);
   }
   return serialised_message;
