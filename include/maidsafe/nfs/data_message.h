@@ -12,6 +12,7 @@
 #ifndef MAIDSAFE_NFS_DATA_MESSAGE_H_
 #define MAIDSAFE_NFS_DATA_MESSAGE_H_
 
+#include <cstdint>
 #include <functional>
 #include <ostream>
 #include <string>
@@ -32,7 +33,7 @@ namespace nfs {
 
 class DataMessage {
  public:
-  enum class Action : int { kGet, kPut, kDelete };
+  enum class Action : int32_t { kGet, kPut, kDelete };
   struct Data {
     Data();
     Data(DataTagValue type_in,
@@ -64,7 +65,7 @@ class DataMessage {
 
   typedef TaggedValue<NonEmptyString, struct SerialisedDataMessageTag> serialised_type;
   typedef std::function<void(DataMessage message)> OnError;
-  static const int32_t message_type_identifier;
+  static const MessageCategory message_type_identifier;
 
   DataMessage(Persona next_persona,
               const PersonaId& this_persona,

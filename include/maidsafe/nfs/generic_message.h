@@ -12,6 +12,7 @@
 #ifndef MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 #define MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 
+#include <cstdint>
 #include <ostream>
 #include <string>
 
@@ -32,7 +33,7 @@ namespace protobuf { class GenericMessage; }
 
 class GenericMessage {
  public:
-  enum class Action : int {
+  enum class Action : int32_t {
     kRegisterPmid,
     kConnect,
     kGetPmidSize,
@@ -42,7 +43,7 @@ class GenericMessage {
   };
   typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
   typedef std::function<void(GenericMessage message)> OnError;
-  static const int32_t message_type_identifier;
+  static const MessageCategory message_type_identifier;
 
   GenericMessage(Action action,
                  Persona destination_persona,

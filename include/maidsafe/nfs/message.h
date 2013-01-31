@@ -28,7 +28,7 @@ class Message {
  public:
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
-  Message(int32_t inner_message_type,
+  Message(MessageCategory inner_message_type,
           const NonEmptyString& serialised_inner_message,
           const asymm::Signature& signature = asymm::Signature());
   explicit Message(const serialised_type& serialised_message);
@@ -39,13 +39,13 @@ class Message {
 
   serialised_type Serialise() const;
 
-  int32_t inner_message_type() const { return inner_message_type_; }
+  MessageCategory inner_message_type() const { return inner_message_type_; }
   template<typename InnerMessageType>
   typename InnerMessageType::serialised_type serialised_inner_message() const;
   asymm::Signature signature() const { return signature_; }
 
  private:
-  int32_t inner_message_type_;
+  MessageCategory inner_message_type_;
   NonEmptyString serialised_inner_message_;
   asymm::Signature signature_;
 };

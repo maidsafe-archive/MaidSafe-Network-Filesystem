@@ -12,6 +12,7 @@
 #ifndef MAIDSAFE_NFS_TYPES_H_
 #define MAIDSAFE_NFS_TYPES_H_
 
+#include <cstdint>
 #include <functional>
 #include <ostream>
 #include <string>
@@ -24,7 +25,9 @@ namespace maidsafe {
 
 namespace nfs {
 
-enum class Persona : int {
+enum class MessageCategory : int32_t { kData, kGeneric, kReply };
+
+enum class Persona : int32_t {
   kMaidAccountHolder,
   kMetadataManager,
   kPmidAccountHolder,

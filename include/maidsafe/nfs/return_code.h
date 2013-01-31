@@ -16,7 +16,10 @@
 #include <system_error>
 
 #include "maidsafe/common/bounded_string.h"
+#include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
+
+#include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
@@ -25,10 +28,16 @@ namespace nfs {
 
 class ReturnCode {
  public:
-  typedef maidsafe::detail::BoundedString<1, 4096> Info;
   typedef TaggedValue<NonEmptyString, struct SerialisedReturnCodeTag> serialised_type;
-  ReturnCode(int value, const Info& info = Info());
-  explicit ReturnCode(const std::system_error& error);
+  static const MessageCategory message_type_identifier;
+
+  // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
+  template<typename ErrorCode>
+  ReturnCode(ErrorCode error_code, const NonEmptyString& data = NonEmptyString())
+      : error_(MakeError(error_code)),
+        data_(data) {}
+  ReturnCode(std::system_error error, const NonEmptyString& data = NonEmptyString());
+
   ReturnCode(const ReturnCode& other);
   ReturnCode& operator=(const ReturnCode& other);
   ReturnCode(ReturnCode&& other);
@@ -37,12 +46,13 @@ class ReturnCode {
   explicit ReturnCode(const serialised_type& serialised_return_code);
   serialised_type Serialise() const;
 
-  int value() const { return value_; }
-  Info info() const { return info_; }
+  std::system_error error() const { return error_; }
+  NonEmptyString data() const { return data_; }
+  bool IsSuccess() const;
 
  private:
-  int value_;
-  Info info_;
+  std::system_error error_;
+  NonEmptyString data_;
 };
 
 }  // namespace nfs

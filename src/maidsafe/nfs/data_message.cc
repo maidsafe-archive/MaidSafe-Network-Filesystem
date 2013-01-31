@@ -23,7 +23,7 @@ namespace maidsafe {
 
 namespace nfs {
 
-const int32_t DataMessage::message_type_identifier = 0;
+const MessageCategory DataMessage::message_type_identifier = MessageCategory::kData;
 
 
 DataMessage::Data::Data()

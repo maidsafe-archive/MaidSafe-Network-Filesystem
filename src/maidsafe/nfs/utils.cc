@@ -33,10 +33,10 @@ void GetReturnCode(int& success_count, int& failure_count, std::future<std::stri
   try {
     // Need '((' when constructing ReturnCode to avoid most vexing parse.
     ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(future.get()))));
-    if (static_cast<CommonErrors>(return_code.value()) == CommonErrors::success) {
+    if (return_code.IsSuccess()) {
       ++success_count;
     } else {
-      LOG(kWarning) << "Received an error " << return_code.value();
+      LOG(kWarning) << "Received an error: " << return_code.error().what();
       ++failure_count;
     }
   }
