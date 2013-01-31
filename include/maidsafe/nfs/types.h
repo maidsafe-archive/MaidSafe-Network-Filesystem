@@ -31,6 +31,9 @@ enum class Persona : int {
   kDataHolder,
   kClientMaid,
   kClientMpid,
+  kOwnerDirectoryManager,
+  kGroupDirectoryManager,
+  kWorldDirectoryManager,
   kDataGetter
 };
 
@@ -96,7 +99,6 @@ struct PersonaId {
 };
 
 typedef TaggedValue<Identity, struct MessageIdTag> MessageId;
-
 
 }  // namespace nfs
 

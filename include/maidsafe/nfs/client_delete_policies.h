@@ -68,6 +68,36 @@ class DeleteFromMaidAccountHolder {
   PersonaId source_;
 };
 
+class DeleteFromDirectoryManager {
+ public:
+  DeleteFromDirectoryManager(routing::Routing& routing, const passport::Maid& signing_fob)
+      : routing_(routing),
+        signing_fob_(signing_fob),
+        source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
+
+  template<typename Data>
+  void Delete(const typename Data::name_type& name, DataMessage::OnError /*on_error*/) {
+    DataMessage::Data data(Data::name_type::tag_type::kEnumValue,
+                           name.data,
+                           NonEmptyString(),
+                           DataMessage::Action::kDelete);
+    DataMessage data_message(detail::GetPersona<Data>::persona, source_, data);
+    data_message.SignData(signing_fob_.private_key());
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());
+    std::make_shared<StringFutureVector>(routing_.SendGroup(routing_.kNodeId(),
+                                                            message.Serialise()->string(),
+                                                            IsCacheable<Data>()));
+  }
+
+ protected:
+  ~DeleteFromDirectoryManager() {}
+
+ private:
+  routing::Routing& routing_;
+  passport::Maid signing_fob_;
+  PersonaId source_;
+};
+
 }  // namespace nfs
 
 }  // namespace maidsafe
