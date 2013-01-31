@@ -41,6 +41,7 @@ class ResponseMapperTest : public testing::Test {
       no_exception_count_(0) {}
 
   void SetPromise(std::vector<std::promise<std::string>> &promise2, std::string input) {
+    std::cout<<"\nSetPromise\n";
     std::lock_guard<std::mutex> lock(mutex_);
     if (promise2.empty())
       return;
@@ -48,6 +49,7 @@ class ResponseMapperTest : public testing::Test {
     uint32_t index = (RandomUint32() % promise2.size());
     promise2.at(index).set_value(input);
     promise2.erase(promise2.begin() + index);
+    std::cout<<"\nSetPromise end\n";
   }
 
   void SetExceptionPromise(std::vector<std::promise<std::string>> &promise2) {
@@ -102,10 +104,18 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
   while (done) {
     auto future_itr = future1.begin();
     while (future_itr != future1.end()) {
+      // std::cout<<"\nChecking future\n";
       if (IsReady(*future_itr)) {
+         //  std::cout<<"\nIn readyChecking future\n";
+        try {
         ReturnCode return_code = (*future_itr).get();
         ReturnCode::serialised_type serialised_resp = return_code.Serialise();
         EXPECT_TRUE(CheckOutput(inputs, serialised_resp));
+        // std::cout<<"\nIn readyChecking futureend\n";
+        }
+        catch (...) {
+          std::cout<< "Error Occured..." <<std::endl;
+        }
         future_itr = future1.erase(future_itr);
       } else {
         ++future_itr;
@@ -114,6 +124,7 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
     if (future1.empty())
       done = false;
   }
+  std::cout<<"\nChecking future end\n";
 }
 
 TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
