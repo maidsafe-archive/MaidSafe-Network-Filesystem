@@ -29,5 +29,5 @@ message GenericMessage {
   required int32 next_persona = 3;
   required DataMessage.PersonaId this_persona = 4;
   required bytes name = 5;
-  required bytes content = 6;
+  optional bytes content = 6;
 }

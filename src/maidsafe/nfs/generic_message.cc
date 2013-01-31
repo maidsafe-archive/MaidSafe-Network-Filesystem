@@ -92,7 +92,8 @@ GenericMessage::GenericMessage(const serialised_type& serialised_message)
   source_.persona = static_cast<Persona>(proto_generic_message.this_persona().persona());
   source_.node_id = NodeId(proto_generic_message.this_persona().node_id());
   name_ = Identity(proto_generic_message.name());
-  content_ = NonEmptyString(proto_generic_message.content());
+  if (proto_generic_message.has_content())
+    content_ = NonEmptyString(proto_generic_message.content());
   message_id_ = MessageId(Identity(proto_generic_message.message_id()));
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
@@ -113,7 +114,8 @@ GenericMessage::serialised_type GenericMessage::Serialise() const {
         static_cast<int32_t>(source_.persona));
     proto_generic_message.mutable_this_persona()->set_node_id(source_.node_id.string());
     proto_generic_message.set_name(name_.string());
-    proto_generic_message.set_content(content_.string());
+    if (content_.IsInitialised())
+      proto_generic_message.set_content(content_.string());
     serialised_message = serialised_type(NonEmptyString(proto_generic_message.SerializeAsString()));
   }
   catch(const std::system_error&) {
