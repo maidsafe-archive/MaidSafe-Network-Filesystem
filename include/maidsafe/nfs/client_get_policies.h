@@ -23,7 +23,9 @@
 
 #include "maidsafe/routing/routing_api.h"
 
+#include "maidsafe/nfs/response_mapper.h"
 #include "maidsafe/nfs/utils.h"
+
 
 
 namespace maidsafe {
@@ -81,29 +83,27 @@ class NoGet {
 template<Persona persona>
 class GetFromMetadataManager {
  public:
-  explicit GetFromMetadataManager(routing::Routing& routing)
-      : routing_(routing),
+  GetFromMetadataManager(NfsResponseMapper& response_mapper,
+                         routing::Routing& routing)
+      : response_mapper_(response_mapper),
+        routing_(routing),
         source_(PersonaId(persona, routing.kNodeId())) {}
 
   template<typename Data>
-  std::future<Data> Get(const typename Data::name_type& name) {
+  std::vector<std::future<nfs::Reply>> Get(const typename Data::name_type& name) {
     DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data,
                            NonEmptyString(), DataMessage::Action::kGet);
     DataMessage data_message(Persona::kMetadataManager, source_, data);
     Message message(DataMessage::message_type_identifier, data_message.Serialise());
-    auto routing_futures(std::make_shared<StringFutureVector>(
-                             routing_.SendGroup(NodeId(name->string()),
-                                                message.Serialise()->string(),
-                                                IsCacheable<Data>())));
-    auto promise(std::make_shared<std::promise<Data> >());
-    HandleGetFutures(promise, routing_futures);
-    return promise->get_future();
+    return NfsSendGroup(NodeId(name->string()), message,
+                        nfs::IsCacheable<Data>(), response_mapper_, routing_);
   }
 
  protected:
   ~GetFromMetadataManager() {}
 
  private:
+  NfsResponseMapper& response_mapper_;
   routing::Routing& routing_;
   PersonaId source_;
 };

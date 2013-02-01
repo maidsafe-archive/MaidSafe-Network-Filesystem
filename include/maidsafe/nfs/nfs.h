@@ -16,6 +16,7 @@
 
 #include "maidsafe/passport/types.h"
 
+#include "maidsafe/nfs/response_mapper.h"
 #include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/client_get_policies.h"
 #include "maidsafe/nfs/client_put_policies.h"
@@ -38,18 +39,19 @@ class NetworkFileSystem : public GetPolicy,
  public:
   NetworkFileSystem() : GetPolicy(), PutPolicy(), PostPolicy(), DeletePolicy() {}
 
-  explicit NetworkFileSystem(routing::Routing& routing)
-      : GetPolicy(routing),
-        PutPolicy(routing),
-        PostPolicy(routing),
-        DeletePolicy(routing) {}
+  NetworkFileSystem(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing)
+      : GetPolicy(response_mapper, routing),
+        PutPolicy(response_mapper, routing),
+        PostPolicy(response_mapper, routing),
+        DeletePolicy(response_mapper,routing) {}
 
   template<typename SigningFob>
-  NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
-      : GetPolicy(routing),
-        PutPolicy(routing, signing_fob),
-        PostPolicy(routing, signing_fob),
-        DeletePolicy(routing, signing_fob) {}
+  NetworkFileSystem(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing,
+                    const SigningFob& signing_fob)
+      : GetPolicy(response_mapper, routing),
+        PutPolicy(response_mapper, routing, signing_fob),
+        PostPolicy(response_mapper, routing, signing_fob),
+        DeletePolicy(response_mapper, routing, signing_fob) {}
 };
 
 typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
@@ -65,7 +67,8 @@ typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
 template<typename GetPolicy>
 class NetworkFileSystemGetter : public GetPolicy {
  public:
-  explicit NetworkFileSystemGetter(routing::Routing& routing) : GetPolicy(routing) {}
+  NetworkFileSystemGetter(nfs::NfsResponseMapper& response_mapper,
+                          routing::Routing& routing) : GetPolicy(response_mapper, routing) {}
 };
 
 typedef NetworkFileSystemGetter<GetFromMetadataManager<Persona::kDataGetter>> KeyGetterNfs;

@@ -20,6 +20,8 @@
 
 #include "maidsafe/common/utils.h"
 
+#include "maidsafe/nfs/reply.h"
+
 namespace maidsafe {
 
 namespace nfs {
@@ -44,6 +46,8 @@ class ResponseMapper {
   std::future<void> worker_future_;
   std::atomic<bool> running_;
 };
+typedef std::function<Reply(std::string &&)> RoutingToNfsConverter;
+typedef ResponseMapper<std::string, Reply, RoutingToNfsConverter> NfsResponseMapper;
 
 template <typename FutureType, typename PromiseType, typename Converter>
 ResponseMapper<FutureType, PromiseType, Converter>::ResponseMapper(Converter converter)
