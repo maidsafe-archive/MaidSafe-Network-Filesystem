@@ -21,15 +21,13 @@
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
 
-#include "maidsafe/nfs/data_message.h"
+#include "maidsafe/nfs/persona_id.h"
 #include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
-
-namespace protobuf { class GenericMessage; }
 
 class GenericMessage {
  public:

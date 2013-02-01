@@ -89,9 +89,9 @@ GenericMessage::GenericMessage(const serialised_type& serialised_message)
   if (!proto_generic_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
   action_ = static_cast<GenericMessage::Action>(proto_generic_message.action());
-  destination_persona_ = static_cast<Persona>(proto_generic_message.next_persona());
-  source_.persona = static_cast<Persona>(proto_generic_message.this_persona().persona());
-  source_.node_id = NodeId(proto_generic_message.this_persona().node_id());
+  destination_persona_ = static_cast<Persona>(proto_generic_message.destination_persona());
+  source_.persona = static_cast<Persona>(proto_generic_message.source().persona());
+  source_.node_id = NodeId(proto_generic_message.source().node_id());
   name_ = Identity(proto_generic_message.name());
   if (proto_generic_message.has_content())
     content_ = NonEmptyString(proto_generic_message.content());
@@ -110,10 +110,10 @@ GenericMessage::serialised_type GenericMessage::Serialise() const {
     protobuf::GenericMessage proto_generic_message;
     proto_generic_message.set_message_id(message_id_->string());
     proto_generic_message.set_action(static_cast<int32_t>(action_));
-    proto_generic_message.set_next_persona(static_cast<int32_t>(destination_persona_));
-    proto_generic_message.mutable_this_persona()->set_persona(
+    proto_generic_message.set_destination_persona(static_cast<int32_t>(destination_persona_));
+    proto_generic_message.mutable_source()->set_persona(
         static_cast<int32_t>(source_.persona));
-    proto_generic_message.mutable_this_persona()->set_node_id(source_.node_id.string());
+    proto_generic_message.mutable_source()->set_node_id(source_.node_id.string());
     proto_generic_message.set_name(name_.string());
     if (content_.IsInitialised())
       proto_generic_message.set_content(content_.string());

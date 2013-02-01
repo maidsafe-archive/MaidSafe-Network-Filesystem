@@ -41,7 +41,7 @@ bool Accumulator::CheckHandled(const RequestIdentity& request_identity, Reply& r
 
 std::vector<Reply> Accumulator::PushRequest(const Request& request) {
   RequestIdentity request_identity = std::make_pair(request.msg.message_id(),
-                                                    request.msg.this_persona().persona);
+                                                    request.msg.source().persona);
   auto pending_request = std::make_pair(request_identity, request);
   std::vector<Reply> replies;
   std::lock_guard<std::mutex> lock(mutex_);

@@ -24,6 +24,7 @@
 #include "maidsafe/data_types/data_type_values.h"
 #include "maidsafe/passport/types.h"
 
+#include "maidsafe/nfs/persona_id.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -50,14 +51,14 @@ class DataMessage {
     NonEmptyString content;
     Action action;
   };
-  struct Originator {
-    Originator();
-    Originator(const passport::PublicMaid::name_type& name_in,
-               const asymm::Signature& data_signature_in);
-    Originator(const Originator& other);
-    Originator& operator=(const Originator& other);
-    Originator(Originator&& other);
-    Originator& operator=(Originator&& other);
+  struct ClientValidation {
+    ClientValidation();
+    ClientValidation(const passport::PublicMaid::name_type& name_in,
+                     const asymm::Signature& data_signature_in);
+    ClientValidation(const ClientValidation& other);
+    ClientValidation& operator=(const ClientValidation& other);
+    ClientValidation(ClientValidation&& other);
+    ClientValidation& operator=(ClientValidation&& other);
 
     Identity name;
     asymm::Signature data_signature;
@@ -67,20 +68,20 @@ class DataMessage {
   typedef std::function<void(DataMessage message)> OnError;
   static const MessageCategory message_type_identifier;
 
-  DataMessage(Persona next_persona,
-              const PersonaId& this_persona,
+  DataMessage(Persona destination_persona,
+              const PersonaId& source,
               const Data& data,
               const passport::PublicPmid::name_type& data_holder_hint =
                   passport::PublicPmid::name_type(),
-              const Identity& target_id = Identity());
+              const Identity& final_target_id = Identity());
   DataMessage(const DataMessage& other);
   DataMessage& operator=(const DataMessage& other);
   DataMessage(DataMessage&& other);
   DataMessage& operator=(DataMessage&& other);
 
   explicit DataMessage(const serialised_type& serialised_message);
-  // This should only be called from client NFS.  It adds an Originator containing this_persona's
-  // node ID, and a signature of the data serialised.
+  // This should only be called from client NFS.  It adds an ClientValidation containing
+  // source's node ID, and a signature of the data serialised.
   void SignData(const asymm::PrivateKey& signer_private_key);
   serialised_type Serialise() const;
   std::pair<serialised_type, asymm::Signature> SerialiseAndSign(
@@ -89,26 +90,26 @@ class DataMessage {
                 const asymm::PublicKey& signer_public_key) const;
 
   MessageId message_id() const { return message_id_; }
-  Persona next_persona() const { return next_persona_; }
-  PersonaId this_persona() const { return this_persona_; }
+  Persona destination_persona() const { return destination_persona_; }
+  PersonaId source() const { return source_; }
   Data data() const { return data_; }
-  Originator originator() const { return originator_; }
-  bool HasOriginator() const { return originator_.name.IsInitialised(); }
+  ClientValidation client_validation() const { return client_validation_; }
+  bool HasClientValidation() const { return client_validation_.name.IsInitialised(); }
   passport::PublicPmid::name_type data_holder_hint() const { return data_holder_hint_; }
   bool HasDataHolderHint() const { return data_holder_hint_->IsInitialised(); }
-  Identity target_id() const { return target_id_; }
-  bool HasTargetId() const { return target_id_.IsInitialised(); }
+  Identity final_target_id() const { return final_target_id_; }
+  bool HasTargetId() const { return final_target_id_.IsInitialised(); }
 
  private:
   bool ValidateInputs() const;
 
   MessageId message_id_;
-  Persona next_persona_;
-  PersonaId this_persona_;
+  Persona destination_persona_;
+  PersonaId source_;
   Data data_;
-  Originator originator_;
+  ClientValidation client_validation_;
   passport::PublicPmid::name_type data_holder_hint_;
-  Identity target_id_;
+  Identity final_target_id_;
 };
 
 

@@ -66,9 +66,9 @@ class DataMessageTest : public testing::Test {
 
 TEST_F(DataMessageTest, BEH_CheckGetters) {
   EXPECT_EQ(action_, data_message_.data().action);
-  EXPECT_EQ(destination_persona_, data_message_.next_persona());
-  EXPECT_EQ(source_.persona, data_message_.this_persona().persona);
-  EXPECT_EQ(source_.node_id, data_message_.this_persona().node_id);
+  EXPECT_EQ(destination_persona_, data_message_.destination_persona());
+  EXPECT_EQ(source_.persona, data_message_.source().persona);
+  EXPECT_EQ(source_.node_id, data_message_.source().node_id);
   EXPECT_EQ(data_type_, data_message_.data().type);
   EXPECT_EQ(name_, data_message_.data().name);
   EXPECT_EQ(content_, data_message_.data().content);
@@ -79,9 +79,9 @@ TEST_F(DataMessageTest, BEH_SerialiseThenParse) {
   DataMessage recovered_message(serialised_message);
 
   EXPECT_EQ(action_, recovered_message.data().action);
-  EXPECT_EQ(destination_persona_, recovered_message.next_persona());
-  EXPECT_EQ(source_.persona, recovered_message.this_persona().persona);
-  EXPECT_EQ(source_.node_id, recovered_message.this_persona().node_id);
+  EXPECT_EQ(destination_persona_, recovered_message.destination_persona());
+  EXPECT_EQ(source_.persona, recovered_message.source().persona);
+  EXPECT_EQ(source_.node_id, recovered_message.source().node_id);
   EXPECT_EQ(data_type_, recovered_message.data().type);
   EXPECT_EQ(name_, recovered_message.data().name);
   EXPECT_EQ(content_, recovered_message.data().content);
@@ -96,9 +96,9 @@ TEST_F(DataMessageTest, BEH_SerialiseParseReserialiseReparse) {
 
   EXPECT_EQ(serialised_message, serialised_message2);
   EXPECT_EQ(action_, recovered_message2.data().action);
-  EXPECT_EQ(destination_persona_, recovered_message2.next_persona());
-  EXPECT_EQ(source_.persona, recovered_message2.this_persona().persona);
-  EXPECT_EQ(source_.node_id, recovered_message2.this_persona().node_id);
+  EXPECT_EQ(destination_persona_, recovered_message2.destination_persona());
+  EXPECT_EQ(source_.persona, recovered_message2.source().persona);
+  EXPECT_EQ(source_.node_id, recovered_message2.source().node_id);
   EXPECT_EQ(data_type_, recovered_message2.data().type);
   EXPECT_EQ(name_, recovered_message2.data().name);
   EXPECT_EQ(content_, recovered_message2.data().content);
@@ -108,9 +108,9 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   DataMessage message2 = data_message_;
 
   EXPECT_EQ(action_, message2.data().action);
-  EXPECT_EQ(destination_persona_, message2.next_persona());
-  EXPECT_EQ(source_.persona, message2.this_persona().persona);
-  EXPECT_EQ(source_.node_id, message2.this_persona().node_id);
+  EXPECT_EQ(destination_persona_, message2.destination_persona());
+  EXPECT_EQ(source_.persona, message2.source().persona);
+  EXPECT_EQ(source_.node_id, message2.source().node_id);
   EXPECT_EQ(data_type_, message2.data().type);
   EXPECT_EQ(name_, message2.data().name);
   EXPECT_EQ(content_, message2.data().content);
@@ -118,9 +118,9 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   DataMessage message3(data_message_);
 
   EXPECT_EQ(action_, message3.data().action);
-  EXPECT_EQ(destination_persona_, message3.next_persona());
-  EXPECT_EQ(source_.persona, message3.this_persona().persona);
-  EXPECT_EQ(source_.node_id, message3.this_persona().node_id);
+  EXPECT_EQ(destination_persona_, message3.destination_persona());
+  EXPECT_EQ(source_.persona, message3.source().persona);
+  EXPECT_EQ(source_.node_id, message3.source().node_id);
   EXPECT_EQ(data_type_, message3.data().type);
   EXPECT_EQ(name_, message3.data().name);
   EXPECT_EQ(content_, message3.data().content);
@@ -128,9 +128,9 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   DataMessage message4 = std::move(message3);
 
   EXPECT_EQ(action_, message4.data().action);
-  EXPECT_EQ(destination_persona_, message4.next_persona());
-  EXPECT_EQ(source_.persona, message4.this_persona().persona);
-  EXPECT_EQ(source_.node_id, message4.this_persona().node_id);
+  EXPECT_EQ(destination_persona_, message4.destination_persona());
+  EXPECT_EQ(source_.persona, message4.source().persona);
+  EXPECT_EQ(source_.node_id, message4.source().node_id);
   EXPECT_EQ(data_type_, message4.data().type);
   EXPECT_EQ(name_, message4.data().name);
   EXPECT_EQ(content_, message4.data().content);
@@ -138,9 +138,9 @@ TEST_F(DataMessageTest, BEH_AssignMessage) {
   DataMessage message5(std::move(message4));
 
   EXPECT_EQ(action_, message5.data().action);
-  EXPECT_EQ(destination_persona_, message5.next_persona());
-  EXPECT_EQ(source_.persona, message5.this_persona().persona);
-  EXPECT_EQ(source_.node_id, message5.this_persona().node_id);
+  EXPECT_EQ(destination_persona_, message5.destination_persona());
+  EXPECT_EQ(source_.persona, message5.source().persona);
+  EXPECT_EQ(source_.node_id, message5.source().node_id);
   EXPECT_EQ(data_type_, message5.data().type);
   EXPECT_EQ(name_, message5.data().name);
   EXPECT_EQ(content_, message5.data().content);
@@ -172,8 +172,8 @@ TEST_F(DataMessageTest, BEH_InvalidName) {
 }
 
 TEST_F(DataMessageTest, BEH_SignData) {
-  EXPECT_FALSE(data_message_.originator().name.IsInitialised());
-  EXPECT_FALSE(data_message_.originator().data_signature.IsInitialised());
+  EXPECT_FALSE(data_message_.client_validation().name.IsInitialised());
+  EXPECT_FALSE(data_message_.client_validation().data_signature.IsInitialised());
 
   asymm::Keys keys(asymm::GenerateKeyPair());
 
@@ -188,11 +188,12 @@ TEST_F(DataMessageTest, BEH_SignData) {
 //   asymm::Signature expected_signature = asymm::Sign(serialised_data, keys.private_key);
 
   data_message_.SignData(keys.private_key);
-  EXPECT_TRUE(data_message_.originator().name.IsInitialised());
-  EXPECT_TRUE(data_message_.originator().data_signature.IsInitialised());
-  DataMessage::Originator originator(data_message_.originator());
-  EXPECT_EQ(data_message_.this_persona().node_id.string(), originator.name.string());
-  EXPECT_TRUE(asymm::CheckSignature(serialised_data, originator.data_signature, keys.public_key));
+  EXPECT_TRUE(data_message_.client_validation().name.IsInitialised());
+  EXPECT_TRUE(data_message_.client_validation().data_signature.IsInitialised());
+  DataMessage::ClientValidation client_validation(data_message_.client_validation());
+  EXPECT_EQ(data_message_.source().node_id.string(), client_validation.name.string());
+  EXPECT_TRUE(asymm::CheckSignature(serialised_data, client_validation.data_signature,
+                                    keys.public_key));
 //   EXPECT_TRUE(asymm::CheckSignature(serialised_data, expected_signature, keys.public_key));
 }
 
