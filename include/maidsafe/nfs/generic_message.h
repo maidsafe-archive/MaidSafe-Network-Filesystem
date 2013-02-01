@@ -39,6 +39,16 @@ class GenericMessage {
     kNodeUp,
     kSynchronise
   };
+  struct Batch {
+    Batch();
+    Batch(int32_t size_in, int32_t index_in);
+    Batch(const Batch& other);
+    Batch& operator=(const Batch& other);
+    Batch(Batch&& other);
+    Batch& operator=(Batch&& other);
+
+    int32_t size, index;
+  };
   typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
   typedef std::function<void(GenericMessage message)> OnError;
   static const MessageCategory message_type_identifier;
@@ -47,7 +57,8 @@ class GenericMessage {
                  Persona destination_persona,
                  const PersonaId& source,
                  const Identity& name,
-                 const NonEmptyString& content);
+                 const NonEmptyString& content,
+                 Batch batch = Batch());
   GenericMessage(const GenericMessage& other);
   GenericMessage& operator=(const GenericMessage& other);
   GenericMessage(GenericMessage&& other);
@@ -57,6 +68,7 @@ class GenericMessage {
   serialised_type Serialise() const;
 
   MessageId message_id() const { return message_id_; }
+  Batch batch() const { return batch_; }
   Action action() const { return action_; }
   Persona destination_persona() const { return destination_persona_; }
   PersonaId source() const { return source_; }
@@ -67,6 +79,7 @@ class GenericMessage {
   bool ValidateInputs() const;
 
   MessageId message_id_;
+  Batch batch_;
   Action action_;
   Persona destination_persona_;
   PersonaId source_;
