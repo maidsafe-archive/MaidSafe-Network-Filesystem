@@ -49,9 +49,9 @@ class DeleteFromMaidAccountHolder {
 
   template<typename Data>
   void Delete(const typename Data::name_type& name) {
-    DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString());
-    DataMessage data_message(DataMessage::Action::kDelete, Persona::kMaidAccountHolder, source_,
-                             data);
+    DataMessage::Data data(Data::name_type::tag_type::kEnumValue, name.data, NonEmptyString(),
+                           DataMessage::Action::kDelete);
+    DataMessage data_message(Persona::kMaidAccountHolder, source_, data);
     data_message.SignData(signing_fob_.private_key());
     Message message(DataMessage::message_type_identifier, data_message.Serialise());
     std::make_shared<StringFutureVector>(routing_.SendGroup(NodeId(name->string()),
