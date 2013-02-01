@@ -9,11 +9,11 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/return_code.h"
+#include "maidsafe/nfs/reply.h"
 
 #include "maidsafe/common/error.h"
 
-#include "maidsafe/nfs/return_code_pb.h"
+#include "maidsafe/nfs/reply_pb.h"
 
 
 namespace maidsafe {
@@ -44,22 +44,20 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
 
 }  // unnamed namespace
 
-const MessageCategory ReturnCode::message_type_identifier = MessageCategory::kReply;
+const MessageCategory Reply::message_type_identifier = MessageCategory::kReply;
 
 
-ReturnCode::ReturnCode(const ReturnCode& other) : error_(other.error_), data_(other.data_) {}
+Reply::Reply(const Reply& other) : error_(other.error_), data_(other.data_) {}
 
-ReturnCode& ReturnCode::operator=(const ReturnCode& other) {
+Reply& Reply::operator=(const Reply& other) {
   error_ = other.error_;
   data_ = other.data_;
   return *this;
 }
 
-ReturnCode::ReturnCode(ReturnCode&& other)
-    : error_(std::move(other.error_)),
-      data_(std::move(other.data_)) {}
+Reply::Reply(Reply&& other) : error_(std::move(other.error_)), data_(std::move(other.data_)) {}
 
-ReturnCode& ReturnCode::operator=(ReturnCode&& other) {
+Reply& Reply::operator=(Reply&& other) {
   error_ = std::move(other.error_);
   data_ = std::move(other.data_);
   return *this;
@@ -68,29 +66,29 @@ ReturnCode& ReturnCode::operator=(ReturnCode&& other) {
 // TODO(Fraser#5#): 2012-12-24 - Once MSVC eventually handles delegating constructors, we can make
 //                  this more efficient by using a lambda which returns the parsed protobuf
 //                  inside a private constructor taking a single arg of type protobuf.
-ReturnCode::ReturnCode(const serialised_type& serialised_return_code)
+Reply::Reply(const serialised_type& serialised_reply)
     : error_(CommonErrors::success),
       data_() {
-  protobuf::ReturnCode proto_return_code;
-  if (!proto_return_code.ParseFromString(serialised_return_code->string()))
+  protobuf::Reply proto_reply;
+  if (!proto_reply.ParseFromString(serialised_reply->string()))
     ThrowError(CommonErrors::parsing_error);
 
-  error_ = GetError(proto_return_code.error_value(), proto_return_code.error_category_name());
+  error_ = GetError(proto_reply.error_value(), proto_reply.error_category_name());
 
-  if (proto_return_code.has_data())
-    data_ = NonEmptyString(proto_return_code.data());
+  if (proto_reply.has_data())
+    data_ = NonEmptyString(proto_reply.data());
 }
 
-ReturnCode::serialised_type ReturnCode::Serialise() const {
-  protobuf::ReturnCode proto_return_code;
-  proto_return_code.set_error_value(error_.code().value());
-  proto_return_code.set_error_category_name(error_.code().category().name());
+Reply::serialised_type Reply::Serialise() const {
+  protobuf::Reply proto_reply;
+  proto_reply.set_error_value(error_.code().value());
+  proto_reply.set_error_category_name(error_.code().category().name());
   if (data_.IsInitialised())
-    proto_return_code.set_data(data_.string());
-  return serialised_type(NonEmptyString(proto_return_code.SerializeAsString()));
+    proto_reply.set_data(data_.string());
+  return serialised_type(NonEmptyString(proto_reply.SerializeAsString()));
 }
 
-bool ReturnCode::IsSuccess() const {
+bool Reply::IsSuccess() const {
   return error_.code().category().name() == std::string(GetCommonCategory().name()) &&
          static_cast<CommonErrors>(error_.code().value()) == CommonErrors::success;
 }

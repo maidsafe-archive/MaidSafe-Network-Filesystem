@@ -27,7 +27,7 @@
 #include "maidsafe/nfs/data_message.h"
 #include "maidsafe/nfs/generic_message.h"
 #include "maidsafe/nfs/message.h"
-#include "maidsafe/nfs/return_code.h"
+#include "maidsafe/nfs/reply.h"
 #include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/utils.h"
 
@@ -40,7 +40,7 @@ namespace detail {
 
 MessageId GetNewMessageId(const NodeId& source_node_id);
 
-void GetReturnCode(int& success_count, int& failure_count, std::future<std::string>& future);
+void GetReply(int& success_count, int& failure_count, std::future<std::string>& future);
 
 }  // namespace detail
 

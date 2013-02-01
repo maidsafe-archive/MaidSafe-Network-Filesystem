@@ -25,8 +25,7 @@ Accumulator::Accumulator()
       kMaxHandledRequestsCount_(1000),
       mutex_() {}
 
-bool Accumulator::CheckHandled(const RequestIdentity& request_identity,
-                               ReturnCode& ret_code) const {
+bool Accumulator::CheckHandled(const RequestIdentity& request_identity, Reply& reply) const {
   std::lock_guard<std::mutex> lock(mutex_);
   auto it = std::find_if(handled_requests_.begin(),
                          handled_requests_.end(),
@@ -34,30 +33,30 @@ bool Accumulator::CheckHandled(const RequestIdentity& request_identity,
                             return request.first == request_identity;
                          });
   if (it != handled_requests_.end()) {
-    ret_code = it->second;
+    reply = it->second;
     return true;
   }
   return false;
 }
 
-std::vector<ReturnCode> Accumulator::PushRequest(const Request& request) {
+std::vector<Reply> Accumulator::PushRequest(const Request& request) {
   RequestIdentity request_identity = std::make_pair(request.msg.message_id(),
                                                     request.msg.this_persona().persona);
   auto pending_request = std::make_pair(request_identity, request);
-  std::vector<ReturnCode> ret_codes;
+  std::vector<Reply> replies;
   std::lock_guard<std::mutex> lock(mutex_);
   pending_requests_.push_back(pending_request);
   for (auto& request : pending_requests_) {
     if (request.first == request_identity)
-      ret_codes.push_back(request.second.ret_code);
+      replies.push_back(request.second.reply);
   }
   if (pending_requests_.size() > kMaxPendingRequestsCount_)
     pending_requests_.pop_front();
-  return ret_codes;
+  return replies;
 }
 
 std::vector<Accumulator::Request> Accumulator::SetHandled(const RequestIdentity& request_identity,
-                                                          const ReturnCode& ret_code) {
+                                                          const Reply& reply) {
   std::vector<Request> ret_requests;
   std::lock_guard<std::mutex> lock(mutex_);
   auto itr = pending_requests_.begin();
@@ -70,7 +69,7 @@ std::vector<Accumulator::Request> Accumulator::SetHandled(const RequestIdentity&
     }
   }
 
-  handled_requests_.push_back(std::make_pair(request_identity, ret_code));
+  handled_requests_.push_back(std::make_pair(request_identity, reply));
   if (handled_requests_.size() > kMaxHandledRequestsCount_)
     handled_requests_.pop_front();
   return ret_requests;

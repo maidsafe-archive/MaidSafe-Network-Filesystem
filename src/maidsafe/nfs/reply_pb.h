@@ -9,16 +9,16 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_RETURN_CODE_PB_H_
-#define MAIDSAFE_NFS_RETURN_CODE_PB_H_
+#ifndef MAIDSAFE_NFS_REPLY_PB_H_
+#define MAIDSAFE_NFS_REPLY_PB_H_
 
 #ifdef __MSVC__
 #  pragma warning(push)
 #  pragma warning(disable: 4127 4244 4267)
 #endif
-#include "maidsafe/nfs/return_code.pb.h"
+#include "maidsafe/nfs/reply.pb.h"
 #ifdef __MSVC__
 #  pragma warning(pop)
 #endif
 
-#endif  // MAIDSAFE_NFS_RETURN_CODE_PB_H_
+#endif  // MAIDSAFE_NFS_REPLY_PB_H_

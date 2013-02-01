@@ -17,23 +17,22 @@
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
-#include "maidsafe/nfs/return_code.h"
+#include "maidsafe/nfs/reply.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
 namespace test {
-  typedef std::pair<std::future<std::string>, std::promise<ReturnCode>> FuturePromisePair;
+  typedef std::pair<std::future<std::string>, std::promise<Reply>> FuturePromisePair;
 
 class ResponseMapperTest : public testing::Test {
  protected:
-  typedef std::function<ReturnCode(std::string&& input)> converter;
+  typedef std::function<Reply(std::string&& input)> converter;
   ResponseMapperTest()
-    : converter_([](std::string &&input)->ReturnCode {
-                        ReturnCode return_code(
-                            (ReturnCode::serialised_type(NonEmptyString(input))));
-                        return return_code;
+    : converter_([](std::string &&input)->Reply {
+                        Reply reply((Reply::serialised_type(NonEmptyString(input))));
+                        return reply;
                     }),
       response_mapper_(converter_),
       mutex_(),
@@ -61,16 +60,16 @@ class ResponseMapperTest : public testing::Test {
     promise2.erase(promise2.begin() + index);
   }
 
-  bool CheckOutput(std::vector<std::string> &inputs, ReturnCode::serialised_type output) {
-    return (std::find_if(inputs.begin(), inputs.end(),
+  bool CheckOutput(std::vector<std::string> &inputs, Reply::serialised_type output) {
+    return (std::find_if(inputs.begin(),
+                         inputs.end(),
                          [output] (const std::string& element) {
-                         return output ==
-                             ReturnCode::serialised_type(NonEmptyString(element)); }) !=
-           inputs.end());
+                             return output == Reply::serialised_type(NonEmptyString(element));
+                         }) != inputs.end());
   }
 
   converter converter_;
-  ResponseMapper<std::string, ReturnCode, converter> response_mapper_;
+  ResponseMapper<std::string, Reply, converter> response_mapper_;
   std::mutex mutex_;
   uint16_t exception_count_;
   uint16_t no_exception_count_;
@@ -79,16 +78,16 @@ class ResponseMapperTest : public testing::Test {
 TEST_F(ResponseMapperTest, BEH_push_back) {
   uint16_t num_inputs(1);
   std::vector<std::string> inputs;
-  std::vector<std::promise<ReturnCode>> promise1(num_inputs);
+  std::vector<std::promise<Reply>> promise1(num_inputs);
   std::vector<std::promise<std::string>> promise2(num_inputs);
-  std::vector<std::future<ReturnCode>> future1;
+  std::vector<std::future<Reply>> future1;
   auto promise2_itr = promise2.begin();
   auto promise1_itr = promise1.begin();
   while (!promise1.empty()) {
     inputs.push_back(RandomAlphaNumericString(16));
     future1.emplace_back((*promise1_itr).get_future());
     std::future<std::string> future2 = (*promise2_itr).get_future();
-    std::promise<ReturnCode> promise(std::move(*promise1_itr));
+    std::promise<Reply> promise(std::move(*promise1_itr));
     FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
     response_mapper_.push_back(std::move(pair));
     promise1_itr = promise1.erase(promise1_itr);
@@ -106,13 +105,13 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
       if (IsReady(*future_itr)) {
          //  std::cout<<"\nIn readyChecking future\n";
         try {
-        ReturnCode return_code = (*future_itr).get();
-        ReturnCode::serialised_type serialised_resp = return_code.Serialise();
+        Reply reply = (*future_itr).get();
+        Reply::serialised_type serialised_resp = reply.Serialise();
         EXPECT_TRUE(CheckOutput(inputs, serialised_resp));
         // std::cout<<"\nIn readyChecking futureend\n";
         }
-        catch (...) {
-          std::cout<< "Error Occured..." <<std::endl;
+        catch(...) {
+          std::cout<< "Error Occurred..." <<std::endl;
         }
         future_itr = future1.erase(future_itr);
       } else {
@@ -126,15 +125,15 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
 
 TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
   uint16_t num_inputs(1);
-  std::vector<std::promise<ReturnCode>> promise1(num_inputs);
+  std::vector<std::promise<Reply>> promise1(num_inputs);
   std::vector<std::promise<std::string>> promise2(num_inputs);
-  std::vector<std::future<ReturnCode>> future1;
+  std::vector<std::future<Reply>> future1;
   auto promise2_itr = promise2.begin();
   auto promise1_itr = promise1.begin();
   while (!promise1.empty()) {
     future1.emplace_back((*promise1_itr).get_future());
     std::future<std::string> future2 = (*promise2_itr).get_future();
-    std::promise<ReturnCode> promise(std::move(*promise1_itr));
+    std::promise<Reply> promise(std::move(*promise1_itr));
     FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
     response_mapper_.push_back(std::move(pair));
     promise1_itr = promise1.erase(promise1_itr);
@@ -150,8 +149,8 @@ TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
     while (future_itr != future1.end()) {
       if (IsReady(*future_itr)) {
         try {
-          ReturnCode return_code = (*future_itr).get();
-          ReturnCode::serialised_type serialised_resp = return_code.Serialise();
+          Reply reply = (*future_itr).get();
+          Reply::serialised_type serialised_resp = reply.Serialise();
         }
         catch(const NfsErrors &error) {
           EXPECT_EQ(error, NfsErrors::failed_to_get_data);
@@ -168,9 +167,9 @@ TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
 TEST_F(ResponseMapperTest, BEH_push_back_Random) {
   uint16_t num_inputs(1);
   std::vector<std::string> inputs;
-  std::vector<std::promise<ReturnCode>> promise1(num_inputs);
+  std::vector<std::promise<Reply>> promise1(num_inputs);
   std::vector<std::promise<std::string>> promise2;
-  std::vector<std::future<ReturnCode>> future1;
+  std::vector<std::future<Reply>> future1;
   for (auto& promise : promise1) {
     future1.emplace_back(promise.get_future());
     inputs.push_back(RandomAlphaNumericString(16));
@@ -193,8 +192,8 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
           std::promise<std::string> prom2;
           std::future<std::string> future2 = (prom2).get_future();
           promise2.push_back(std::move(prom2));
-          std::promise<ReturnCode> prom1(std::move(*promise1_itr));
-          std::future<ReturnCode> fut1 = prom1.get_future();
+          std::promise<Reply> prom1(std::move(*promise1_itr));
+          std::future<Reply> fut1 = prom1.get_future();
           future1.push_back(std::move(fut1));
           pair = std::make_pair(std::move(future2), std::move(prom1));
           promise1_itr = promise1.erase(promise1_itr);
@@ -238,8 +237,8 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
     while (future_itr != future1.end()) {
       try {
         if (IsReady(*future_itr)) {
-          ReturnCode return_code = (*future_itr).get();
-          ReturnCode::serialised_type serialised_resp = return_code.Serialise();
+          Reply reply = (*future_itr).get();
+          Reply::serialised_type serialised_resp = reply.Serialise();
           EXPECT_TRUE(CheckOutput(inputs, serialised_resp));
           future_itr = future1.erase(future_itr);
         } else {

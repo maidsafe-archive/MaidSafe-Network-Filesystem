@@ -9,8 +9,8 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_RETURN_CODE_H_
-#define MAIDSAFE_NFS_RETURN_CODE_H_
+#ifndef MAIDSAFE_NFS_REPLY_H_
+#define MAIDSAFE_NFS_REPLY_H_
 
 #include <string>
 #include <system_error>
@@ -27,22 +27,22 @@ namespace maidsafe {
 
 namespace nfs {
 
-class ReturnCode {
+class Reply {
  public:
-  typedef TaggedValue<NonEmptyString, struct SerialisedReturnCodeTag> serialised_type;
+  typedef TaggedValue<NonEmptyString, struct SerialisedReplyTag> serialised_type;
   static const MessageCategory message_type_identifier;
 
   // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
   template<typename ErrorCode>
-  ReturnCode(ErrorCode error_code,
-             const NonEmptyString& data = NonEmptyString(),
-             typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
+  Reply(ErrorCode error_code,
+        const NonEmptyString& data = NonEmptyString(),
+        typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
       : error_(MakeError(error_code)),
         data_(data) {}
   template<typename Error>
-  ReturnCode(Error error,
-             const NonEmptyString& data = NonEmptyString(),
-             typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
+  Reply(Error error,
+        const NonEmptyString& data = NonEmptyString(),
+        typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
       : error_(error),
         data_(data) {
     static_assert(std::is_same<Error, maidsafe_error>::value ||
@@ -50,12 +50,12 @@ class ReturnCode {
                   "Error type must be a MaidSafe-specific type");
   }
 
-  ReturnCode(const ReturnCode& other);
-  ReturnCode& operator=(const ReturnCode& other);
-  ReturnCode(ReturnCode&& other);
-  ReturnCode& operator=(ReturnCode&& other);
+  Reply(const Reply& other);
+  Reply& operator=(const Reply& other);
+  Reply(Reply&& other);
+  Reply& operator=(Reply&& other);
 
-  explicit ReturnCode(const serialised_type& serialised_return_code);
+  explicit Reply(const serialised_type& serialised_reply);
   serialised_type Serialise() const;
 
   maidsafe_error error() const { return error_; }
@@ -71,4 +71,4 @@ class ReturnCode {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_RETURN_CODE_H_
+#endif  // MAIDSAFE_NFS_REPLY_H_

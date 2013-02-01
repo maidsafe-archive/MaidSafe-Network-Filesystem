@@ -31,16 +31,18 @@ namespace maidsafe {
 
 namespace nfs {
 
-typedef std::future<ReturnCode> ReturnCodeFuture;
-typedef std::vector<ReturnCodeFuture> ReturnCodeFutureVector;
-typedef std::promise<ReturnCode> ReturnCodePromise;
-typedef std::vector<ReturnCodePromise> ReturnCodePromiseVector;
+class Reply;
+
+typedef std::future<Reply> ReplyFuture;
+typedef std::vector<ReplyFuture> ReplyFutureVector;
+typedef std::promise<Reply> ReplyPromise;
+typedef std::vector<ReplyPromise> ReplyPromiseVector;
 
 void ProcessReadyFuture(StringFuture& future,
-                        ReturnCodePromiseVector& promises,
+                        ReplyPromiseVector& promises,
                         size_t& index);
 
-void HandlePutFutures(std::shared_ptr<ReturnCodePromiseVector> promises,
+void HandlePutFutures(std::shared_ptr<ReplyPromiseVector> promises,
                       std::shared_ptr<StringFutureVector> routing_futures);
 
 template<typename SigningFob>
@@ -100,7 +102,7 @@ class PutToMaidAccountHolder {
         source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
-  ReturnCodeFutureVector Put(const Data& data) {
+  ReplyFutureVector Put(const Data& data) {
     DataMessage data_message(DataMessage::Action::kPut, Persona::kMaidAccountHolder, source_, data);
     data_message.SignData(signing_fob_.private_key());
     Message message(DataMessage::message_type_identifier, data_message.Serialise());
@@ -109,13 +111,13 @@ class PutToMaidAccountHolder {
                                                 message.Serialise()->string(),
                                                 IsCacheable<Data>())));
 
-    ReturnCodeFutureVector return_codes;
-    auto promises(std::make_shared<ReturnCodePromiseVector>(routing_futures.size()));
+    ReplyFutureVector replies;
+    auto promises(std::make_shared<ReplyPromiseVector>(routing_futures.size()));
     for (auto& promise : *promises)
-      return_codes.push_back(promise.get_future());
+      replies.push_back(promise.get_future());
     HandlePutFutures(promises, routing_futures);
 
-    return std::move(return_codes);
+    return std::move(replies);
   }
 
  protected:

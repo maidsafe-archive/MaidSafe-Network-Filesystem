@@ -29,14 +29,14 @@ MessageId GetNewMessageId(const NodeId& source_node_id) {
                                                          std::to_string(random_element++))));
 }
 
-void GetReturnCode(int& success_count, int& failure_count, std::future<std::string>& future) {
+void GetReply(int& success_count, int& failure_count, std::future<std::string>& future) {
   try {
-    // Need '((' when constructing ReturnCode to avoid most vexing parse.
-    ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(future.get()))));
-    if (return_code.IsSuccess()) {
+    // Need '((' when constructing Reply to avoid most vexing parse.
+    Reply reply((Reply::serialised_type(NonEmptyString(future.get()))));
+    if (reply.IsSuccess()) {
       ++success_count;
     } else {
-      LOG(kWarning) << "Received an error: " << return_code.error().what();
+      LOG(kWarning) << "Received an error: " << reply.error().what();
       ++failure_count;
     }
   }

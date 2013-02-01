@@ -16,13 +16,13 @@ namespace maidsafe {
 namespace nfs {
 
 void ProcessReadyFuture(StringFuture& future,
-                        ReturnCodePromiseVector& promises,
+                        ReplyPromiseVector& promises,
                         size_t& index) {
   try {
     std::string serialised_message(future.get());
-    // Need '((' when constructing ReturnCode to avoid most vexing parse.
-    ReturnCode return_code((ReturnCode::serialised_type(NonEmptyString(serialised_message))));
-    promises.at(index++).set_value(std::move(return_code));
+    // Need '((' when constructing Reply to avoid most vexing parse.
+    Reply reply((Reply::serialised_type(NonEmptyString(serialised_message))));
+    promises.at(index++).set_value(std::move(reply));
   }
   catch(const std::system_error& error) {
     LOG(kWarning) << "Put future problem: " << error.code() << " - " << error.what();
@@ -30,7 +30,7 @@ void ProcessReadyFuture(StringFuture& future,
   }
 }
 
-void HandlePutFutures(std::shared_ptr<ReturnCodePromiseVector> promises,
+void HandlePutFutures(std::shared_ptr<ReplyPromiseVector> promises,
                       std::shared_ptr<StringFutureVector> routing_futures) {
   std::async(
       std::launch::async,
