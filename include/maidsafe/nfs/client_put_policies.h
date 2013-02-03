@@ -24,6 +24,7 @@
 
 #include "maidsafe/routing/routing_api.h"
 
+#include "maidsafe/nfs/response_mapper.h"
 #include "maidsafe/nfs/utils.h"
 
 
@@ -49,8 +50,8 @@ template<typename SigningFob>
 class NoPut {
  public:
   NoPut() {}
-  explicit NoPut(routing::Routing& /*routing*/) {}
-  NoPut(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
+  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}
+  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
 
   template<typename Data>
   void Put(const Data& /*data*/, DataMessage::OnError /*on_error*/) {}
@@ -64,7 +65,9 @@ class NoPut {
 template<typename SigningFob>
 class PutToDataHolder {
  public:
-  PutToDataHolder(routing::Routing& routing, const SigningFob& signing_fob)
+  PutToDataHolder(NfsResponseMapper& /*response_mapper*/,
+                  routing::Routing& routing,
+                  const SigningFob& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
         source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
@@ -96,7 +99,9 @@ class PutToDataHolder {
 
 class PutToMaidAccountHolder {
  public:
-  PutToMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
+  PutToMaidAccountHolder(NfsResponseMapper& /*response_mapper*/,
+                         routing::Routing& routing,
+                         const passport::Maid& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
         source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}

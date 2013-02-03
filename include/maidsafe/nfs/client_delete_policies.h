@@ -22,6 +22,7 @@
 
 #include "maidsafe/routing/routing_api.h"
 
+#include "maidsafe/nfs/response_mapper.h"
 #include "maidsafe/nfs/utils.h"
 
 
@@ -32,7 +33,7 @@ namespace nfs {
 template<typename SigningFob>
 class NoDelete {
  public:
-  NoDelete(routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
+  NoDelete(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
   template<typename Data>
   void Delete(const typename Data::name_type& /*name*/, DataMessage::OnError /*on_error*/) {}
 
@@ -42,7 +43,7 @@ class NoDelete {
 
 class DeleteFromMaidAccountHolder {
  public:
-  DeleteFromMaidAccountHolder(routing::Routing& routing, const passport::Maid& signing_fob)
+  DeleteFromMaidAccountHolder(NfsResponseMapper& /*response_mapper*/, routing::Routing& routing, const passport::Maid& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
         source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}

@@ -68,7 +68,8 @@ template<typename GetPolicy>
 class NetworkFileSystemGetter : public GetPolicy {
  public:
   NetworkFileSystemGetter(nfs::NfsResponseMapper& response_mapper,
-                          routing::Routing& routing) : GetPolicy(response_mapper, routing) {}
+                          routing::Routing& routing)
+      : GetPolicy(response_mapper, routing) {}
 };
 
 typedef NetworkFileSystemGetter<GetFromMetadataManager<Persona::kDataGetter>> KeyGetterNfs;
