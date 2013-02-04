@@ -39,6 +39,12 @@ class ResponseMapperTest : public testing::Test {
       exception_count_(0),
       no_exception_count_(0) {}
 
+  std::string CreateInput() {
+    Reply reply(CommonErrors::success, NonEmptyString(RandomAlphaNumericString(16)));
+    Reply::serialised_type ser_type = reply.Serialise();
+    return (ser_type.data).string();
+  }
+
   void SetPromise(std::vector<std::promise<std::string>> &promise2, std::string input) {
     std::lock_guard<std::mutex> lock(mutex_);
     if (promise2.empty())
@@ -55,8 +61,7 @@ class ResponseMapperTest : public testing::Test {
       return;
     ++exception_count_;
     uint32_t index = (RandomUint32() % promise2.size());
-    promise2.at(index).set_exception(std::make_exception_ptr(
-        MakeError(NfsErrors::failed_to_get_data)));
+    promise2.at(index).set_exception(std::make_exception_ptr(NfsErrors::failed_to_get_data));
     promise2.erase(promise2.begin() + index);
   }
 
@@ -76,107 +81,107 @@ class ResponseMapperTest : public testing::Test {
 };
 
 TEST_F(ResponseMapperTest, BEH_push_back) {
-  uint16_t num_inputs(1);
-  std::vector<std::string> inputs;
-  std::vector<std::promise<Reply>> promise1(num_inputs);
-  std::vector<std::promise<std::string>> promise2(num_inputs);
-  std::vector<std::future<Reply>> future1;
-  auto promise2_itr = promise2.begin();
-  auto promise1_itr = promise1.begin();
-  while (!promise1.empty()) {
-    inputs.push_back(RandomAlphaNumericString(16));
-    future1.emplace_back((*promise1_itr).get_future());
-    std::future<std::string> future2 = (*promise2_itr).get_future();
-    std::promise<Reply> promise(std::move(*promise1_itr));
-    FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
-    response_mapper_.push_back(std::move(pair));
-    promise1_itr = promise1.erase(promise1_itr);
-    ++promise2_itr;
-  }
-  //  Set promises values
-  while (!promise2.empty())
-    SetPromise(promise2, inputs.at(RandomInt32() % inputs.size()));
-//  auto future_itr = future1.begin();
-  bool done(true);
-  while (done) {
-    auto future_itr = future1.begin();
-    while (future_itr != future1.end()) {
-      // std::cout<<"\nChecking future\n";
-      if (IsReady(*future_itr)) {
-         //  std::cout<<"\nIn readyChecking future\n";
-        try {
-        Reply reply = (*future_itr).get();
-        Reply::serialised_type serialised_resp = reply.Serialise();
-        EXPECT_TRUE(CheckOutput(inputs, serialised_resp));
-        // std::cout<<"\nIn readyChecking futureend\n";
-        }
-        catch(...) {
-          std::cout<< "Error Occurred..." <<std::endl;
-        }
-        future_itr = future1.erase(future_itr);
-      } else {
-        ++future_itr;
-      }
+  maidsafe::test::RunInParallel(10, [&] {
+    uint16_t num_inputs(10);
+    std::vector<std::string> inputs;
+    std::vector<std::promise<Reply>> promise1(num_inputs);
+    std::vector<std::promise<std::string>> promise2(num_inputs);
+    std::vector<std::future<Reply>> future1;
+    auto promise2_itr = promise2.begin();
+    auto promise1_itr = promise1.begin();
+    while (!promise1.empty()) {
+      inputs.push_back(CreateInput());
+      future1.emplace_back((*promise1_itr).get_future());
+      std::future<std::string> future2 = (*promise2_itr).get_future();
+      std::promise<Reply> promise(std::move(*promise1_itr));
+      FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
+      response_mapper_.push_back(std::move(pair));
+      promise1_itr = promise1.erase(promise1_itr);
+      ++promise2_itr;
     }
-    if (future1.empty())
-      done = false;
-  }
+    //  Set promises values
+    while (!promise2.empty())
+      SetPromise(promise2, inputs.at(RandomInt32() % inputs.size()));
+
+    bool done(true);
+    while (done) {
+      auto future_itr = future1.begin();
+      while (future_itr != future1.end()) {
+        if (IsReady(*future_itr)) {
+          try {
+            Reply reply = (*future_itr).get();
+            Reply::serialised_type serialised_resp = reply.Serialise();
+            EXPECT_TRUE(CheckOutput(inputs, serialised_resp));
+          }
+          catch(...) {
+            std::cout<< "Error Occurred..." <<std::endl;
+          }
+          future_itr = future1.erase(future_itr);
+        } else {
+          ++future_itr;
+        }
+      }
+      if (future1.empty())
+        done = false;
+    }
+  });
 }
 
-TEST_F(ResponseMapperTest, BEH_push_back_With_Exception) {
-  uint16_t num_inputs(1);
-  std::vector<std::promise<Reply>> promise1(num_inputs);
-  std::vector<std::promise<std::string>> promise2(num_inputs);
-  std::vector<std::future<Reply>> future1;
-  auto promise2_itr = promise2.begin();
-  auto promise1_itr = promise1.begin();
-  while (!promise1.empty()) {
-    future1.emplace_back((*promise1_itr).get_future());
-    std::future<std::string> future2 = (*promise2_itr).get_future();
-    std::promise<Reply> promise(std::move(*promise1_itr));
-    FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
-    response_mapper_.push_back(std::move(pair));
-    promise1_itr = promise1.erase(promise1_itr);
-    ++promise2_itr;
-  }
-  //  Set promises values
-  while (!promise2.empty())
-    SetExceptionPromise(promise2);
-
-  bool done(true);
-  while (done) {
-    auto future_itr = future1.begin();
-    while (future_itr != future1.end()) {
-      if (IsReady(*future_itr)) {
-        try {
-          Reply reply = (*future_itr).get();
-          Reply::serialised_type serialised_resp = reply.Serialise();
-        }
-        catch(const NfsErrors &error) {
-          EXPECT_EQ(error, NfsErrors::failed_to_get_data);
-        }
-      } else {
-        future_itr = future1.erase(future_itr);
-      }
+TEST_F(ResponseMapperTest, BEH_push_back_with_exception) {
+  maidsafe::test::RunInParallel(10, [&] {
+    uint16_t num_inputs(1);
+    std::vector<std::promise<Reply>> promise1(num_inputs);
+    std::vector<std::promise<std::string>> promise2(num_inputs);
+    std::vector<std::future<Reply>> future1;
+    auto promise2_itr = promise2.begin();
+    auto promise1_itr = promise1.begin();
+    while (!promise1.empty()) {
+      future1.emplace_back((*promise1_itr).get_future());
+      std::future<std::string> future2 = (*promise2_itr).get_future();
+      std::promise<Reply> promise(std::move(*promise1_itr));
+      FuturePromisePair pair(std::make_pair(std::move(future2), std::move(promise)));
+      response_mapper_.push_back(std::move(pair));
+      promise1_itr = promise1.erase(promise1_itr);
+      ++promise2_itr;
     }
-    if (future1.empty())
-      done = false;
-  }
+    //  Set promises values
+    while (!promise2.empty())
+      SetExceptionPromise(promise2);
+    bool done(true);
+    while (done) {
+      auto future_itr = future1.begin();
+      while (future_itr != future1.end()) {
+        if (IsReady(*future_itr)) {
+          try {
+            Reply reply = (*future_itr).get();
+            Reply::serialised_type serialised_resp = reply.Serialise();
+          }
+          catch(const NfsErrors &error) {
+            EXPECT_EQ(error, NfsErrors::failed_to_get_data);
+          }
+          future_itr = future1.erase(future_itr);
+        } else {
+          ++future_itr;
+        }
+      }
+      if (future1.empty())
+        done = false;
+    }
+  });
 }
 
 TEST_F(ResponseMapperTest, BEH_push_back_Random) {
-  uint16_t num_inputs(1);
+  uint16_t num_inputs(5);
   std::vector<std::string> inputs;
   std::vector<std::promise<Reply>> promise1(num_inputs);
   std::vector<std::promise<std::string>> promise2;
   std::vector<std::future<Reply>> future1;
   for (auto& promise : promise1) {
     future1.emplace_back(promise.get_future());
-    inputs.push_back(RandomAlphaNumericString(16));
+    inputs.push_back(CreateInput());
   }
 
   auto promise1_itr = promise1.begin();
-//  auto promise2_itr = promise2.begin();
   bool pending(true);
   std::mutex mutex;
   std::vector<std::future<void>> result_futures;
@@ -193,8 +198,6 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
           std::future<std::string> future2 = (prom2).get_future();
           promise2.push_back(std::move(prom2));
           std::promise<Reply> prom1(std::move(*promise1_itr));
-          std::future<Reply> fut1 = prom1.get_future();
-          future1.push_back(std::move(fut1));
           pair = std::make_pair(std::move(future2), std::move(prom1));
           promise1_itr = promise1.erase(promise1_itr);
         }
@@ -217,43 +220,43 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
         break;
       }
       default : {
+        break;
       }
     }
     {
       std::lock_guard<std::mutex> lock(mutex_);
-      if ((no_exception_count_ + exception_count_) == num_inputs)
+      if ((no_exception_count_ + exception_count_) == num_inputs) {
         pending = false;
+      }
     }
   }
   for (auto& result : result_futures)
     result.get();
-
   uint16_t exception_count(0);
   uint16_t no_exception_count(0);
-//  auto future_itr = future1.begin();
   bool done(true);
   while (done) {
     auto future_itr = future1.begin();
     while (future_itr != future1.end()) {
-      try {
-        if (IsReady(*future_itr)) {
-          Reply reply = (*future_itr).get();
-          Reply::serialised_type serialised_resp = reply.Serialise();
+      if (IsReady(*future_itr)) {
+        try {
+          Reply return_code = (*future_itr).get();
+          Reply::serialised_type serialised_resp = return_code.Serialise();
           EXPECT_TRUE(CheckOutput(inputs, serialised_resp));
-          future_itr = future1.erase(future_itr);
-        } else {
-          ++future_itr;
+          ++no_exception_count;
         }
-      }
-      catch(...) {
+        catch(...) {
         ++exception_count;
+        }
+        future_itr = future1.erase(future_itr);
+      } else {
+        ++future_itr;
       }
     }
     if (future1.empty())
       done = false;
   }
-  EXPECT_EQ(exception_count, exception_count_);
-  EXPECT_EQ(no_exception_count, no_exception_count_);
+  EXPECT_EQ((no_exception_count + exception_count), num_inputs);
 }
 
 }  // namespace test
