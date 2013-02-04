@@ -91,7 +91,7 @@ class ResponseMapperTest : public testing::Test {
 
 TEST_F(ResponseMapperTest, BEH_push_back) {
   maidsafe::test::RunInParallel(10, [&] {
-    uint16_t num_inputs(10);
+    uint16_t num_inputs(100);
     std::vector<std::string> inputs;
     std::vector<std::promise<Reply>> promise1(num_inputs);
     std::vector<std::promise<std::string>> promise2(num_inputs);
@@ -138,7 +138,7 @@ TEST_F(ResponseMapperTest, BEH_push_back) {
 
 TEST_F(ResponseMapperTest, BEH_push_back_with_exception) {
   maidsafe::test::RunInParallel(10, [&] {
-    uint16_t num_inputs(1);
+    uint16_t num_inputs(100);
     std::vector<std::promise<Reply>> promise1(num_inputs);
     std::vector<std::promise<std::string>> promise2(num_inputs);
     std::vector<std::future<Reply>> future1;
@@ -157,6 +157,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_with_exception) {
     while (!promise2.empty())
       SetExceptionPromise(promise2);
     bool done(true);
+    uint16_t exception(0);
     while (done) {
       auto future_itr = future1.begin();
       while (future_itr != future1.end()) {
@@ -166,7 +167,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_with_exception) {
             Reply::serialised_type serialised_resp = reply.Serialise();
           }
           catch(const std::exception&) {
-            std::cout<<"\nError Occured\n";
+            ++exception;
           }
           future_itr = future1.erase(future_itr);
         } else {
@@ -176,6 +177,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_with_exception) {
       if (future1.empty())
         done = false;
     }
+    EXPECT_EQ(exception, num_inputs);
   });
 }
 
