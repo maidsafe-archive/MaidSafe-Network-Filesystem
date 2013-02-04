@@ -31,8 +31,13 @@ class ResponseMapperTest : public testing::Test {
   typedef std::function<Reply(std::string&& input)> converter;
   ResponseMapperTest()
     : converter_([](std::string &&input)->Reply {
-                        Reply reply((Reply::serialised_type(NonEmptyString(input))));
-                        return reply;
+                        try {
+                          Reply reply((Reply::serialised_type(NonEmptyString(input))));
+                          return reply;
+                        }
+                        catch(std::error_code& ec) {
+                          throw ec;
+                        }
                     }),
       response_mapper_(converter_),
       mutex_(),
@@ -61,7 +66,11 @@ class ResponseMapperTest : public testing::Test {
       return;
     ++exception_count_;
     uint32_t index = (RandomUint32() % promise2.size());
-    promise2.at(index).set_exception(std::make_exception_ptr(NfsErrors::failed_to_get_data));
+    Reply reply(MakeError(
+        NfsErrors::failed_to_get_data), NonEmptyString());
+    Reply::serialised_type ser_type = reply.Serialise();
+    promise2.at(index).set_exception(std::make_exception_ptr(MakeError(
+        NfsErrors::failed_to_get_data)));
     promise2.erase(promise2.begin() + index);
   }
 
@@ -156,8 +165,8 @@ TEST_F(ResponseMapperTest, BEH_push_back_with_exception) {
             Reply reply = (*future_itr).get();
             Reply::serialised_type serialised_resp = reply.Serialise();
           }
-          catch(const NfsErrors &error) {
-            EXPECT_EQ(error, NfsErrors::failed_to_get_data);
+          catch(const std::exception&) {
+            std::cout<<"\nError Occured\n";
           }
           future_itr = future1.erase(future_itr);
         } else {
@@ -246,7 +255,7 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
           ++no_exception_count;
         }
         catch(...) {
-        ++exception_count;
+          ++exception_count;
         }
         future_itr = future1.erase(future_itr);
       } else {
