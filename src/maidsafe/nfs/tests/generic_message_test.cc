@@ -169,8 +169,8 @@ TEST_F(GenericMessageTest, BEH_DefaultValue) {
   EXPECT_EQ(content_, generic_message.content());
   EXPECT_NE(batch_.index, generic_message.batch().index);
   EXPECT_NE(batch_.size, generic_message.batch().size);
-  EXPECT_NE(int32_t(0), generic_message.batch().index);
-  EXPECT_NE(int32_t(0), generic_message.batch().size);
+  EXPECT_EQ(int32_t(-1), generic_message.batch().index);
+  EXPECT_EQ(int32_t(-1), generic_message.batch().size);
 }
 
 TEST_F(GenericMessageTest, BEH_InvalidSource) {
