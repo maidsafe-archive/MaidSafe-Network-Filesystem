@@ -50,8 +50,10 @@ template<typename SigningFob>
 class NoPut {
  public:
   NoPut() {}
-  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}
-  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
+  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}  // NOLINT (Fraser)
+  NoPut(NfsResponseMapper& /*response_mapper*/,
+        routing::Routing& /*routing*/,
+        const SigningFob& /*signing_fob*/) {}
 
   template<typename Data>
   void Put(const Data& /*data*/, DataMessage::OnError /*on_error*/) {}
@@ -73,13 +75,13 @@ class PutToDataHolder {
         source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
-  void Put(const Data& data) {
-    DataMessage::Data message_data(Data::name_type::tag_type::kEnumValue, data.name(),
+  void Put(const Data& /*data*/) {
+    /*DataMessage::Data message_data(Data::name_type::tag_type::kEnumValue, data.name(),
                                    data.Serialise());
     DataMessage data_message(DataMessage::Action::kPut, Persona::kDataHolder, source_,
                              message_data);
     data_message.SignData(signing_fob_.private_key());
-    Message message(DataMessage::message_type_identifier, data_message.Serialise());
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());*/
 //    routing::ResponseFunctor callback =
 //        [on_error, data_message](const std::vector<std::string>& serialised_messages) {
 //          HandlePutResponse<Data>(on_error, data_message, serialised_messages);
@@ -134,7 +136,44 @@ class PutToMaidAccountHolder {
   PersonaId source_;
 };
 
+class PutToDirectoryManager {
+ public:
+  PutToDirectoryManager(routing::Routing& routing, const passport::Maid& signing_fob)
+      : routing_(routing),
+        signing_fob_(signing_fob),
+        source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
 
+  template<typename Data>
+  ReplyFutureVector Put(const Data& data) {
+    DataMessage::Data message_data(data.type_enum_value(),
+                                   data.name().data,
+                                   data.data(),
+                                   DataMessage::Action::kPut);
+    DataMessage data_message(detail::GetPersona<Data>::persona, source_, message_data);
+    data_message.SignData(signing_fob_.private_key());
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());
+    auto routing_futures(std::make_shared<StringFutureVector>(
+                             routing_.SendGroup(routing_.kNodeId(),
+                                                message.Serialise()->string(),
+                                                IsCacheable<Data>())));
+
+    ReplyFutureVector replies;
+    auto promises(std::make_shared<ReplyPromiseVector>(routing_futures.size()));
+    for (auto& promise : *promises)
+      replies.push_back(promise.get_future());
+    HandlePutFutures(promises, routing_futures);
+
+    return std::move(replies);
+  }
+
+ protected:
+  ~PutToDirectoryManager() {}
+
+ private:
+  routing::Routing& routing_;
+  passport::Maid signing_fob_;
+  PersonaId source_;
+};
 
 }  // namespace nfs
 

@@ -37,6 +37,7 @@ class GenericMessage {
     kGetPmidSize,
     kNodeDown,
     kNodeUp,
+    kGetElementList,
     kSynchronise
   };
   struct Batch {
