@@ -66,9 +66,6 @@ class ResponseMapperTest : public testing::Test {
       return;
     ++exception_count_;
     uint32_t index = (RandomUint32() % promise2.size());
-    Reply reply(MakeError(
-        NfsErrors::failed_to_get_data), NonEmptyString());
-    Reply::serialised_type ser_type = reply.Serialise();
     promise2.at(index).set_exception(std::make_exception_ptr(MakeError(
         NfsErrors::failed_to_get_data)));
     promise2.erase(promise2.begin() + index);
@@ -181,50 +178,37 @@ TEST_F(ResponseMapperTest, BEH_push_back_with_exception) {
   });
 }
 
-TEST_F(ResponseMapperTest, BEH_push_back_Random) {
-  uint16_t num_inputs(5);
+TEST_F(ResponseMapperTest, BEH_push_back_random) {
+  uint16_t num_inputs(500);
   std::vector<std::string> inputs;
   std::vector<std::promise<Reply>> promise1(num_inputs);
   std::vector<std::promise<std::string>> promise2;
   std::vector<std::future<Reply>> future1;
-  for (auto& promise : promise1) {
-    future1.emplace_back(promise.get_future());
-    inputs.push_back(CreateInput());
-  }
-
   auto promise1_itr = promise1.begin();
+  while (!promise1.empty()) {
+    future1.emplace_back((*promise1_itr).get_future());
+    inputs.push_back(CreateInput());
+    std::promise<std::string> prom2;
+    std::future<std::string> future2 = (prom2).get_future();
+    promise2.push_back(std::move(prom2));
+    std::promise<Reply> prom1(std::move(*promise1_itr));
+    FuturePromisePair pair = std::make_pair(std::move(future2), std::move(prom1));
+    promise1_itr = promise1.erase(promise1_itr);
+    response_mapper_.push_back(std::move(pair));
+  }
   bool pending(true);
-  std::mutex mutex;
   std::vector<std::future<void>> result_futures;
   while (pending) {
-    uint16_t operation = (RandomInt32() % 3);
+    uint16_t operation = (RandomInt32() % 2);
     switch (operation) {
       case(0) : {
-        if (promise1.empty())
-          break;
-        FuturePromisePair pair;
-        {
-          std::lock_guard<std::mutex> lock(mutex_);
-          std::promise<std::string> prom2;
-          std::future<std::string> future2 = (prom2).get_future();
-          promise2.push_back(std::move(prom2));
-          std::promise<Reply> prom1(std::move(*promise1_itr));
-          pair = std::make_pair(std::move(future2), std::move(prom1));
-          promise1_itr = promise1.erase(promise1_itr);
-        }
-        result_futures.push_back(std::async([this, &pair] {
-                                            this->response_mapper_.push_back(std::move(pair));
-                                           }));
-        break;
-      }
-      case(1) : {
         std::string value = inputs.at(RandomInt32() % inputs.size());
         result_futures.push_back(std::async([this, &promise2, value] {
                                            this->SetPromise(promise2, value);
                                            }));
         break;
       }
-      case(2) : {
+      case(1) : {
         result_futures.push_back(std::async([this, &promise2] {
                                             this->SetExceptionPromise(promise2);
                                            }));
@@ -241,10 +225,12 @@ TEST_F(ResponseMapperTest, BEH_push_back_Random) {
       }
     }
   }
-  for (auto& result : result_futures)
+  for (auto& result : result_futures) {
     result.get();
+  }
   uint16_t exception_count(0);
   uint16_t no_exception_count(0);
+
   bool done(true);
   while (done) {
     auto future_itr = future1.begin();
