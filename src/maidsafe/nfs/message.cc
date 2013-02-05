@@ -20,7 +20,7 @@ namespace maidsafe {
 
 namespace nfs {
 
-Message::Message(int32_t inner_message_type,
+Message::Message(MessageCategory inner_message_type,
                  const NonEmptyString& serialised_inner_message,
                  const asymm::Signature& signature)
     : inner_message_type_(inner_message_type),
@@ -52,13 +52,13 @@ Message& Message::operator=(Message&& other) {
 }
 
 Message::Message(const serialised_type& serialised_message)
-    : inner_message_type_(-1),
+    : inner_message_type_(static_cast<MessageCategory>(-1)),
       serialised_inner_message_(),
       signature_() {
   protobuf::Message proto_message;
   if (!proto_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
-  inner_message_type_ = proto_message.message_type();
+  inner_message_type_ = static_cast<MessageCategory>(proto_message.message_type());
   serialised_inner_message_ = NonEmptyString(proto_message.serialised_message());
   if (proto_message.has_signature())
     signature_ = asymm::Signature(proto_message.signature());
@@ -68,13 +68,13 @@ Message::serialised_type Message::Serialise() const {
   serialised_type serialised_message;
   try {
     protobuf::Message proto_message;
-    proto_message.set_message_type(inner_message_type_);
+    proto_message.set_message_type(static_cast<int32_t>(inner_message_type_));
     proto_message.set_serialised_message(serialised_inner_message_.string());
     serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
     if (signature_.IsInitialised())
       proto_message.set_signature(signature_.string());
   }
-  catch(const std::system_error&) {
+  catch(const std::exception&) {
     ThrowError(NfsErrors::invalid_parameter);
   }
   return serialised_message;

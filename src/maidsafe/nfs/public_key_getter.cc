@@ -19,9 +19,12 @@ namespace maidsafe {
 
 namespace nfs {
 
-PublicKeyGetter::PublicKeyGetter(routing::Routing& routing,
+PublicKeyGetter::PublicKeyGetter(nfs::NfsResponseMapper& response_mapper,
+                                 routing::Routing& routing,
                                  const std::vector<passport::PublicPmid>& public_pmids_from_file)
-    : key_getter_nfs_(public_pmids_from_file.empty() ? new KeyGetterNfs(routing) : nullptr),
+    : key_getter_nfs_(public_pmids_from_file.empty() ?
+                          new KeyGetterNfs(response_mapper, routing) :
+                          nullptr),
       fake_key_getter_nfs_(public_pmids_from_file.empty() ?
                            nullptr : new FakeKeyGetterNfs(public_pmids_from_file)),
       running_(true),

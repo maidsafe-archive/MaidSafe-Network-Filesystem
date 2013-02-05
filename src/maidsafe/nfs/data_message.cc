@@ -23,7 +23,7 @@ namespace maidsafe {
 
 namespace nfs {
 
-const int32_t DataMessage::message_type_identifier = 0;
+const MessageCategory DataMessage::message_type_identifier = MessageCategory::kData;
 
 
 DataMessage::Data::Data()
@@ -71,28 +71,29 @@ DataMessage::Data& DataMessage::Data::operator=(Data&& other) {
 
 
 
-DataMessage::Originator::Originator() : name(), data_signature() {}
+DataMessage::ClientValidation::ClientValidation() : name(), data_signature() {}
 
-DataMessage::Originator::Originator(const passport::PublicMaid::name_type& name_in,
-                                    const asymm::Signature& data_signature_in)
+DataMessage::ClientValidation::ClientValidation(const passport::PublicMaid::name_type& name_in,
+                                                const asymm::Signature& data_signature_in)
     : name(name_in),
       data_signature(data_signature_in) {}
 
-DataMessage::Originator::Originator(const Originator& other)
+DataMessage::ClientValidation::ClientValidation(const ClientValidation& other)
     : name(other.name),
       data_signature(other.data_signature) {}
 
-DataMessage::Originator& DataMessage::Originator::operator=(const Originator& other) {
+DataMessage::ClientValidation& DataMessage::ClientValidation::operator=(
+    const ClientValidation& other) {
   name = other.name;
   data_signature = other.data_signature;
   return *this;
 }
 
-DataMessage::Originator::Originator(Originator&& other)
+DataMessage::ClientValidation::ClientValidation(ClientValidation&& other)
     : name(std::move(other.name)),
       data_signature(std::move(other.data_signature)) {}
 
-DataMessage::Originator& DataMessage::Originator::operator=(Originator&& other) {
+DataMessage::ClientValidation& DataMessage::ClientValidation::operator=(ClientValidation&& other) {
   name = std::move(other.name);
   data_signature = std::move(other.data_signature);
   return *this;
@@ -100,59 +101,59 @@ DataMessage::Originator& DataMessage::Originator::operator=(Originator&& other) 
 
 
 
-DataMessage::DataMessage(Persona next_persona,
-                         const PersonaId& this_persona,
+DataMessage::DataMessage(Persona destination_persona,
+                         const PersonaId& source,
                          const Data& data,
                          const passport::PublicPmid::name_type& data_holder_hint,
-                         const Identity& target_id)
-    : message_id_(detail::GetNewMessageId(this_persona.node_id)),
-      next_persona_(next_persona),
-      this_persona_(this_persona),
+                         const Identity& final_target_id)
+    : message_id_(detail::GetNewMessageId(source.node_id)),
+      destination_persona_(destination_persona),
+      source_(source),
       data_(data),
-      originator_(),
+      client_validation_(),
       data_holder_hint_(data_holder_hint),
-      target_id_(target_id) {
+      final_target_id_(final_target_id) {
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
 
 DataMessage::DataMessage(const DataMessage& other)
     : message_id_(other.message_id_),
-      next_persona_(other.next_persona_),
-      this_persona_(other.this_persona_),
+      destination_persona_(other.destination_persona_),
+      source_(other.source_),
       data_(other.data_),
-      originator_(other.originator_),
+      client_validation_(other.client_validation_),
       data_holder_hint_(other.data_holder_hint_),
-      target_id_(other.target_id_) {}
+      final_target_id_(other.final_target_id_) {}
 
 DataMessage& DataMessage::operator=(const DataMessage& other) {
   message_id_ = other.message_id_;
-  next_persona_ = other.next_persona_;
-  this_persona_ = other.this_persona_;
+  destination_persona_ = other.destination_persona_;
+  source_ = other.source_;
   data_ = other.data_;
-  originator_ = other.originator_;
+  client_validation_ = other.client_validation_;
   data_holder_hint_ = other.data_holder_hint_;
-  target_id_ = other.target_id_;
+  final_target_id_ = other.final_target_id_;
   return *this;
 }
 
 DataMessage::DataMessage(DataMessage&& other)
     : message_id_(std::move(other.message_id_)),
-      next_persona_(std::move(other.next_persona_)),
-      this_persona_(std::move(other.this_persona_)),
+      destination_persona_(std::move(other.destination_persona_)),
+      source_(std::move(other.source_)),
       data_(std::move(other.data_)),
-      originator_(std::move(other.originator_)),
+      client_validation_(std::move(other.client_validation_)),
       data_holder_hint_(std::move(other.data_holder_hint_)),
-      target_id_(std::move(other.target_id_)) {}
+      final_target_id_(std::move(other.final_target_id_)) {}
 
 DataMessage& DataMessage::operator=(DataMessage&& other) {
   message_id_ = std::move(other.message_id_);
-  next_persona_ = std::move(other.next_persona_);
-  this_persona_ = std::move(other.this_persona_);
+  destination_persona_ = std::move(other.destination_persona_);
+  source_ = std::move(other.source_);
   data_ = std::move(other.data_);
-  originator_ = std::move(other.originator_);
+  client_validation_ = std::move(other.client_validation_);
   data_holder_hint_ = std::move(other.data_holder_hint_);
-  target_id_ = std::move(other.target_id_);
+  final_target_id_ = std::move(other.final_target_id_);
   return *this;
 }
 
@@ -161,20 +162,20 @@ DataMessage& DataMessage::operator=(DataMessage&& other) {
 //                  inside a private constructor taking a single arg of type protobuf.
 DataMessage::DataMessage(const serialised_type& serialised_message)
     : message_id_(),
-      next_persona_(),
-      this_persona_(),
+      destination_persona_(),
+      source_(),
       data_(),
-      originator_(),
+      client_validation_(),
       data_holder_hint_(),
-      target_id_() {
+      final_target_id_() {
   protobuf::DataMessage proto_data_message;
   if (!proto_data_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
 
   message_id_ = MessageId(Identity(proto_data_message.message_id()));
-  next_persona_ = static_cast<Persona>(proto_data_message.next_persona());
-  this_persona_.persona = static_cast<Persona>(proto_data_message.this_persona().persona());
-  this_persona_.node_id = NodeId(proto_data_message.this_persona().node_id());
+  destination_persona_ = static_cast<Persona>(proto_data_message.destination_persona());
+  source_.persona = static_cast<Persona>(proto_data_message.source().persona());
+  source_.node_id = NodeId(proto_data_message.source().node_id());
 
   auto& proto_data(proto_data_message.data());
   data_.type = static_cast<DataTagValue>(proto_data.type());
@@ -183,10 +184,10 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
     data_.content = NonEmptyString(proto_data.content());
   data_.action = static_cast<Action>(proto_data.action());
 
-  if (proto_data_message.has_originator()) {
-    auto& proto_originator(proto_data_message.originator());
-    originator_.name = Identity(proto_originator.name());
-    originator_.data_signature = asymm::Signature(proto_originator.data_signature());
+  if (proto_data_message.has_client_validation()) {
+    auto& proto_client_validation(proto_data_message.client_validation());
+    client_validation_.name = Identity(proto_client_validation.name());
+    client_validation_.data_signature = asymm::Signature(proto_client_validation.data_signature());
   }
 
   if (proto_data_message.has_data_holder_hint()) {
@@ -194,8 +195,8 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
         passport::PublicPmid::name_type((Identity(proto_data_message.data_holder_hint())));
   }
 
-  if (proto_data_message.has_target_id()) {
-    target_id_ = Identity(proto_data_message.target_id());
+  if (proto_data_message.has_final_target_id()) {
+    final_target_id_ = Identity(proto_data_message.final_target_id());
   }
 
   if (!ValidateInputs())
@@ -205,7 +206,7 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
 bool DataMessage::ValidateInputs() const {
   return (static_cast<int32_t>(data_.type) >= 0) &&
          data_.name.IsInitialised() &&
-         !this_persona_.node_id.IsZero();
+         !source_.node_id.IsZero();
 }
 
 void DataMessage::SignData(const asymm::PrivateKey& signer_private_key) {
@@ -216,8 +217,8 @@ void DataMessage::SignData(const asymm::PrivateKey& signer_private_key) {
     data.set_content(data_.content.string());
   data.set_action(static_cast<int32_t>(data_.action));
   asymm::PlainText serialised_data(data.SerializeAsString());
-  originator_.name = Identity(this_persona_.node_id.string());
-  originator_.data_signature = asymm::Sign(serialised_data, signer_private_key);
+  client_validation_.name = Identity(source_.node_id.string());
+  client_validation_.data_signature = asymm::Sign(serialised_data, signer_private_key);
 }
 
 DataMessage::serialised_type DataMessage::Serialise() const {
@@ -225,27 +226,27 @@ DataMessage::serialised_type DataMessage::Serialise() const {
   try {
     protobuf::DataMessage proto_data_message;
     proto_data_message.set_message_id(message_id_->string());
-    proto_data_message.set_next_persona(static_cast<int32_t>(next_persona_));
-    proto_data_message.mutable_this_persona()->set_persona(
-        static_cast<int32_t>(this_persona_.persona));
-    proto_data_message.mutable_this_persona()->set_node_id(this_persona_.node_id.string());
+    proto_data_message.set_destination_persona(static_cast<int32_t>(destination_persona_));
+    proto_data_message.mutable_source()->set_persona(
+        static_cast<int32_t>(source_.persona));
+    proto_data_message.mutable_source()->set_node_id(source_.node_id.string());
     proto_data_message.mutable_data()->set_type(static_cast<int32_t>(data_.type));
     proto_data_message.mutable_data()->set_name(data_.name.string());
     if (data_.content.IsInitialised())
       proto_data_message.mutable_data()->set_content(data_.content.string());
     proto_data_message.mutable_data()->set_action(static_cast<int32_t>(data_.action));
-    if (HasOriginator()) {
-      proto_data_message.mutable_originator()->set_name(originator_.name.string());
-      proto_data_message.mutable_originator()->set_data_signature(
-          originator_.data_signature.string());
+    if (HasClientValidation()) {
+      proto_data_message.mutable_client_validation()->set_name(client_validation_.name.string());
+      proto_data_message.mutable_client_validation()->set_data_signature(
+          client_validation_.data_signature.string());
     }
     if (HasDataHolderHint())
       proto_data_message.set_data_holder_hint(data_holder_hint_->string());
     if (HasTargetId())
-      proto_data_message.set_target_id(target_id_.string());
+      proto_data_message.set_final_target_id(final_target_id_.string());
     serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
   }
-  catch(const std::system_error&) {
+  catch(const std::exception&) {
     ThrowError(NfsErrors::invalid_parameter);
   }
   return serialised_message;

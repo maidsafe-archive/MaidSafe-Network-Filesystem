@@ -16,6 +16,7 @@
 
 #include "maidsafe/passport/types.h"
 
+#include "maidsafe/nfs/response_mapper.h"
 #include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/client_get_policies.h"
 #include "maidsafe/nfs/client_put_policies.h"
@@ -26,6 +27,33 @@
 namespace maidsafe {
 
 namespace nfs {
+
+namespace detail {
+
+  template <typename Data>
+  struct GetPersona {};
+
+  template <>
+  struct GetPersona<OwnerDirectory> {
+    static const Persona persona = Persona::kOwnerDirectoryManager;
+  };
+
+  template <>
+  struct GetPersona<GroupDirectory> {
+    static const Persona persona = Persona::kGroupDirectoryManager;
+  };
+
+  template <>
+  struct GetPersona<WorldDirectory> {
+    static const Persona persona = Persona::kWorldDirectoryManager;
+  };
+
+  template <>
+  struct GetPersona<ImmutableData> {
+    static const Persona persona = Persona::kMaidAccountHolder;
+  };
+
+}  // namespace detail
 
 template<typename GetPolicy,
          typename PutPolicy,
@@ -38,18 +66,19 @@ class NetworkFileSystem : public GetPolicy,
  public:
   NetworkFileSystem() : GetPolicy(), PutPolicy(), PostPolicy(), DeletePolicy() {}
 
-  explicit NetworkFileSystem(routing::Routing& routing)
-      : GetPolicy(routing),
-        PutPolicy(routing),
-        PostPolicy(routing),
-        DeletePolicy(routing) {}
+  NetworkFileSystem(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing)
+      : GetPolicy(response_mapper, routing),
+        PutPolicy(response_mapper, routing),
+        PostPolicy(response_mapper, routing),
+        DeletePolicy(response_mapper, routing) {}
 
   template<typename SigningFob>
-  NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
-      : GetPolicy(routing),
-        PutPolicy(routing, signing_fob),
-        PostPolicy(routing, signing_fob),
-        DeletePolicy(routing, signing_fob) {}
+  NetworkFileSystem(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing,
+                    const SigningFob& signing_fob)
+      : GetPolicy(response_mapper, routing),
+        PutPolicy(response_mapper, routing, signing_fob),
+        PostPolicy(response_mapper, routing, signing_fob),
+        DeletePolicy(response_mapper, routing, signing_fob) {}
 };
 
 typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
@@ -57,15 +86,22 @@ typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
                           NoPost<passport::Maid>,
                           NoDelete<passport::Maid>> TemporaryClientMaidNfs;
 
-typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
-                          PutToMaidAccountHolder,
+typedef NetworkFileSystem<GetFromDirectoryManager,
+                          PutToDirectoryManager,
                           NoPost<passport::Maid>,
-                          DeleteFromMaidAccountHolder> ClientMaidNfs;
+                          DeleteFromDirectoryManager> ClientMaidNfs;
+
+// typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
+//                          PutToMaidAccountHolder,
+//                          NoPost<passport::Maid>,
+//                          DeleteFromMaidAccountHolder> ClientMaidNfs;
 
 template<typename GetPolicy>
 class NetworkFileSystemGetter : public GetPolicy {
  public:
-  explicit NetworkFileSystemGetter(routing::Routing& routing) : GetPolicy(routing) {}
+  NetworkFileSystemGetter(nfs::NfsResponseMapper& response_mapper,
+                          routing::Routing& routing)
+      : GetPolicy(response_mapper, routing) {}
 };
 
 typedef NetworkFileSystemGetter<GetFromMetadataManager<Persona::kDataGetter>> KeyGetterNfs;

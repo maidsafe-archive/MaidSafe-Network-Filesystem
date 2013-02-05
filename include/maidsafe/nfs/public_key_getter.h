@@ -39,7 +39,7 @@ namespace nfs {
 class PublicKeyGetter {
  public:
   // all_pmids_from_file should only be non-empty if TESTING is defined
-  PublicKeyGetter(routing::Routing& routing,
+  PublicKeyGetter(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing,
                   const std::vector<passport::PublicPmid>& public_pmids_from_file =
                       std::vector<passport::PublicPmid>());
   ~PublicKeyGetter();

@@ -1,0 +1,8 @@
+package maidsafe.nfs.protobuf;
+option optimize_for = LITE_RUNTIME;
+
+message Reply {
+  required int32 error_value = 1;
+  required bytes error_category_name = 2;
+  optional bytes data = 3;
+}

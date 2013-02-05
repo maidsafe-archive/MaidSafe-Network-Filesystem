@@ -1,6 +1,20 @@
 package maidsafe.nfs.protobuf;
-import "maidsafe/nfs/data_message.proto";
+import "maidsafe/nfs/persona_id.proto";
 option optimize_for = LITE_RUNTIME;
+
+message GenericMessage {
+  message Batch {
+    required int32 size = 1;
+    required int32 index = 2;
+  }
+  required bytes message_id = 1;
+  optional Batch batch = 2;
+  required int32 action = 3;
+  required int32 destination_persona = 4;
+  required PersonaId source = 5;
+  required bytes name = 6;
+  optional bytes content = 7;
+}
 
 // MAID Client send to MAID Account Holder
 message PmidRegistration {
@@ -21,13 +35,4 @@ message PmidRegistration {
 message ConnectMessage {
   required int32 message_id = 1; // random int32
   optional int32 parent_id = 2;
-}
-
-message GenericMessage {
-  required bytes message_id = 1;
-  required int32 action = 2;
-  required int32 next_persona = 3;
-  required DataMessage.PersonaId this_persona = 4;
-  required bytes name = 5;
-  optional bytes content = 6;
 }

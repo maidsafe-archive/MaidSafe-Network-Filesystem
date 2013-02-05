@@ -12,6 +12,7 @@
 #ifndef MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 #define MAIDSAFE_NFS_GENERIC_MESSAGE_H_
 
+#include <cstdint>
 #include <ostream>
 #include <string>
 
@@ -20,7 +21,7 @@
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
 
-#include "maidsafe/nfs/data_message.h"
+#include "maidsafe/nfs/persona_id.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -28,27 +29,37 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace protobuf { class GenericMessage; }
-
 class GenericMessage {
  public:
-  enum class Action : int {
+  enum class Action : int32_t {
     kRegisterPmid,
     kConnect,
     kGetPmidSize,
     kNodeDown,
     kNodeUp,
+    kGetElementList,
     kSynchronise
+  };
+  struct Batch {
+    Batch();
+    Batch(int32_t size_in, int32_t index_in);
+    Batch(const Batch& other);
+    Batch& operator=(const Batch& other);
+    Batch(Batch&& other);
+    Batch& operator=(Batch&& other);
+
+    int32_t size, index;
   };
   typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
   typedef std::function<void(GenericMessage message)> OnError;
-  static const int32_t message_type_identifier;
+  static const MessageCategory message_type_identifier;
 
   GenericMessage(Action action,
                  Persona destination_persona,
                  const PersonaId& source,
                  const Identity& name,
-                 const NonEmptyString& content);
+                 const NonEmptyString& content,
+                 Batch batch = Batch());
   GenericMessage(const GenericMessage& other);
   GenericMessage& operator=(const GenericMessage& other);
   GenericMessage(GenericMessage&& other);
@@ -58,6 +69,7 @@ class GenericMessage {
   serialised_type Serialise() const;
 
   MessageId message_id() const { return message_id_; }
+  Batch batch() const { return batch_; }
   Action action() const { return action_; }
   Persona destination_persona() const { return destination_persona_; }
   PersonaId source() const { return source_; }
@@ -68,6 +80,7 @@ class GenericMessage {
   bool ValidateInputs() const;
 
   MessageId message_id_;
+  Batch batch_;
   Action action_;
   Persona destination_persona_;
   PersonaId source_;

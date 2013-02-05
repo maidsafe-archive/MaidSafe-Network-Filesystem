@@ -9,35 +9,16 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_
-#define MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_
+#ifndef MAIDSAFE_NFS_PERSONA_ID_PB_H_
+#define MAIDSAFE_NFS_PERSONA_ID_PB_H_
 
-#include "maidsafe/routing/routing_api.h"
+#ifdef __MSVC__
+#  pragma warning(push)
+#  pragma warning(disable: 4127 4244 4267)
+#endif
+#include "maidsafe/nfs/persona_id.pb.h"
+#ifdef __MSVC__
+#  pragma warning(pop)
+#endif
 
-#include "maidsafe/nfs/response_mapper.h"
-
-namespace maidsafe {
-
-namespace nfs {
-
-template<typename SigningFob>
-class NoPost {
- public:
-  NoPost() {}
-  NoPost(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}  // NOLINT (Fraser)
-  NoPost(NfsResponseMapper& /*response_mapper*/,
-         routing::Routing& /*routing*/,
-         const SigningFob& /*signing_fob*/) {}
-
-  template<typename Data>
-  void Post(const typename Data::name_type& /*name*/) {}
-
- protected:
-  ~NoPost() {}
-};
-
-}  // namespace nfs
-
-}  // namespace maidsafe
-
-#endif  // MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_
+#endif  // MAIDSAFE_NFS_PERSONA_ID_PB_H_

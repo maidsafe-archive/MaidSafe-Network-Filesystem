@@ -9,44 +9,32 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_RETURN_CODE_H_
-#define MAIDSAFE_NFS_RETURN_CODE_H_
+#ifndef MAIDSAFE_NFS_PERSONA_ID_H_
+#define MAIDSAFE_NFS_PERSONA_ID_H_
 
-#include <string>
-#include <system_error>
+#include "maidsafe/common/node_id.h"
 
-#include "maidsafe/common/bounded_string.h"
-#include "maidsafe/common/types.h"
+#include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
 
-class ReturnCode {
- public:
-  typedef maidsafe::detail::BoundedString<1, 4096> Info;
-  typedef TaggedValue<NonEmptyString, struct SerialisedReturnCodeTag> serialised_type;
-  ReturnCode(int value, const Info& info = Info());
-  explicit ReturnCode(const std::system_error& error);
-  ReturnCode(const ReturnCode& other);
-  ReturnCode& operator=(const ReturnCode& other);
-  ReturnCode(ReturnCode&& other);
-  ReturnCode& operator=(ReturnCode&& other);
+struct PersonaId {
+  PersonaId();
+  PersonaId(Persona persona_in, const NodeId& node_id_in);
+  PersonaId(const PersonaId& other);
+  PersonaId& operator=(const PersonaId& other);
+  PersonaId(PersonaId&& other);
+  PersonaId& operator=(PersonaId&& other);
 
-  explicit ReturnCode(const serialised_type& serialised_return_code);
-  serialised_type Serialise() const;
-
-  int value() const { return value_; }
-  Info info() const { return info_; }
-
- private:
-  int value_;
-  Info info_;
+  Persona persona;
+  NodeId node_id;
 };
 
 }  // namespace nfs
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_RETURN_CODE_H_
+#endif  // MAIDSAFE_NFS_PERSONA_ID_H_

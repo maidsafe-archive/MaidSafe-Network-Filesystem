@@ -1,7 +1,0 @@
-package maidsafe.nfs.protobuf;
-option optimize_for = LITE_RUNTIME;
-
-message ReturnCode {
-  required int32 value = 1;
-  optional bytes info = 2;
-}
