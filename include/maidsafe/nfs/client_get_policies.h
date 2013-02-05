@@ -75,7 +75,7 @@ void HandleGetFutures(std::shared_ptr<std::promise<Data> > promise,
 class NoGet {
  public:
   NoGet() {}
-  NoGet(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}
+  NoGet(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}  // NOLINT (Fraser)
 
   template<typename Data>
   std::future<Data> Get(const typename Data::name_type& /*name*/) {}

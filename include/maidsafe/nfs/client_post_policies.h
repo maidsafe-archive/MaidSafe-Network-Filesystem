@@ -24,8 +24,10 @@ template<typename SigningFob>
 class NoPost {
  public:
   NoPost() {}
-  NoPost(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}
-  NoPost(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
+  NoPost(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}  // NOLINT (Fraser)
+  NoPost(NfsResponseMapper& /*response_mapper*/,
+         routing::Routing& /*routing*/,
+         const SigningFob& /*signing_fob*/) {}
 
   template<typename Data>
   void Post(const typename Data::name_type& /*name*/) {}

@@ -70,7 +70,7 @@ class NetworkFileSystem : public GetPolicy,
       : GetPolicy(response_mapper, routing),
         PutPolicy(response_mapper, routing),
         PostPolicy(response_mapper, routing),
-        DeletePolicy(response_mapper,routing) {}
+        DeletePolicy(response_mapper, routing) {}
 
   template<typename SigningFob>
   NetworkFileSystem(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing,

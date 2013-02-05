@@ -50,8 +50,10 @@ template<typename SigningFob>
 class NoPut {
  public:
   NoPut() {}
-  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}
-  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/, const SigningFob& /*signing_fob*/) {}  // NOLINT (Fraser)
+  NoPut(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}  // NOLINT (Fraser)
+  NoPut(NfsResponseMapper& /*response_mapper*/,
+        routing::Routing& /*routing*/,
+        const SigningFob& /*signing_fob*/) {}
 
   template<typename Data>
   void Put(const Data& /*data*/, DataMessage::OnError /*on_error*/) {}
@@ -142,7 +144,7 @@ class PutToDirectoryManager {
         source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
 
   template<typename Data>
-  ReturnCodeFutureVector Put(const Data& data) {
+  ReplyFutureVector Put(const Data& data) {
     DataMessage::Data message_data(data.type_enum_value(),
                                    data.name().data,
                                    data.data(),
@@ -155,13 +157,13 @@ class PutToDirectoryManager {
                                                 message.Serialise()->string(),
                                                 IsCacheable<Data>())));
 
-    ReturnCodeFutureVector return_codes;
-    auto promises(std::make_shared<ReturnCodePromiseVector>(routing_futures->size()));
+    ReplyFutureVector replies;
+    auto promises(std::make_shared<ReplyPromiseVector>(routing_futures.size()));
     for (auto& promise : *promises)
-      return_codes.push_back(promise.get_future());
+      replies.push_back(promise.get_future());
     HandlePutFutures(promises, routing_futures);
 
-    return std::move(return_codes);
+    return std::move(replies);
   }
 
  protected:

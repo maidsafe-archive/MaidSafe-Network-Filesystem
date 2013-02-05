@@ -43,10 +43,12 @@ class NoDelete {
 
 class DeleteFromMaidAccountHolder {
  public:
-  DeleteFromMaidAccountHolder(NfsResponseMapper& /*response_mapper*/, routing::Routing& routing, const passport::Maid& signing_fob)
+  DeleteFromMaidAccountHolder(NfsResponseMapper& /*response_mapper*/,
+                              routing::Routing& routing,
+                              const passport::Maid& signing_fob)
       : routing_(routing),
         signing_fob_(signing_fob),
-        source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
+        source_((PersonaId(Persona::kClientMaid, routing.kNodeId()))) {}
 
   template<typename Data>
   void Delete(const typename Data::name_type& name) {
