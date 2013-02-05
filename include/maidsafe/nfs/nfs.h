@@ -28,6 +28,33 @@ namespace maidsafe {
 
 namespace nfs {
 
+namespace detail {
+
+  template <typename Data>
+  struct GetPersona {};
+
+  template <>
+  struct GetPersona<OwnerDirectory> {
+    static const Persona persona = Persona::kOwnerDirectoryManager;
+  };
+
+  template <>
+  struct GetPersona<GroupDirectory> {
+    static const Persona persona = Persona::kGroupDirectoryManager;
+  };
+
+  template <>
+  struct GetPersona<WorldDirectory> {
+    static const Persona persona = Persona::kWorldDirectoryManager;
+  };
+
+  template <>
+  struct GetPersona<ImmutableData> {
+    static const Persona persona = Persona::kMaidAccountHolder;
+  };
+
+}  // namespace detail
+
 template<typename GetPolicy,
          typename PutPolicy,
          typename PostPolicy,
@@ -59,10 +86,15 @@ typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
                           NoPost<passport::Maid>,
                           NoDelete<passport::Maid>> TemporaryClientMaidNfs;
 
-typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
-                          PutToMaidAccountHolder,
+typedef NetworkFileSystem<GetFromDirectoryManager,
+                          PutToDirectoryManager,
                           NoPost<passport::Maid>,
-                          DeleteFromMaidAccountHolder> ClientMaidNfs;
+                          DeleteFromDirectoryManager> ClientMaidNfs;
+
+// typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
+//                          PutToMaidAccountHolder,
+//                          NoPost<passport::Maid>,
+//                          DeleteFromMaidAccountHolder> ClientMaidNfs;
 
 template<typename GetPolicy>
 class NetworkFileSystemGetter : public GetPolicy {

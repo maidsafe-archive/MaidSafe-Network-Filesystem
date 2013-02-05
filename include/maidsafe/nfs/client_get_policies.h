@@ -21,6 +21,11 @@
 
 #include "maidsafe/passport/types.h"
 
+#include "maidsafe/data_types/owner_directory.h"
+#include "maidsafe/data_types/group_directory.h"
+#include "maidsafe/data_types/world_directory.h"
+#include "maidsafe/data_types/immutable_data.h"
+
 #include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/response_mapper.h"
@@ -104,6 +109,37 @@ class GetFromMetadataManager {
 
  private:
   NfsResponseMapper& response_mapper_;
+  routing::Routing& routing_;
+  PersonaId source_;
+};
+
+class GetFromDirectoryManager {
+ public:
+  explicit GetFromDirectoryManager(routing::Routing& routing)
+      : routing_(routing),
+        source_(PersonaId(Persona::kClientMaid, routing.kNodeId())) {}
+
+  template <typename Data>
+  std::future<Data> Get(const typename Data::name_type& name) {
+    DataMessage::Data data(Data::name_type::tag_type::kEnumValue,
+                           name.data,
+                           NonEmptyString(),
+                           DataMessage::Action::kGet);
+    DataMessage data_message(detail::GetPersona<Data>::persona, source_, data);
+    Message message(DataMessage::message_type_identifier, data_message.Serialise());
+    auto routing_futures(std::make_shared<StringFutureVector>(
+                             routing_.SendGroup(NodeId(name->string()),
+                                                message.Serialise()->string(),
+                                                IsCacheable<Data>())));
+    auto promise(std::make_shared<std::promise<Data>>());
+    HandleGetFutures(promise, routing_futures);
+    return promise->get_future();
+  }
+
+ protected:
+  ~GetFromDirectoryManager() {}
+
+ private:
   routing::Routing& routing_;
   PersonaId source_;
 };

@@ -34,6 +34,9 @@ enum class Persona : int32_t {
   kDataHolder,
   kClientMaid,
   kClientMpid,
+  kOwnerDirectoryManager,
+  kGroupDirectoryManager,
+  kWorldDirectoryManager,
   kDataGetter
 };
 
@@ -74,7 +77,6 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
 }
 
 typedef TaggedValue<Identity, struct MessageIdTag> MessageId;
-
 
 }  // namespace nfs
 
