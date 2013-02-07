@@ -99,8 +99,6 @@ DataMessage::ClientValidation& DataMessage::ClientValidation::operator=(ClientVa
   return *this;
 }
 
-
-
 DataMessage::DataMessage(Persona destination_persona,
                          const PersonaId& source,
                          const Data& data,
