@@ -155,7 +155,6 @@ class DeleteReducerDataPolicy : public DataPolicy<SigningFob,
   }
 };
 
-
 class DataGetterPolicy : public DataPolicy<passport::Maid,
                                            Persona::kDataGetter,
                                            DataMessage::Action::kGet> {

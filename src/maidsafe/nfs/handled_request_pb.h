@@ -9,15 +9,16 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/accumulator.h"
+#ifndef MAIDSAFE_NFS_HANDLED_REQUEST_PB_H_
+#define MAIDSAFE_NFS_HANDLED_REQUEST_PB_H_
 
-#include <algorithm>
+#ifdef __MSVC__
+#  pragma warning(push)
+#  pragma warning(disable: 4127 4244 4267)
+#endif
+#include "maidsafe/nfs/handled_request.pb.h"
+#ifdef __MSVC__
+#  pragma warning(pop)
+#endif
 
-
-namespace maidsafe {
-
-namespace nfs {
-
-}  // namespace nfs
-
-}  // namespace maidsafe
+#endif  // MAIDSAFE_NFS_HANDLED_REQUEST_PB_H_
