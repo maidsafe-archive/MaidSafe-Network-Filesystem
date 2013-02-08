@@ -214,7 +214,7 @@ DataMessage DataPolicy<passport::Maid,
     const passport::PublicPmid::name_type& /*data_holder_hint*/) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
-                                       action));
+                                       DataMessage::Action::kGet));
 }
 
 // Delete for all data types doesn't use data_holder_hint.
@@ -229,20 +229,8 @@ DataMessage DataPolicy<passport::Maid,
     const passport::PublicPmid::name_type& /*data_holder_hint*/) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
-                                       action));
+                                       DataMessage::Action::kDelete));
 }
-
-// Put for all data types requires signature.
-template<>
-void DataPolicy<passport::Maid,
-                Persona::kClientMaid,
-                DataMessage::Action::kPut>::SignDataIfRequired(DataMessage& data_message) const;
-
-// Delete for all data types requires signature.
-template<>
-void DataPolicy<passport::Maid,
-                Persona::kClientMaid,
-                DataMessage::Action::kDelete>::SignDataIfRequired(DataMessage& data_message) const;
 
 // Get for all data types should use the Cacheable trait of the data type.
 template<>
@@ -361,7 +349,7 @@ DataMessage DataPolicy<passport::Pmid,
     const passport::PublicPmid::name_type& data_holder_name) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
-                                       action),
+                                       DataMessage::Action::kPut),
                      data_holder_name);
 }
 
@@ -392,7 +380,7 @@ DataMessage DataPolicy<passport::Pmid,
     const passport::PublicPmid::name_type& data_holder_name) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
-                                       action),
+                                       DataMessage::Action::kDelete),
                      data_holder_name);
 }
 
@@ -434,7 +422,7 @@ DataMessage DataPolicy<passport::Pmid,
     const passport::PublicPmid::name_type& data_holder_name) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
-                                       action));
+                                       DataMessage::Action::kPut));
 }
 
 // Delete for all data types doesn't use final_target_id field of DataMessage.
@@ -449,7 +437,7 @@ DataMessage DataPolicy<passport::Pmid,
     const passport::PublicPmid::name_type& data_holder_name) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
-                                       action));
+                                       DataMessage::Action::kDelete));
 }
 
 // Put for all data types should be via routing's SendDirect rather than SendGroup

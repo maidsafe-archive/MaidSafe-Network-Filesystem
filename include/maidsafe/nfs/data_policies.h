@@ -72,12 +72,12 @@ template<typename SigningFob, Persona source_persona>
 class PutDataPolicy : public DataPolicy<SigningFob, source_persona, DataMessage::Action::kPut> {
  public:
   PutDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy(routing, signing_fob) {}
+      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kPut>(routing, signing_fob) {}
   template<typename Data>
   void Put(const Data& data,
            const passport::PublicPmid::name_type& data_holder_hint,
            const routing::ResponseFunctor& callback) {
-    ExecuteAction<Data>(callback, data.name(), data.data(), data_holder_hint);
+    ExecuteAction(callback, data.name(), data.data(), data_holder_hint);
   }
 };
 
@@ -85,10 +85,10 @@ template<typename SigningFob, Persona source_persona>
 class GetDataPolicy : public DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet> {
  public:
   GetDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy(routing, signing_fob) {}
+      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing, signing_fob) {}
   template<typename Data>
   void Get(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
-    ExecuteAction<Data>(callback, name);
+    ExecuteAction(callback, name);
   }
 };
 
@@ -98,10 +98,12 @@ class DeleteDataPolicy : public DataPolicy<SigningFob,
                                            DataMessage::Action::kDelete> {
  public:
   DeleteDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy(routing, signing_fob) {}
+      : DataPolicy<SigningFob,
+                   source_persona,
+                   DataMessage::Action::kDelete>(routing, signing_fob) {}
   template<typename Data>
   void Delete(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
-    ExecuteAction<Data>(callback, name);
+    ExecuteAction(callback, name);
   }
 };
 
@@ -112,12 +114,12 @@ class PutReducerDataPolicy : public DataPolicy<SigningFob,
                                                DataMessage::Action::kPut> {
  public:
   PutReducerDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy(routing, signing_fob) {}
+      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kPut>(routing, signing_fob) {}
   template<typename Data>
   void Put(const passport::PublicPmid::name_type& data_holder_name,
            const Data& data,
            const routing::ResponseFunctor& callback) {
-    ExecuteAction<Data>(callback, data.name(), data.data(), data_holder_name);
+    ExecuteAction(callback, data.name(), data.data(), data_holder_name);
   }
 };
 
@@ -127,12 +129,12 @@ class GetReducerDataPolicy : public DataPolicy<SigningFob,
                                                DataMessage::Action::kGet> {
  public:
   GetReducerDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy(routing, signing_fob) {}
+      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing, signing_fob) {}
   template<typename Data>
   void Get(const passport::PublicPmid::name_type& data_holder_name,
            const typename Data::name_type& name,
            const routing::ResponseFunctor& callback) {
-    ExecuteAction<Data>(callback, name, NonEmptyString(), data_holder_name);
+    ExecuteAction(callback, name, NonEmptyString(), data_holder_name);
   }
 };
 
@@ -142,12 +144,14 @@ class DeleteReducerDataPolicy : public DataPolicy<SigningFob,
                                                   DataMessage::Action::kDelete> {
  public:
   DeleteReducerDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy(routing, signing_fob) {}
+      : DataPolicy<SigningFob,
+                   source_persona,
+                   DataMessage::Action::kDelete>(routing, signing_fob) {}
   template<typename Data>
   void Delete(const passport::PublicPmid::name_type& data_holder_name,
               const typename Data::name_type& name,
               const routing::ResponseFunctor& callback) {
-    ExecuteAction<Data>(callback, name, NonEmptyString(), data_holder_name);
+    ExecuteAction(callback, name, NonEmptyString(), data_holder_name);
   }
 };
 
@@ -156,10 +160,13 @@ class DataGetterPolicy : public DataPolicy<passport::Maid,
                                            Persona::kDataGetter,
                                            DataMessage::Action::kGet> {
  public:
-  explicit DataGetterPolicy(routing::Routing& routing) : DataPolicy(routing) {}
+  explicit DataGetterPolicy(routing::Routing& routing)
+      : DataPolicy<passport::Maid,
+                   Persona::kDataGetter,
+                   DataMessage::Action::kGet>(routing) {}
   template<typename Data>
   void Get(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
-    ExecuteAction<Data>(callback, name);
+    ExecuteAction(callback, name);
   }
 };
 

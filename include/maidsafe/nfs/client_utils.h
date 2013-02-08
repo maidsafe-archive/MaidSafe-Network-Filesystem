@@ -55,7 +55,7 @@ class GetOp {
     errors_.push_back(error);
     if (errors_.size() == 4) {
       // Operation has failed, get most frequent error_code.
-      get_op->promise_set = true;
+      promise_set_ = true;
       typedef std::map<std::error_code, int> Count;
       Count count;
       for (auto& error : errors_)
@@ -87,7 +87,7 @@ class GetOp {
 template<typename Data>
 std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_type& name) {
   std::shared_ptr<detail::GetOp<Data>> get_op;
-  client_maid_nfs.Get(name, [get_op](std::string serialised_reply) {
+  client_maid_nfs.Get(name, [get_op](std::string serialised_reply)->void {
     try {
       Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
       if (!reply.IsSuccess())
