@@ -294,7 +294,7 @@ DataMessage DataPolicy<passport::Pmid,
     Persona destination_persona,
     const typename Data::name_type& name,
     const NonEmptyString& content,
-    const passport::PublicPmid::name_type& data_holder_hint) const {
+    const passport::PublicPmid::name_type& /*data_holder_hint*/) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                        DataMessage::Action::kDelete));
@@ -337,7 +337,7 @@ PersonaId DataPolicy<passport::Pmid,
   return PersonaId(Persona::kPmidAccountHolder, NodeId(data_holder_name->string()));
 }
 
-// Put for all data types uses final_target_id field of DataMessage.
+// Put for all data types uses data_holder field of DataMessage.
 template<>
 template<typename Data>
 DataMessage DataPolicy<passport::Pmid,
@@ -353,7 +353,7 @@ DataMessage DataPolicy<passport::Pmid,
                      data_holder_name);
 }
 
-// Get for all data types doesn't use final_target_id field of DataMessage.
+// Get for all data types doesn't use data_holder field of DataMessage.
 template<>
 template<typename Data>
 DataMessage DataPolicy<passport::Pmid,
@@ -368,7 +368,7 @@ DataMessage DataPolicy<passport::Pmid,
                                        DataMessage::Action::kGet));
 }
 
-// Delete for all data types uses final_target_id field of DataMessage.
+// Delete for all data types uses data_holder field of DataMessage.
 template<>
 template<typename Data>
 DataMessage DataPolicy<passport::Pmid,
@@ -410,7 +410,7 @@ PersonaId DataPolicy<passport::Pmid,
   return PersonaId(Persona::kDataHolder, NodeId(data_holder_name->string()));
 }
 
-// Put for all data types doesn't use final_target_id field of DataMessage.
+// Put for all data types doesn't use data_holder field of DataMessage.
 template<>
 template<typename Data>
 DataMessage DataPolicy<passport::Pmid,
@@ -419,13 +419,13 @@ DataMessage DataPolicy<passport::Pmid,
     Persona destination_persona,
     const typename Data::name_type& name,
     const NonEmptyString& content,
-    const passport::PublicPmid::name_type& data_holder_name) const {
+    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                        DataMessage::Action::kPut));
 }
 
-// Delete for all data types doesn't use final_target_id field of DataMessage.
+// Delete for all data types doesn't use data_holder field of DataMessage.
 template<>
 template<typename Data>
 DataMessage DataPolicy<passport::Pmid,
@@ -434,7 +434,7 @@ DataMessage DataPolicy<passport::Pmid,
     Persona destination_persona,
     const typename Data::name_type& name,
     const NonEmptyString& content,
-    const passport::PublicPmid::name_type& data_holder_name) const {
+    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return DataMessage(destination_persona, kSource_,
                      DataMessage::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                        DataMessage::Action::kDelete));
