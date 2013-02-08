@@ -9,7 +9,9 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/response_mapper.h"
+#ifndef MAIDSAFE_NFS_CLIENT_POST_POLICIES_INL_H_
+#define MAIDSAFE_NFS_CLIENT_POST_POLICIES_INL_H_
+
 
 namespace maidsafe {
 
@@ -19,3 +21,5 @@ namespace nfs {
 }  // namespace nfs
 
 }  // namespace maidsafe
+
+#endif  // MAIDSAFE_NFS_CLIENT_POST_POLICIES_INL_H_

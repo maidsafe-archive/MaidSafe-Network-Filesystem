@@ -9,30 +9,13 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/client_get_policies.h"
+#include "maidsafe/nfs/client_utils.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
-#ifdef TESTING
-
-std::future<passport::PublicPmid> GetFromKeyFile::Get(const passport::PublicPmid::name_type& name) {
-  std::promise<passport::PublicPmid> promise;
-  try {
-    auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
-        [&name](const passport::PublicPmid& pmid) { return pmid.name() == name; }));  //NOLINT
-    if (itr == kAllPmids_.end())
-      ThrowError(NfsErrors::failed_to_get_data);
-    promise.set_value(*itr);
-  }
-  catch(...) {
-    promise.set_exception(std::current_exception());
-  }
-  return promise.get_future();
-}
-
-#endif
 
 }  // namespace nfs
 

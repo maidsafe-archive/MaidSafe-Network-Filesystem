@@ -24,12 +24,10 @@
 #include "boost/variant/static_visitor.hpp"
 
 #include "maidsafe/common/utils.h"
+#include "maidsafe/passport/types.h"
+#include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/nfs.h"
-
-#include "maidsafe/passport/types.h"
-
-#include "maidsafe/routing/routing_api.h"
 
 
 namespace maidsafe {
@@ -39,7 +37,7 @@ namespace nfs {
 class PublicKeyGetter {
  public:
   // all_pmids_from_file should only be non-empty if TESTING is defined
-  PublicKeyGetter(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing,
+  PublicKeyGetter(routing::Routing& routing,
                   const std::vector<passport::PublicPmid>& public_pmids_from_file =
                       std::vector<passport::PublicPmid>());
   ~PublicKeyGetter();

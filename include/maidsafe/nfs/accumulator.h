@@ -22,14 +22,12 @@
 #include "maidsafe/nfs/reply.h"
 #include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/utils.h"
-#include "maidsafe/nfs/handled_request_pb.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
 
-template <typename Name>
 class Accumulator {
  public:
   struct Request {
@@ -39,23 +37,17 @@ class Accumulator {
     routing::ReplyFunctor reply_functor;
     Reply reply;
   };
-
-  typedef TaggedValue<NonEmptyString, struct SerialisedAccumulatorTag> serialised_type;
-  typedef std::pair<MessageId, Name> RequestIdentity;
-  typedef std::pair<RequestIdentity, Reply> HandledRequest;
+  typedef std::pair<MessageId, Persona> RequestIdentity;
 
   Accumulator();
 
   bool CheckHandled(const RequestIdentity& request_identity, Reply& reply) const;
   std::vector<Reply> PushRequest(const Request& request);
   std::vector<Request> SetHandled(const RequestIdentity& request_identity, const Reply& reply);
-  serialised_type GetSerialisedHandledRequests(const Name& name) const;
-  std::vector<HandledRequest> ParseSerailisedHandledRequest(
-      const typename Accumulator::serialised_type& serialised_message);
 
  private:
   typedef std::deque<std::pair<RequestIdentity, Request>> Requests;
-  typedef std::deque<HandledRequest> HandledRequests;
+  typedef std::deque<std::pair<RequestIdentity, Reply>> HandledRequests;
 
   Requests pending_requests_;
   HandledRequests handled_requests_;
@@ -66,7 +58,5 @@ class Accumulator {
 }  // namespace nfs
 
 }  // namespace maidsafe
-
-#include "maidsafe/nfs/accumulator-inl.h"
 
 #endif  // MAIDSAFE_NFS_ACCUMULATOR_H_

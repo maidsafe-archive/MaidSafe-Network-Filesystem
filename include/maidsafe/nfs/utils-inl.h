@@ -9,16 +9,23 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#ifndef MAIDSAFE_NFS_HANDLED_REQUEST_PB_H_
-#define MAIDSAFE_NFS_HANDLED_REQUEST_PB_H_
+#ifndef MAIDSAFE_NFS_UTILS_INL_H_
+#define MAIDSAFE_NFS_UTILS_INL_H_
 
-#ifdef __MSVC__
-#  pragma warning(push)
-#  pragma warning(disable: 4127 4244 4267)
-#endif
-#include "maidsafe/nfs/handled_request.pb.h"
-#ifdef __MSVC__
-#  pragma warning(pop)
-#endif
+#include "maidsafe/common/types.h"
 
-#endif  // MAIDSAFE_NFS_HANDLED_REQUEST_PB_H_
+
+namespace maidsafe {
+
+namespace nfs {
+
+template<typename Data>
+bool IsCacheable() {
+  return is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value;
+}
+
+}  // namespace nfs
+
+}  // namespace maidsafe
+
+#endif  // MAIDSAFE_NFS_UTILS_INL_H_
