@@ -7,6 +7,6 @@ message HandledRequest {
 }
 
 message HandledRequests {
-  repeated bytes name = 1;
+  required bytes name = 1;
   repeated HandledRequest request = 2;
 }

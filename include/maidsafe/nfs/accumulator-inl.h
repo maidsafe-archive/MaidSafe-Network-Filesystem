@@ -87,24 +87,24 @@ std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
 
 template <typename Name>
 typename Accumulator<Name>::serialised_type
-    Accumulator<Name>::GetSerialisedHandledRequests(const Name& name) const {
+    Accumulator<Name>::SerialiseHandledRequests(const typename Name::name_type& name) const {
   protobuf::HandledRequests handled_requests;
   protobuf::HandledRequest* handled_request;
-  handled_requests.set_name(name);
+  handled_requests.set_name((name->string()));
   std::lock_guard<std::mutex> lock(mutex_);
   for (auto& request : handled_requests_) {
     if (request.first.second == name) {
       handled_request = handled_requests.add_request();
-      handled_request->set_message_id(request.first.first);
-      handled_request->set_reply(request.second.serialize());
+      handled_request->set_message_id(request.first.first->string());
+      handled_request->set_reply(request.second.Serialise()->string());
     }
   }
   return serialised_type(NonEmptyString(handled_requests.SerializeAsString()));
 }
 
-template <typename Name> std::vector<typename Accumulator<Name>::HandledRequest>
-    Accumulator<Name>::ParseSerailisedHandledRequest(
-        const typename Accumulator::serialised_type& serialised_message) {
+template <typename Name>
+std::vector<typename Accumulator<Name>::HandledRequest> Accumulator<Name>::ParseHandledRequests(
+    const typename Accumulator<Name>::serialised_type& serialised_message) {
   std::vector<typename Accumulator<Name>::HandledRequest> ret_handled_requests;
   protobuf::HandledRequests proto_handled_requests;
   if (!proto_handled_requests.ParseFromString(serialised_message->string()))
@@ -112,9 +112,11 @@ template <typename Name> std::vector<typename Accumulator<Name>::HandledRequest>
   try {
     for (auto index(0); index < proto_handled_requests.request_size(); ++index) {
       ret_handled_requests.push_back(
-          std::make_pair(std::make_pair(proto_handled_requests.request(index).message_id(),
-                                        proto_handled_requests.name()),
-                         Reply(proto_handled_requests.request(index).reply())));
+          std::make_pair(std::make_pair(
+                             Identity(proto_handled_requests.request(index).message_id()),
+                             Identity(proto_handled_requests.name())),
+              Reply(Reply::serialised_type(
+                  NonEmptyString(proto_handled_requests.request(index).reply())))));
     }
   }
   catch(const std::exception&) {

@@ -29,6 +29,10 @@ namespace maidsafe {
 
 namespace nfs {
 
+namespace test {
+  class AccumulatorTest_BEH_PushRequest_Test;
+}
+
 template <typename Name>
 class Accumulator {
  public:
@@ -49,9 +53,10 @@ class Accumulator {
   bool CheckHandled(const RequestIdentity& request_identity, Reply& reply) const;
   std::vector<Reply> PushRequest(const Request& request);
   std::vector<Request> SetHandled(const RequestIdentity& request_identity, const Reply& reply);
-  serialised_type GetSerialisedHandledRequests(const Name& name) const;
-  std::vector<HandledRequest> ParseSerailisedHandledRequest(
-      const typename Accumulator::serialised_type& serialised_message);
+  serialised_type SerialiseHandledRequests(const typename Name::name_type& name) const;
+  std::vector<HandledRequest> ParseHandledRequests(const serialised_type& serialised_message);
+
+  friend class test::AccumulatorTest_BEH_PushRequest_Test;
 
  private:
   typedef std::deque<std::pair<RequestIdentity, Request>> Requests;

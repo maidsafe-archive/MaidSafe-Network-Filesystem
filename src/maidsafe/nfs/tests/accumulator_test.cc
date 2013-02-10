@@ -56,9 +56,19 @@ TEST(AccumulatorTest, BEH_PushRequest) {
   Reply reply(CommonErrors::success);
   Accumulator<passport::PublicMaid> accumulator;
   Accumulator<passport::PublicMaid>::Request request(data_message,
-                                                                [](const std::string&) {},
-                                                                reply);
+                                                     [](const std::string&) {},
+                                                     reply);
   accumulator.PushRequest(request);
+  EXPECT_EQ(accumulator.pending_requests_.size(), 1);
+  auto request_identity(accumulator.pending_requests_.at(0).first);
+  EXPECT_FALSE(accumulator.CheckHandled(request_identity, reply));
+  accumulator.SetHandled(request_identity, reply);
+  EXPECT_EQ(accumulator.pending_requests_.size(), 0);
+  EXPECT_TRUE(accumulator.CheckHandled(request_identity, reply));
+  Accumulator<passport::PublicMaid>::serialised_type serialised(
+      accumulator.SerialiseHandledRequests(request_identity.second));
+  auto parsed(accumulator.ParseHandledRequests(serialised));
+  EXPECT_EQ(parsed.size(), 1);
 }
 
 }  // namespace test
