@@ -22,8 +22,6 @@
 #include "maidsafe/nfs/reply.h"
 #include "maidsafe/nfs/types.h"
 #include "maidsafe/nfs/utils.h"
-#include "maidsafe/nfs/handled_request_pb.h"
-
 
 namespace maidsafe {
 
@@ -44,8 +42,8 @@ class Accumulator {
     Reply reply;
   };
 
-  typedef TaggedValue<NonEmptyString, struct SerialisedAccumulatorTag> serialised_type;
-  typedef std::pair<MessageId, typename Name::name_type> RequestIdentity;
+  typedef TaggedValue<NonEmptyString, struct SerialisedRequestsTag> serialised_requests;
+  typedef std::pair<MessageId, Name> RequestIdentity;
   typedef std::pair<RequestIdentity, Reply> HandledRequest;
 
   Accumulator();
@@ -53,8 +51,10 @@ class Accumulator {
   bool CheckHandled(const RequestIdentity& request_identity, Reply& reply) const;
   std::vector<Reply> PushRequest(const Request& request);
   std::vector<Request> SetHandled(const RequestIdentity& request_identity, const Reply& reply);
-  serialised_type SerialiseHandledRequests(const typename Name::name_type& name) const;
-  std::vector<HandledRequest> ParseHandledRequests(const serialised_type& serialised_message);
+  std::vector<HandledRequest> GetHandledRequests(const Name& name) const;
+  serialised_requests SerialiseHandledRequests(const Name& name) const;
+  std::vector<HandledRequest> ParseHandledRequests(
+      const serialised_requests& serialised_message) const;
 
   friend class test::AccumulatorTest_BEH_PushRequest_Test;
 

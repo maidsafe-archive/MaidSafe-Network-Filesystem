@@ -16,7 +16,6 @@
 #include <vector>
 
 #include "maidsafe/nfs/reply.h"
-#include "maidsafe/nfs/handled_request_pb.h"
 
 namespace maidsafe {
 
@@ -48,9 +47,9 @@ bool Accumulator<Name>::CheckHandled(const Accumulator::RequestIdentity& request
 
 template <typename Name>
 std::vector<Reply> Accumulator<Name>::PushRequest(const Request& request) {
-  auto request_identity = std::make_pair(Identity(request.msg.message_id()),
-                                         Identity(request.msg.source().node_id.string()));
-  auto pending_request = std::make_pair(request_identity, request);
+  auto request_identity(std::make_pair(Identity(request.msg.message_id()),
+                                       Identity(request.msg.source().node_id.string())));
+  auto pending_request(std::make_pair(request_identity, request));
   std::vector<Reply> replies;
   std::lock_guard<std::mutex> lock(mutex_);
   pending_requests_.push_back(pending_request);
@@ -83,46 +82,6 @@ std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
   if (handled_requests_.size() > kMaxHandledRequestsCount_)
     handled_requests_.pop_front();
   return ret_requests;
-}
-
-template <typename Name>
-typename Accumulator<Name>::serialised_type
-    Accumulator<Name>::SerialiseHandledRequests(const typename Name::name_type& name) const {
-  protobuf::HandledRequests handled_requests;
-  protobuf::HandledRequest* handled_request;
-  handled_requests.set_name((name->string()));
-  std::lock_guard<std::mutex> lock(mutex_);
-  for (auto& request : handled_requests_) {
-    if (request.first.second == name) {
-      handled_request = handled_requests.add_request();
-      handled_request->set_message_id(request.first.first->string());
-      handled_request->set_reply(request.second.Serialise()->string());
-    }
-  }
-  return serialised_type(NonEmptyString(handled_requests.SerializeAsString()));
-}
-
-template <typename Name>
-std::vector<typename Accumulator<Name>::HandledRequest> Accumulator<Name>::ParseHandledRequests(
-    const typename Accumulator<Name>::serialised_type& serialised_message) {
-  std::vector<typename Accumulator<Name>::HandledRequest> ret_handled_requests;
-  protobuf::HandledRequests proto_handled_requests;
-  if (!proto_handled_requests.ParseFromString(serialised_message->string()))
-    ThrowError(CommonErrors::parsing_error);
-  try {
-    for (auto index(0); index < proto_handled_requests.request_size(); ++index) {
-      ret_handled_requests.push_back(
-          std::make_pair(std::make_pair(
-                             Identity(proto_handled_requests.request(index).message_id()),
-                             Identity(proto_handled_requests.name())),
-              Reply(Reply::serialised_type(
-                  NonEmptyString(proto_handled_requests.request(index).reply())))));
-    }
-  }
-  catch(const std::exception&) {
-    ThrowError(CommonErrors::parsing_error);
-  }
-  return ret_handled_requests;
 }
 
 }  // namespace nfs

@@ -54,8 +54,8 @@ TEST(AccumulatorTest, BEH_PushRequest) {
       data,
       passport::PublicPmid::name_type(Identity(RandomString(NodeId::kSize))));
   Reply reply(CommonErrors::success);
-  Accumulator<passport::PublicMaid> accumulator;
-  Accumulator<passport::PublicMaid>::Request request(data_message,
+  Accumulator<passport::PublicMaid::name_type> accumulator;
+  Accumulator<passport::PublicMaid::name_type>::Request request(data_message,
                                                      [](const std::string&) {},
                                                      reply);
   accumulator.PushRequest(request);
@@ -65,7 +65,7 @@ TEST(AccumulatorTest, BEH_PushRequest) {
   accumulator.SetHandled(request_identity, reply);
   EXPECT_EQ(accumulator.pending_requests_.size(), 0);
   EXPECT_TRUE(accumulator.CheckHandled(request_identity, reply));
-  Accumulator<passport::PublicMaid>::serialised_type serialised(
+  Accumulator<passport::PublicMaid::name_type>::serialised_requests serialised(
       accumulator.SerialiseHandledRequests(request_identity.second));
   auto parsed(accumulator.ParseHandledRequests(serialised));
   EXPECT_EQ(parsed.size(), 1);
