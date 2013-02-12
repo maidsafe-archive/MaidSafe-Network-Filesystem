@@ -84,9 +84,6 @@ class PutDataPolicy : public DataPolicy<SigningFob, source_persona, DataMessage:
 template<typename SigningFob, Persona source_persona>
 class GetDataPolicy : public DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet> {
  public:
-  GetDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing, signing_fob) {}
-
   explicit GetDataPolicy(routing::Routing& routing)
       : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing) {}
 
@@ -132,8 +129,9 @@ class GetReducerDataPolicy : public DataPolicy<SigningFob,
                                                source_persona,
                                                DataMessage::Action::kGet> {
  public:
-  GetReducerDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
-      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing, signing_fob) {}
+  explicit GetReducerDataPolicy(routing::Routing& routing)
+      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing) {}
+
   template<typename Data>
   void Get(const passport::PublicPmid::name_type& data_holder_name,
            const typename Data::name_type& name,
