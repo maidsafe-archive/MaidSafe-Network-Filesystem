@@ -35,8 +35,14 @@ template <typename Name>
 class Accumulator {
  public:
   struct Request {
-    Request(DataMessage msg_in, routing::ReplyFunctor reply_functor_in, Reply reply_in)
-        : msg(msg_in), reply_functor(reply_functor_in), reply(reply_in) {}
+    Request(const DataMessage& msg_in,
+            const routing::ReplyFunctor& reply_functor_in,
+            const Reply& reply_in);
+    Request(const Request& other);
+    Request& operator=(const Request& other);
+    Request(Request&& other);
+    Request& operator=(Request&& other);
+
     DataMessage msg;
     routing::ReplyFunctor reply_functor;
     Reply reply;

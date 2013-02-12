@@ -24,7 +24,7 @@ template <>
 typename Accumulator<passport::PublicMaid::name_type>::serialised_requests
 Accumulator<passport::PublicMaid::name_type>::SerialiseHandledRequests(
     const passport::PublicMaid::name_type& name) const {
-  typename Accumulator<passport::PublicMaid::name_type>::serialised_requests ser;
+  Accumulator<passport::PublicMaid::name_type>::serialised_requests ser;
   protobuf::HandledRequests handled_requests;
   protobuf::HandledRequest* handled_request;
   handled_requests.set_name((name->string()));
@@ -52,9 +52,10 @@ Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
   try {
     for (auto index(0); index < proto_handled_requests.request_size(); ++index) {
       ret_handled_requests.push_back(
-          std::make_pair(std::make_pair(
-                             Identity(proto_handled_requests.request(index).message_id()),
-                             Identity(proto_handled_requests.name())),
+          std::make_pair(
+              std::make_pair(
+                  MessageId(Identity(proto_handled_requests.request(index).message_id())),
+                  passport::PublicMaid::name_type(Identity(proto_handled_requests.name()))),
               Reply(Reply::serialised_type(
                   NonEmptyString(proto_handled_requests.request(index).reply())))));
     }

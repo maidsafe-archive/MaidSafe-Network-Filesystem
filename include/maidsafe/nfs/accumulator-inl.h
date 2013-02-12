@@ -22,6 +22,43 @@ namespace maidsafe {
 namespace nfs {
 
 template <typename Name>
+Accumulator<Name>::Request::Request(const DataMessage& msg_in,
+                                    const routing::ReplyFunctor& reply_functor_in,
+                                    const Reply& reply_in)
+    : msg(msg_in),
+      reply_functor(reply_functor_in),
+      reply(reply_in) {}
+
+template <typename Name>
+Accumulator<Name>::Request::Request(const Request& other)
+    : msg(other.msg),
+      reply_functor(other.reply_functor),
+      reply(other.reply) {}
+
+template <typename Name>
+typename Accumulator<Name>::Request& Accumulator<Name>::Request::operator=(const Request& other) {
+  msg = other.msg;
+  reply_functor = other.reply_functor;
+  reply = other.reply;
+  return *this;
+}
+
+template <typename Name>
+Accumulator<Name>::Request::Request(Request&& other)
+    : msg(std::move(other.msg)),
+      reply_functor(std::move(other.reply_functor)),
+      reply(std::move(other.reply)) {}
+
+template <typename Name>
+typename Accumulator<Name>::Request& Accumulator<Name>::Request::operator=(Request&& other) {
+  msg = std::move(other.msg);
+  reply_functor = std::move(other.reply_functor);
+  reply = std::move(other.reply);
+  return *this;
+}
+
+
+template <typename Name>
 Accumulator<Name>::Accumulator()
     : pending_requests_(),
       handled_requests_(),
@@ -30,8 +67,7 @@ Accumulator<Name>::Accumulator()
       mutex_() {}
 
 template <typename Name>
-bool Accumulator<Name>::CheckHandled(const Accumulator::RequestIdentity& request_identity,
-                                     Reply& reply) const {
+bool Accumulator<Name>::CheckHandled(const RequestIdentity& request_identity, Reply& reply) const {
   std::lock_guard<std::mutex> lock(mutex_);
   auto it = std::find_if(handled_requests_.begin(),
                          handled_requests_.end(),
@@ -47,14 +83,14 @@ bool Accumulator<Name>::CheckHandled(const Accumulator::RequestIdentity& request
 
 template <typename Name>
 std::vector<Reply> Accumulator<Name>::PushRequest(const Request& request) {
-  auto request_identity(std::make_pair(Identity(request.msg.message_id()),
-                                       Identity(request.msg.source().node_id.string())));
+  auto request_identity(std::make_pair(MessageId(Identity(request.msg.message_id())),
+                                       Name(Identity(request.msg.source().node_id.string()))));
   auto pending_request(std::make_pair(request_identity, request));
   std::vector<Reply> replies;
   std::lock_guard<std::mutex> lock(mutex_);
   pending_requests_.push_back(pending_request);
   for (auto& request : pending_requests_) {
-    if (Identity(request.first.first) == Identity(request_identity.first))
+    if (request.first.first == request_identity.first)
       replies.push_back(request.second.reply);
   }
   if (pending_requests_.size() > kMaxPendingRequestsCount_)
