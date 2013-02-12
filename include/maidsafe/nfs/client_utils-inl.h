@@ -23,8 +23,11 @@
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
 
+#include "maidsafe/routing/parameters.h"
+
 #include "maidsafe/nfs/reply.h"
 #include "maidsafe/nfs/nfs.h"
+#include "maidsafe/nfs/utils.h"
 
 
 namespace maidsafe {
@@ -62,7 +65,7 @@ void GetOp<Data>::HandleFailure(const maidsafe_error& error) {
   if (promise_set_)
     return;
   errors_.push_back(error);
-  if (errors_.size() == 4)  // Operation has failed
+  if (errors_.size() == routing::Parameters::node_group_size)  // Operation has failed
     promise_.set_exception(std::make_exception_ptr(GetMostFrequentError(errors_)));
 }
 
@@ -75,11 +78,11 @@ void Put(ClientMaidNfs& client_maid_nfs,
          const passport::PublicPmid::name_type& data_holder_hint,
          int successes_required,
          std::function<void(Reply)> result) {
-  auto put_op(std::make_shared<detail::PutDeleteOp>(successes_required, result));
+  auto put_op(std::make_shared<PutOrDeleteOp>(successes_required, result));
   client_maid_nfs.Put(data,
                       data_holder_hint,
                       [put_op](std::string serialised_reply) {
-                           detail::HandlePutOrDeleteReply(put_op, serialised_reply);
+                           HandlePutOrDeleteReply(put_op, serialised_reply);
                       });
 }
 
@@ -111,10 +114,10 @@ void Delete(ClientMaidNfs& client_maid_nfs,
             const typename Data::name_type& name,
             int successes_required,
             std::function<void(Reply)> result) {
-  auto delete_op(std::make_shared<detail::PutDeleteOp>(successes_required, result));
+  auto delete_op(std::make_shared<PutOrDeleteOp>(successes_required, result));
   client_maid_nfs.Delete(name,
                          [delete_op](std::string serialised_reply) {
-                             detail::HandlePutOrDeleteReply(delete_op, serialised_reply);
+                             HandlePutOrDeleteReply(delete_op, serialised_reply);
                          });
 }
 

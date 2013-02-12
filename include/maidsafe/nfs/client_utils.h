@@ -12,7 +12,9 @@
 #ifndef MAIDSAFE_NFS_CLIENT_UTILS_H_
 #define MAIDSAFE_NFS_CLIENT_UTILS_H_
 
+#include <functional>
 #include <future>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -28,27 +30,6 @@ namespace maidsafe {
 namespace nfs {
 
 namespace detail {
-
-class PutDeleteOp {
- public:
-  PutDeleteOp(int successes_required, std::function<void(Reply)> callback);
-  void HandleReply(Reply&& reply);
-
- private:
-  PutDeleteOp(const PutDeleteOp&);
-  PutDeleteOp& operator=(const PutDeleteOp&);
-  PutDeleteOp(PutDeleteOp&&);
-  PutDeleteOp& operator=(PutDeleteOp&&);
-
-  mutable std::mutex mutex_;
-  int successes_required_;
-  std::function<void(Reply)> callback_;
-  std::vector<Reply> replies_;
-  bool callback_executed_;
-};
-
-void HandlePutOrDeleteReply(std::shared_ptr<detail::PutDeleteOp> op,
-                            const std::string& serialised_reply);
 
 template<typename Data>
 class GetOp {
