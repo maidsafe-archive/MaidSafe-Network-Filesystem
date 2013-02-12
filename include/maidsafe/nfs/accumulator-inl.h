@@ -57,6 +57,46 @@ typename Accumulator<Name>::Request& Accumulator<Name>::Request::operator=(Reque
   return *this;
 }
 
+template <typename Name>
+Accumulator<Name>::SyncData::SyncData(const SyncData& other)
+    : msg_id(other.msg_id),
+      action(other.action),
+      persona_id(other.persona_id),
+      size(other.size),
+      replication(other.replication),
+      reply(other.reply) {}
+
+template <typename Name>
+typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(
+    const SyncData& other) {
+  msg_id = other.msg_id;
+  action = other.action;
+  persona_id = other.persona_id;
+  size = other.size;
+  replication = other.replication;
+  reply = other.reply;
+  return *this;
+}
+
+template <typename Name>
+Accumulator<Name>::SyncData::SyncData(SyncData&& other)
+    : msg_id(std::move(other.msg_id)),
+      action(other.action),
+      persona_id(std::move(other.persona_id)),
+      size(std::move(other.size)),
+      replication(other.replication),
+      reply(std::move(other.reply)) {}
+
+template <typename Name>
+typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(SyncData&& other) {
+  msg_id = std::move(other.msg_id);
+  action = other.action;
+  persona_id = std::move(other.persona_id);
+  size = std::move(other.size);
+  replication = other.replication;
+  reply = std::move(other.reply);
+  return *this;
+}
 
 template <typename Name>
 Accumulator<Name>::Accumulator()
@@ -75,7 +115,7 @@ bool Accumulator<Name>::CheckHandled(const RequestIdentity& request_identity, Re
                             return request.first == request_identity;
                          });
   if (it != handled_requests_.end()) {
-    reply = it->second;
+    reply = it->second.reply;
     return true;
   }
   return false;
@@ -114,7 +154,14 @@ std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
     }
   }
 
-  handled_requests_.push_back(std::make_pair(request_identity, reply));
+  handled_requests_.push_back(std::make_pair(request_identity,
+      Accumulator::SyncData(request_identity.first,
+      itr->second.msg.data().action,
+      itr->second.msg.data().content.string().size(),
+      PersonaId(itr->second.msg.data().type,
+      itr->second.msg.data().name),
+      1,
+      reply)));
   if (handled_requests_.size() > kMaxHandledRequestsCount_)
     handled_requests_.pop_front();
   return ret_requests;

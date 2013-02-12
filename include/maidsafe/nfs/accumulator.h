@@ -48,9 +48,29 @@ class Accumulator {
     Reply reply;
   };
 
+  struct SyncData {
+    SyncData(const MessageId& msg_id_in,
+             const int& action_type_in,
+             const Persona& persona_in,
+             const uint64_t& size_in,
+             const uint8_t replication_in,
+             const Reply reply_in);
+    SyncData(const SyncData& other);
+    SyncData& operator=(const SyncData& other);
+    SyncData(SyncData&& other);
+    SyncData& operator=(SyncData&& other);
+
+    MessageId msg_id;
+    DataMessage::Action action;
+    PersonaId persona_id;
+    uint64_t size;
+    uint8_t replication;
+    Reply reply;
+  };
+
   typedef TaggedValue<NonEmptyString, struct SerialisedRequestsTag> serialised_requests;
   typedef std::pair<MessageId, Name> RequestIdentity;
-  typedef std::pair<RequestIdentity, Reply> HandledRequest;
+  typedef std::pair<RequestIdentity, SyncData> HandledRequest;
 
   Accumulator();
 

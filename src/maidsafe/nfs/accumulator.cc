@@ -33,7 +33,7 @@ Accumulator<passport::PublicMaid::name_type>::SerialiseHandledRequests(
     if (request.first.second == name) {
       handled_request = handled_requests.add_request();
       handled_request->set_message_id(request.first.first->string());
-      handled_request->set_reply(request.second.Serialise()->string());
+//      handled_request->set_reply(request.second.Serialise()->string()); FIXME (Mahmoud):
     }
   }
   return serialised_requests(NonEmptyString(handled_requests.SerializeAsString()));
@@ -51,13 +51,14 @@ Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
     ThrowError(CommonErrors::parsing_error);
   try {
     for (auto index(0); index < proto_handled_requests.request_size(); ++index) {
-      ret_handled_requests.push_back(
-          std::make_pair(
-              std::make_pair(
-                  MessageId(Identity(proto_handled_requests.request(index).message_id())),
-                  passport::PublicMaid::name_type(Identity(proto_handled_requests.name()))),
-              Reply(Reply::serialised_type(
-                  NonEmptyString(proto_handled_requests.request(index).reply())))));
+// FIXME (Mahmoud):
+//      ret_handled_requests.push_back(
+//          std::make_pair(
+//              std::make_pair(
+//                  MessageId(Identity(proto_handled_requests.request(index).message_id())),
+//                  passport::PublicMaid::name_type(Identity(proto_handled_requests.name()))),
+//              Reply(Reply::serialised_type(
+//                  NonEmptyString(proto_handled_requests.request(index).reply())))));
     }
   }
   catch(const std::exception&) {
