@@ -86,6 +86,10 @@ class GetDataPolicy : public DataPolicy<SigningFob, source_persona, DataMessage:
  public:
   GetDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
       : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing, signing_fob) {}
+
+  explicit GetDataPolicy(routing::Routing& routing)
+      : DataPolicy<SigningFob, source_persona, DataMessage::Action::kGet>(routing) {}
+
   template<typename Data>
   void Get(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
     ExecuteAction(callback, name);
