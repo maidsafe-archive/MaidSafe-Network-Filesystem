@@ -1,12 +1,18 @@
 package maidsafe.nfs.protobuf;
 option optimize_for = LITE_RUNTIME;
 
-message HandledRequest {
+message SyncData {
   required bytes message_id = 1;
-  required bytes reply = 2;
+  required bytes source_name = 2;
+  required int32 action = 3;
+  required bytes data_name = 4;
+  required int32 data_type = 5;
+  required int32 size = 6;
+  optional int32 replication = 7;
+  required bytes reply = 8;
 }
 
 message HandledRequests {
   required bytes name = 1;
-  repeated HandledRequest request = 2;
+  repeated SyncData sync_data = 2;
 }

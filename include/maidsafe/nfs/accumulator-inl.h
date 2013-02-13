@@ -58,10 +58,31 @@ typename Accumulator<Name>::Request& Accumulator<Name>::Request::operator=(Reque
 }
 
 template <typename Name>
+Accumulator<Name>::SyncData::SyncData(
+    const MessageId& msg_id_in,
+    const Identity& source_name_in,
+    const DataMessage::Action& action_type_in,
+    const Identity& data_name_in,
+    const DataTagValue data_type_in,
+    const uint64_t& size_in,
+    const uint8_t replication_in,
+    const Reply reply_in)
+    : msg_id(msg_id_in),
+      source_name(source_name_in),
+      action(action_type_in),
+      data_name(data_name_in),
+      data_type(data_type_in),
+      size(size_in),
+      replication(replication_in),
+      reply(reply_in) {}
+
+template <typename Name>
 Accumulator<Name>::SyncData::SyncData(const SyncData& other)
     : msg_id(other.msg_id),
+      source_name(other.source_name),
       action(other.action),
-      persona_id(other.persona_id),
+      data_name(other.data_name),
+      data_type(other.data_type),
       size(other.size),
       replication(other.replication),
       reply(other.reply) {}
@@ -70,8 +91,10 @@ template <typename Name>
 typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(
     const SyncData& other) {
   msg_id = other.msg_id;
+  source_name = other.source_name;
   action = other.action;
-  persona_id = other.persona_id;
+  data_name = other.data_name,
+  data_type = other.data_type,
   size = other.size;
   replication = other.replication;
   reply = other.reply;
@@ -81,8 +104,10 @@ typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(
 template <typename Name>
 Accumulator<Name>::SyncData::SyncData(SyncData&& other)
     : msg_id(std::move(other.msg_id)),
+      source_name(std::move(other.source_name)),
       action(other.action),
-      persona_id(std::move(other.persona_id)),
+      data_name(std::move(other.data_name)),
+      data_type(other.data_type),
       size(std::move(other.size)),
       replication(other.replication),
       reply(std::move(other.reply)) {}
@@ -90,8 +115,10 @@ Accumulator<Name>::SyncData::SyncData(SyncData&& other)
 template <typename Name>
 typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(SyncData&& other) {
   msg_id = std::move(other.msg_id);
+  source_name = std::move(other.source_name);
   action = other.action;
-  persona_id = std::move(other.persona_id);
+  data_name = std::move(other.data_name),
+  data_type = data_type;
   size = std::move(other.size);
   replication = other.replication;
   reply = std::move(other.reply);
@@ -111,11 +138,12 @@ bool Accumulator<Name>::CheckHandled(const RequestIdentity& request_identity, Re
   std::lock_guard<std::mutex> lock(mutex_);
   auto it = std::find_if(handled_requests_.begin(),
                          handled_requests_.end(),
-                         [&request_identity](const typename HandledRequests::value_type& request) {
-                            return request.first == request_identity;
+                         [&request_identity](const SyncData& sync_data) {
+                         return (sync_data.msg_id == request_identity.first) &&
+                                (sync_data.source_name == request_identity.second);
                          });
   if (it != handled_requests_.end()) {
-    reply = it->second.reply;
+    reply = it->reply;
     return true;
   }
   return false;
@@ -154,14 +182,15 @@ std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
     }
   }
 
-  handled_requests_.push_back(std::make_pair(request_identity,
+  handled_requests_.push_back(
       Accumulator::SyncData(request_identity.first,
-      itr->second.msg.data().action,
-      itr->second.msg.data().content.string().size(),
-      PersonaId(itr->second.msg.data().type,
-      itr->second.msg.data().name),
-      1,
-      reply)));
+                            request_identity.second,
+                            itr->second.msg.data().action,
+                            itr->second.msg.data().name,
+                            itr->second.msg.data().type,
+                            itr->second.msg.data().content.string().size(),
+                            1,
+                            reply));
   if (handled_requests_.size() > kMaxHandledRequestsCount_)
     handled_requests_.pop_front();
   return ret_requests;
