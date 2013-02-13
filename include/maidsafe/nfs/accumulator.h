@@ -50,12 +50,13 @@ class Accumulator {
 
   struct SyncData {
     SyncData(const MessageId& msg_id_in,
-             const Identity& source_name_in,
+             const Identity& updater_name,
+             const Name& source_name_in,
              const DataMessage::Action& action_type_in,
              const Identity& data_name,
              const DataTagValue data_type,
              const uint64_t& size_in,
-             const uint8_t replication_in,
+             const uint32_t replication_in,
              const Reply reply_in);
     SyncData(const SyncData& other);
     SyncData& operator=(const SyncData& other);
@@ -63,6 +64,7 @@ class Accumulator {
     SyncData& operator=(SyncData&& other);
 
     MessageId msg_id;
+    Identity updater_name;
     Name source_name;
     DataMessage::Action action;
     Identity data_name;
@@ -79,11 +81,14 @@ class Accumulator {
 
   bool CheckHandled(const RequestIdentity& request_identity, Reply& reply) const;
   std::vector<Reply> PushRequest(const Request& request);
-  std::vector<Request> SetHandled(const RequestIdentity& request_identity, const Reply& reply);
+  std::vector<Request> SetHandled(const Identity& updater_name,
+                                  const RequestIdentity& request_identity,
+                                  const Reply& reply);
   std::vector<SyncData> GetHandledRequests(const Name& name) const;
   serialised_requests SerialiseHandledRequests(const Name& name) const;
   std::vector<SyncData> ParseHandledRequests(
-      const serialised_requests& serialised_message) const;
+      const serialised_requests& serialised_sync_updates) const;
+  void HandleSyncUpdates(const NonEmptyString& serialised_sync_updates);
 
   friend class test::AccumulatorTest_BEH_PushRequest_Test;
 
@@ -93,6 +98,7 @@ class Accumulator {
 
   Requests pending_requests_;
   HandledRequests handled_requests_;
+  HandledRequests pending_sync_updates_;
   const size_t kMaxPendingRequestsCount_, kMaxHandledRequestsCount_;
   mutable std::mutex mutex_;
 };

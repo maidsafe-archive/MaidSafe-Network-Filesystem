@@ -14,5 +14,6 @@ message SyncData {
 
 message HandledRequests {
   required bytes name = 1;
-  repeated SyncData sync_data = 2;
+  required bytes updater_name = 2;
+  repeated SyncData sync_data = 3;
 }

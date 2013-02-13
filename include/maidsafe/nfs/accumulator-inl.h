@@ -60,14 +60,16 @@ typename Accumulator<Name>::Request& Accumulator<Name>::Request::operator=(Reque
 template <typename Name>
 Accumulator<Name>::SyncData::SyncData(
     const MessageId& msg_id_in,
-    const Identity& source_name_in,
+    const Identity& updater_name_in,
+    const Name& source_name_in,
     const DataMessage::Action& action_type_in,
     const Identity& data_name_in,
     const DataTagValue data_type_in,
     const uint64_t& size_in,
-    const uint8_t replication_in,
+    const uint32_t replication_in,
     const Reply reply_in)
     : msg_id(msg_id_in),
+      updater_name(updater_name_in),
       source_name(source_name_in),
       action(action_type_in),
       data_name(data_name_in),
@@ -79,6 +81,7 @@ Accumulator<Name>::SyncData::SyncData(
 template <typename Name>
 Accumulator<Name>::SyncData::SyncData(const SyncData& other)
     : msg_id(other.msg_id),
+      updater_name(other.updater_name),
       source_name(other.source_name),
       action(other.action),
       data_name(other.data_name),
@@ -91,6 +94,7 @@ template <typename Name>
 typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(
     const SyncData& other) {
   msg_id = other.msg_id;
+  updater_name = other.updater_name;
   source_name = other.source_name;
   action = other.action;
   data_name = other.data_name,
@@ -104,6 +108,7 @@ typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(
 template <typename Name>
 Accumulator<Name>::SyncData::SyncData(SyncData&& other)
     : msg_id(std::move(other.msg_id)),
+      updater_name(std::move(other.updater_name)),
       source_name(std::move(other.source_name)),
       action(other.action),
       data_name(std::move(other.data_name)),
@@ -115,6 +120,7 @@ Accumulator<Name>::SyncData::SyncData(SyncData&& other)
 template <typename Name>
 typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(SyncData&& other) {
   msg_id = std::move(other.msg_id);
+  updater_name = std::move(other.updater_name);
   source_name = std::move(other.source_name);
   action = other.action;
   data_name = std::move(other.data_name),
@@ -129,6 +135,7 @@ template <typename Name>
 Accumulator<Name>::Accumulator()
     : pending_requests_(),
       handled_requests_(),
+      pending_sync_updates_(),
       kMaxPendingRequestsCount_(300),
       kMaxHandledRequestsCount_(1000),
       mutex_() {}
@@ -168,6 +175,7 @@ std::vector<Reply> Accumulator<Name>::PushRequest(const Request& request) {
 
 template <typename Name>
 std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
+    const Identity& updater_name,
     const RequestIdentity& request_identity,
     const Reply& reply) {
   std::vector<Request> ret_requests;
@@ -184,6 +192,7 @@ std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
 
   handled_requests_.push_back(
       Accumulator::SyncData(request_identity.first,
+                            updater_name,
                             request_identity.second,
                             itr->second.msg.data().action,
                             itr->second.msg.data().name,

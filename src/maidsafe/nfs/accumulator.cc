@@ -27,6 +27,7 @@ Accumulator<passport::PublicMaid::name_type>::SerialiseHandledRequests(
   protobuf::HandledRequests handled_requests;
   protobuf::SyncData* sync_data;
   handled_requests.set_name((name->string()));
+  handled_requests.set_updater_name(handled_requests_[0].updater_name.string());
   std::lock_guard<std::mutex> lock(mutex_);
   for (auto& request : handled_requests_) {
     if (request.source_name == name) {
@@ -48,30 +49,53 @@ template <>
 std::vector<typename Accumulator<passport::PublicMaid::name_type>::SyncData>
 Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
     const typename Accumulator<passport::PublicMaid::name_type>::serialised_requests&
-        serialised_message) const {
+        serialised_sync_updates) const {
   std::vector<typename Accumulator<passport::PublicMaid::name_type>::SyncData>
       ret_sync_data;
   protobuf::HandledRequests proto_handled_requests;
-  if (!proto_handled_requests.ParseFromString(serialised_message->string()))
+  if (!proto_handled_requests.ParseFromString(serialised_sync_updates->string()))
     ThrowError(CommonErrors::parsing_error);
   try {
     for (auto index(0); index < proto_handled_requests.sync_data_size(); ++index) {
       ret_sync_data.push_back(
-          SyncData(MessageId(Identity(proto_handled_requests.sync_data(index).message_id())),
-          passport::PublicMaid::name_type(Identity(proto_handled_requests.name())),
-          static_cast<DataMessage::Action>(proto_handled_requests.sync_data(index).action()),
-          Identity(proto_handled_requests.sync_data(index).data_name()),
-          static_cast<DataTagValue>(proto_handled_requests.sync_data(index).data_type()),
-          proto_handled_requests.sync_data(index).size(),
-          proto_handled_requests.sync_data(index).replication(),
-          Reply(Reply::serialised_type(NonEmptyString(
-                                           proto_handled_requests.sync_data(index).reply())))));
+          SyncData(
+              MessageId(Identity(proto_handled_requests.sync_data(index).message_id())),
+              Identity(proto_handled_requests.updater_name()),
+              passport::PublicMaid::name_type(Identity(proto_handled_requests.name())),
+              static_cast<DataMessage::Action>(proto_handled_requests.sync_data(index).action()),
+              Identity(proto_handled_requests.sync_data(index).data_name()),
+              static_cast<DataTagValue>(proto_handled_requests.sync_data(index).data_type()),
+              proto_handled_requests.sync_data(index).size(),
+              proto_handled_requests.sync_data(index).replication(),
+              Reply(Reply::serialised_type(NonEmptyString(
+                                               proto_handled_requests.sync_data(index).reply())))));
     }
   }
   catch(const std::exception&) {
     ThrowError(CommonErrors::parsing_error);
   }
   return ret_sync_data;
+}
+
+template <>
+void Accumulator<passport::PublicMaid::name_type>::HandleSyncUpdates(
+    const  NonEmptyString&  serialised_sync_updates)  {
+  auto sync_updates(ParseHandledRequests<passport::PublicMaid::name_type>(serialised_sync_updates));
+  for (auto& sync_update : sync_updates) {
+    if (/* same update from same updater exist in pending_sync_updates_*/)
+      continue;
+    if (/* request is already handled and is in handled_requests_*/)
+      continue;
+    if (/* request is in pending_requests_ */)
+      continue;
+    if (/* no similar request exist add it to pending_sync_updates_*/) {
+      // pending_sync_updates_.push_back(SyncData);
+    }
+    if (/* similar request from different updater exists in pending_sync_updates_ */) {
+      // remove the similar entry from the pending_sync_updates_
+      // make and add request to the pending requests
+    }
+  }
 }
 
 }  // namespace nfs
