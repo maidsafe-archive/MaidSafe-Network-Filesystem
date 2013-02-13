@@ -65,7 +65,7 @@ Accumulator<Name>::SyncData::SyncData(
     const Identity& data_name_in,
     const DataTagValue data_type_in,
     const uint64_t& size_in,
-    const uint8_t replication_in,
+    const int32_t replication_in,
     const Reply reply_in)
     : msg_id(msg_id_in),
       source_name(source_name_in),

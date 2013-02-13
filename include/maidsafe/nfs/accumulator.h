@@ -55,7 +55,7 @@ class Accumulator {
              const Identity& data_name,
              const DataTagValue data_type,
              const uint64_t& size_in,
-             const uint8_t replication_in,
+             const int32_t replication_in,
              const Reply reply_in);
     SyncData(const SyncData& other);
     SyncData& operator=(const SyncData& other);
@@ -68,7 +68,7 @@ class Accumulator {
     Identity data_name;
     DataTagValue data_type;
     uint64_t size;
-    uint8_t replication;
+    int32_t replication;
     Reply reply;
   };
 

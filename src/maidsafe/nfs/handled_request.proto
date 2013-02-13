@@ -7,7 +7,7 @@ message SyncData {
   required int32 action = 3;
   required bytes data_name = 4;
   required int32 data_type = 5;
-  required int32 size = 6;
+  required uint64 size = 6;
   optional int32 replication = 7;
   required bytes reply = 8;
 }
