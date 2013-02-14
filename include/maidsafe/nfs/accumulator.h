@@ -29,6 +29,8 @@ namespace nfs {
 
 namespace test {
   class AccumulatorTest_BEH_PushRequest_Test;
+  class AccumulatorTest_BEH_CheckPendingRequestsLimit_Test;
+  class AccumulatorTest_BEH_CheckHandled_Test;
 }
 
 template <typename Name>
@@ -88,7 +90,8 @@ class Accumulator {
       const serialised_requests& serialised_requests_in) const;
 
   friend class test::AccumulatorTest_BEH_PushRequest_Test;
-
+  friend class test::AccumulatorTest_BEH_CheckPendingRequestsLimit_Test;
+  friend class test::AccumulatorTest_BEH_CheckHandled_Test;
  private:
   typedef std::deque<PendingRequest> Requests;
   typedef std::deque<HandledRequest> HandledRequests;
