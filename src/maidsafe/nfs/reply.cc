@@ -89,8 +89,8 @@ Reply::serialised_type Reply::Serialise() const {
 }
 
 bool Reply::IsSuccess() const {
-  return error_.code().category().name() == std::string(GetCommonCategory().name()) &&
-         static_cast<CommonErrors>(error_.code().value()) == CommonErrors::success;
+  static std::error_code success((MakeError(CommonErrors::success)).code());
+  return error_.code() == success;
 }
 
 }  // namespace nfs
