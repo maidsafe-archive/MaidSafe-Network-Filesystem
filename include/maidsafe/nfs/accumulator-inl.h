@@ -58,9 +58,8 @@ typename Accumulator<Name>::Request& Accumulator<Name>::Request::operator=(Reque
 }
 
 template <typename Name>
-Accumulator<Name>::SyncData::SyncData(
+Accumulator<Name>::HandledRequest::HandledRequest(
     const MessageId& msg_id_in,
-    const Identity& updater_name_in,
     const Name& source_name_in,
     const DataMessage::Action& action_type_in,
     const Identity& data_name_in,
@@ -69,7 +68,6 @@ Accumulator<Name>::SyncData::SyncData(
     const uint32_t& replication_in,
     const Reply& reply_in)
     : msg_id(msg_id_in),
-      updater_name(updater_name_in),
       source_name(source_name_in),
       action(action_type_in),
       data_name(data_name_in),
@@ -79,9 +77,8 @@ Accumulator<Name>::SyncData::SyncData(
       reply(reply_in) {}
 
 template <typename Name>
-Accumulator<Name>::SyncData::SyncData(const SyncData& other)
+Accumulator<Name>::HandledRequest::HandledRequest(const HandledRequest& other)
     : msg_id(other.msg_id),
-      updater_name(other.updater_name),
       source_name(other.source_name),
       action(other.action),
       data_name(other.data_name),
@@ -91,10 +88,9 @@ Accumulator<Name>::SyncData::SyncData(const SyncData& other)
       reply(other.reply) {}
 
 template <typename Name>
-typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(
-    const SyncData& other) {
+typename Accumulator<Name>::HandledRequest& Accumulator<Name>::HandledRequest::operator=(
+    const HandledRequest& other) {
   msg_id = other.msg_id;
-  updater_name = other.updater_name;
   source_name = other.source_name;
   action = other.action;
   data_name = other.data_name,
@@ -106,9 +102,8 @@ typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(
 }
 
 template <typename Name>
-Accumulator<Name>::SyncData::SyncData(SyncData&& other)
+Accumulator<Name>::HandledRequest::HandledRequest(HandledRequest&& other)
     : msg_id(std::move(other.msg_id)),
-      updater_name(std::move(other.updater_name)),
       source_name(std::move(other.source_name)),
       action(other.action),
       data_name(std::move(other.data_name)),
@@ -118,9 +113,9 @@ Accumulator<Name>::SyncData::SyncData(SyncData&& other)
       reply(std::move(other.reply)) {}
 
 template <typename Name>
-typename Accumulator<Name>::SyncData& Accumulator<Name>::SyncData::operator=(SyncData&& other) {
+typename Accumulator<Name>::HandledRequest& Accumulator<Name>::HandledRequest::operator=(
+    HandledRequest&& other) {
   msg_id = std::move(other.msg_id);
-  updater_name = std::move(other.updater_name);
   source_name = std::move(other.source_name);
   action = other.action;
   data_name = std::move(other.data_name),
@@ -135,10 +130,8 @@ template <typename Name>
 Accumulator<Name>::Accumulator()
     : pending_requests_(),
       handled_requests_(),
-      pending_sync_updates_(),
       kMaxPendingRequestsCount_(300),
       kMaxHandledRequestsCount_(1000),
-      kMinResolutionCount_(2),
       mutex_() {}
 
 template <typename Name>
@@ -146,7 +139,7 @@ bool Accumulator<Name>::CheckHandled(const RequestIdentity& request_identity, Re
   std::lock_guard<std::mutex> lock(mutex_);
   auto it = std::find_if(handled_requests_.begin(),
                          handled_requests_.end(),
-                         [&request_identity](const SyncData& sync_data) {
+                         [&request_identity](const HandledRequest& sync_data) {
                          return (sync_data.msg_id == request_identity.first) &&
                                 (sync_data.source_name == request_identity.second);
                          });
@@ -176,7 +169,6 @@ std::vector<Reply> Accumulator<Name>::PushRequest(const Request& request) {
 
 template <typename Name>
 std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
-    const Identity& updater_name,
     const RequestIdentity& request_identity,
     const Reply& reply) {
   std::vector<Request> ret_requests;
@@ -192,15 +184,14 @@ std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
   }
   if (!ret_requests.empty()) {
     handled_requests_.push_back(
-        Accumulator::SyncData(request_identity.first,
-                              updater_name,
-                              request_identity.second,
-                              ret_requests.at(0).msg.data().action,
-                              ret_requests.at(0).msg.data().name,
-                              ret_requests.at(0).msg.data().type,
-                              ret_requests.at(0).msg.data().content.string().size(),
-                              1,
-                              reply));
+        Accumulator::HandledRequest(request_identity.first,
+                                    request_identity.second,
+                                    ret_requests.at(0).msg.data().action,
+                                    ret_requests.at(0).msg.data().name,
+                                    ret_requests.at(0).msg.data().type,
+                                    ret_requests.at(0).msg.data().content.string().size(),
+                                    1,
+                                    reply));
   }
   if (handled_requests_.size() > kMaxHandledRequestsCount_)
     handled_requests_.pop_front();

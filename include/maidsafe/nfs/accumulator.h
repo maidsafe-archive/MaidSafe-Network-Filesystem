@@ -48,23 +48,21 @@ class Accumulator {
     Reply reply;
   };
 
-  struct SyncData {
-    SyncData(const MessageId& msg_id_in,
-             const Identity& updater_name,
-             const Name& source_name_in,
-             const DataMessage::Action& action_type_in,
-             const Identity& data_name,
-             const DataTagValue& data_type,
-             const uint64_t& size_in,
-             const uint32_t& replication_in,
-             const Reply& reply_in);
-    SyncData(const SyncData& other);
-    SyncData& operator=(const SyncData& other);
-    SyncData(SyncData&& other);
-    SyncData& operator=(SyncData&& other);
+  struct HandledRequest {
+    HandledRequest(const MessageId& msg_id_in,
+                   const Name& source_name_in,
+                   const DataMessage::Action& action_type_in,
+                   const Identity& data_name,
+                   const DataTagValue& data_type,
+                   const uint64_t& size_in,
+                   const uint32_t& replication_in,
+                   const Reply& reply_in);
+    HandledRequest(const HandledRequest& other);
+    HandledRequest& operator=(const HandledRequest& other);
+    HandledRequest(HandledRequest&& other);
+    HandledRequest& operator=(HandledRequest&& other);
 
     MessageId msg_id;
-    Identity updater_name;
     Name source_name;
     DataMessage::Action action;
     Identity data_name;
@@ -82,25 +80,22 @@ class Accumulator {
 
   bool CheckHandled(const RequestIdentity& request_identity, Reply& reply) const;
   std::vector<Reply> PushRequest(const Request& request);
-  std::vector<Request> SetHandled(const Identity& updater_name,
-                                  const RequestIdentity& request_identity,
+  std::vector<Request> SetHandled(const RequestIdentity& request_identity,
                                   const Reply& reply);
-  std::vector<SyncData> GetHandledRequests(const Name& name) const;
+  std::vector<HandledRequest> GetHandledRequests(const Name& name) const;
   serialised_requests SerialiseHandledRequests(const Name& name) const;
-  std::vector<SyncData> ParseHandledRequests(
-      const serialised_requests& serialised_sync_updates) const;
-  void HandleSyncUpdates(const NonEmptyString& serialised_sync_updates);
+  std::vector<HandledRequest> ParseHandledRequests(
+      const serialised_requests& serialised_requests_in) const;
 
   friend class test::AccumulatorTest_BEH_PushRequest_Test;
 
  private:
   typedef std::deque<PendingRequest> Requests;
-  typedef std::deque<SyncData> HandledRequests;
+  typedef std::deque<HandledRequest> HandledRequests;
 
   Requests pending_requests_;
   HandledRequests handled_requests_;
-  HandledRequests pending_sync_updates_;
-  const size_t kMaxPendingRequestsCount_, kMaxHandledRequestsCount_, kMinResolutionCount_;
+  const size_t kMaxPendingRequestsCount_, kMaxHandledRequestsCount_;
   mutable std::mutex mutex_;
 };
 

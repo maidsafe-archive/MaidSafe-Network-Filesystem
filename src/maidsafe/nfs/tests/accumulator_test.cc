@@ -62,9 +62,7 @@ TEST(AccumulatorTest, BEH_PushRequest) {
   EXPECT_EQ(accumulator.pending_requests_.size(), 1);
   auto request_identity(accumulator.pending_requests_.at(0).first);
   EXPECT_FALSE(accumulator.CheckHandled(request_identity, reply));
-  accumulator.SetHandled(Identity(NodeId(NodeId::kRandomId).string()),
-                         request_identity,
-                         reply);
+  accumulator.SetHandled(request_identity, reply);
   EXPECT_EQ(accumulator.pending_requests_.size(), 0);
   EXPECT_TRUE(accumulator.CheckHandled(request_identity, reply));
   Accumulator<passport::PublicMaid::name_type>::serialised_requests serialised(
