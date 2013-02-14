@@ -51,9 +51,9 @@ class Accumulator {
   struct SyncData {
     SyncData(const MessageId& msg_id_in,
              const Identity& updater_name,
-             const Identity& source_name_in,
+             const Name& source_name_in,
              const DataMessage::Action& action_type_in,
-             const Name& data_name,
+             const Identity& data_name,
              const DataTagValue& data_type,
              const uint64_t& size_in,
              const uint32_t& replication_in,
@@ -65,9 +65,9 @@ class Accumulator {
 
     MessageId msg_id;
     Identity updater_name;
-    Identity source_name;
+    Name source_name;
     DataMessage::Action action;
-    Name data_name;
+    Identity data_name;
     DataTagValue data_type;
     uint64_t size;
     uint8_t replication;
@@ -100,7 +100,7 @@ class Accumulator {
   Requests pending_requests_;
   HandledRequests handled_requests_;
   HandledRequests pending_sync_updates_;
-  const size_t kMaxPendingRequestsCount_, kMaxHandledRequestsCount_;
+  const size_t kMaxPendingRequestsCount_, kMaxHandledRequestsCount_, kMinResolutionCount_;
   mutable std::mutex mutex_;
 };
 

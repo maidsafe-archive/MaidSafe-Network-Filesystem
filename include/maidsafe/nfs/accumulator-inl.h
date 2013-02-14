@@ -61,9 +61,9 @@ template <typename Name>
 Accumulator<Name>::SyncData::SyncData(
     const MessageId& msg_id_in,
     const Identity& updater_name_in,
-    const Identity& source_name_in,
+    const Name& source_name_in,
     const DataMessage::Action& action_type_in,
-    const Name& data_name_in,
+    const Identity& data_name_in,
     const DataTagValue& data_type_in,
     const uint64_t& size_in,
     const uint32_t& replication_in,
@@ -138,6 +138,7 @@ Accumulator<Name>::Accumulator()
       pending_sync_updates_(),
       kMaxPendingRequestsCount_(300),
       kMaxHandledRequestsCount_(1000),
+      kMinResolutionCount_(2),
       mutex_() {}
 
 template <typename Name>
