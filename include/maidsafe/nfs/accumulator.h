@@ -70,7 +70,7 @@ class Accumulator {
     Identity data_name;
     DataTagValue data_type;
     uint64_t size;
-    uint8_t replication;
+    int32_t replication;
     Reply reply;
   };
 
