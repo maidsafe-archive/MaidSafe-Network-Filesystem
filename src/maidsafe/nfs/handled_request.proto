@@ -3,16 +3,16 @@ option optimize_for = LITE_RUNTIME;
 
 message SyncData {
   required bytes message_id = 1;
-  required bytes source_name = 2;
-  required int32 action = 3;
-  required bytes data_name = 4;
-  required int32 data_type = 5;
-  required uint64 size = 6;
-  optional int32 replication = 7;
-  required bytes reply = 8;
+  required int32 action = 2;
+  required bytes data_name = 3;
+  required int32 data_type = 4;
+  required uint64 size = 5;
+  optional int32 replication = 6;
+  required bytes reply = 7;
 }
 
 message HandledRequests {
   required bytes name = 1;
-  repeated SyncData sync_data = 2;
+  required bytes updater_name = 2;
+  repeated SyncData sync_data = 3;
 }
