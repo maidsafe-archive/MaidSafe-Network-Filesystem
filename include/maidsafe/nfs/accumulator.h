@@ -51,13 +51,13 @@ class Accumulator {
   struct SyncData {
     SyncData(const MessageId& msg_id_in,
              const Identity& updater_name,
-             const Name& source_name_in,
+             const Identity& source_name_in,
              const DataMessage::Action& action_type_in,
-             const Identity& data_name,
-             const DataTagValue data_type,
+             const Name& data_name,
+             const DataTagValue& data_type,
              const uint64_t& size_in,
-             const uint32_t replication_in,
-             const Reply reply_in);
+             const uint32_t& replication_in,
+             const Reply& reply_in);
     SyncData(const SyncData& other);
     SyncData& operator=(const SyncData& other);
     SyncData(SyncData&& other);
@@ -65,9 +65,9 @@ class Accumulator {
 
     MessageId msg_id;
     Identity updater_name;
-    Name source_name;
+    Identity source_name;
     DataMessage::Action action;
-    Identity data_name;
+    Name data_name;
     DataTagValue data_type;
     uint64_t size;
     uint8_t replication;
@@ -76,6 +76,7 @@ class Accumulator {
 
   typedef TaggedValue<NonEmptyString, struct SerialisedRequestsTag> serialised_requests;
   typedef std::pair<MessageId, Name> RequestIdentity;
+  typedef std::pair<RequestIdentity, Request> PendingRequest;
 
   Accumulator();
 
@@ -93,7 +94,7 @@ class Accumulator {
   friend class test::AccumulatorTest_BEH_PushRequest_Test;
 
  private:
-  typedef std::deque<std::pair<RequestIdentity, Request>> Requests;
+  typedef std::deque<PendingRequest> Requests;
   typedef std::deque<SyncData> HandledRequests;
 
   Requests pending_requests_;

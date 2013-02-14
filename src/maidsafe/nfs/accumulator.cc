@@ -30,12 +30,12 @@ Accumulator<passport::PublicMaid::name_type>::SerialiseHandledRequests(
   handled_requests.set_updater_name(handled_requests_[0].updater_name.string());
   std::lock_guard<std::mutex> lock(mutex_);
   for (auto& request : handled_requests_) {
-    if (request.source_name == name) {
+    if (request.data_name == name) {
       sync_data = handled_requests.add_sync_data();
       sync_data->set_message_id(request.msg_id->string());
-      sync_data->set_source_name(request.source_name->string());
+      sync_data->set_source_name(request.source_name.string());
       sync_data->set_action(static_cast<int32_t>(request.action));
-      sync_data->set_data_name(request.data_name.string());
+      sync_data->set_data_name(request.data_name->string());
       sync_data->set_data_type(static_cast<int32_t>(request.data_type));
       sync_data->set_size(request.size);
       sync_data->set_replication(request.replication);
@@ -61,9 +61,10 @@ Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
           SyncData(
               MessageId(Identity(proto_handled_requests.sync_data(index).message_id())),
               Identity(proto_handled_requests.updater_name()),
-              passport::PublicMaid::name_type(Identity(proto_handled_requests.name())),
+              Identity(proto_handled_requests.name()),
               static_cast<DataMessage::Action>(proto_handled_requests.sync_data(index).action()),
-              Identity(proto_handled_requests.sync_data(index).data_name()),
+              passport::PublicMaid::name_type(
+                  Identity(proto_handled_requests.sync_data(index).data_name())),
               static_cast<DataTagValue>(proto_handled_requests.sync_data(index).data_type()),
               proto_handled_requests.sync_data(index).size(),
               proto_handled_requests.sync_data(index).replication(),
@@ -80,21 +81,41 @@ Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
 template <>
 void Accumulator<passport::PublicMaid::name_type>::HandleSyncUpdates(
     const  NonEmptyString&  serialised_sync_updates)  {
-  auto sync_updates(ParseHandledRequests<passport::PublicMaid::name_type>(serialised_sync_updates));
+    auto sync_updates(ParseHandledRequests(serialised_requests(serialised_sync_updates)));
   for (auto& sync_update : sync_updates) {
-    if (/* same update from same updater exist in pending_sync_updates_*/)
+    /* same update from same updater exist in pending_sync_updates_*/
+    if (std::find_if(pending_sync_updates_.begin(), pending_sync_updates_.end(),
+                     [&](const SyncData& sync) {
+                       return ((sync.updater_name == sync_update.updater_name) &&
+                               (sync.msg_id == sync_update.msg_id) &&
+                               (sync.data_name == sync_update.data_name));
+                     }) != pending_sync_updates_.end())
       continue;
-    if (/* request is already handled and is in handled_requests_*/)
+    /* request is already handled and is in handled_requests_*/
+    if (std::find_if(handled_requests_.begin(), handled_requests_.end(),
+                     [&](const SyncData& sync) {
+                       return ((sync.updater_name == sync_update.updater_name) &&
+                               (sync.msg_id == sync_update.msg_id));
+                     }) != handled_requests_.end())
       continue;
-    if (/* request is in pending_requests_ */)
+    /* request is in pending_requests_ */
+    if (std::find_if(pending_requests_.begin(), pending_requests_.end(),
+                     [&](const PendingRequest& request) {
+                       return ((request.first.second == sync_update.data_name) &&
+                               (request.first.first == sync_update.msg_id));
+                     }) != pending_requests_.end())
       continue;
-    if (/* no similar request exist add it to pending_sync_updates_*/) {
-      // pending_sync_updates_.push_back(SyncData);
-    }
-    if (/* similar request from different updater exists in pending_sync_updates_ */) {
-      // remove the similar entry from the pending_sync_updates_
-      // make and add request to the pending requests
-    }
+    /* no similar request exist add it to pending_sync_updates_*/
+    if (std::find_if(pending_sync_updates_.begin(), pending_sync_updates_.end(),
+                     [&](const SyncData& sync) {
+                       return ((sync.updater_name == sync_update.updater_name) &&
+                               (sync.msg_id == sync_update.msg_id));
+                     }) == pending_sync_updates_.end())
+      pending_sync_updates_.push_back(sync_update);
+//    if (/* similar request from different updater exists in pending_sync_updates_ */) {
+//      // remove the similar entry from the pending_sync_updates_
+//      // make and add request to the pending requests
+//    }
   }
 }
 
