@@ -181,16 +181,17 @@ std::vector<typename Accumulator<Name>::Request> Accumulator<Name>::SetHandled(
       ++itr;
     }
   }
-
-  handled_requests_.push_back(
-      Accumulator::SyncData(request_identity.first,
-                            request_identity.second,
-                            itr->second.msg.data().action,
-                            itr->second.msg.data().name,
-                            itr->second.msg.data().type,
-                            itr->second.msg.data().content.string().size(),
-                            1,
-                            reply));
+  if (!ret_requests.empty()) {
+    handled_requests_.push_back(
+        Accumulator::SyncData(request_identity.first,
+                              request_identity.second,
+                              ret_requests.at(0).msg.data().action,
+                              ret_requests.at(0).msg.data().name,
+                              ret_requests.at(0).msg.data().type,
+                              ret_requests.at(0).msg.data().content.string().size(),
+                              1,
+                              reply));
+  }
   if (handled_requests_.size() > kMaxHandledRequestsCount_)
     handled_requests_.pop_front();
   return ret_requests;
