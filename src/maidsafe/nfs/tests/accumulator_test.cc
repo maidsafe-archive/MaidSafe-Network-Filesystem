@@ -74,6 +74,28 @@ TEST(AccumulatorTest, BEH_PushRequest) {
   EXPECT_EQ(parsed.size(), 1);
 }
 
+TEST(AccumulatorTest, BEH_PushRequestThreaded) {
+  maidsafe::test::RunInParallel(10, [] {
+    DataMessage data_message = MakeMessage();
+    Reply reply(CommonErrors::success);
+    Accumulator<passport::PublicMaid::name_type> accumulator;
+    Accumulator<passport::PublicMaid::name_type>::Request request(data_message,
+                                                                  [](const std::string&) {},
+                                                                  reply);
+    accumulator.PushRequest(request);
+    EXPECT_EQ(accumulator.pending_requests_.size(), 1);
+    auto request_identity(accumulator.pending_requests_.at(0).first);
+    EXPECT_FALSE(accumulator.CheckHandled(request_identity, reply));
+    accumulator.SetHandled(request_identity, reply);
+    EXPECT_EQ(accumulator.pending_requests_.size(), 0);
+    EXPECT_TRUE(accumulator.CheckHandled(request_identity, reply));
+    Accumulator<passport::PublicMaid::name_type>::serialised_requests serialised(
+        accumulator.SerialiseHandledRequests(request_identity.second));
+    auto parsed(accumulator.ParseHandledRequests(serialised));
+    EXPECT_EQ(parsed.size(), 1);
+    });
+}
+
 TEST(AccumulatorTest, BEH_CheckPendingRequestsLimit) {
   Accumulator<passport::PublicPmid::name_type> accumulator;
   //  Pending list limit 300
