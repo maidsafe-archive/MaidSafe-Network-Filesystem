@@ -77,7 +77,8 @@ class PutDataPolicy : public DataPolicy<SigningFob, source_persona, DataMessage:
   void Put(const Data& data,
            const passport::PublicPmid::name_type& data_holder_hint,
            const routing::ResponseFunctor& callback) {
-    ExecuteAction(callback, data.name(), data.data(), data_holder_hint);
+    this->template ExecuteAction<Data>(callback, data.name(), data.Serialise().data,
+                                       data_holder_hint);
   }
 };
 
@@ -89,7 +90,7 @@ class GetDataPolicy : public DataPolicy<SigningFob, source_persona, DataMessage:
 
   template<typename Data>
   void Get(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
-    ExecuteAction(callback, name);
+    this->template ExecuteAction<Data>(callback, name);
   }
 };
 
@@ -104,7 +105,7 @@ class DeleteDataPolicy : public DataPolicy<SigningFob,
                    DataMessage::Action::kDelete>(routing, signing_fob) {}
   template<typename Data>
   void Delete(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
-    ExecuteAction(callback, name);
+    this->template ExecuteAction<Data>(callback, name);
   }
 };
 
@@ -120,7 +121,7 @@ class PutReducerDataPolicy : public DataPolicy<SigningFob,
   void Put(const passport::PublicPmid::name_type& data_holder_name,
            const Data& data,
            const routing::ResponseFunctor& callback) {
-    ExecuteAction(callback, data.name(), data.data(), data_holder_name);
+    this->template ExecuteAction<Data>(callback, data.name(), data.data(), data_holder_name);
   }
 };
 
@@ -136,7 +137,7 @@ class GetReducerDataPolicy : public DataPolicy<SigningFob,
   void Get(const passport::PublicPmid::name_type& data_holder_name,
            const typename Data::name_type& name,
            const routing::ResponseFunctor& callback) {
-    ExecuteAction(callback, name, NonEmptyString(), data_holder_name);
+    this->template ExecuteAction<Data>(callback, name, NonEmptyString(), data_holder_name);
   }
 };
 
@@ -153,7 +154,7 @@ class DeleteReducerDataPolicy : public DataPolicy<SigningFob,
   void Delete(const passport::PublicPmid::name_type& data_holder_name,
               const typename Data::name_type& name,
               const routing::ResponseFunctor& callback) {
-    ExecuteAction(callback, name, NonEmptyString(), data_holder_name);
+    this->template ExecuteAction<Data>(callback, name, NonEmptyString(), data_holder_name);
   }
 };
 
@@ -167,7 +168,7 @@ class DataGetterPolicy : public DataPolicy<passport::Maid,
                    DataMessage::Action::kGet>(routing) {}
   template<typename Data>
   void Get(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
-    ExecuteAction(callback, name);
+    this->template ExecuteAction<Data>(callback, name);
   }
 };
 
