@@ -75,32 +75,32 @@ TEST(AccumulatorTest, BEH_PushRequest) {
 }
 
 TEST(AccumulatorTest, BEH_CheckPendingRequestsLimit) {
-  Accumulator<passport::PublicPmid::name_type> accumulator;
-  //  Pending list limit 300
-  size_t pending_request_max_limit = accumulator.kMaxPendingRequestsCount_;
-  for (size_t index = 0; index < pending_request_max_limit; ++index) {
-    DataMessage data_message = MakeMessage();
-    Reply reply(CommonErrors::success);
-    Accumulator<passport::PublicPmid::name_type>::Request request(data_message,
-                                                                  [](const std::string&) {},
-                                                                  reply);
-    accumulator.PushRequest(request);
-    EXPECT_EQ(accumulator.pending_requests_.size(), (index + 1));
-  }
-  // Try to add request beyond the limit and it should fail
-  EXPECT_EQ(accumulator.pending_requests_.size(), pending_request_max_limit);
+  //Accumulator<passport::PublicPmid::name_type> accumulator;
+  ////  Pending list limit 300
+  //size_t pending_request_max_limit = accumulator.kMaxPendingRequestsCount_;
+  //for (size_t index = 0; index < pending_request_max_limit; ++index) {
+  //  DataMessage data_message = MakeMessage();
+  //  Reply reply(CommonErrors::success);
+  //  Accumulator<passport::PublicPmid::name_type>::Request request(data_message,
+  //                                                                [](const std::string&) {},
+  //                                                                reply);
+  //  accumulator.PushRequest(request);
+  //  EXPECT_EQ(accumulator.pending_requests_.size(), (index + 1));
+  //}
+  //// Try to add request beyond the limit and it should fail
+  //EXPECT_EQ(accumulator.pending_requests_.size(), pending_request_max_limit);
 
-  DataMessage data_message = MakeMessage();
-  Reply reply(CommonErrors::unknown);
-  Accumulator<passport::PublicPmid::name_type>::Request request(data_message,
-                                                                [](const std::string&) {},
-                                                                reply);
-  accumulator.PushRequest(request);
-  EXPECT_EQ(accumulator.pending_requests_.size(), pending_request_max_limit);
+  //DataMessage data_message = MakeMessage();
+  //Reply reply(CommonErrors::unknown);
+  //Accumulator<passport::PublicPmid::name_type>::Request request(data_message,
+  //                                                              [](const std::string&) {},
+  //                                                              reply);
+  //accumulator.PushRequest(request);
+  //EXPECT_EQ(accumulator.pending_requests_.size(), pending_request_max_limit);
 }
 
 TEST(AccumulatorTest, BEH_CheckHandled) {
-  DataMessage data_message = MakeMessage();
+  /*DataMessage data_message = MakeMessage();
   Reply reply(CommonErrors::success);
   Accumulator<passport::PublicMaid::name_type> accumulator;
   Accumulator<passport::PublicMaid::name_type>::Request request(data_message,
@@ -112,7 +112,7 @@ TEST(AccumulatorTest, BEH_CheckHandled) {
   EXPECT_FALSE(accumulator.CheckHandled(request_identity, reply));
   accumulator.PushRequest(request);
   accumulator.SetHandled(request_identity, reply);
-  EXPECT_TRUE(accumulator.CheckHandled(request_identity, reply));
+  EXPECT_TRUE(accumulator.CheckHandled(request_identity, reply));*/
 }
 
 }  // namespace test
