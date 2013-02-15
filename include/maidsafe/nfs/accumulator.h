@@ -29,6 +29,10 @@ namespace nfs {
 
 namespace test {
   class AccumulatorTest_BEH_PushRequest_Test;
+  class AccumulatorTest_BEH_PushRequestThreaded_Test;
+  class AccumulatorTest_BEH_CheckPendingRequestsLimit_Test;
+  class AccumulatorTest_BEH_CheckHandled_Test;
+  class AccumulatorTest_BEH_SetHandled_Test;
 }
 
 template <typename Name>
@@ -48,19 +52,19 @@ class Accumulator {
     Reply reply;
   };
 
-  struct SyncData {
-    SyncData(const MessageId& msg_id_in,
-             const Identity& source_name_in,
-             const DataMessage::Action& action_type_in,
-             const Identity& data_name,
-             const DataTagValue data_type,
-             const uint64_t& size_in,
-             const int32_t replication_in,
-             const Reply reply_in);
-    SyncData(const SyncData& other);
-    SyncData& operator=(const SyncData& other);
-    SyncData(SyncData&& other);
-    SyncData& operator=(SyncData&& other);
+  struct HandledRequest {
+    HandledRequest(const MessageId& msg_id_in,
+                   const Name& source_name_in,
+                   const DataMessage::Action& action_type_in,
+                   const Identity& data_name,
+                   const DataTagValue& data_type,
+                   const uint64_t& size_in,
+                   const uint32_t& replication_in,
+                   const Reply& reply_in);
+    HandledRequest(const HandledRequest& other);
+    HandledRequest& operator=(const HandledRequest& other);
+    HandledRequest(HandledRequest&& other);
+    HandledRequest& operator=(HandledRequest&& other);
 
     MessageId msg_id;
     Name source_name;
@@ -74,22 +78,27 @@ class Accumulator {
 
   typedef TaggedValue<NonEmptyString, struct SerialisedRequestsTag> serialised_requests;
   typedef std::pair<MessageId, Name> RequestIdentity;
+  typedef std::pair<RequestIdentity, Request> PendingRequest;
 
   Accumulator();
 
   bool CheckHandled(const RequestIdentity& request_identity, Reply& reply) const;
   std::vector<Reply> PushRequest(const Request& request);
-  std::vector<Request> SetHandled(const RequestIdentity& request_identity, const Reply& reply);
-  std::vector<SyncData> GetHandledRequests(const Name& name) const;
+  std::vector<Request> SetHandled(const RequestIdentity& request_identity,
+                                  const Reply& reply);
+  std::vector<HandledRequest> GetHandledRequests(const Name& name) const;
   serialised_requests SerialiseHandledRequests(const Name& name) const;
-  std::vector<SyncData> ParseHandledRequests(
-      const serialised_requests& serialised_message) const;
+  std::vector<HandledRequest> ParseHandledRequests(
+      const serialised_requests& serialised_requests_in) const;
 
   friend class test::AccumulatorTest_BEH_PushRequest_Test;
-
+  friend class test::AccumulatorTest_BEH_PushRequestThreaded_Test;
+  friend class test::AccumulatorTest_BEH_CheckPendingRequestsLimit_Test;
+  friend class test::AccumulatorTest_BEH_CheckHandled_Test;
+  friend class test::AccumulatorTest_BEH_SetHandled_Test;
  private:
-  typedef std::deque<std::pair<RequestIdentity, Request>> Requests;
-  typedef std::deque<SyncData> HandledRequests;
+  typedef std::deque<PendingRequest> Requests;
+  typedef std::deque<HandledRequest> HandledRequests;
 
   Requests pending_requests_;
   HandledRequests handled_requests_;
