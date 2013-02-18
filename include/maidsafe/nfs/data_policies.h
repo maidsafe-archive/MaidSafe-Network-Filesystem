@@ -121,7 +121,8 @@ class PutReducerDataPolicy : public DataPolicy<SigningFob,
   void Put(const passport::PublicPmid::name_type& data_holder_name,
            const Data& data,
            const routing::ResponseFunctor& callback) {
-    this->template ExecuteAction<Data>(callback, data.name(), data.data(), data_holder_name);
+    this->template ExecuteAction<Data>(callback, data.name(), data.Serialise().data,
+                                       data_holder_name);
   }
 };
 
