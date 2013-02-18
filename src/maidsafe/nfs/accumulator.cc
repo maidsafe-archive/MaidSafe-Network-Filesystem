@@ -22,12 +22,11 @@ namespace nfs {
 
 template <>
 typename Accumulator<passport::PublicMaid::name_type>::serialised_requests
-Accumulator<passport::PublicMaid::name_type>::SerialiseHandledRequests(
+Accumulator<passport::PublicMaid::name_type>::Serialise(
     const passport::PublicMaid::name_type& name) const {
   protobuf::HandledRequests handled_requests;
   protobuf::HandledRequest* handled_request;
-  handled_requests.set_name((name->string()));
-  std::lock_guard<std::mutex> lock(mutex_);
+  handled_requests.set_name(name->string());
   for (auto& request : handled_requests_) {
     if (request.source_name == name) {
       handled_request = handled_requests.add_handled_requests();
@@ -36,7 +35,6 @@ Accumulator<passport::PublicMaid::name_type>::SerialiseHandledRequests(
       handled_request->set_data_name(request.data_name.string());
       handled_request->set_data_type(static_cast<int32_t>(request.data_type));
       handled_request->set_size(request.size);
-      handled_request->set_replication(request.replication);
       handled_request->set_reply(NonEmptyString(request.reply.Serialise()).string());
     }
   }
@@ -45,7 +43,7 @@ Accumulator<passport::PublicMaid::name_type>::SerialiseHandledRequests(
 
 template <>
 std::vector<typename Accumulator<passport::PublicMaid::name_type>::HandledRequest>
-Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
+Accumulator<passport::PublicMaid::name_type>::Parse(
     const typename Accumulator<passport::PublicMaid::name_type>::serialised_requests&
         serialised_requests_in) const {
   std::vector<typename Accumulator<passport::PublicMaid::name_type>::HandledRequest>
@@ -59,11 +57,11 @@ Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
           HandledRequest(
               MessageId(Identity(proto_handled_requests.handled_requests(index).message_id())),
               passport::PublicMaid::name_type(Identity(proto_handled_requests.name())),
-              static_cast<DataMessage::Action>(proto_handled_requests.handled_requests(index).action()),
+              static_cast<DataMessage::Action>(
+                  proto_handled_requests.handled_requests(index).action()),
               Identity(proto_handled_requests.handled_requests(index).data_name()),
               static_cast<DataTagValue>(proto_handled_requests.handled_requests(index).data_type()),
               proto_handled_requests.handled_requests(index).size(),
-              proto_handled_requests.handled_requests(index).replication(),
               Reply(Reply::serialised_type(NonEmptyString(
                   proto_handled_requests.handled_requests(index).reply())))));
     }
@@ -74,8 +72,8 @@ Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
   return handled_requests;
 }
 
-//template <>
-//void Accumulator<passport::PublicMaid::name_type>::HandleSyncUpdates(
+// template <>
+// void Accumulator<passport::PublicMaid::name_type>::HandleSyncUpdates(
 //    const  NonEmptyString&  /*serialised_sync_updates*/)  {
 //    auto sync_updates(ParseHandledRequests(serialised_requests(serialised_sync_updates)));
 //  HandledRequests ready_to_update;
@@ -123,7 +121,7 @@ Accumulator<passport::PublicMaid::name_type>::ParseHandledRequests(
 //      pending_sync_updates_.erase(iter, pending_sync_updates_.end());
 //    }
 //  }
-//}
+// }
 
 }  // namespace nfs
 

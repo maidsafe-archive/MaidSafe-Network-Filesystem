@@ -38,14 +38,14 @@ namespace test {
 template <typename Name>
 class Accumulator {
  public:
-  struct Request {
-    Request(const DataMessage& msg_in,
+  struct PendingRequest {
+    PendingRequest(const DataMessage& msg_in,
             const routing::ReplyFunctor& reply_functor_in,
             const Reply& reply_in);
-    Request(const Request& other);
-    Request& operator=(const Request& other);
-    Request(Request&& other);
-    Request& operator=(Request&& other);
+    PendingRequest(const PendingRequest& other);
+    PendingRequest& operator=(const PendingRequest& other);
+    PendingRequest(PendingRequest&& other);
+    PendingRequest& operator=(PendingRequest&& other);
 
     DataMessage msg;
     routing::ReplyFunctor reply_functor;
@@ -58,8 +58,7 @@ class Accumulator {
                    const DataMessage::Action& action_type_in,
                    const Identity& data_name,
                    const DataTagValue& data_type,
-                   const uint64_t& size_in,
-                   const uint32_t& replication_in,
+                   const int32_t& size_in,
                    const Reply& reply_in);
     HandledRequest(const HandledRequest& other);
     HandledRequest& operator=(const HandledRequest& other);
@@ -71,39 +70,42 @@ class Accumulator {
     DataMessage::Action action;
     Identity data_name;
     DataTagValue data_type;
-    uint64_t size;
-    int32_t replication;
+    int32_t size;
     Reply reply;
   };
 
   typedef TaggedValue<NonEmptyString, struct SerialisedRequestsTag> serialised_requests;
-  typedef std::pair<MessageId, Name> RequestIdentity;
-  typedef std::pair<RequestIdentity, Request> PendingRequest;
 
   Accumulator();
 
-  bool CheckHandled(const RequestIdentity& request_identity, Reply& reply) const;
-  std::vector<Reply> PushRequest(const Request& request);
-  std::vector<Request> SetHandled(const RequestIdentity& request_identity,
-                                  const Reply& reply);
-  std::vector<HandledRequest> GetHandledRequests(const Name& name) const;
-  serialised_requests SerialiseHandledRequests(const Name& name) const;
-  std::vector<HandledRequest> ParseHandledRequests(
-      const serialised_requests& serialised_requests_in) const;
+  // Returns true and populates <reply_out> if the message has already been set as handled.
+  bool CheckHandled(const DataMessage& data_message, Reply& reply_out) const;
+  // Adds a request pending the overall result of the operation.
+  std::vector<Reply> PushRequest(const PendingRequest& pending_request);
+  // Marks the message as handled and returns all pending requests held with the same ID
+  std::vector<PendingRequest> SetHandled(const DataMessage& data_message, const Reply& reply);
+  // Returns all handled requests for the given account name.
+  std::vector<HandledRequest> Get(const Name& name) const;
+  // Serialises all handled requests for the given account name.
+  serialised_requests Serialise(const Name& name) const;
+  // Parses the list of serialised handled requests.
+  std::vector<HandledRequest> Parse(const serialised_requests& serialised_requests_in) const;
 
   friend class test::AccumulatorTest_BEH_PushRequest_Test;
   friend class test::AccumulatorTest_BEH_PushRequestThreaded_Test;
   friend class test::AccumulatorTest_BEH_CheckPendingRequestsLimit_Test;
   friend class test::AccumulatorTest_BEH_CheckHandled_Test;
   friend class test::AccumulatorTest_BEH_SetHandled_Test;
- private:
-  typedef std::deque<PendingRequest> Requests;
-  typedef std::deque<HandledRequest> HandledRequests;
 
-  Requests pending_requests_;
-  HandledRequests handled_requests_;
+ private:
+  Accumulator(const Accumulator&);
+  Accumulator& operator=(const Accumulator&);
+  Accumulator(Accumulator&&);
+  Accumulator& operator=(Accumulator&&);
+
+  std::deque<PendingRequest> pending_requests_;
+  std::deque<HandledRequest> handled_requests_;
   const size_t kMaxPendingRequestsCount_, kMaxHandledRequestsCount_;
-  mutable std::mutex mutex_;
 };
 
 }  // namespace nfs
