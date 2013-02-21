@@ -13,9 +13,11 @@
 #define MAIDSAFE_NFS_UTILS_H_
 
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "maidsafe/common/node_id.h"
@@ -38,6 +40,15 @@ MessageId GetNewMessageId(const NodeId& source_node_id);
 
 template<typename Data>
 bool IsCacheable();
+
+// If 'replies' contains >= n successsful replies where n is 'successes_required', returns
+// <iterator to nth successful reply, true> otherwise
+// <iterator to most frequent failed reply, false>.  If there is more than one most frequent type,
+// (e.g. 2 'no_such_element' and 2 'invalid_parameter') the iterator points to the first which
+// reaches the frequency.
+std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+    const std::vector<Reply>& replies,
+    int successes_required);
 
 class PutOrDeleteOp {
  public:

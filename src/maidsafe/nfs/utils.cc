@@ -39,6 +39,26 @@ MessageId GetNewMessageId(const NodeId& source_node_id) {
 }  // namespace detail
 
 
+std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+    const std::vector<Reply>& replies,
+    int successes_required) {
+  auto most_frequent_itr(std::end(replies));
+  int successes(0), most_frequent(0);
+  typedef std::map<std::error_code, int> Count;
+  Count count;
+  for (auto itr(std::begin(replies)); itr != std::end(replies); ++itr) {
+    int this_reply_count(++count[(*itr).error().code()]);
+    if ((*itr).IsSuccess()) {
+      if (++successes >= successes_required)
+        return std::make_pair(itr, true);
+    } else if (this_reply_count > most_frequent) {
+      most_frequent = this_reply_count;
+      most_frequent_itr = itr;
+    }
+  }
+  return std::make_pair(most_frequent_itr, false);
+}
+
 PutOrDeleteOp::PutOrDeleteOp(int successes_required, std::function<void(Reply)> callback)
     : mutex_(),
       successes_required_(successes_required),
@@ -51,40 +71,23 @@ PutOrDeleteOp::PutOrDeleteOp(int successes_required, std::function<void(Reply)> 
 
 void PutOrDeleteOp::HandleReply(Reply&& reply) {
   std::function<void(Reply)> callback;
-  std::unique_ptr<Reply> result;
+  std::unique_ptr<Reply> result_ptr;
   {
     std::lock_guard<std::mutex> lock(mutex_);
     if (callback_executed_)
       return;
     replies_.push_back(std::move(reply));
-    std::vector<Reply>::iterator success_itr, most_frequent_itr;
-    int successes(0), most_frequent(0);
-    typedef std::map<std::error_code, int> Count;
-    Count count;
-    for (auto itr(replies_.begin()); itr != replies_.end(); ++itr) {
-      int this_reply_count(++count[(*itr).error().code()]);
-      if ((*itr).IsSuccess()) {
-        ++successes;
-        success_itr = itr;
-      } else if (this_reply_count > most_frequent) {
-        most_frequent = this_reply_count;
-        most_frequent_itr = itr;
-      }
-    }
-
-    if (successes == successes_required_) {
+    auto result(GetSuccessOrMostFrequentReply(replies_, successes_required_));
+    if (result.second || replies_.size() == routing::Parameters::node_group_size) {
+      // Operation has succeeded or failed overall
       callback = callback_;
       callback_executed_ = true;
-      result = std::unique_ptr<Reply>(new Reply(*success_itr));
-    } else if (replies_.size() == routing::Parameters::node_group_size) {  // Operation has failed
-      callback = callback_;
-      callback_executed_ = true;
-      result = std::unique_ptr<Reply>(new Reply(*most_frequent_itr));
+      result_ptr = std::unique_ptr<Reply>(new Reply(*result.first));
     } else {
       return;
     }
   }
-  callback(*result);
+  callback(*result_ptr);
 }
 
 void HandlePutOrDeleteReply(std::shared_ptr<PutOrDeleteOp> op,
