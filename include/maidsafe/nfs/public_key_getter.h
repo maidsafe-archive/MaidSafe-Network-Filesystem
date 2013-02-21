@@ -20,7 +20,7 @@
 #include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/nfs.h"
-
+#include "maidsafe/nfs/reply.h"
 
 namespace maidsafe {
 
@@ -34,24 +34,35 @@ class PublicKeyGetter {
                       std::vector<passport::PublicPmid>());
 
   template<typename Data>
-  void HandleGetKey(const typename Data::name_type& key_name,
-                    const routing::ResponseFunctor& get_key_functor);
+  void GetKey(const typename Data::name_type& key_name,
+              const routing::ResponseFunctor& get_key_functor);
 
  private:
   std::unique_ptr<KeyGetterNfs> key_getter_nfs_;
-  std::unique_ptr<FakeKeyGetterNfs> fake_key_getter_nfs_;
+#ifdef TESTING
+  std::vector<passport::PublicPmid> kAllPmids_;
+#endif
 };
 
 template<typename Data>
-void PublicKeyGetter::HandleGetKey(const typename Data::name_type& key_name,
-                                   const routing::ResponseFunctor& get_key_functor) {
+void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
+                             const routing::ResponseFunctor& get_key_functor) {
+  static_assert(passport::is_public_key_type<Data>::value,
+                "Error, type must be a PublicKey type");
 #ifdef TESTING
   if (key_getter_nfs_) {
 #endif
     key_getter_nfs_->Get<Data>(key_name, get_key_functor);
 #ifdef TESTING
   } else {
-    fake_key_getter_nfs_->Get<passport::PublicPmid>(key_name, get_key_functor);
+    auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
+        [&key_name](const passport::PublicPmid& pmid) { return pmid.name() == key_name; }));
+    if (itr == kAllPmids_.end()) {
+      Reply reply(NfsErrors::failed_to_get_data);
+      return get_key_functor(reply.Serialise()->string());
+    }
+    Reply reply(CommonErrors::success, (*itr).Serialise().data);
+    get_key_functor(reply.Serialise()->string());
   }
 #endif
 }

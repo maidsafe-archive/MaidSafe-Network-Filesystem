@@ -214,22 +214,6 @@ class NoDelete {
 };
 
 
-#ifdef TESTING
-
-class GetFromKeyFile {
- public:
-  explicit GetFromKeyFile(const std::vector<passport::PublicPmid>& all_pmids)
-      : kAllPmids_(all_pmids) {}
-  template<typename Data>
-  void Get(const typename Data::name_type& name, const routing::ResponseFunctor& callback);
-
- private:
-  const std::vector<passport::PublicPmid> kAllPmids_;
-};
-
-#endif
-
-
 typedef PutDataPolicy<passport::Maid, Persona::kClientMaid> ClientMaidPutPolicy;
 typedef GetDataPolicy<passport::Maid, Persona::kClientMaid> ClientMaidGetPolicy;
 typedef DeleteDataPolicy<passport::Maid, Persona::kClientMaid> ClientMaidDeletePolicy;

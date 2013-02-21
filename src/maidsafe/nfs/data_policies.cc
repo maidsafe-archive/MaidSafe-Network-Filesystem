@@ -172,26 +172,6 @@ PersonaId DataPolicy<passport::Maid,
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
 }
 
-
-
-// ============================== FakeKeyGetter ==============================
-#ifdef TESTING
-
-template<>
-void GetFromKeyFile::Get<passport::PublicPmid>(const typename passport::PublicPmid::name_type& name,
-                                               const routing::ResponseFunctor& callback) {
-  auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
-      [&name](const passport::PublicPmid& pmid) { return pmid.name() == name; }));
-  if (itr == kAllPmids_.end()) {
-    Reply reply(NfsErrors::failed_to_get_data);
-    return callback(reply.Serialise()->string());
-  }
-  Reply reply(CommonErrors::success, (*itr).Serialise().data);
-  callback(reply.Serialise()->string());
-}
-
-#endif
-
 }  // namespace nfs
 
 }  // namespace maidsafe

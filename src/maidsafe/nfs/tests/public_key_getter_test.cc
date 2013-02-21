@@ -125,7 +125,7 @@ TEST_F(PublicKeyGetterTest, BEH_GetPublicPmidKeys) {
     }
   });
   for (auto& pmid : public_pmids)
-    public_key_getter_->HandleGetKey<passport::PublicPmid>(pmid.name(), get_key_functor);
+    public_key_getter_->GetKey<passport::PublicPmid>(pmid.name(), get_key_functor);
 }
 
 //  TEST_F(PublicKeyGetterTest, BEH_GetPublicKeys) {

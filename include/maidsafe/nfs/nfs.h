@@ -60,11 +60,6 @@ typedef NetworkFileSystem<ClientMaidPutPolicy,
 
 typedef DataGetterPolicy KeyGetterNfs;
 
-
-#ifdef TESTING
-typedef GetFromKeyFile FakeKeyGetterNfs;
-#endif
-
 }  // namespace nfs
 
 }  // namespace maidsafe
