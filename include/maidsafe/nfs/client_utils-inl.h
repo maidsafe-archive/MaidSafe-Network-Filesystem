@@ -94,7 +94,7 @@ std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_
       Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
       if (!reply.IsSuccess())
         throw reply.error();
-      Data data((Data::serialised_type(reply.data())));
+      Data data(name, (Data::serialised_type(reply.data())));
       return get_op->SetPromiseValue(std::move(data));
     }
     catch(const maidsafe_error& error) {
