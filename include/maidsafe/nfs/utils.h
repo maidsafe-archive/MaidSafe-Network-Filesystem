@@ -50,16 +50,17 @@ std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentRepl
     const std::vector<Reply>& replies,
     int successes_required);
 
-class PutOrDeleteOp {
+// Put, delete and PublicKeyGet(as use callback only, don't return future)
+class OperationOp {
  public:
-  PutOrDeleteOp(int successes_required, std::function<void(Reply)> callback);
+  OperationOp(int successes_required, std::function<void(Reply)> callback);
   void HandleReply(Reply&& reply);
 
  private:
-  PutOrDeleteOp(const PutOrDeleteOp&);
-  PutOrDeleteOp& operator=(const PutOrDeleteOp&);
-  PutOrDeleteOp(PutOrDeleteOp&&);
-  PutOrDeleteOp& operator=(PutOrDeleteOp&&);
+  OperationOp(const OperationOp&);
+  OperationOp& operator=(const OperationOp&);
+  OperationOp(OperationOp&&);
+  OperationOp& operator=(OperationOp&&);
 
   mutable std::mutex mutex_;
   int successes_required_;
@@ -68,7 +69,8 @@ class PutOrDeleteOp {
   bool callback_executed_;
 };
 
-void HandlePutOrDeleteReply(std::shared_ptr<PutOrDeleteOp> op, const std::string& serialised_reply);
+// Put, delete and PublicKeyGet(as use callback only, don't return future)
+void HandleOperationReply(std::shared_ptr<OperationOp> op, const std::string& serialised_reply);
 
 }  // namespace nfs
 

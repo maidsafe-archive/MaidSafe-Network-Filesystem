@@ -59,7 +59,7 @@ std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentRepl
   return std::make_pair(most_frequent_itr, false);
 }
 
-PutOrDeleteOp::PutOrDeleteOp(int successes_required, std::function<void(Reply)> callback)
+OperationOp::OperationOp(int successes_required, std::function<void(Reply)> callback)
     : mutex_(),
       successes_required_(successes_required),
       callback_(callback),
@@ -69,7 +69,7 @@ PutOrDeleteOp::PutOrDeleteOp(int successes_required, std::function<void(Reply)> 
     ThrowError(CommonErrors::invalid_parameter);
 }
 
-void PutOrDeleteOp::HandleReply(Reply&& reply) {
+void OperationOp::HandleReply(Reply&& reply) {
   std::function<void(Reply)> callback;
   std::unique_ptr<Reply> result_ptr;
   {
@@ -90,8 +90,8 @@ void PutOrDeleteOp::HandleReply(Reply&& reply) {
   callback(*result_ptr);
 }
 
-void HandlePutOrDeleteReply(std::shared_ptr<PutOrDeleteOp> op,
-                            const std::string& serialised_reply) {
+void HandleOperationReply(std::shared_ptr<OperationOp> op,
+                          const std::string& serialised_reply) {
   try {
     Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
     op->HandleReply(std::move(reply));

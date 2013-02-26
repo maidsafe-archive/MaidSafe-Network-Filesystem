@@ -78,11 +78,11 @@ void Put(ClientMaidNfs& client_maid_nfs,
          const passport::PublicPmid::name_type& data_holder_hint,
          int successes_required,
          std::function<void(Reply)> result) {
-  auto put_op(std::make_shared<PutOrDeleteOp>(successes_required, result));
+  auto put_op(std::make_shared<OperationOp>(successes_required, result));
   client_maid_nfs.Put(data,
                       data_holder_hint,
                       [put_op](std::string serialised_reply) {
-                           HandlePutOrDeleteReply(put_op, serialised_reply);
+                           HandleOperationReply(put_op, serialised_reply);
                       });
 }
 
@@ -114,10 +114,10 @@ void Delete(ClientMaidNfs& client_maid_nfs,
             const typename Data::name_type& name,
             int successes_required,
             std::function<void(Reply)> result) {
-  auto delete_op(std::make_shared<PutOrDeleteOp>(successes_required, result));
+  auto delete_op(std::make_shared<OperationOp>(successes_required, result));
   client_maid_nfs.Delete(name,
                          [delete_op](std::string serialised_reply) {
-                             HandlePutOrDeleteReply(delete_op, serialised_reply);
+                             HandleOperationReply(delete_op, serialised_reply);
                          });
 }
 
