@@ -35,7 +35,7 @@ class PublicKeyGetter {
 
   template<typename Data>
   void GetKey(const typename Data::name_type& key_name,
-              const routing::ResponseFunctor& get_key_functor);
+              std::function<void(Reply)> get_key_functor);
 
  private:
   std::unique_ptr<KeyGetterNfs> key_getter_nfs_;
@@ -46,23 +46,27 @@ class PublicKeyGetter {
 
 template<typename Data>
 void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
-                             const routing::ResponseFunctor& get_key_functor) {
+                             std::function<void(Reply)> get_key_functor) {
   static_assert(passport::is_public_key_type<Data>::value,
                 "Error, type must be a PublicKey type");
 #ifdef TESTING
   if (key_getter_nfs_) {
 #endif
-    key_getter_nfs_->Get<Data>(key_name, get_key_functor);
+    auto get_op(std::make_shared<OperationOp>(1, get_key_functor));
+    key_getter_nfs_->Get<Data>(key_name,
+                               [get_op](std::string serialised_reply) {
+                                 HandleOperationReply(get_op, serialised_reply);
+                               });
 #ifdef TESTING
   } else {
     auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
         [&key_name](const passport::PublicPmid& pmid) { return pmid.name() == key_name; }));
     if (itr == kAllPmids_.end()) {
       Reply reply(NfsErrors::failed_to_get_data);
-      return get_key_functor(reply.Serialise()->string());
+      return get_key_functor(reply);
     }
     Reply reply(CommonErrors::success, (*itr).Serialise().data);
-    get_key_functor(reply.Serialise()->string());
+    get_key_functor(reply);
   }
 #endif
 }

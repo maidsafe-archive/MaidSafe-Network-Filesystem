@@ -110,9 +110,10 @@ TEST_F(PublicKeyGetterTest, BEH_GetPublicPmidKeys) {
   PublicPmidVector public_pmids(GeneratePublicPmids());
   public_key_getter_.reset(new PublicKeyGetter(routing_, public_pmids));
   PublicKeyVector public_keys(FillPublicKeyVector(public_pmids));
-  auto get_key_functor([&public_keys](std::string fetched_key) {
+  auto get_key_functor([&public_keys](Reply fetched_key) {
     try {
-      asymm::PublicKey public_key(asymm::DecodeKey(asymm::EncodedPublicKey(fetched_key)));
+      asymm::PublicKey public_key(asymm::DecodeKey(
+                                    asymm::EncodedPublicKey(fetched_key.data().string())));
       auto it = std::find_if(public_keys.begin(),
                              public_keys.end(),
                              [&public_key](const asymm::PublicKey& saved_public_key) {
