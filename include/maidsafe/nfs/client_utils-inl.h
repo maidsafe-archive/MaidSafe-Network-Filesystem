@@ -88,8 +88,8 @@ void Put(ClientMaidNfs& client_maid_nfs,
 
 template<typename Data>
 std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_type& name) {
-  auto get_op(std::make_shared<detail::GetOp<Data>>());
-  client_maid_nfs.Get(name, [get_op](std::string serialised_reply)->void {
+  auto get_op(std::make_shared<detail::GetOp<Data> >());
+  client_maid_nfs.Get(name, [get_op, name] (std::string serialised_reply)->void {
     try {
       Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
       if (!reply.IsSuccess())
