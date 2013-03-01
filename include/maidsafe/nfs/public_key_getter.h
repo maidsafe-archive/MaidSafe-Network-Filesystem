@@ -59,8 +59,11 @@ void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
                                });
 #ifdef TESTING
   } else {
-    auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
-        [&key_name](const passport::PublicPmid& pmid) { return pmid.name() == key_name; }));
+    auto itr(std::find_if(kAllPmids_.begin(),
+                          kAllPmids_.end(),
+                          [&key_name] (const passport::PublicPmid& pmid) {
+                            return pmid.name() == key_name;
+                          }));
     if (itr == kAllPmids_.end()) {
       Reply reply(NfsErrors::failed_to_get_data);
       return get_key_functor(reply);
