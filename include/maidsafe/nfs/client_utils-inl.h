@@ -95,7 +95,7 @@ std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_
       if (!reply.IsSuccess())
         throw reply.error();
       Data data(name, (typename Data::serialised_type(reply.data())));
-      return get_op->SetPromiseValue(std::move(data));
+      get_op->SetPromiseValue(std::move(data));
     }
     catch(const maidsafe_error& error) {
       LOG(kWarning) << "nfs Get error: " << error.code() << " - " << error.what();
