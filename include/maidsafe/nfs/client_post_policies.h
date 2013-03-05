@@ -12,8 +12,12 @@
 #ifndef MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_
 #define MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_
 
+#include <string>
+
 #include "maidsafe/routing/routing_api.h"
 
+#include "maidsafe/nfs/generic_message.h"
+#include "maidsafe/nfs/persona_id.h"
 
 namespace maidsafe {
 
@@ -30,6 +34,48 @@ class NoPost {
  protected:
   ~NoPost() {}
 };
+
+template <typename SigningFob, Persona source_persona>
+class ClientPostPolicy {
+ public:
+  ClientPostPolicy(routing::Routing& routing, const SigningFob& signing_fob)
+      : routing_(routing),
+        kSigningFob_(new SigningFob(signing_fob)),
+        kSource_(source_persona, routing_.kNodeId()) {}
+
+  void RegisterPmid(const NonEmptyString& serialised_pmid_registration,
+                    const routing::ResponseFunctor& callback) {
+    GenericMessage generic_message(
+        nfs::GenericMessage::Action::kRegisterPmid,
+        source_persona,
+        kSource_,
+        kSigningFob_->name().data,
+        serialised_pmid_registration);
+    Message message(GenericMessage::message_type_identifier, generic_message.Serialise().data);
+    routing_.SendGroup(NodeId(generic_message.name().string()), message.Serialise()->string(),
+                       false, callback);
+  }
+
+  void UnregisterPmid(const NonEmptyString& serialised_pmid_unregistration,
+                      const routing::ResponseFunctor& callback) {
+    GenericMessage generic_message(
+        nfs::GenericMessage::Action::kRegisterPmid,
+        source_persona,
+        kSource_,
+        kSigningFob_->name().data,
+        serialised_pmid_unregistration);
+    Message message(GenericMessage::message_type_identifier, generic_message.Serialise().data);
+    routing_.SendGroup(NodeId(generic_message.name().string()), message.Serialise()->string(),
+                       false, callback);
+  }
+
+ private:
+  routing::Routing& routing_;
+  const std::unique_ptr<const SigningFob> kSigningFob_;
+  const PersonaId kSource_;
+};
+
+typedef ClientPostPolicy<passport::Maid, Persona::kClientMaid> ClientMaidPostPolicy;
 
 }  // namespace nfs
 

@@ -89,12 +89,12 @@ void Put(ClientMaidNfs& client_maid_nfs,
 template<typename Data>
 std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_type& name) {
   auto get_op(std::make_shared<detail::GetOp<Data> >());
-  client_maid_nfs.Get<Data>(name, [get_op, name] (std::string serialised_reply) {
+  client_maid_nfs.Get(name, [get_op, name] (std::string serialised_reply)->void {
     try {
       Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
       if (!reply.IsSuccess())
         throw reply.error();
-      Data data(name, (typename Data::serialised_type(reply.data())));
+      Data data(name, (Data::serialised_type(reply.data())));
       return get_op->SetPromiseValue(std::move(data));
     }
     catch(const maidsafe_error& error) {
@@ -103,7 +103,7 @@ std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_
     }
     catch(const std::exception& e) {
       LOG(kWarning) << "nfs Get error: " << e.what();
-      get_op->HandleFailure(MakeError(CommonErrors::unknown));
+      get_op->HandleFailure(CommonErrors::unknown);
     }
   });
   return get_op->GetFutureFromPromise();
@@ -116,8 +116,8 @@ void Delete(ClientMaidNfs& client_maid_nfs,
             std::function<void(Reply)> result) {
   auto delete_op(std::make_shared<OperationOp>(successes_required, result));
   client_maid_nfs.Delete<Data>(name,
-                               [delete_op] (std::string serialised_reply) {
-                                 HandleOperationReply(delete_op, serialised_reply);
+                               [delete_op](std::string serialised_reply) {
+                                   HandleOperationReply(delete_op, serialised_reply);
                                });
 }
 
