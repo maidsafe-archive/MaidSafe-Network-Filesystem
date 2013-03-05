@@ -49,7 +49,7 @@ class PublicKeyGetterTest : public testing::Test {
   };
 
   PublicKeyGetterTest()
-      : routing_(nullptr),
+      : routing_(NodeId(NodeId::kRandomId)),
         public_key_getter_(new PublicKeyGetter(routing_, PublicPmidVector())) {}
 
   PublicDataType GetRandomPublicData() {
