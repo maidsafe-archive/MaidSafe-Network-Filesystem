@@ -59,7 +59,7 @@ class ClientPostPolicy {
   void UnregisterPmid(const NonEmptyString& serialised_pmid_unregistration,
                       const routing::ResponseFunctor& callback) {
     GenericMessage generic_message(
-        nfs::GenericMessage::Action::kRegisterPmid,
+        nfs::GenericMessage::Action::kUnregisterPmid,
         source_persona,
         kSource_,
         kSigningFob_->name().data,
