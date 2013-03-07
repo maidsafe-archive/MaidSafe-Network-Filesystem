@@ -18,6 +18,5 @@ message DataMessage {
   required PersonaId source = 3;
   required Data data = 4;
   optional ClientValidation client_validation = 5;
-  optional bytes data_holder_hint = 6;
-  optional bytes final_target_id = 7;
+  optional bytes data_holder = 6;
 }

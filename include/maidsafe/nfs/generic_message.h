@@ -20,7 +20,6 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
-
 #include "maidsafe/nfs/persona_id.h"
 #include "maidsafe/nfs/types.h"
 
@@ -34,9 +33,10 @@ class GenericMessage {
   enum class Action : int32_t {
     kRegisterPmid,
     kConnect,
-    kGetPmidSize,
+    kGetPmidHealth,
     kNodeDown,
     kNodeUp,
+    kPmidStatus,
     kGetElementList,
     kSynchronise
   };
@@ -51,7 +51,6 @@ class GenericMessage {
     int32_t size, index;
   };
   typedef TaggedValue<NonEmptyString, struct SerialisedGenericMessageTag> serialised_type;
-  typedef std::function<void(GenericMessage message)> OnError;
   static const MessageCategory message_type_identifier;
 
   GenericMessage(Action action,
@@ -88,7 +87,6 @@ class GenericMessage {
   NonEmptyString content_;
 };
 
-
 template <typename Elem, typename Traits>
 std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
                                              const GenericMessage::Action &action) {
@@ -100,7 +98,7 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
     case GenericMessage::Action::kConnect:
       action_str = "Connect";
       break;
-    case GenericMessage::Action::kGetPmidSize:
+    case GenericMessage::Action::kGetPmidHealth:
       action_str = "Get PMID Size";
       break;
     case GenericMessage::Action::kNodeDown:

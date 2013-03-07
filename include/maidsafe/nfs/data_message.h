@@ -65,15 +65,17 @@ class DataMessage {
   };
 
   typedef TaggedValue<NonEmptyString, struct SerialisedDataMessageTag> serialised_type;
-  typedef std::function<void(DataMessage message)> OnError;
   static const MessageCategory message_type_identifier;
-
+  // In the context of a MaidClient doing a Put, the data_holder arg represents a hint to a
+  // DataHolder the client would want to store the data (i.e. one of its own vaults).  In the
+  // context of a MetadataManger sending to PmidAccountHolder, the data_holder represents the name
+  // of the actual DataHolder chosen (the PmidAccountHolder should be managing this DataHolder's
+  // account).
   DataMessage(Persona destination_persona,
               const PersonaId& source,
               const Data& data,
-              const passport::PublicPmid::name_type& data_holder_hint =
-                  passport::PublicPmid::name_type(),
-              const Identity& final_target_id = Identity());
+              const passport::PublicPmid::name_type& data_holder =
+                  passport::PublicPmid::name_type());
   DataMessage(const DataMessage& other);
   DataMessage& operator=(const DataMessage& other);
   DataMessage(DataMessage&& other);
@@ -95,10 +97,8 @@ class DataMessage {
   Data data() const { return data_; }
   ClientValidation client_validation() const { return client_validation_; }
   bool HasClientValidation() const { return client_validation_.name.IsInitialised(); }
-  passport::PublicPmid::name_type data_holder_hint() const { return data_holder_hint_; }
-  bool HasDataHolderHint() const { return data_holder_hint_->IsInitialised(); }
-  Identity final_target_id() const { return final_target_id_; }
-  bool HasTargetId() const { return final_target_id_.IsInitialised(); }
+  passport::PublicPmid::name_type data_holder() const { return data_holder_; }
+  bool HasDataHolder() const { return data_holder_->IsInitialised(); }
 
  private:
   bool ValidateInputs() const;
@@ -108,8 +108,7 @@ class DataMessage {
   PersonaId source_;
   Data data_;
   ClientValidation client_validation_;
-  passport::PublicPmid::name_type data_holder_hint_;
-  Identity final_target_id_;
+  passport::PublicPmid::name_type data_holder_;
 };
 
 

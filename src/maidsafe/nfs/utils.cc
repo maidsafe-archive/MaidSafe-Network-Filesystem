@@ -12,8 +12,15 @@
 #include "maidsafe/nfs/utils.h"
 
 #include <cstdint>
+#include <string>
 
+#include "maidsafe/common/crypto.h"
+#include "maidsafe/common/log.h"
 #include "maidsafe/common/utils.h"
+
+#include "maidsafe/routing/parameters.h"
+
+#include "maidsafe/nfs/reply.h"
 
 
 namespace maidsafe {
@@ -29,36 +36,74 @@ MessageId GetNewMessageId(const NodeId& source_node_id) {
                                                          std::to_string(random_element++))));
 }
 
-void GetReply(int& success_count, int& failure_count, std::future<std::string>& future) {
-  try {
-    // Need '((' when constructing Reply to avoid most vexing parse.
-    Reply reply((Reply::serialised_type(NonEmptyString(future.get()))));
-    if (reply.IsSuccess()) {
-      ++success_count;
-    } else {
-      LOG(kWarning) << "Received an error: " << reply.error().what();
-      ++failure_count;
-    }
-  }
-  catch(const std::exception& e) {
-    ++failure_count;
-    LOG(kError) <<  e.what();
-  }
-}
-
 }  // namespace detail
 
-std::vector<StringFuture>::iterator FindNextReadyFuture(const StringFutureVector::iterator& begin,
-                                                        StringFutureVector& routing_futures) {
-  return std::find_if(begin,
-                      routing_futures.end(),
-                      [] (StringFuture& future) { return IsReady(future); });  // NOLINT (Dan)
+
+std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+    const std::vector<Reply>& replies,
+    int successes_required) {
+  auto most_frequent_itr(std::end(replies));
+  int successes(0), most_frequent(0);
+  typedef std::map<std::error_code, int> Count;
+  Count count;
+  for (auto itr(std::begin(replies)); itr != std::end(replies); ++itr) {
+    int this_reply_count(++count[(*itr).error().code()]);
+    if ((*itr).IsSuccess()) {
+      if (++successes >= successes_required)
+        return std::make_pair(itr, true);
+    } else if (this_reply_count > most_frequent) {
+      most_frequent = this_reply_count;
+      most_frequent_itr = itr;
+    }
+  }
+  return std::make_pair(most_frequent_itr, false);
 }
 
-void HandleGenericResponse(GenericMessage::OnError /*on_error_functor*/,
-                           GenericMessage /*original_generic_message*/,
-                           const std::vector<std::string>& /*serialised_messages*/) {
-  // TODO(Team): BEFORE_RELEASE implement
+OperationOp::OperationOp(int successes_required, std::function<void(Reply)> callback)
+    : mutex_(),
+      successes_required_(successes_required),
+      callback_(callback),
+      replies_(),
+      callback_executed_(!callback) {
+  if ((callback && successes_required <= 0) || (!callback && successes_required != 0))
+    ThrowError(CommonErrors::invalid_parameter);
+}
+
+void OperationOp::HandleReply(Reply&& reply) {
+  std::function<void(Reply)> callback;
+  std::unique_ptr<Reply> result_ptr;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (callback_executed_)
+      return;
+    replies_.push_back(std::move(reply));
+    auto result(GetSuccessOrMostFrequentReply(replies_, successes_required_));
+    if (result.second || replies_.size() == routing::Parameters::node_group_size) {
+      // Operation has succeeded or failed overall
+      callback = callback_;
+      callback_executed_ = true;
+      result_ptr = std::unique_ptr<Reply>(new Reply(*result.first));
+    } else {
+      return;
+    }
+  }
+  callback(*result_ptr);
+}
+
+void HandleOperationReply(std::shared_ptr<OperationOp> op,
+                          const std::string& serialised_reply) {
+  try {
+    Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
+    op->HandleReply(std::move(reply));
+  }
+  catch(const maidsafe_error& error) {
+    LOG(kWarning) << "nfs error: " << error.code() << " - " << error.what();
+    op->HandleReply(Reply(error));
+  }
+  catch(const std::exception& e) {
+    LOG(kWarning) << "nfs error: " << e.what();
+    op->HandleReply(Reply(CommonErrors::unknown));
+  }
 }
 
 }  // namespace nfs

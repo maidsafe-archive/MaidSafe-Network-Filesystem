@@ -9,30 +9,12 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/public_key_getter.h"
-
-#include "maidsafe/common/error.h"
-#include "maidsafe/common/log.h"
+#include "maidsafe/nfs/client_utils.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
-
-PublicKeyGetter::PublicKeyGetter(routing::Routing& routing,
-                                 const std::vector<passport::PublicPmid>& public_pmids_from_file)
-    : key_getter_nfs_(public_pmids_from_file.empty() ? new KeyGetterNfs(routing) : nullptr)
-#ifdef TESTING
-      , kAllPmids_(public_pmids_from_file)
-#endif
-{
-#ifndef TESTING
-  if (!public_pmids_from_file.empty()) {
-    LOG(kError) << "Cannot use fake key getter if TESTING is not defined";
-    ThrowError(NfsErrors::invalid_parameter);
-  }
-#endif
-}
 
 }  // namespace nfs
 

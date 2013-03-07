@@ -12,25 +12,15 @@
 #ifndef MAIDSAFE_NFS_PUBLIC_KEY_GETTER_H_
 #define MAIDSAFE_NFS_PUBLIC_KEY_GETTER_H_
 
-#include <chrono>
-#include <condition_variable>
-#include <future>
-#include <memory>
-#include <mutex>
 #include <string>
 #include <vector>
 
-#include "boost/variant/variant.hpp"
-#include "boost/variant/static_visitor.hpp"
-
 #include "maidsafe/common/utils.h"
-
-#include "maidsafe/nfs/nfs.h"
-
 #include "maidsafe/passport/types.h"
-
 #include "maidsafe/routing/routing_api.h"
 
+#include "maidsafe/nfs/nfs.h"
+#include "maidsafe/nfs/reply.h"
 
 namespace maidsafe {
 
@@ -39,85 +29,50 @@ namespace nfs {
 class PublicKeyGetter {
  public:
   // all_pmids_from_file should only be non-empty if TESTING is defined
-  PublicKeyGetter(nfs::NfsResponseMapper& response_mapper, routing::Routing& routing,
+  PublicKeyGetter(routing::Routing& routing,
                   const std::vector<passport::PublicPmid>& public_pmids_from_file =
                       std::vector<passport::PublicPmid>());
-  ~PublicKeyGetter();
+
   template<typename Data>
-  void HandleGetKey(const typename Data::name_type& key_name,
-                    std::function<void(std::future<Data>)> get_key_future);
+  void GetKey(const typename Data::name_type& key_name,
+              std::function<void(Reply)> get_key_functor);
 
  private:
-  template<typename Data>
-  struct PendingKey {
-    PendingKey(std::future<Data> future_in,
-               std::function<void(std::future<Data>)> get_key_future_in)
-        : future(std::move(future_in)),
-          get_key_future(get_key_future_in) {}
-    std::future<Data> future;
-    std::function<void(std::future<Data>)> get_key_future;
-  };
-
-  typedef boost::variant<std::shared_ptr<PendingKey<passport::PublicAnmid>>,
-                         std::shared_ptr<PendingKey<passport::PublicAnsmid>>,
-                         std::shared_ptr<PendingKey<passport::PublicAntmid>>,
-                         std::shared_ptr<PendingKey<passport::PublicAnmaid>>,
-                         std::shared_ptr<PendingKey<passport::PublicMaid>>,
-                         std::shared_ptr<PendingKey<passport::PublicPmid>>,
-                         std::shared_ptr<PendingKey<passport::PublicAnmpid>>,
-                         std::shared_ptr<PendingKey<passport::PublicMpid>>> PendingKeyVariant;
-
-  void Run();
-  void AddPendingKey(PendingKeyVariant pending_key);
-  class IsReady;
-  class InvokeFunctor;
-
   std::unique_ptr<KeyGetterNfs> key_getter_nfs_;
-  std::unique_ptr<FakeKeyGetterNfs> fake_key_getter_nfs_;
-  bool running_;
-  std::vector<PendingKeyVariant> pending_keys_;
-  std::mutex flags_mutex_, mutex_;
-  std::condition_variable condition_;
-  std::thread thread_;
+#ifdef TESTING
+  std::vector<passport::PublicPmid> kAllPmids_;
+#endif
 };
 
 template<typename Data>
-void PublicKeyGetter::HandleGetKey(const typename Data::name_type& key_name,
-                                   std::function<void(std::future<Data>)> get_key_future) {
+void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
+                             std::function<void(Reply)> get_key_functor) {
+  static_assert(passport::is_public_key_type<Data>::value,
+                "Error, type must be a PublicKey type");
 #ifdef TESTING
   if (key_getter_nfs_) {
 #endif
-    std::future<Data> future(std::move(key_getter_nfs_->Get<Data>(key_name)));
-    PendingKeyVariant pending_key(
-        std::make_shared<PendingKey<Data>>(std::move(future), get_key_future));
-    AddPendingKey(pending_key);
+    auto get_op(std::make_shared<OperationOp>(1, get_key_functor));
+    key_getter_nfs_->Get<Data>(key_name,
+                               [get_op](std::string serialised_reply) {
+                                 HandleOperationReply(get_op, serialised_reply);
+                               });
 #ifdef TESTING
   } else {
-    std::future<passport::PublicPmid> future(
-        std::move(fake_key_getter_nfs_->Get(key_name)));
-    PendingKeyVariant pending_key(
-        std::make_shared<PendingKey<passport::PublicPmid>>(std::move(future), get_key_future));
-    AddPendingKey(pending_key);
+    auto itr(std::find_if(kAllPmids_.begin(),
+                          kAllPmids_.end(),
+                          [&key_name] (const passport::PublicPmid& pmid) {
+                            return pmid.name() == key_name;
+                          }));
+    if (itr == kAllPmids_.end()) {
+      Reply reply(NfsErrors::failed_to_get_data);
+      return get_key_functor(reply);
+    }
+    Reply reply(CommonErrors::success, (*itr).Serialise().data);
+    get_key_functor(reply);
   }
 #endif
 }
-
-class PublicKeyGetter::IsReady : public boost::static_visitor<bool> {
- public:
-  template<typename PublicKeyType>
-  bool operator()(std::shared_ptr<PendingKey<PublicKeyType>> pending_key) const {
-    return maidsafe::IsReady(pending_key->future);
-  }
-};
-
-class PublicKeyGetter::InvokeFunctor : public boost::static_visitor<> {
- public:
-  template<typename PublicKeyType>
-  void operator()(std::shared_ptr<PendingKey<PublicKeyType>> pending_key) const {
-    if (pending_key)
-      pending_key->get_key_future(std::move(pending_key->future));
-  }
-};
 
 }  // namespace nfs
 

@@ -14,7 +14,6 @@
 
 #include "maidsafe/routing/routing_api.h"
 
-#include "maidsafe/nfs/response_mapper.h"
 
 namespace maidsafe {
 
@@ -24,11 +23,7 @@ template<typename SigningFob>
 class NoPost {
  public:
   NoPost() {}
-  NoPost(NfsResponseMapper& /*response_mapper*/, routing::Routing& /*routing*/) {}  // NOLINT (Fraser)
-  NoPost(NfsResponseMapper& /*response_mapper*/,
-         routing::Routing& /*routing*/,
-         const SigningFob& /*signing_fob*/) {}
-
+  NoPost(routing::Routing&, const SigningFob&) {}
   template<typename Data>
   void Post(const typename Data::name_type& /*name*/) {}
 
@@ -39,5 +34,7 @@ class NoPost {
 }  // namespace nfs
 
 }  // namespace maidsafe
+
+#include "maidsafe/nfs/client_post_policies-inl.h"
 
 #endif  // MAIDSAFE_NFS_CLIENT_POST_POLICIES_H_

@@ -104,15 +104,13 @@ DataMessage::ClientValidation& DataMessage::ClientValidation::operator=(ClientVa
 DataMessage::DataMessage(Persona destination_persona,
                          const PersonaId& source,
                          const Data& data,
-                         const passport::PublicPmid::name_type& data_holder_hint,
-                         const Identity& final_target_id)
+                         const passport::PublicPmid::name_type& data_holder)
     : message_id_(detail::GetNewMessageId(source.node_id)),
       destination_persona_(destination_persona),
       source_(source),
       data_(data),
       client_validation_(),
-      data_holder_hint_(data_holder_hint),
-      final_target_id_(final_target_id) {
+      data_holder_(data_holder) {
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
 }
@@ -123,8 +121,7 @@ DataMessage::DataMessage(const DataMessage& other)
       source_(other.source_),
       data_(other.data_),
       client_validation_(other.client_validation_),
-      data_holder_hint_(other.data_holder_hint_),
-      final_target_id_(other.final_target_id_) {}
+      data_holder_(other.data_holder_) {}
 
 DataMessage& DataMessage::operator=(const DataMessage& other) {
   message_id_ = other.message_id_;
@@ -132,8 +129,7 @@ DataMessage& DataMessage::operator=(const DataMessage& other) {
   source_ = other.source_;
   data_ = other.data_;
   client_validation_ = other.client_validation_;
-  data_holder_hint_ = other.data_holder_hint_;
-  final_target_id_ = other.final_target_id_;
+  data_holder_ = other.data_holder_;
   return *this;
 }
 
@@ -143,8 +139,7 @@ DataMessage::DataMessage(DataMessage&& other)
       source_(std::move(other.source_)),
       data_(std::move(other.data_)),
       client_validation_(std::move(other.client_validation_)),
-      data_holder_hint_(std::move(other.data_holder_hint_)),
-      final_target_id_(std::move(other.final_target_id_)) {}
+      data_holder_(std::move(other.data_holder_)) {}
 
 DataMessage& DataMessage::operator=(DataMessage&& other) {
   message_id_ = std::move(other.message_id_);
@@ -152,8 +147,7 @@ DataMessage& DataMessage::operator=(DataMessage&& other) {
   source_ = std::move(other.source_);
   data_ = std::move(other.data_);
   client_validation_ = std::move(other.client_validation_);
-  data_holder_hint_ = std::move(other.data_holder_hint_);
-  final_target_id_ = std::move(other.final_target_id_);
+  data_holder_ = std::move(other.data_holder_);
   return *this;
 }
 
@@ -166,8 +160,7 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
       source_(),
       data_(),
       client_validation_(),
-      data_holder_hint_(),
-      final_target_id_() {
+      data_holder_() {
   protobuf::DataMessage proto_data_message;
   if (!proto_data_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
@@ -190,14 +183,8 @@ DataMessage::DataMessage(const serialised_type& serialised_message)
     client_validation_.data_signature = asymm::Signature(proto_client_validation.data_signature());
   }
 
-  if (proto_data_message.has_data_holder_hint()) {
-    data_holder_hint_ =
-        passport::PublicPmid::name_type((Identity(proto_data_message.data_holder_hint())));
-  }
-
-  if (proto_data_message.has_final_target_id()) {
-    final_target_id_ = Identity(proto_data_message.final_target_id());
-  }
+  if (proto_data_message.has_data_holder())
+    data_holder_ = passport::PublicPmid::name_type((Identity(proto_data_message.data_holder())));
 
   if (!ValidateInputs())
     ThrowError(NfsErrors::invalid_parameter);
@@ -240,10 +227,8 @@ DataMessage::serialised_type DataMessage::Serialise() const {
       proto_data_message.mutable_client_validation()->set_data_signature(
           client_validation_.data_signature.string());
     }
-    if (HasDataHolderHint())
-      proto_data_message.set_data_holder_hint(data_holder_hint_->string());
-    if (HasTargetId())
-      proto_data_message.set_final_target_id(final_target_id_.string());
+    if (HasDataHolder())
+      proto_data_message.set_data_holder(data_holder_->string());
     serialised_message = serialised_type(NonEmptyString(proto_data_message.SerializeAsString()));
   }
   catch(const std::exception&) {

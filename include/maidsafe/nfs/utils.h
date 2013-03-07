@@ -12,62 +12,70 @@
 #ifndef MAIDSAFE_NFS_UTILS_H_
 #define MAIDSAFE_NFS_UTILS_H_
 
-#include <exception>
-#include <future>
+#include <functional>
+#include <iterator>
+#include <memory>
+#include <mutex>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "maidsafe/common/error.h"
-#include "maidsafe/common/log.h"
 #include "maidsafe/common/node_id.h"
-#include "maidsafe/common/rsa.h"
-#include "maidsafe/common/utils.h"
-#include "maidsafe/common/types.h"
 
-#include "maidsafe/nfs/data_message.h"
-#include "maidsafe/nfs/generic_message.h"
 #include "maidsafe/nfs/message.h"
-#include "maidsafe/nfs/reply.h"
 #include "maidsafe/nfs/types.h"
-#include "maidsafe/nfs/utils.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
 
+class Reply;
+
 namespace detail {
 
 MessageId GetNewMessageId(const NodeId& source_node_id);
 
-void GetReply(int& success_count, int& failure_count, std::future<std::string>& future);
-
 }  // namespace detail
 
-
 template<typename Data>
-bool IsCacheable() {
-  return is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value;
-}
+bool IsCacheable();
 
-template<typename Data>
-Data ValidateAndParse(const Message& message) {
-  DataMessage data_message((message.serialised_inner_message<DataMessage>()));
-  return Data(typename Data::name_type(data_message.data().name),
-              typename Data::serialised_type(data_message.data().content));
-}
+// If 'replies' contains >= n successsful replies where n is 'successes_required', returns
+// <iterator to nth successful reply, true> otherwise
+// <iterator to most frequent failed reply, false>.  If there is more than one most frequent type,
+// (e.g. 2 'no_such_element' and 2 'invalid_parameter') the iterator points to the first which
+// reaches the frequency.
+std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+    const std::vector<Reply>& replies,
+    int successes_required);
 
-typedef std::future<std::string> StringFuture;
-typedef std::vector<StringFuture> StringFutureVector;
-std::vector<StringFuture>::iterator FindNextReadyFuture(const StringFutureVector::iterator& begin,
-                                                        StringFutureVector& routing_futures);
+// Put, delete and PublicKeyGet(as use callback only, don't return future)
+class OperationOp {
+ public:
+  OperationOp(int successes_required, std::function<void(Reply)> callback);
+  void HandleReply(Reply&& reply);
 
-void HandleGenericResponse(GenericMessage::OnError /*on_error_functor*/,
-                           GenericMessage /*original_generic_message*/,
-                           const std::vector<std::string>& /*serialised_messages*/);
+ private:
+  OperationOp(const OperationOp&);
+  OperationOp& operator=(const OperationOp&);
+  OperationOp(OperationOp&&);
+  OperationOp& operator=(OperationOp&&);
+
+  mutable std::mutex mutex_;
+  int successes_required_;
+  std::function<void(Reply)> callback_;
+  std::vector<Reply> replies_;
+  bool callback_executed_;
+};
+
+// Put, delete and PublicKeyGet(as use callback only, don't return future)
+void HandleOperationReply(std::shared_ptr<OperationOp> op, const std::string& serialised_reply);
 
 }  // namespace nfs
 
 }  // namespace maidsafe
+
+#include "maidsafe/nfs/utils-inl.h"
 
 #endif  // MAIDSAFE_NFS_UTILS_H_

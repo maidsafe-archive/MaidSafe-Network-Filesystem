@@ -9,13 +9,23 @@
  *  written permission of the board of directors of MaidSafe.net.                                  *
  **************************************************************************************************/
 
-#include "maidsafe/nfs/response_mapper.h"
+#ifndef MAIDSAFE_NFS_UTILS_INL_H_
+#define MAIDSAFE_NFS_UTILS_INL_H_
+
+#include "maidsafe/common/types.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
+template<typename Data>
+bool IsCacheable() {
+  return is_long_term_cacheable<Data>::value || is_short_term_cacheable<Data>::value;
+}
 
 }  // namespace nfs
 
 }  // namespace maidsafe
+
+#endif  // MAIDSAFE_NFS_UTILS_INL_H_

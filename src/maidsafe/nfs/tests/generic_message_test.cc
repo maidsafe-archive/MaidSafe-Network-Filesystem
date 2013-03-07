@@ -49,14 +49,16 @@ class GenericMessageTest : public testing::Test {
         source_(GenerateSource()),
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
+        batch_(GenericMessage::Batch(16, 4)),
 //        signature_(RandomString(1 + RandomUint32() % 50)),
-        generic_message_(action_, destination_persona_, source_, name_, content_) {}
+        generic_message_(action_, destination_persona_, source_, name_, content_, batch_) {}
 
   GenericMessage::Action action_;
   Persona destination_persona_;
   PersonaId source_;
   Identity name_;
   NonEmptyString content_;
+  GenericMessage::Batch batch_;
 //  asymm::Signature signature_;
   GenericMessage generic_message_;
 };
@@ -68,6 +70,8 @@ TEST_F(GenericMessageTest, BEH_CheckGetters) {
   EXPECT_EQ(source_.node_id, generic_message_.source().node_id);
   EXPECT_EQ(name_, generic_message_.name());
   EXPECT_EQ(content_, generic_message_.content());
+  EXPECT_EQ(batch_.index, generic_message_.batch().index);
+  EXPECT_EQ(batch_.size, generic_message_.batch().size);
 //  EXPECT_EQ(signature_, generic_message_.signature());
 }
 
@@ -81,6 +85,8 @@ TEST_F(GenericMessageTest, BEH_SerialiseThenParse) {
   EXPECT_EQ(source_.node_id, recovered_message.source().node_id);
   EXPECT_EQ(name_, recovered_message.name());
   EXPECT_EQ(content_, recovered_message.content());
+  EXPECT_EQ(batch_.index, recovered_message.batch().index);
+  EXPECT_EQ(batch_.size, recovered_message.batch().size);
 //  EXPECT_EQ(signature_, recovered_message.signature());
 }
 
@@ -98,6 +104,8 @@ TEST_F(GenericMessageTest, BEH_SerialiseParseReserialiseReparse) {
   EXPECT_EQ(source_.node_id, recovered_message2.source().node_id);
   EXPECT_EQ(name_, recovered_message2.name());
   EXPECT_EQ(content_, recovered_message2.content());
+  EXPECT_EQ(batch_.index, recovered_message2.batch().index);
+  EXPECT_EQ(batch_.size, recovered_message2.batch().size);
 //  EXPECT_EQ(signature_, recovered_message2.signature());
 }
 
@@ -110,6 +118,8 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(source_.node_id, message2.source().node_id);
   EXPECT_EQ(name_, message2.name());
   EXPECT_EQ(content_, message2.content());
+  EXPECT_EQ(batch_.index, message2.batch().index);
+  EXPECT_EQ(batch_.size, message2.batch().size);
 //  EXPECT_EQ(signature_, message2.signature());
 
   GenericMessage message3(generic_message_);
@@ -120,6 +130,8 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(source_.node_id, message3.source().node_id);
   EXPECT_EQ(name_, message3.name());
   EXPECT_EQ(content_, message3.content());
+  EXPECT_EQ(batch_.index, message3.batch().index);
+  EXPECT_EQ(batch_.size, message3.batch().size);
 //  EXPECT_EQ(signature_, message3.signature());
 
   GenericMessage message4 = std::move(message3);
@@ -130,6 +142,8 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(source_.node_id, message4.source().node_id);
   EXPECT_EQ(name_, message4.name());
   EXPECT_EQ(content_, message4.content());
+  EXPECT_EQ(batch_.index, message4.batch().index);
+  EXPECT_EQ(batch_.size, message4.batch().size);
 //  EXPECT_EQ(signature_, message4.signature());
 
   GenericMessage message5(std::move(message4));
@@ -140,7 +154,23 @@ TEST_F(GenericMessageTest, BEH_AssignMessage) {
   EXPECT_EQ(source_.node_id, message5.source().node_id);
   EXPECT_EQ(name_, message5.name());
   EXPECT_EQ(content_, message5.content());
+  EXPECT_EQ(batch_.index, message5.batch().index);
+  EXPECT_EQ(batch_.size, message5.batch().size);
 //  EXPECT_EQ(signature_, message5.signature());
+}
+
+TEST_F(GenericMessageTest, BEH_DefaultValue) {
+  GenericMessage generic_message(action_, destination_persona_, source_, name_, content_);
+  EXPECT_EQ(action_, generic_message.action());
+  EXPECT_EQ(destination_persona_, generic_message.destination_persona());
+  EXPECT_EQ(source_.persona, generic_message.source().persona);
+  EXPECT_EQ(source_.node_id, generic_message.source().node_id);
+  EXPECT_EQ(name_, generic_message.name());
+  EXPECT_EQ(content_, generic_message.content());
+  EXPECT_NE(batch_.index, generic_message.batch().index);
+  EXPECT_NE(batch_.size, generic_message.batch().size);
+  EXPECT_EQ(int32_t(-1), generic_message.batch().index);
+  EXPECT_EQ(int32_t(-1), generic_message.batch().size);
 }
 
 TEST_F(GenericMessageTest, BEH_InvalidSource) {
@@ -153,6 +183,11 @@ TEST_F(GenericMessageTest, BEH_InvalidSource) {
 TEST_F(GenericMessageTest, BEH_InvalidName) {
   EXPECT_THROW(GenericMessage(action_, destination_persona_, source_, Identity(), content_),
                nfs_error);
+}
+
+TEST_F(GenericMessageTest, BEH_InvalidBatch) {
+  EXPECT_THROW(GenericMessage(action_, destination_persona_, source_, name_, content_,
+                              GenericMessage::Batch(10, 11)), nfs_error);
 }
 
 }  // namespace test
