@@ -13,7 +13,7 @@
 
 #include "maidsafe/common/error.h"
 
-#include "maidsafe/nfs/message_pb.h"
+#include "maidsafe/nfs/message.pb.h"
 
 
 namespace maidsafe {
