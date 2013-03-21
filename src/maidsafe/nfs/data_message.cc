@@ -15,7 +15,7 @@
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/utils.h"
 
-#include "maidsafe/nfs/data_message_pb.h"
+#include "maidsafe/nfs/data_message.pb.h"
 #include "maidsafe/nfs/utils.h"
 
 
