@@ -13,8 +13,8 @@
 
 
 namespace maidsafe {
-
 namespace nfs {
+namespace detail {
 
 std::error_code GetMostFrequentError(const std::vector<maidsafe_error>& errors) {
   typedef std::map<std::error_code, int> Count;
@@ -30,6 +30,6 @@ std::error_code GetMostFrequentError(const std::vector<maidsafe_error>& errors) 
   return (*itr).first;
 }
 
+}  // namespace detail
 }  // namespace nfs
-
 }  // namespace maidsafe
