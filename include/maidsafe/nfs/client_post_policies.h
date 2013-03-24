@@ -17,6 +17,7 @@
 #include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/generic_message.h"
+#include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/persona_id.h"
 
 namespace maidsafe {

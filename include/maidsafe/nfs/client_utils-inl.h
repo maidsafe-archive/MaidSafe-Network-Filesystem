@@ -36,8 +36,6 @@ namespace nfs {
 
 namespace detail {
 
-std::error_code GetMostFrequentError(const std::vector<maidsafe_error>& errors);
-
 template<typename Data>
 void GetOp<Data>::SetPromiseValue(Data&& data) {
   std::lock_guard<std::mutex> lock(mutex_);
