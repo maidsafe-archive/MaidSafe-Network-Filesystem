@@ -36,20 +36,6 @@ namespace nfs {
 
 namespace detail {
 
-std::error_code GetMostFrequentError(const std::vector<maidsafe_error>& errors) {
-  typedef std::map<std::error_code, int> Count;
-  Count count;
-  for (auto& error : errors)
-    ++count[error.code()];
-  auto itr(std::max_element(
-      count.begin(),
-      count.end(),
-      [](const Count::value_type& lhs, const Count::value_type& rhs)->bool {
-          return lhs.second < rhs.second;
-      }));
-  return (*itr).first;
-}
-
 template<typename Data>
 void GetOp<Data>::SetPromiseValue(Data&& data) {
   std::lock_guard<std::mutex> lock(mutex_);

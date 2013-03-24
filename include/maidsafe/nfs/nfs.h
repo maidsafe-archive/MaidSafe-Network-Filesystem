@@ -55,7 +55,7 @@ class NetworkFileSystem : public PutPolicy,
 typedef NetworkFileSystem<ClientMaidPutPolicy,
                           ClientMaidGetPolicy,
                           ClientMaidDeletePolicy,
-                          NoPost<passport::Maid>> ClientMaidNfs;
+                          ClientMaidPostPolicy> ClientMaidNfs;
 
 
 typedef DataGetterPolicy KeyGetterNfs;
