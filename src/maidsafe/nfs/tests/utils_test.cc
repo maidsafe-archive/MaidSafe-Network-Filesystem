@@ -23,6 +23,7 @@
 #include "maidsafe/common/utils.h"
 
 #include "maidsafe/passport/passport.h"
+#include "maidsafe/passport/detail/secure_string.h"
 
 #include "maidsafe/routing/routing_api.h"
 
@@ -107,9 +108,9 @@ std::pair<Identity, NonEmptyString> GetNameAndContent<passport::PublicMpid>() {
 
 template<>
 std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Mid>() {
-  const UserPassword kKeyword(RandomAlphaNumericString(20));
-  const UserPassword kPassword(RandomAlphaNumericString(20));
-  const uint32_t kPin(RandomUint32() % 9999 + 1);
+  const passport::detail::Keyword kKeyword(RandomAlphaNumericString(20));
+  const passport::detail::Password kPassword(RandomAlphaNumericString(20));
+  const passport::detail::Pin kPin(std::to_string(RandomUint32() % 9999 + 1));
   const NonEmptyString kMasterData(RandomString(34567));
   auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
   passport::Antmid antmid;
@@ -124,9 +125,9 @@ std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Mid>() {
 
 template<>
 std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Smid>() {
-  const UserPassword kKeyword(RandomAlphaNumericString(20));
-  const UserPassword kPassword(RandomAlphaNumericString(20));
-  const uint32_t kPin(RandomUint32() % 9999 + 1);
+  const passport::detail::Keyword kKeyword(RandomAlphaNumericString(20));
+  const passport::detail::Password kPassword(RandomAlphaNumericString(20));
+  const passport::detail::Pin kPin(std::to_string(RandomUint32() % 9999 + 1));
   const NonEmptyString kMasterData(RandomString(34567));
   auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
   passport::Antmid antmid;
@@ -141,9 +142,9 @@ std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Smid>() {
 
 template<>
 std::pair<Identity, NonEmptyString> GetNameAndContent<passport::Tmid>() {
-  const UserPassword kKeyword(RandomAlphaNumericString(20));
-  const UserPassword kPassword(RandomAlphaNumericString(20));
-  const uint32_t kPin(RandomUint32() % 9999 + 1);
+  const passport::detail::Keyword kKeyword(RandomAlphaNumericString(20));
+  const passport::detail::Password kPassword(RandomAlphaNumericString(20));
+  const passport::detail::Pin kPin(std::to_string(RandomUint32() % 9999 + 1));
   const NonEmptyString kMasterData(RandomString(34567));
   auto encrypted_session(passport::EncryptSession(kKeyword, kPin, kPassword, kMasterData));
   passport::Antmid antmid;
