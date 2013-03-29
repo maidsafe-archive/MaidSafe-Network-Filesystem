@@ -31,6 +31,8 @@ namespace nfs {
 
 namespace detail {
 
+std::error_code GetMostFrequentError(const std::vector<maidsafe_error>& errors);
+
 template<typename Data>
 class GetOp {
  public:
