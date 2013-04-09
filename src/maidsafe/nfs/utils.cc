@@ -31,7 +31,6 @@ namespace detail {
 
 MessageId GetNewMessageId(const NodeId& source_node_id) {
   static int32_t random_element(RandomInt32());
-  std::string id(source_node_id.string() + std::to_string(random_element++));
   return MessageId(Identity(crypto::Hash<crypto::SHA512>(source_node_id.string() +
                                                          std::to_string(random_element++))));
 }
