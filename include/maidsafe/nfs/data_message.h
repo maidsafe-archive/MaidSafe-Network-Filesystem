@@ -34,7 +34,7 @@ namespace nfs {
 
 class DataMessage {
  public:
-  enum class Action : int32_t { kGet, kPut, kDelete };
+  typedef MessageAction Action;
   struct Data {
     Data();
     Data(DataTagValue type_in,
@@ -112,29 +112,29 @@ class DataMessage {
 };
 
 
-template <typename Elem, typename Traits>
-std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
-                                             const DataMessage::Action &action) {
-  std::string action_str;
-  switch (action) {
-    case DataMessage::Action::kGet:
-      action_str = "Get";
-      break;
-    case DataMessage::Action::kPut:
-      action_str = "Put";
-      break;
-    case DataMessage::Action::kDelete:
-      action_str = "Delete";
-      break;
-    default:
-      action_str = "Invalid DataMessage action type";
-      break;
-  }
+//template <typename Elem, typename Traits>
+//std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
+//                                             const DataMessage::Action &action) {
+//  std::string action_str;
+//  switch (action) {
+//    case DataMessage::Action::kGet:
+//      action_str = "Get";
+//      break;
+//    case DataMessage::Action::kPut:
+//      action_str = "Put";
+//      break;
+//    case DataMessage::Action::kDelete:
+//      action_str = "Delete";
+//      break;
+//    default:
+//      action_str = "Invalid DataMessage action type";
+//      break;
+//  }
 
-  for (std::string::iterator itr(action_str.begin()); itr != action_str.end(); ++itr)
-    ostream << ostream.widen(*itr);
-  return ostream;
-}
+//  for (std::string::iterator itr(action_str.begin()); itr != action_str.end(); ++itr)
+//    ostream << ostream.widen(*itr);
+//  return ostream;
+//}
 
 
 
