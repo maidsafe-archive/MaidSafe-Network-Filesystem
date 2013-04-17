@@ -88,8 +88,7 @@ class DataMessage {
   serialised_type Serialise() const;
   std::pair<serialised_type, asymm::Signature> SerialiseAndSign(
       const asymm::PrivateKey& signer_private_key) const;
-  bool Validate(const asymm::Signature& signature,
-                const asymm::PublicKey& signer_public_key) const;
+  bool Validate(const asymm::Signature& signature, const asymm::PublicKey& signer_public_key) const;
 
   MessageId message_id() const { return message_id_; }
   Persona destination_persona() const { return destination_persona_; }
@@ -110,33 +109,6 @@ class DataMessage {
   ClientValidation client_validation_;
   passport::PublicPmid::name_type data_holder_;
 };
-
-
-//template <typename Elem, typename Traits>
-//std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
-//                                             const DataMessage::Action &action) {
-//  std::string action_str;
-//  switch (action) {
-//    case DataMessage::Action::kGet:
-//      action_str = "Get";
-//      break;
-//    case DataMessage::Action::kPut:
-//      action_str = "Put";
-//      break;
-//    case DataMessage::Action::kDelete:
-//      action_str = "Delete";
-//      break;
-//    default:
-//      action_str = "Invalid DataMessage action type";
-//      break;
-//  }
-
-//  for (std::string::iterator itr(action_str.begin()); itr != action_str.end(); ++itr)
-//    ostream << ostream.widen(*itr);
-//  return ostream;
-//}
-
-
 
 }  // namespace nfs
 

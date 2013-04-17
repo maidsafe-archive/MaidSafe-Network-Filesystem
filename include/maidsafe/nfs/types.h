@@ -75,7 +75,7 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
     action_str = "Synchronise";
     break;
   default:
-    action_str = "Invalid GenericMessage action type";
+    action_str = "Invalid message action type";
     break;
   }
 
@@ -83,12 +83,6 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
     ostream << ostream.widen(*itr);
   return ostream;
 }
-
-
-
-
-
-
 
 enum class Persona : int32_t {
   kMaidAccountHolder,
