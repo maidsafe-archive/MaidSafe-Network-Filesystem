@@ -27,6 +27,63 @@ namespace nfs {
 
 enum class MessageCategory : int32_t { kData, kGeneric, kReply };
 
+enum class MessageAction : int32_t {
+  kGet,
+  kPut,
+  kDelete,
+  kRegisterPmid,
+  kUnregisterPmid,
+  kConnect,
+  kGetPmidHealth,
+  kNodeDown,
+  kNodeUp,
+  kPmidStatus,
+  kGetElementList,
+  kSynchronise
+};
+
+template <typename Elem, typename Traits>
+std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
+                                             const MessageAction &action) {
+  std::string action_str;
+  switch (action) {
+  case MessageAction::kGet:
+    action_str = "Get";
+    break;
+  case MessageAction::kPut:
+    action_str = "Put";
+    break;
+  case MessageAction::kDelete:
+    action_str = "Delete";
+    break;
+  case MessageAction::kRegisterPmid:
+    action_str = "Register PMID";
+    break;
+  case MessageAction::kConnect:
+    action_str = "Connect";
+    break;
+  case MessageAction::kGetPmidHealth:
+    action_str = "Get PMID Size";
+    break;
+  case MessageAction::kNodeDown:
+    action_str = "Node Down";
+    break;
+  case MessageAction::kNodeUp:
+    action_str = "Node Up";
+    break;
+  case MessageAction::kSynchronise:
+    action_str = "Synchronise";
+    break;
+  default:
+    action_str = "Invalid message action type";
+    break;
+  }
+
+  for (std::string::iterator itr(action_str.begin()); itr != action_str.end(); ++itr)
+    ostream << ostream.widen(*itr);
+  return ostream;
+}
+
 enum class Persona : int32_t {
   kMaidAccountHolder,
   kMetadataManager,

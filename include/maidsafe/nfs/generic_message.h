@@ -30,17 +30,7 @@ namespace nfs {
 
 class GenericMessage {
  public:
-  enum class Action : int32_t {
-    kRegisterPmid,
-    kUnregisterPmid,
-    kConnect,
-    kGetPmidHealth,
-    kNodeDown,
-    kNodeUp,
-    kPmidStatus,
-    kGetElementList,
-    kSynchronise
-  };
+  typedef MessageAction Action;
   struct Batch {
     Batch();
     Batch(int32_t size_in, int32_t index_in);
@@ -87,39 +77,6 @@ class GenericMessage {
   Identity name_;
   NonEmptyString content_;
 };
-
-template <typename Elem, typename Traits>
-std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
-                                             const GenericMessage::Action &action) {
-  std::string action_str;
-  switch (action) {
-    case GenericMessage::Action::kRegisterPmid:
-      action_str = "Register PMID";
-      break;
-    case GenericMessage::Action::kConnect:
-      action_str = "Connect";
-      break;
-    case GenericMessage::Action::kGetPmidHealth:
-      action_str = "Get PMID Size";
-      break;
-    case GenericMessage::Action::kNodeDown:
-      action_str = "Node Down";
-      break;
-    case GenericMessage::Action::kNodeUp:
-      action_str = "Node Up";
-      break;
-    case GenericMessage::Action::kSynchronise:
-      action_str = "Synchronise";
-      break;
-    default:
-      action_str = "Invalid GenericMessage action type";
-      break;
-  }
-
-  for (std::string::iterator itr(action_str.begin()); itr != action_str.end(); ++itr)
-    ostream << ostream.widen(*itr);
-  return ostream;
-}
 
 }  // namespace nfs
 

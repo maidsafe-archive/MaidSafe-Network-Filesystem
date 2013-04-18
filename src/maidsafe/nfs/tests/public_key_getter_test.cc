@@ -78,7 +78,10 @@ class PublicKeyGetterTest : public testing::Test {
                             anmpid);
         return passport::PublicMpid(mpid);
       }
+      default : LOG(kError) << "No type found";
+      ThrowError(NfsErrors::failed_to_get_data);
     }
+    return passport::PublicAnmid(passport::Anmid());  // compiler silence
   }
 
   PublicPmidVector GeneratePublicPmids() {
