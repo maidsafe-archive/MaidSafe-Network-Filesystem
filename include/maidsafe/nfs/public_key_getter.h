@@ -58,18 +58,14 @@ void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
                                  HandleOperationReply(get_op, serialised_reply);
                                });
 #ifdef TESTING
-  } else {
-    auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
-        [&key_name](const passport::PublicPmid& pmid) { return pmid.name() == key_name; }));
-    if (itr == kAllPmids_.end()) {
-      Reply reply(NfsErrors::failed_to_get_data);
-      return get_key_functor(reply);
-    }
-    Reply reply(CommonErrors::success, (*itr).Serialise().data);
-    get_key_functor(reply);
   }
 #endif
 }
+
+template<>
+void PublicKeyGetter::GetKey<passport::PublicPmid>(
+    const typename passport::PublicPmid::name_type& key_name,
+    std::function<void(Reply)> get_key_functor);
 
 }  // namespace nfs
 
