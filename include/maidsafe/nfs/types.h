@@ -39,7 +39,8 @@ enum class MessageAction : int32_t {
   kNodeUp,
   kPmidStatus,
   kGetElementList,
-  kSynchronise
+  kSynchronise,
+  kAccountTransfer
 };
 
 template <typename Elem, typename Traits>
