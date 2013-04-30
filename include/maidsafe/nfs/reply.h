@@ -34,15 +34,15 @@ class Reply {
 
   // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
   template<typename ErrorCode>
-  Reply(ErrorCode error_code,
-        const NonEmptyString& data = NonEmptyString(),
-        typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
+  explicit Reply(ErrorCode error_code,
+                 const NonEmptyString& data = NonEmptyString(),
+                 typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
       : error_(MakeError(error_code)),
         data_(data) {}
   template<typename Error>
-  Reply(Error error,
-        const NonEmptyString& data = NonEmptyString(),
-        typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
+  explicit Reply(Error error,
+                 const NonEmptyString& data = NonEmptyString(),
+                 typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
       : error_(error),
         data_(data) {
     static_assert(std::is_same<Error, maidsafe_error>::value ||
