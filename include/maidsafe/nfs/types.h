@@ -37,7 +37,7 @@ enum class MessageAction : int32_t {
   kGetPmidHealth,
   kNodeDown,
   kNodeUp,
-  kPmidStatus,
+  kGetPmidTotals,
   kGetElementList,
   kSynchronise,
   kAccountTransfer
