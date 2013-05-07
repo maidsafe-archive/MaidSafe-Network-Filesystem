@@ -92,6 +92,7 @@ enum class Persona : int32_t {
   kDataHolder,
   kClientMaid,
   kClientMpid,
+  kStructuredDataManager,
   kOwnerDirectoryManager,
   kGroupDirectoryManager,
   kWorldDirectoryManager,
