@@ -3,18 +3,15 @@ import "maidsafe/nfs/persona_id.proto";
 option optimize_for = LITE_RUNTIME;
 
 message GenericMessage {
-  message Batch {
-    required int32 size = 1;
-    required int32 index = 2;
-  }
-  required bytes message_id = 1;
-  optional Batch batch = 2;
+  optional bytes message_id = 1;
+  optional int32 type = 2;
   required int32 action = 3;
   required int32 destination_persona = 4;
   required PersonaId source = 5;
   required bytes name = 6;
   optional bytes content = 7;
 }
+
 
 // MAID Client send to MAID Account Holder
 message PmidRegistration {

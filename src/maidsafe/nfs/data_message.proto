@@ -4,7 +4,7 @@ option optimize_for = LITE_RUNTIME;
 
 message DataMessage {
   message Data {
-    required int32 type = 1;
+    optional int32 type = 1;
     required bytes name = 2;
     optional bytes content = 3;
     required int32 action = 4;
@@ -19,4 +19,19 @@ message DataMessage {
   required Data data = 4;
   optional ClientValidation client_validation = 5;
   optional bytes data_holder = 6;
+}
+
+// MAID Client send to MAID Account Holder
+message PmidRegistration {
+  message SignedDetails {
+    message Details {
+      required bytes maid_name = 1;
+      required bytes pmid_name = 2;
+      required bool unregister = 3;
+    }
+    required bytes serialised_details = 1;
+    required bytes pmid_signature = 2;
+  }
+  required bytes serialised_signed_details = 1;
+  required bytes maid_signature = 2;
 }
