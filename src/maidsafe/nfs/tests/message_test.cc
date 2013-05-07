@@ -28,8 +28,8 @@ namespace test {
 
 namespace {
 
-Message::Action GenerateAction() {
-  return static_cast<Message::Action>(RandomUint32() % 3);
+MessageAction GenerateAction() {
+  return static_cast<MessageAction>(RandomUint32() % 3);
 }
 
 PersonaId GenerateSource() {
@@ -55,7 +55,7 @@ class MessageTest : public testing::Test {
         data_message_(destination_persona_, source_,
                       Message::Data(data_type_, name_, content_, action_), data_holder_) {}
 
-  Message::Action action_;
+  MessageAction action_;
   Persona destination_persona_;
   PersonaId source_;
   Message::Data data_;

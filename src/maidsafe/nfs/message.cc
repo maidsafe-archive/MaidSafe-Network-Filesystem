@@ -30,12 +30,12 @@ Message::Data::Data()
     : type(static_cast<DataTagValue>(-1)),
       name(),
       content(),
-      action(static_cast<Action>(-1)) {}
+      action(static_cast<MessageAction>(-1)) {}
 
 Message::Data::Data(DataTagValue type_in,
-                        const Identity& name_in,
-                        const NonEmptyString& content_in,
-                        Action action_in)
+                    const Identity& name_in,
+                    const NonEmptyString& content_in,
+                    MessageAction action_in)
     : type(type_in),
       name(name_in),
       content(content_in),
@@ -102,9 +102,9 @@ Message::ClientValidation& Message::ClientValidation::operator=(ClientValidation
 
 
 Message::Message(Persona destination_persona,
-                         const PersonaId& source,
-                         const Data& data,
-                         const passport::PublicPmid::name_type& data_holder)
+                 const PersonaId& source,
+                 const Data& data,
+                 const passport::PublicPmid::name_type& data_holder)
     : message_id_(detail::GetNewMessageId(source.node_id)),
       destination_persona_(destination_persona),
       source_(source),
@@ -175,7 +175,7 @@ Message::Message(const serialised_type& serialised_message)
   data_.name = Identity(proto_data.name());
   if (proto_data.has_content())
     data_.content = NonEmptyString(proto_data.content());
-  data_.action = static_cast<Action>(proto_data.action());
+  data_.action = static_cast<MessageAction>(proto_data.action());
 
   if (proto_message.has_client_validation()) {
     auto& proto_client_validation(proto_message.client_validation());
@@ -245,7 +245,7 @@ std::pair<Message::serialised_type, asymm::Signature> Message::SerialiseAndSign(
 }
 
 bool Message::Validate(const asymm::Signature& signature,
-                           const asymm::PublicKey& signer_public_key) const {
+                       const asymm::PublicKey& signer_public_key) const {
   asymm::PlainText serialised(Serialise().data);
   return asymm::CheckSignature(serialised, signature, signer_public_key);
 }

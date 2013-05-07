@@ -34,13 +34,12 @@ namespace nfs {
 
 class Message {
  public:
-  typedef MessageAction Action;
   struct Data {
     Data();
     Data(DataTagValue type_in,
          const Identity& name_in,
          const NonEmptyString& content_in,
-         Action action_in);
+         MessageAction action_in);
     Data(const Data& other);
     Data& operator=(const Data& other);
     Data(Data&& other);
@@ -49,7 +48,7 @@ class Message {
     DataTagValue type;
     Identity name;
     NonEmptyString content;
-    Action action;
+    MessageAction action;
   };
   struct ClientValidation {
     ClientValidation();
@@ -72,10 +71,9 @@ class Message {
   // of the actual DataHolder chosen (the PmidAccountHolder should be managing this DataHolder's
   // account).
   Message(Persona destination_persona,
-              const PersonaId& source,
-              const Data& data,
-              const passport::PublicPmid::name_type& data_holder =
-                  passport::PublicPmid::name_type());
+          const PersonaId& source,
+          const Data& data,
+          const passport::PublicPmid::name_type& data_holder = passport::PublicPmid::name_type());
   Message(const Message& other);
   Message& operator=(const Message& other);
   Message(Message&& other);

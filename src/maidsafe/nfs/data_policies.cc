@@ -25,7 +25,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kPut>::GetDestination<OwnerDirectory>(
+                     MessageAction::kPut>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
@@ -36,7 +36,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kGet>::GetDestination<OwnerDirectory>(
+                     MessageAction::kGet>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
@@ -47,7 +47,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kDelete>::GetDestination<OwnerDirectory>(
+                     MessageAction::kDelete>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
@@ -58,7 +58,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kPut>::GetDestination<GroupDirectory>(
+                     MessageAction::kPut>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
@@ -69,7 +69,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kGet>::GetDestination<GroupDirectory>(
+                     MessageAction::kGet>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
@@ -80,7 +80,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kDelete>::GetDestination<GroupDirectory>(
+                     MessageAction::kDelete>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
@@ -91,7 +91,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kPut>::GetDestination<WorldDirectory>(
+                     MessageAction::kPut>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
@@ -102,7 +102,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kGet>::GetDestination<WorldDirectory>(
+                     MessageAction::kGet>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
@@ -113,28 +113,28 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kClientMaid,
-                     Message::Action::kDelete>::GetDestination<WorldDirectory>(
+                     MessageAction::kDelete>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
 }
 
 
-//// Put for all data types requires signature.
-//template<>
-//void DataPolicy<passport::Maid,
-//                Persona::kClientMaid,
-//                Message::Action::kPut>::SignDataIfRequired(Message& data_message) const {
-//  data_message.SignData(kSigningFob_->private_key());
-//}
+// Put for all data types requires signature.
+template<>
+void DataPolicy<passport::Maid,
+                Persona::kClientMaid,
+                MessageAction::kPut>::SignDataIfRequired(Message& data_message) const {
+  data_message.SignData(kSigningFob_->private_key());
+}
 
-//// Delete for all data types requires signature.
-//template<>
-//void DataPolicy<passport::Maid,
-//                Persona::kClientMaid,
-//                Message::Action::kDelete>::SignDataIfRequired(Message& data_message) const {
-//  data_message.SignData(kSigningFob_->private_key());
-//}
+// Delete for all data types requires signature.
+template<>
+void DataPolicy<passport::Maid,
+                Persona::kClientMaid,
+                MessageAction::kDelete>::SignDataIfRequired(Message& data_message) const {
+  data_message.SignData(kSigningFob_->private_key());
+}
 
 
 
@@ -145,7 +145,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kDataGetter,
-                     Message::Action::kGet>::GetDestination<OwnerDirectory>(
+                     MessageAction::kGet>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
@@ -156,7 +156,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kDataGetter,
-                     Message::Action::kGet>::GetDestination<GroupDirectory>(
+                     MessageAction::kGet>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
@@ -167,7 +167,7 @@ template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
                      Persona::kDataGetter,
-                     Message::Action::kGet>::GetDestination<WorldDirectory>(
+                     MessageAction::kGet>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());

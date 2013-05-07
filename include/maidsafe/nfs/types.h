@@ -60,6 +60,9 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
   case MessageAction::kRegisterPmid:
     action_str = "Register PMID";
     break;
+  case MessageAction::kUnregisterPmid:
+    action_str = "Unregister PMID";
+    break;
   case MessageAction::kConnect:
     action_str = "Connect";
     break;
@@ -72,8 +75,17 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
   case MessageAction::kNodeUp:
     action_str = "Node Up";
     break;
+  case MessageAction::kGetPmidTotals:
+    action_str = "Get PMID Totals";
+    break;
+  case MessageAction::kGetElementList:
+    action_str = "Get element list";
+    break;
   case MessageAction::kSynchronise:
     action_str = "Synchronise";
+    break;
+  case MessageAction::kAccountTransfer:
+    action_str = "Account Transfer";
     break;
   default:
     action_str = "Invalid message action type";
@@ -121,6 +133,18 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
       break;
     case Persona::kClientMpid:
       persona_str = "Client MPID Persona";
+      break;
+    case Persona::kStructuredDataManager:
+      persona_str = "Structured Data Manager Persona";
+      break;
+    case Persona::kOwnerDirectoryManager:
+      persona_str = "Owner Directory Manager Persona";
+      break;
+    case Persona::kGroupDirectoryManager:
+      persona_str = "Group Directory Manager Persona";
+      break;
+    case Persona::kWorldDirectoryManager:
+      persona_str = "World Directory Manager Persona";
       break;
     case Persona::kDataGetter:
       persona_str = "Data Getter Persona";

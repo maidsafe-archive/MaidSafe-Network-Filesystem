@@ -25,7 +25,7 @@ namespace maidsafe {
 namespace nfs {
 
 class MessageWrapper {
-public:
+ public:
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
 
   MessageWrapper(MessageCategory inner_message_type,
@@ -44,7 +44,7 @@ public:
   typename InnerMessageType::serialised_type serialised_inner_message() const;
   asymm::Signature signature() const { return signature_; }
 
-private:
+ private:
   MessageCategory inner_message_type_;
   NonEmptyString serialised_inner_message_;
   asymm::Signature signature_;
