@@ -22,7 +22,7 @@
 
 #include "maidsafe/common/node_id.h"
 
-#include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/types.h"
 
 

@@ -25,7 +25,7 @@ namespace maidsafe {
 
 namespace nfs {
 
-enum class MessageCategory : int32_t { kData, kGeneric, kReply };
+enum class MessageCategory : int32_t { kMessage, kReply };
 
 enum class MessageAction : int32_t {
   kGet,

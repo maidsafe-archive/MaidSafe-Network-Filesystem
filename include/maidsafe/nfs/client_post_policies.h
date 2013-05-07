@@ -16,8 +16,8 @@
 
 #include "maidsafe/routing/routing_api.h"
 
-#include "maidsafe/nfs/generic_message.h"
 #include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/persona_id.h"
 
 namespace maidsafe {
@@ -46,27 +46,27 @@ class ClientPostPolicy {
 
   void RegisterPmid(const NonEmptyString& serialised_pmid_registration,
                     const routing::ResponseFunctor& callback) {
-    GenericMessage generic_message(
-        nfs::GenericMessage::Action::kRegisterPmid,
+    Message message(
+        nfs::Message::Action::kRegisterPmid,
         source_persona,
         kSource_,
         kSigningFob_->name().data,
         serialised_pmid_registration);
-    Message message(GenericMessage::message_type_identifier, generic_message.Serialise().data);
-    routing_.SendGroup(NodeId(generic_message.name().string()), message.Serialise()->string(),
+    MessageWrapper message_wrapper(Message::message_type_identifier, message.Serialise().data);
+    routing_.SendGroup(NodeId(message.data().name().string()), message_wrapper.Serialise()->string(),
                        false, callback);
   }
 
   void UnregisterPmid(const NonEmptyString& serialised_pmid_unregistration,
                       const routing::ResponseFunctor& callback) {
-    GenericMessage generic_message(
-        nfs::GenericMessage::Action::kUnregisterPmid,
+    Message message(
+        nfs::Message::Action::kUnregisterPmid,
         source_persona,
         kSource_,
         kSigningFob_->name().data,
         serialised_pmid_unregistration);
-    Message message(GenericMessage::message_type_identifier, generic_message.Serialise().data);
-    routing_.SendGroup(NodeId(generic_message.name().string()), message.Serialise()->string(),
+    MessageWrapper message_wrapper(Message::message_type_identifier, message.Serialise().data);
+    routing_.SendGroup(NodeId(message.data().name().string()), message_wrapper.Serialise()->string(),
                        false, callback);
   }
 

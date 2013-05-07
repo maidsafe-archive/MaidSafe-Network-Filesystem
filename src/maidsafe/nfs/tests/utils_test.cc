@@ -33,7 +33,7 @@
 #include "maidsafe/data_types/world_directory.h"
 
 #include "maidsafe/nfs/nfs.h"
-#include "maidsafe/nfs/data_message.h"
+#include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/message.h"
 
 
@@ -189,10 +189,10 @@ class UtilsTest : public testing::Test {
   std::string MakeSerialisedMessage(const std::pair<Identity, NonEmptyString>& name_and_content) {
     Persona destination_persona(Persona::kMetadataManager);
     PersonaId source(Persona::kClientMaid, NodeId(NodeId::kRandomId));
-    DataMessage::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
-                           name_and_content.second, DataMessage::Action::kGet);
-    DataMessage data_message(destination_persona, source, data);
-    Message message(DataMessage::message_type_identifier, data_message.Serialise().data);
+    Message::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
+                           name_and_content.second, Message::Action::kGet);
+    Message data_message(destination_persona, source, data);
+    Message message(Message::message_type_identifier, data_message.Serialise().data);
     return message.Serialise()->string();
   }
 
