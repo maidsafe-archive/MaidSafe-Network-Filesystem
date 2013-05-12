@@ -23,9 +23,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-const MessageCategory Message::message_type_identifier = MessageCategory::kMessage;
-
-
 Message::Data::Data()
     : type(static_cast<DataTagValue>(-1)),
       name(),

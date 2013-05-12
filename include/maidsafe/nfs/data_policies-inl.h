@@ -63,7 +63,7 @@ void DataPolicy<SigningFob, source_persona, action>::ExecuteAction(
 template<typename SigningFob, Persona source_persona, MessageAction action>
 MessageWrapper DataPolicy<SigningFob, source_persona, action>::ConstructMessageWrapper(
     const Message& message) const {
-  return MessageWrapper(Message::message_type_identifier, message.Serialise());
+  return MessageWrapper(message.Serialise());
 }
 
 // ============================== ClientMaid ==============================

@@ -64,7 +64,6 @@ class Message {
   };
 
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
-  static const MessageCategory message_type_identifier;
   // In the context of a MaidClient doing a Put, the data_holder arg represents a hint to a
   // DataHolder the client would want to store the data (i.e. one of its own vaults).  In the
   // context of a MetadataManger sending to PmidAccountHolder, the data_holder represents the name

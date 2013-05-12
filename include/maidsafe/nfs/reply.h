@@ -30,7 +30,6 @@ namespace nfs {
 class Reply {
  public:
   typedef TaggedValue<NonEmptyString, struct SerialisedReplyTag> serialised_type;
-  static const MessageCategory message_type_identifier;
 
   // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
   template<typename ErrorCode>

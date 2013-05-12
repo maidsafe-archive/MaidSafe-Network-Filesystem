@@ -17,8 +17,6 @@
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 
-#include "maidsafe/nfs/types.h"
-
 
 namespace maidsafe {
 
@@ -26,11 +24,12 @@ namespace nfs {
 
 class MessageWrapper {
  public:
-  typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
+  typedef TaggedValue<NonEmptyString, struct SerialisedMessageWrapperTag> serialised_type;
 
-  MessageWrapper(MessageCategory inner_message_type,
-                 const NonEmptyString& serialised_inner_message,
-                 const asymm::Signature& signature = asymm::Signature());
+  explicit MessageWrapper(const NonEmptyString& serialised_inner_message,
+                          const asymm::Signature& signature = asymm::Signature());
+  explicit MessageWrapper(NonEmptyString&& serialised_inner_message,
+                          const asymm::Signature& signature = asymm::Signature());
   explicit MessageWrapper(const serialised_type& serialised_message);
   MessageWrapper(const MessageWrapper& other);
   MessageWrapper& operator=(const MessageWrapper& other);
@@ -39,13 +38,11 @@ class MessageWrapper {
 
   serialised_type Serialise() const;
 
-  MessageCategory inner_message_type() const { return inner_message_type_; }
   template<typename InnerMessageType>
   typename InnerMessageType::serialised_type serialised_inner_message() const;
   asymm::Signature signature() const { return signature_; }
 
  private:
-  MessageCategory inner_message_type_;
   NonEmptyString serialised_inner_message_;
   asymm::Signature signature_;
 };

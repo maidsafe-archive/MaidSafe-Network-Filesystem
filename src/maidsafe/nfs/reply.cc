@@ -44,7 +44,6 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
 
 }  // unnamed namespace
 
-const MessageCategory Reply::message_type_identifier = MessageCategory::kReply;
 
 
 Reply::Reply(const Reply& other) : error_(other.error_), data_(other.data_) {}

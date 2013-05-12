@@ -190,9 +190,9 @@ class UtilsTest : public testing::Test {
     PersonaId source(Persona::kClientMaid, NodeId(NodeId::kRandomId));
     Message::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
                            name_and_content.second, MessageAction::kGet);
-    Message data_message(destination_persona, source, data);
-    Message message(Message::message_type_identifier, data_message.Serialise().data);
-    return message.Serialise()->string();
+    Message message(destination_persona, source, data);
+    MessageWrapper message_wrapper(data_message.Serialise());
+    return message_wrapper.Serialise()->string();
   }
 
   RoutingFutures SendReturnsAllFailed() const {

@@ -52,7 +52,7 @@ class ClientPostPolicy {
         kSource_,
         kSigningFob_->name().data,
         serialised_pmid_registration);
-    MessageWrapper message_wrapper(Message::message_type_identifier, message.Serialise().data);
+    MessageWrapper message_wrapper(message.Serialise());
     routing_.SendGroup(NodeId(message.data().name().string()),
                        message_wrapper.Serialise()->string(), false, callback);
   }
@@ -64,7 +64,7 @@ class ClientPostPolicy {
                     kSource_,
                     kSigningFob_->name().data,
                     serialised_pmid_unregistration);
-    MessageWrapper message_wrapper(Message::message_type_identifier, message.Serialise().data);
+    MessageWrapper message_wrapper(message.Serialise());
     routing_.SendGroup(NodeId(message.data().name().string()),
                        message_wrapper.Serialise()->string(), false, callback);
   }
