@@ -124,16 +124,16 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 void DataPolicy<passport::Maid,
                 Persona::kClientMaid,
-                MessageAction::kPut>::SignDataIfRequired(Message& data_message) const {
-  data_message.SignData(kSigningFob_->private_key());
+                MessageAction::kPut>::SignDataIfRequired(Message& message) const {
+  message.SignData(kSigningFob_->private_key());
 }
 
 // Delete for all data types requires signature.
 template<>
 void DataPolicy<passport::Maid,
                 Persona::kClientMaid,
-                MessageAction::kDelete>::SignDataIfRequired(Message& data_message) const {
-  data_message.SignData(kSigningFob_->private_key());
+                MessageAction::kDelete>::SignDataIfRequired(Message& message) const {
+  message.SignData(kSigningFob_->private_key());
 }
 
 

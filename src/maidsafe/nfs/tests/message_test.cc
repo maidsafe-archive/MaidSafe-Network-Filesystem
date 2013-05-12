@@ -52,7 +52,7 @@ class MessageTest : public testing::Test {
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
         data_holder_(passport::PublicPmid::name_type(Identity(RandomString(NodeId::kSize)))),
-        data_message_(destination_persona_, source_,
+        message_(destination_persona_, source_,
                       Message::Data(data_type_, name_, content_, action_), data_holder_) {}
 
   MessageAction action_;
@@ -63,22 +63,22 @@ class MessageTest : public testing::Test {
   Identity name_;
   NonEmptyString content_;
   passport::PublicPmid::name_type data_holder_;
-  Message data_message_;
+  Message message_;
 };
 
 TEST_F(MessageTest, BEH_CheckGetters) {
-  EXPECT_EQ(action_, data_message_.data().action);
-  EXPECT_EQ(destination_persona_, data_message_.destination_persona());
-  EXPECT_EQ(source_.persona, data_message_.source().persona);
-  EXPECT_EQ(source_.node_id, data_message_.source().node_id);
-  EXPECT_EQ(data_type_, data_message_.data().type);
-  EXPECT_EQ(name_, data_message_.data().name);
-  EXPECT_EQ(content_, data_message_.data().content);
-  EXPECT_EQ(data_holder_, data_message_.data_holder());
+  EXPECT_EQ(action_, message_.data().action);
+  EXPECT_EQ(destination_persona_, message_.destination_persona());
+  EXPECT_EQ(source_.persona, message_.source().persona);
+  EXPECT_EQ(source_.node_id, message_.source().node_id);
+  EXPECT_EQ(data_type_, message_.data().type);
+  EXPECT_EQ(name_, message_.data().name);
+  EXPECT_EQ(content_, message_.data().content);
+  EXPECT_EQ(data_holder_, message_.data_holder());
 }
 
 TEST_F(MessageTest, BEH_SerialiseThenParse) {
-  auto serialised_message(data_message_.Serialise());
+  auto serialised_message(message_.Serialise());
   Message recovered_message(serialised_message);
 
   EXPECT_EQ(action_, recovered_message.data().action);
@@ -92,7 +92,7 @@ TEST_F(MessageTest, BEH_SerialiseThenParse) {
 }
 
 TEST_F(MessageTest, BEH_SerialiseParseReserialiseReparse) {
-  auto serialised_message(data_message_.Serialise());
+  auto serialised_message(message_.Serialise());
   Message recovered_message(serialised_message);
 
   auto serialised_message2(recovered_message.Serialise());
@@ -110,7 +110,7 @@ TEST_F(MessageTest, BEH_SerialiseParseReserialiseReparse) {
 }
 
 TEST_F(MessageTest, BEH_AssignMessage) {
-  Message message2 = data_message_;
+  Message message2 = message_;
 
   EXPECT_EQ(action_, message2.data().action);
   EXPECT_EQ(destination_persona_, message2.destination_persona());
@@ -121,7 +121,7 @@ TEST_F(MessageTest, BEH_AssignMessage) {
   EXPECT_EQ(content_, message2.data().content);
   EXPECT_EQ(data_holder_, message2.data_holder());
 
-  Message message3(data_message_);
+  Message message3(message_);
 
   EXPECT_EQ(action_, message3.data().action);
   EXPECT_EQ(destination_persona_, message3.destination_persona());
@@ -168,21 +168,21 @@ TEST_F(MessageTest, BEH_InvalidDataType) {
 }
 
 TEST_F(MessageTest, BEH_DefaultValues) {
-  Message data_message(destination_persona_, source_, data_message_.data());
-  EXPECT_EQ(action_, data_message.data().action);
-  EXPECT_EQ(destination_persona_, data_message.destination_persona());
-  EXPECT_EQ(source_.persona, data_message.source().persona);
-  EXPECT_EQ(source_.node_id, data_message.source().node_id);
-  EXPECT_EQ(data_type_, data_message.data().type);
-  EXPECT_EQ(name_, data_message.data().name);
-  EXPECT_EQ(content_, data_message.data().content);
-  EXPECT_FALSE(data_message.HasDataHolder());
+  Message message(destination_persona_, source_, message_.data());
+  EXPECT_EQ(action_, message.data().action);
+  EXPECT_EQ(destination_persona_, message.destination_persona());
+  EXPECT_EQ(source_.persona, message.source().persona);
+  EXPECT_EQ(source_.node_id, message.source().node_id);
+  EXPECT_EQ(data_type_, message.data().type);
+  EXPECT_EQ(name_, message.data().name);
+  EXPECT_EQ(content_, message.data().content);
+  EXPECT_FALSE(message.HasDataHolder());
 }
 
 TEST_F(MessageTest, BEH_InvalidSource) {
   PersonaId bad_source(GenerateSource());
   bad_source.node_id = NodeId();
-  EXPECT_THROW(Message(destination_persona_, bad_source, data_message_.data()),
+  EXPECT_THROW(Message(destination_persona_, bad_source, message_.data()),
                nfs_error);
 }
 
@@ -193,12 +193,12 @@ TEST_F(MessageTest, BEH_InvalidName) {
 }
 
 TEST_F(MessageTest, BEH_SignData) {
-  EXPECT_FALSE(data_message_.client_validation().name.IsInitialised());
-  EXPECT_FALSE(data_message_.client_validation().data_signature.IsInitialised());
-  EXPECT_FALSE(data_message_.HasClientValidation());
+  EXPECT_FALSE(message_.client_validation().name.IsInitialised());
+  EXPECT_FALSE(message_.client_validation().data_signature.IsInitialised());
+  EXPECT_FALSE(message_.HasClientValidation());
   asymm::Keys keys(asymm::GenerateKeyPair());
 
-  Message::Data stored_data(data_message_.data());
+  Message::Data stored_data(message_.data());
   protobuf::Message::Data data;
   data.set_type(static_cast<int32_t>(stored_data.type));
   data.set_name(stored_data.name.string());
@@ -207,30 +207,30 @@ TEST_F(MessageTest, BEH_SignData) {
   data.set_action(static_cast<int32_t>(stored_data.action));
   asymm::PlainText serialised_data(data.SerializeAsString());
 
-  data_message_.SignData(keys.private_key);
-  EXPECT_TRUE(data_message_.client_validation().name.IsInitialised());
-  EXPECT_TRUE(data_message_.client_validation().data_signature.IsInitialised());
-  Message::ClientValidation client_validation(data_message_.client_validation());
-  EXPECT_EQ(data_message_.source().node_id.string(), client_validation.name.string());
+  message_.SignData(keys.private_key);
+  EXPECT_TRUE(message_.client_validation().name.IsInitialised());
+  EXPECT_TRUE(message_.client_validation().data_signature.IsInitialised());
+  Message::ClientValidation client_validation(message_.client_validation());
+  EXPECT_EQ(message_.source().node_id.string(), client_validation.name.string());
   EXPECT_TRUE(asymm::CheckSignature(serialised_data, client_validation.data_signature,
                                     keys.public_key));
-  EXPECT_TRUE(data_message_.HasClientValidation());
+  EXPECT_TRUE(message_.HasClientValidation());
 }
 
 TEST_F(MessageTest, BEH_SerialiseAndSignThenValidate) {
-  Message::serialised_type serialised_message(data_message_.Serialise());
+  Message::serialised_type serialised_message(message_.Serialise());
   asymm::Keys keys(asymm::GenerateKeyPair());
-  auto result(data_message_.SerialiseAndSign(keys.private_key));
+  auto result(message_.SerialiseAndSign(keys.private_key));
   EXPECT_EQ(serialised_message.data.string(), result.first.data.string());
   asymm::PlainText serialised_data(result.first.data.string());
   EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
   serialised_data = asymm::PlainText(serialised_message.data.string());
   EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
 
-  EXPECT_TRUE(data_message_.Validate(result.second, keys.public_key));
-  EXPECT_FALSE(data_message_.Validate(asymm::Signature(RandomString(256)), keys.public_key));
+  EXPECT_TRUE(message_.Validate(result.second, keys.public_key));
+  EXPECT_FALSE(message_.Validate(asymm::Signature(RandomString(256)), keys.public_key));
   asymm::Keys false_keys(asymm::GenerateKeyPair());
-  EXPECT_FALSE(data_message_.Validate(asymm::Signature(result.second), false_keys.public_key));
+  EXPECT_FALSE(message_.Validate(asymm::Signature(result.second), false_keys.public_key));
 }
 
 }  // namespace test

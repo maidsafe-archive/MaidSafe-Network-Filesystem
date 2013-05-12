@@ -191,7 +191,7 @@ class UtilsTest : public testing::Test {
     Message::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
                            name_and_content.second, MessageAction::kGet);
     Message message(destination_persona, source, data);
-    MessageWrapper message_wrapper(data_message.Serialise());
+    MessageWrapper message_wrapper(message.Serialise());
     return message_wrapper.Serialise()->string();
   }
 
