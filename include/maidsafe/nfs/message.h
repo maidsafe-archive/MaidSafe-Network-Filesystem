@@ -18,6 +18,8 @@
 #include <string>
 #include <utility>
 
+#include "boost/optional/optional.hpp"
+
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
@@ -45,7 +47,7 @@ class Message {
     Data(Data&& other);
     Data& operator=(Data&& other);
 
-    DataTagValue type;
+    boost::optional<DataTagValue> type;
     Identity name;
     NonEmptyString content;
     MessageAction action;

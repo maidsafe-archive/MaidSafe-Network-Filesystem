@@ -200,7 +200,7 @@ TEST_F(MessageTest, BEH_SignData) {
 
   Message::Data stored_data(message_.data());
   protobuf::Message::Data data;
-  data.set_type(static_cast<int32_t>(stored_data.type));
+  data.set_type(static_cast<int32_t>(*stored_data.type));
   data.set_name(stored_data.name.string());
   if (stored_data.content.IsInitialised())
     data.set_content(stored_data.content.string());

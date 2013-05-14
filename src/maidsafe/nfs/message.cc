@@ -24,7 +24,7 @@ namespace maidsafe {
 namespace nfs {
 
 Message::Data::Data()
-    : type(static_cast<DataTagValue>(-1)),
+    : type(),
       name(),
       content(),
       action(static_cast<MessageAction>(-1)) {}
@@ -168,7 +168,8 @@ Message::Message(const serialised_type& serialised_message)
   source_.node_id = NodeId(proto_message.source().node_id());
 
   auto& proto_data(proto_message.data());
-  data_.type = static_cast<DataTagValue>(proto_data.type());
+  if (proto_data.has_type())
+    data_.type = static_cast<DataTagValue>(proto_data.type());
   data_.name = Identity(proto_data.name());
   if (proto_data.has_content())
     data_.content = NonEmptyString(proto_data.content());
@@ -188,14 +189,15 @@ Message::Message(const serialised_type& serialised_message)
 }
 
 bool Message::ValidateInputs() const {
-  return (static_cast<int32_t>(data_.type) >= 0) &&
+  return (data_.type ? (static_cast<int32_t>(*data_.type) >= 0) : true) &&
          data_.name.IsInitialised() &&
          !source_.node_id.IsZero();
 }
 
 void Message::SignData(const asymm::PrivateKey& signer_private_key) {
   protobuf::Message::Data data;
-  data.set_type(static_cast<int32_t>(data_.type));
+  if (data_.type)
+    data.set_type(static_cast<int32_t>(*data_.type));
   data.set_name(data_.name.string());
   if (data_.content.IsInitialised())
     data.set_content(data_.content.string());
@@ -214,7 +216,8 @@ Message::serialised_type Message::Serialise() const {
     proto_message.mutable_source()->set_persona(
         static_cast<int32_t>(source_.persona));
     proto_message.mutable_source()->set_node_id(source_.node_id.string());
-    proto_message.mutable_data()->set_type(static_cast<int32_t>(data_.type));
+    if (data_.type)
+      proto_message.mutable_data()->set_type(static_cast<int32_t>(*data_.type));
     proto_message.mutable_data()->set_name(data_.name.string());
     if (data_.content.IsInitialised())
       proto_message.mutable_data()->set_content(data_.content.string());
