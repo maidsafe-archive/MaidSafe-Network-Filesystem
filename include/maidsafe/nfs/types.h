@@ -31,6 +31,8 @@ enum class MessageAction : int32_t {
   kDelete,
   kRegisterPmid,
   kUnregisterPmid,
+  kDeleteBranchUntilFork,
+  kGetBranch,
   kConnect,
   kGetPmidHealth,
   kNodeDown,
