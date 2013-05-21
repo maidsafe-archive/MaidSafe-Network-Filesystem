@@ -41,8 +41,6 @@ enum class MessageAction : int32_t {
   kGetElementList,
   kSynchronise,
   kAccountTransfer,
-  kDeleteBranchUntilFork,
-  kGetBranch
 };
 
 template <typename Elem, typename Traits>
