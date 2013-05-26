@@ -27,6 +27,7 @@ Message::Data::Data()
     : type(),
       name(),
       content(),
+      structured_data_version(),
       action(static_cast<MessageAction>(-1)) {}
 
 Message::Data::Data(DataTagValue type_in,
@@ -36,18 +37,33 @@ Message::Data::Data(DataTagValue type_in,
     : type(type_in),
       name(name_in),
       content(content_in),
+      structured_data_version(),
       action(action_in) {}
+
+
+Message::Data::Data(DataTagValue type_in,
+                    const Identity& name_in,
+                    const std::vector<Identity>& structured_data_version_in,
+                    MessageAction action_in)
+    : type(type_in),
+      name(name_in),
+      content(),
+      structured_data_version(structured_data_version_in),
+      action(action_in) {}
+
 
 Message::Data::Data(const Data& other)
     : type(other.type),
       name(other.name),
       content(other.content),
+      structured_data_version(other.structured_data_version),
       action(other.action) {}
 
 Message::Data& Message::Data::operator=(const Data& other) {
   type = other.type;
   name = other.name;
   content = other.content;
+  structured_data_version = other.structured_data_version;
   action = other.action;
   return *this;
 }
@@ -56,12 +72,14 @@ Message::Data::Data(Data&& other)
     : type(std::move(other.type)),
       name(std::move(other.name)),
       content(std::move(other.content)),
+      structured_data_version(std::move(other.structured_data_version)),
       action(std::move(other.action)) {}
 
 Message::Data& Message::Data::operator=(Data&& other) {
   type = std::move(other.type);
   name = std::move(other.name);
   content = std::move(other.content);
+  structured_data_version = std::move(other.structured_data_version),
   action = std::move(other.action);
   return *this;
 }
@@ -173,6 +191,9 @@ Message::Message(const serialised_type& serialised_message)
   data_.name = Identity(proto_data.name());
   if (proto_data.has_content())
     data_.content = NonEmptyString(proto_data.content());
+  for(auto i(0); i < proto_data.structured_data_version().size() ; ++i)
+    data_.structured_data_version.push_back(Identity(proto_data.structured_data_version(i)));
+
   data_.action = static_cast<MessageAction>(proto_data.action());
 
   if (proto_message.has_client_validation()) {

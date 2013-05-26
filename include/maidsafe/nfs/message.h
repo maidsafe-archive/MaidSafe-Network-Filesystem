@@ -17,6 +17,7 @@
 #include <ostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "boost/optional/optional.hpp"
 
@@ -42,6 +43,10 @@ class Message {
          const Identity& name_in,
          const NonEmptyString& content_in,
          MessageAction action_in);
+    Data(DataTagValue type_in,
+         const Identity& name_in,
+         const std::vector<Identity>& structured_data_version_in,
+         MessageAction action_in);
     Data(const Data& other);
     Data& operator=(const Data& other);
     Data(Data&& other);
@@ -50,6 +55,7 @@ class Message {
     boost::optional<DataTagValue> type;
     Identity name;
     NonEmptyString content;
+    std::vector<Identity> structured_data_version;
     MessageAction action;
   };
   struct ClientValidation {
