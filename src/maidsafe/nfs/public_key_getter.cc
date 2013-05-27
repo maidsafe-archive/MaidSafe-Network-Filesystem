@@ -29,7 +29,7 @@ PublicKeyGetter::PublicKeyGetter(routing::Routing& routing,
 #ifndef TESTING
   if (!public_pmids_from_file.empty()) {
     LOG(kError) << "Cannot use fake key getter if TESTING is not defined";
-    ThrowError(NfsErrors::invalid_parameter);
+    ThrowError(CommonErrors::invalid_parameter);
   }
 #endif
 }

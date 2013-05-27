@@ -109,7 +109,7 @@ Message::Message(Persona destination_persona,
       client_validation_(),
       data_holder_(data_holder) {
   if (!ValidateInputs())
-    ThrowError(NfsErrors::invalid_parameter);
+    ThrowError(CommonErrors::invalid_parameter);
 }
 
 Message::Message(const Message& other)
@@ -185,7 +185,7 @@ Message::Message(const serialised_type& serialised_message)
     data_holder_ = passport::PublicPmid::name_type((Identity(proto_message.data_holder())));
 
   if (!ValidateInputs())
-    ThrowError(NfsErrors::invalid_parameter);
+    ThrowError(CommonErrors::invalid_parameter);
 }
 
 bool Message::ValidateInputs() const {
@@ -232,7 +232,7 @@ Message::serialised_type Message::Serialise() const {
     serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
   }
   catch(const std::exception&) {
-    ThrowError(NfsErrors::invalid_parameter);
+    ThrowError(CommonErrors::invalid_parameter);
   }
   return serialised_message;
 }

@@ -71,7 +71,7 @@ MessageWrapper::serialised_type MessageWrapper::Serialise() const {
       proto_message.set_signature(signature_.string());
   }
   catch(const std::exception&) {
-    ThrowError(NfsErrors::invalid_parameter);
+    ThrowError(CommonErrors::invalid_parameter);
   }
   return serialised_message;
 }
