@@ -43,6 +43,9 @@ class Message {
          const Identity& name_in,
          const NonEmptyString& content_in,
          MessageAction action_in);
+    Data(const Identity& name_in,
+         const NonEmptyString& content_in,
+         MessageAction action_in);
     Data(const Data& other);
     Data& operator=(const Data& other);
     Data(Data&& other);
@@ -51,7 +54,6 @@ class Message {
     boost::optional<DataTagValue> type;
     Identity name;
     NonEmptyString content;
-    std::vector<Identity> structured_data_version;
     MessageAction action;
   };
   struct ClientValidation {

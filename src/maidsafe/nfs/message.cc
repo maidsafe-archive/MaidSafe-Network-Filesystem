@@ -27,7 +27,6 @@ Message::Data::Data()
     : type(),
       name(),
       content(),
-      structured_data_version(),
       action(static_cast<MessageAction>(-1)) {}
 
 Message::Data::Data(DataTagValue type_in,
@@ -37,7 +36,14 @@ Message::Data::Data(DataTagValue type_in,
     : type(type_in),
       name(name_in),
       content(content_in),
-      structured_data_version(),
+      action(action_in) {}
+
+Message::Data::Data(const Identity& name_in,
+                    const NonEmptyString& content_in,
+                    MessageAction action_in)
+    : type(),
+      name(name_in),
+      content(content_in),
       action(action_in) {}
 
 Message::Data::Data(const Data& other)
@@ -67,8 +73,6 @@ Message::Data& Message::Data::operator=(Data&& other) {
   action = std::move(other.action);
   return *this;
 }
-
-
 
 Message::ClientValidation::ClientValidation() : name(), data_signature() {}
 
