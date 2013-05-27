@@ -43,10 +43,6 @@ class Message {
          const Identity& name_in,
          const NonEmptyString& content_in,
          MessageAction action_in);
-    Data(DataTagValue type_in,
-         const Identity& name_in,
-         const std::vector<Identity>& structured_data_version_in,
-         MessageAction action_in);
     Data(const Data& other);
     Data& operator=(const Data& other);
     Data(Data&& other);
