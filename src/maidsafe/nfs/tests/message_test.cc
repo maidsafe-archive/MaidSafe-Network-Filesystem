@@ -164,7 +164,7 @@ TEST_F(MessageTest, BEH_InvalidDataType) {
   EXPECT_THROW(Message(destination_persona_, source_,
                            Message::Data(static_cast<DataTagValue>(bad_data_type),
                                              name_, content_, action_)),
-               nfs_error);
+               common_error);
 }
 
 TEST_F(MessageTest, BEH_DefaultValues) {
@@ -183,13 +183,13 @@ TEST_F(MessageTest, BEH_InvalidSource) {
   PersonaId bad_source(GenerateSource());
   bad_source.node_id = NodeId();
   EXPECT_THROW(Message(destination_persona_, bad_source, message_.data()),
-               nfs_error);
+               common_error);
 }
 
 TEST_F(MessageTest, BEH_InvalidName) {
   EXPECT_THROW(Message(destination_persona_, source_,
                            Message::Data(data_type_, Identity(), content_, action_)),
-               nfs_error);
+               common_error);
 }
 
 TEST_F(MessageTest, BEH_SignData) {
