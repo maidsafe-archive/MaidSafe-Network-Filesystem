@@ -46,6 +46,10 @@ StructuredData::StructuredData(const serialised_type& serialised_message)
   protobuf::StructuredData proto_structured_data;
   if (!proto_structured_data.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
+  for (auto i(0); i < proto_structured_data.versions_size() ; ++i){
+    versions_.emplace_back(proto_structured_data.versions(i).index(),
+                 ImmutableData::name_type(Identity(proto_structured_data.versions(i).id())));
+  }
 
 }
 
@@ -54,8 +58,10 @@ StructuredData::serialised_type StructuredData::Serialise() const {
   try {
     protobuf::StructuredData proto_structured_data;
     for (size_t i(0); i < versions_.size() ; ++i) {
-      proto_structured_data.add_versions(versions_.at(i).id->string());
-     }
+      auto proto_version = proto_structured_data.add_versions();
+      proto_version->set_index(versions_.at(i).index);
+      proto_version->set_id(versions_.at(i).id->string());
+    }
 
     auto serialised_message =
       serialised_type(NonEmptyString(proto_structured_data.SerializeAsString()));

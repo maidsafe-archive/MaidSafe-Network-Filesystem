@@ -1,6 +1,12 @@
 package maidsafe.nfs.protobuf;
 option optimize_for = LITE_RUNTIME;
 
-message StructuredData {
-  repeated bytes versions = 1;
+message Versions {
+required uint64 index = 1;
+required bytes id = 2;
 }
+
+message StructuredData {
+  repeated Versions versions = 1;
+}
+

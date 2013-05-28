@@ -19,7 +19,6 @@
 #include <utility>
 #include <vector>
 
-#include "maidsafe/nfs/structured_data.pb.h"
 #include "maidsafe/data_types/structured_data_versions.h"
 
 namespace maidsafe {
