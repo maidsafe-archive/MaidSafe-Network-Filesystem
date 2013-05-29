@@ -35,6 +35,7 @@ class StructuredData {
   StructuredData(StructuredData&& other);
   StructuredData& operator=(StructuredData&& other);
   serialised_type Serialise() const;
+  std::vector<StructuredDataVersions::VersionName> Versions() { return versions_; }
  private:
   std::vector<StructuredDataVersions::VersionName> versions_;
 };
