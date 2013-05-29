@@ -45,7 +45,7 @@ class Message {
          MessageAction action_in);
     Data(DataTagValue type_in,
          const Identity& name_in,
-         const Identity& originator_id_in,
+         const Identity& originator_in,
          const NonEmptyString& content_in,
          MessageAction action_in);
     Data(const Identity& name_in,
@@ -58,7 +58,7 @@ class Message {
 
     boost::optional<DataTagValue> type;
     Identity name;
-    Identity originator_id;
+    Identity originator;
     NonEmptyString content;
     MessageAction action;
   };

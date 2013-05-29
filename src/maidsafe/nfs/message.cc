@@ -26,7 +26,7 @@ namespace nfs {
 Message::Data::Data()
     : type(),
       name(),
-      originator_id(),
+      originator(),
       content(),
       action(static_cast<MessageAction>(-1)) {}
 
@@ -36,18 +36,18 @@ Message::Data::Data(DataTagValue type_in,
                     MessageAction action_in)
     : type(type_in),
       name(name_in),
-      originator_id(),
+      originator(),
       content(content_in),
       action(action_in) {}
 
 Message::Data::Data(DataTagValue type_in,
                     const Identity& name_in,
-                    const Identity& originator_id_in,
+                    const Identity& originator_in,
                     const NonEmptyString& content_in,
                     MessageAction action_in)
     : type(type_in),
       name(name_in),
-      originator_id(originator_id_in),
+      originator(originator_in),
       content(content_in),
       action(action_in) {}
 
@@ -56,7 +56,7 @@ Message::Data::Data(const Identity& name_in,
                     MessageAction action_in)
     : type(),
       name(name_in),
-      originator_id(),
+      originator(),
       content(content_in),
       action(action_in) {}
 
@@ -65,14 +65,14 @@ Message::Data::Data(const Identity& name_in,
 Message::Data::Data(const Data& other)
     : type(other.type),
       name(other.name),
-      originator_id(other.originator_id),
+      originator(other.originator),
       content(other.content),
       action(other.action) {}
 
 Message::Data& Message::Data::operator=(const Data& other) {
   type = other.type;
   name = other.name;
-  originator_id = other.originator_id;
+  originator = other.originator;
   content = other.content;
   action = other.action;
   return *this;
@@ -81,14 +81,14 @@ Message::Data& Message::Data::operator=(const Data& other) {
 Message::Data::Data(Data&& other)
     : type(std::move(other.type)),
       name(std::move(other.name)),
-      originator_id(std::move(other.originator_id)),
+      originator(std::move(other.originator)),
       content(std::move(other.content)),
       action(std::move(other.action)) {}
 
 Message::Data& Message::Data::operator=(Data&& other) {
   type = std::move(other.type);
   name = std::move(other.name);
-  originator_id = std::move(other.originator_id);
+  originator = std::move(other.originator);
   content = std::move(other.content);
   action = std::move(other.action);
   return *this;
