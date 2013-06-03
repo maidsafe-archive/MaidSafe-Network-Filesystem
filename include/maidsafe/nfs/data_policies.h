@@ -184,7 +184,7 @@ template<typename SigningFob>
 class NoGet {
  public:
   NoGet() {}
-  NoGet(routing::Routing&, const SigningFob&) {}
+  explicit NoGet(routing::Routing&) {}
   template<typename Data>
   void Get(const typename Data::name_type&, const routing::ResponseFunctor&) {}
   template<typename Data>
@@ -215,12 +215,9 @@ typedef PutDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHo
 typedef GetDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHolderGetPolicy;
 typedef DeleteDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHolderDeletePolicy;
 
-typedef PutDataPolicy<passport::Pmid, Persona::kStructuredDataManager>
-                                               StructuredDataManagerPutPolicy;
-typedef GetDataPolicy<passport::Pmid, Persona::kStructuredDataManager>
-                                               StructuredDataManagerGetPolicy;
-typedef DeleteDataPolicy<passport::Pmid, Persona::kStructuredDataManager>
-                                               StructuredDataManagerDeletePolicy;
+typedef NoPut<passport::Pmid> StructuredDataManagerPutPolicy;
+typedef NoGet<passport::Pmid> StructuredDataManagerGetPolicy;
+typedef NoDelete<passport::Pmid>StructuredDataManagerDeletePolicy;
 
 
 typedef PutReducerDataPolicy<passport::Pmid, Persona::kMetadataManager> MetadataManagerPutPolicy;
