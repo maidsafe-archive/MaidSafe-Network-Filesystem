@@ -215,6 +215,14 @@ typedef PutDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHo
 typedef GetDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHolderGetPolicy;
 typedef DeleteDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHolderDeletePolicy;
 
+typedef PutDataPolicy<passport::Pmid, Persona::kStructuredDataManager>
+                                               StructuredDataManagerPutPolicy;
+typedef GetDataPolicy<passport::Pmid, Persona::kStructuredDataManager>
+                                               StructuredDataManagerGetPolicy;
+typedef DeleteDataPolicy<passport::Pmid, Persona::kStructuredDataManager>
+                                               StructuredDataManagerDeletePolicy;
+
+
 typedef PutReducerDataPolicy<passport::Pmid, Persona::kMetadataManager> MetadataManagerPutPolicy;
 typedef GetReducerDataPolicy<passport::Pmid, Persona::kMetadataManager> MetadataManagerGetPolicy;
 typedef DeleteReducerDataPolicy<passport::Pmid,
