@@ -1,5 +1,4 @@
 package maidsafe.nfs.protobuf;
-option optimize_for = LITE_RUNTIME;
 
 message MessageWrapper {
   required bytes serialised_message = 1;
