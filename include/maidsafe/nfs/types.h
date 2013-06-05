@@ -40,9 +40,11 @@ enum class MessageAction : int32_t {
   kNodeDown,
   kNodeUp,
   kGetPmidTotals,
+  kPmidTotals,
   kGetElementList,
   kSynchronise,
-  kAccountTransfer
+  kAccountTransfer,
+  kCreatePmidAccount
 };
 
 template <typename Elem, typename Traits>
