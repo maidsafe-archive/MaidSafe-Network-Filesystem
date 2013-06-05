@@ -215,7 +215,8 @@ Message::Message(const serialised_type& serialised_message)
 }
 
 bool Message::ValidateInputs() const {
-  return (data_.type ? (static_cast<int32_t>(*data_.type) >= 0) : true) &&
+  return data_.type &&
+         static_cast<int32_t>(*data_.type) >= 0 &&
          data_.name.IsInitialised() &&
          !source_.node_id.IsZero();
 }
