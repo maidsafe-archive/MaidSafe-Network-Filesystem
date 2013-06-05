@@ -30,6 +30,7 @@ namespace nfs {
 enum class MessageAction : int32_t {
   kGet,
   kPut,
+  kPutResult,
   kDelete,
   kRegisterPmid,
   kUnregisterPmid,
