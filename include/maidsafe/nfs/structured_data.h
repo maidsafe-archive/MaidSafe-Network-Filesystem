@@ -1,5 +1,5 @@
 /***************************************************************************************************
- *  Copyright 2012 MaidSafe.net limited                                                            *
+ *  Copyright 2013 MaidSafe.net limited                                                            *
  *                                                                                                 *
  *  The following source code is property of MaidSafe.net limited and is not meant for external    *
  *  use.  The use of this code is governed by the licence file licence.txt found in the root of    *
@@ -12,30 +12,36 @@
 #ifndef MAIDSAFE_NFS_STRUCTURED_DATA_H_
 #define MAIDSAFE_NFS_STRUCTURED_DATA_H_
 
-#include <cstdint>
-#include <functional>
-#include <ostream>
-#include <string>
-#include <utility>
 #include <vector>
 
+#include "maidsafe/common/types.h"
+#include "maidsafe/common/tagged_value.h"
 #include "maidsafe/data_types/structured_data_versions.h"
+
 
 namespace maidsafe {
 
 namespace nfs {
 
 class StructuredData {
+ private:
+  struct StructuredDataTag;
+
  public:
-  typedef TaggedValue<NonEmptyString, struct SerialisedVersionsTag> serialised_type;
-  StructuredData(const std::vector<StructuredDataVersions::VersionName> versions);
-  StructuredData(const serialised_type& serialised_message);
+  typedef TaggedValue<NonEmptyString, StructuredDataTag> serialised_type;
+
+  explicit StructuredData(const std::vector<StructuredDataVersions::VersionName>& versions);
+
   StructuredData(const StructuredData& other);
-  StructuredData& operator=(const StructuredData& other);
   StructuredData(StructuredData&& other);
-  StructuredData& operator=(StructuredData&& other);
+  StructuredData& operator=(StructuredData other);
+  friend void swap(StructuredData& lhs, StructuredData& rhs) MAIDSAFE_NOEXCEPT;
+
+  explicit StructuredData(const serialised_type& serialised_message);
   serialised_type Serialise() const;
-  std::vector<StructuredDataVersions::VersionName> Versions() { return versions_; }
+
+  std::vector<StructuredDataVersions::VersionName> versions() const { return versions_; }
+
  private:
   std::vector<StructuredDataVersions::VersionName> versions_;
 };

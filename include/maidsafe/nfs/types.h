@@ -175,17 +175,6 @@ struct PersonaTypes {
  static const Persona persona = PersonaType;
 };
 
-template<>
-struct PersonaTypes<Persona::kStructuredDataManager> {
-  typedef std::pair<DataNameVariant, Identity> DbKey;
-//  typedef NonEmptyString SerialisedDbKey;
-  typedef StructuredDataVersions DbValue;
-  struct UnresolvedEntryKey {
-    DbKey db_key;
-    MessageAction action;
-  };
- static const Persona persona = Persona::kStructuredDataManager;
-};
 
 typedef TaggedValue<Identity, struct MessageIdTag> MessageId;
 

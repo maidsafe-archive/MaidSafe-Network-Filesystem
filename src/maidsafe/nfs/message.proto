@@ -1,6 +1,5 @@
 package maidsafe.nfs.protobuf;
 import "maidsafe/nfs/persona_id.proto";
-option optimize_for = LITE_RUNTIME;
 
 message Message {
   message Data {
