@@ -215,16 +215,13 @@ Message::Message(const serialised_type& serialised_message)
 }
 
 bool Message::ValidateInputs() const {
-  return data_.type &&
-         static_cast<int32_t>(*data_.type) >= 0 &&
-         data_.name.IsInitialised() &&
-         !source_.node_id.IsZero();
+  return data_.type && data_.name.IsInitialised() && !source_.node_id.IsZero();
 }
 
 void Message::SignData(const asymm::PrivateKey& signer_private_key) {
   protobuf::Message::Data data;
   if (data_.type)
-    data.set_type(static_cast<int32_t>(*data_.type));
+    data.set_type(static_cast<uint32_t>(*data_.type));
   data.set_name(data_.name.string());
   if (data_.content.IsInitialised())
     data.set_content(data_.content.string());
@@ -244,7 +241,7 @@ Message::serialised_type Message::Serialise() const {
         static_cast<int32_t>(source_.persona));
     proto_message.mutable_source()->set_node_id(source_.node_id.string());
     if (data_.type)
-      proto_message.mutable_data()->set_type(static_cast<int32_t>(*data_.type));
+      proto_message.mutable_data()->set_type(static_cast<uint32_t>(*data_.type));
     proto_message.mutable_data()->set_name(data_.name.string());
     if (data_.content.IsInitialised())
       proto_message.mutable_data()->set_content(data_.content.string());

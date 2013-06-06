@@ -3,7 +3,7 @@ import "maidsafe/nfs/persona_id.proto";
 
 message Message {
   message Data {
-    optional int32 type = 1;
+    optional uint32 type = 1;
     required bytes name = 2;
     optional bytes originator = 3;
     optional bytes content = 4;

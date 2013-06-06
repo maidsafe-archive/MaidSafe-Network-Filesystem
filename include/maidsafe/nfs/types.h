@@ -105,6 +105,7 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
 enum class Persona : int32_t {
   kMaidAccountHolder,
   kMetadataManager,
+  kMpidAccountHolder,
   kPmidAccountHolder,
   kDataHolder,
   kClientMaid,
@@ -164,18 +165,8 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
   return ostream;
 }
 
-template <Persona PersonaType>
-struct PersonaTypes {
-  typedef DataNameVariant DbKey;
-//  typedef NonEmptyString SerialisedDbKey;
-  typedef NonEmptyString DbValue;
-  struct UnresolvedEntryKey {
-    DbKey db_key;
-    MessageAction action;
-  };
- static const Persona persona = PersonaType;
-};
-
+template<Persona PersonaType>
+struct PersonaTypes;
 
 typedef TaggedValue<Identity, struct MessageIdTag> MessageId;
 
