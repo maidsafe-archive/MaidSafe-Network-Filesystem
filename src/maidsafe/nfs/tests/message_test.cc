@@ -155,18 +155,6 @@ TEST_F(MessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_holder_, message5.data_holder());
 }
 
-TEST_F(MessageTest, BEH_InvalidDataType) {
-  int32_t bad_data_type(RandomInt32());
-  while (bad_data_type == 0)
-    bad_data_type = RandomInt32();
-  if (bad_data_type > 0)
-    bad_data_type = -bad_data_type;
-  EXPECT_THROW(Message(destination_persona_, source_,
-                           Message::Data(static_cast<DataTagValue>(bad_data_type),
-                                             name_, content_, action_)),
-               common_error);
-}
-
 TEST_F(MessageTest, BEH_DefaultValues) {
   Message message(destination_persona_, source_, message_.data());
   EXPECT_EQ(action_, message.data().action);
