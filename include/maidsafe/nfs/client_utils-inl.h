@@ -42,7 +42,7 @@ void GetOp<Data>::SetPromiseValue(Data&& data) {
   if (promise_set_)
     return;
   promise_set_ = true;
-  promise_.set_value(data);
+  promise_.set_value(std::move(std::unique_ptr<Data>(new Data(std::move(data)))));
 }
 
 template<typename Data>
@@ -73,8 +73,9 @@ void Put(ClientMaidNfs& client_maid_nfs,
 }
 
 template<typename Data>
-std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_type& name) {
-  auto get_op(std::make_shared<detail::GetOp<Data> >());
+std::future<std::unique_ptr<Data>> Get(ClientMaidNfs& client_maid_nfs,
+                                       const typename Data::name_type& name) {
+  auto get_op(std::make_shared<detail::GetOp<Data>>());
   client_maid_nfs.Get<Data>(name, [get_op, name] (std::string serialised_reply) {
     try {
       Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));

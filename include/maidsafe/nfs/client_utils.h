@@ -37,7 +37,7 @@ template<typename Data>
 class GetOp {
  public:
   GetOp() : mutex_(), promise_(), promise_set_(false), errors_() {}
-  std::future<Data> GetFutureFromPromise() { return promise_.get_future(); }
+  std::future<std::unique_ptr<Data>> GetFutureFromPromise() { return promise_.get_future(); }
   void SetPromiseValue(Data&& data);
   void HandleFailure(const maidsafe_error& error);
 
@@ -48,7 +48,7 @@ class GetOp {
   GetOp& operator=(GetOp&&);
 
   mutable std::mutex mutex_;
-  std::promise<Data> promise_;
+  std::promise<std::unique_ptr<Data>> promise_;
   bool promise_set_;
   std::vector<maidsafe_error> errors_;
 };
@@ -62,8 +62,12 @@ void Put(ClientMaidNfs& client_maid_nfs,
          int successes_required,
          std::function<void(Reply)> result);
 
+// TODO(Fraser#5#): 2013-06-13 - We have to use a unique_ptr here because MS won't fix their
+// implementation of future to not require the shared state's type (e.g. public key) to be
+// default-constructible.
 template<typename Data>
-std::future<Data> Get(ClientMaidNfs& client_maid_nfs, const typename Data::name_type& name);
+std::future<std::unique_ptr<Data>> Get(ClientMaidNfs& client_maid_nfs,
+                                       const typename Data::name_type& name);
 
 template<typename Data>
 void Delete(ClientMaidNfs& client_maid_nfs,
