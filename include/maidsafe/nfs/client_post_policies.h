@@ -57,7 +57,7 @@ class ClientPostPolicy {
   void UnregisterPmid(const NonEmptyString& serialised_pmid_unregistration,
                       const routing::ResponseFunctor& callback) {
     Message message(Persona::kMaidAccountHolder, kSource_,
-                    Message::Data(kSigningFob_->name().data, serialised_pmid_registration,
+                    Message::Data(kSigningFob_->name().data, serialised_pmid_unregistration,
                                   MessageAction::kUnregisterPmid));
     MessageWrapper message_wrapper(message.Serialise());
     routing_.SendGroup(NodeId(message.data().name.string()),
