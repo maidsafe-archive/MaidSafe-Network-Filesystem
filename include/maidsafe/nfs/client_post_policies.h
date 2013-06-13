@@ -46,12 +46,9 @@ class ClientPostPolicy {
 
   void RegisterPmid(const NonEmptyString& serialised_pmid_registration,
                     const routing::ResponseFunctor& callback) {
-    Message message(
-        nfs::MessageAction::kRegisterPmid,
-        source_persona,
-        kSource_,
-        kSigningFob_->name().data,
-        serialised_pmid_registration);
+    Message message(Persona::kMaidAccountHolder, kSource_,
+                    Message::Data(kSigningFob_->name().data, serialised_pmid_registration,
+                                  MessageAction::kRegisterPmid));
     MessageWrapper message_wrapper(message.Serialise());
     routing_.SendGroup(NodeId(message.data().name.string()),
                        message_wrapper.Serialise()->string(), false, callback);
@@ -59,11 +56,9 @@ class ClientPostPolicy {
 
   void UnregisterPmid(const NonEmptyString& serialised_pmid_unregistration,
                       const routing::ResponseFunctor& callback) {
-    Message message(nfs::MessageAction::kUnregisterPmid,
-                    source_persona,
-                    kSource_,
-                    kSigningFob_->name().data,
-                    serialised_pmid_unregistration);
+    Message message(Persona::kMaidAccountHolder, kSource_,
+                    Message::Data(kSigningFob_->name().data, serialised_pmid_registration,
+                                  MessageAction::kUnregisterPmid));
     MessageWrapper message_wrapper(message.Serialise());
     routing_.SendGroup(NodeId(message.data().name.string()),
                        message_wrapper.Serialise()->string(), false, callback);
