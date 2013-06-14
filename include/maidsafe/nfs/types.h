@@ -38,8 +38,7 @@ enum class MessageAction : int32_t {
   kGetBranch,
   kConnect,
   kGetPmidHealth,
-  kNodeDown,
-  kNodeUp,
+  kStateChange,
   kGetPmidTotals,
   kPmidTotals,
   kGetElementList,
@@ -59,6 +58,9 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
   case MessageAction::kPut:
     action_str = "Put";
     break;
+  case MessageAction::kPutResult:
+    action_str = "PutResult";
+    break;
   case MessageAction::kDelete:
     action_str = "Delete";
     break;
@@ -68,17 +70,20 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
   case MessageAction::kUnregisterPmid:
     action_str = "Unregister PMID";
     break;
+  case MessageAction::kDeleteBranchUntilFork:
+    action_str = "Delete BranchUntil Fork";
+    break;
+  case MessageAction::kGetBranch:
+    action_str = "Get Branch";
+    break;
   case MessageAction::kConnect:
     action_str = "Connect";
     break;
   case MessageAction::kGetPmidHealth:
     action_str = "Get PMID Size";
     break;
-  case MessageAction::kNodeDown:
-    action_str = "Node Down";
-    break;
-  case MessageAction::kNodeUp:
-    action_str = "Node Up";
+  case MessageAction::kStateChange:
+    action_str = "State Change";
     break;
   case MessageAction::kGetPmidTotals:
     action_str = "Get PMID Totals";
