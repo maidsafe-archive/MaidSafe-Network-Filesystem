@@ -33,12 +33,6 @@ class NetworkFileSystem : public PutPolicy,
  public:
   NetworkFileSystem() : PutPolicy(), GetPolicy(), DeletePolicy(), PostPolicy() {}
 
-//  NetworkFileSystem(routing::Routing& routing)
-//      : PutPolicy(routing),
-//        GetPolicy(routing),
-//        DeletePolicy(routing),
-//        PostPolicy(routing) {}
-
   template<typename SigningFob>
   NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
       : PutPolicy(routing, signing_fob),
@@ -46,11 +40,6 @@ class NetworkFileSystem : public PutPolicy,
         DeletePolicy(routing, signing_fob),
         PostPolicy(routing, signing_fob) {}
 };
-
-//  typedef NetworkFileSystem<GetFromMetadataManager<Persona::kClientMaid>,
-//                            PutToDataHolder<passport::Maid>,
-//                            NoPost<passport::Maid>,
-//                            NoDelete<passport::Maid>> TemporaryClientMaidNfs;
 
 typedef NetworkFileSystem<ClientMaidPutPolicy,
                           ClientMaidGetPolicy,
