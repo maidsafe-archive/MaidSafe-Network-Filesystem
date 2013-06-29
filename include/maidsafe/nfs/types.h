@@ -108,13 +108,14 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
 }
 
 enum class Persona : int32_t {
-  kMaidAccountHolder,
-  kMetadataManager,
-  kMpidAccountHolder,
-  kPmidAccountHolder,
-  kDataHolder,
-  kClientMaid,
-  kClientMpid,
+  kMaidManager,
+  kDataManager,
+  kPmidManager,
+  kPmidNode,
+  kMaidNode,
+  kMpidManager,
+  kMpidNode,
+  kVersionManager,
   kStructuredDataManager,
   kOwnerDirectoryManager,
   kGroupDirectoryManager,
@@ -127,25 +128,25 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
                                              const Persona &persona) {
   std::string persona_str;
   switch (persona) {
-    case Persona::kMaidAccountHolder:
+    case Persona::kMaidManager:
       persona_str = "MAID Account Holder Persona";
       break;
-    case Persona::kMetadataManager:
+    case Persona::kDataManager:
       persona_str = "Metadata Manager Persona";
       break;
-    case Persona::kPmidAccountHolder:
+    case Persona::kPmidManager:
       persona_str = "PMID Account Holder Persona";
       break;
-    case Persona::kDataHolder:
+    case Persona::kPmidNode:
       persona_str = "Data Holder Persona";
       break;
-    case Persona::kClientMaid:
+    case Persona::kMaidNode:
       persona_str = "Client MAID Persona";
       break;
-    case Persona::kClientMpid:
+    case Persona::kMpidNode:
       persona_str = "Client MPID Persona";
       break;
-    case Persona::kStructuredDataManager:
+    case Persona::kVersionManager:
       persona_str = "Structured Data Manager Persona";
       break;
     case Persona::kOwnerDirectoryManager:

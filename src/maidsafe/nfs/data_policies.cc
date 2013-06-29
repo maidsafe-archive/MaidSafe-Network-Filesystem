@@ -24,7 +24,7 @@ namespace nfs {
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kPut>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -35,7 +35,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kGet>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -46,7 +46,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kDelete>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -57,7 +57,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kPut>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -68,7 +68,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kGet>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -79,7 +79,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kDelete>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -90,7 +90,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kPut>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -101,7 +101,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kGet>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -112,7 +112,7 @@ PersonaId DataPolicy<passport::Maid,
 template<>
 template<>
 PersonaId DataPolicy<passport::Maid,
-                     Persona::kClientMaid,
+                     Persona::kMaidNode,
                      MessageAction::kDelete>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*data_holder_name*/) const {
@@ -123,7 +123,7 @@ PersonaId DataPolicy<passport::Maid,
 // Put for all data types requires signature.
 template<>
 void DataPolicy<passport::Maid,
-                Persona::kClientMaid,
+                Persona::kMaidNode,
                 MessageAction::kPut>::SignDataIfRequired(Message& message) const {
   message.SignData(kSigningFob_->private_key());
 }
@@ -131,7 +131,7 @@ void DataPolicy<passport::Maid,
 // Delete for all data types requires signature.
 template<>
 void DataPolicy<passport::Maid,
-                Persona::kClientMaid,
+                Persona::kMaidNode,
                 MessageAction::kDelete>::SignDataIfRequired(Message& message) const {
   message.SignData(kSigningFob_->private_key());
 }

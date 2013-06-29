@@ -207,30 +207,30 @@ class NoDelete {
 };
 
 
-typedef PutDataPolicy<passport::Maid, Persona::kClientMaid> ClientMaidPutPolicy;
-typedef GetDataPolicy<passport::Maid, Persona::kClientMaid> ClientMaidGetPolicy;
-typedef DeleteDataPolicy<passport::Maid, Persona::kClientMaid> ClientMaidDeletePolicy;
+typedef PutDataPolicy<passport::Maid, Persona::kMaidNode> ClientMaidPutPolicy;
+typedef GetDataPolicy<passport::Maid, Persona::kMaidNode> ClientMaidGetPolicy;
+typedef DeleteDataPolicy<passport::Maid, Persona::kMaidNode> ClientMaidDeletePolicy;
 
-typedef PutDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHolderPutPolicy;
-typedef GetDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHolderGetPolicy;
-typedef DeleteDataPolicy<passport::Pmid, Persona::kMaidAccountHolder> MaidAccountHolderDeletePolicy;
+typedef PutDataPolicy<passport::Pmid, Persona::kMaidManager> MaidAccountHolderPutPolicy;
+typedef GetDataPolicy<passport::Pmid, Persona::kMaidManager> MaidAccountHolderGetPolicy;
+typedef DeleteDataPolicy<passport::Pmid, Persona::kMaidManager> MaidAccountHolderDeletePolicy;
 
 typedef NoPut<passport::Pmid> StructuredDataManagerPutPolicy;
 typedef NoGet<passport::Pmid> StructuredDataManagerGetPolicy;
 typedef NoDelete<passport::Pmid>StructuredDataManagerDeletePolicy;
 
 
-typedef PutReducerDataPolicy<passport::Pmid, Persona::kMetadataManager> MetadataManagerPutPolicy;
-typedef GetReducerDataPolicy<passport::Pmid, Persona::kMetadataManager> MetadataManagerGetPolicy;
+typedef PutReducerDataPolicy<passport::Pmid, Persona::kDataManager> MetadataManagerPutPolicy;
+typedef GetReducerDataPolicy<passport::Pmid, Persona::kDataManager> MetadataManagerGetPolicy;
 typedef DeleteReducerDataPolicy<passport::Pmid,
-                                Persona::kMetadataManager> MetadataManagerDeletePolicy;
+                                Persona::kDataManager> MetadataManagerDeletePolicy;
 
 typedef PutReducerDataPolicy<passport::Pmid,
-                             Persona::kPmidAccountHolder> PmidAccountHolderPutPolicy;
+                             Persona::kPmidManager> PmidAccountHolderPutPolicy;
 typedef GetReducerDataPolicy<passport::Pmid,
-                             Persona::kPmidAccountHolder> PmidAccountHolderGetPolicy;
+                             Persona::kPmidManager> PmidAccountHolderGetPolicy;
 typedef DeleteReducerDataPolicy<passport::Pmid,
-                                Persona::kPmidAccountHolder> PmidAccountHolderDeletePolicy;
+                                Persona::kPmidManager> PmidAccountHolderDeletePolicy;
 
 }  // namespace nfs
 
