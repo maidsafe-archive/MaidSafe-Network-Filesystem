@@ -1,13 +1,17 @@
-/***************************************************************************************************
- *  Copyright 2012 MaidSafe.net limited                                                            *
- *                                                                                                 *
- *  The following source code is property of MaidSafe.net limited and is not meant for external    *
- *  use.  The use of this code is governed by the licence file licence.txt found in the root of    *
- *  this directory and also on www.maidsafe.net.                                                   *
- *                                                                                                 *
- *  You are not free to copy, amend or otherwise use this source code without the explicit         *
- *  written permission of the board of directors of MaidSafe.net.                                  *
- **************************************************************************************************/
+/* Copyright 2012 MaidSafe.net limited
+
+This MaidSafe Software is licensed under the MaidSafe.net Commercial License, version 1.0 or later,
+and The General Public License (GPL), version 3. By contributing code to this project You agree to
+the terms laid out in the MaidSafe Contributor Agreement, version 1.0, found in the root directory
+of this project at LICENSE, COPYING and CONTRIBUTOR respectively and also available at:
+
+http://www.novinet.com/license
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is
+distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing permissions and limitations under the
+License.
+*/
 
 #ifndef MAIDSAFE_NFS_NFS_H_
 #define MAIDSAFE_NFS_NFS_H_
@@ -33,12 +37,6 @@ class NetworkFileSystem : public PutPolicy,
  public:
   NetworkFileSystem() : PutPolicy(), GetPolicy(), DeletePolicy(), PostPolicy() {}
 
-//  NetworkFileSystem(routing::Routing& routing)
-//      : PutPolicy(routing),
-//        GetPolicy(routing),
-//        DeletePolicy(routing),
-//        PostPolicy(routing) {}
-
   template<typename SigningFob>
   NetworkFileSystem(routing::Routing& routing, const SigningFob& signing_fob)
       : PutPolicy(routing, signing_fob),
@@ -46,11 +44,6 @@ class NetworkFileSystem : public PutPolicy,
         DeletePolicy(routing, signing_fob),
         PostPolicy(routing, signing_fob) {}
 };
-
-//  typedef NetworkFileSystem<GetFromDataManager<Persona::kMaidNode>,
-//                            PutToDataHolder<passport::Maid>,
-//                            NoPost<passport::Maid>,
-//                            NoDelete<passport::Maid>> TemporaryClientMaidNfs;
 
 typedef NetworkFileSystem<ClientMaidPutPolicy,
                           ClientMaidGetPolicy,
