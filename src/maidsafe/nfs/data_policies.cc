@@ -27,7 +27,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kPut>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
 }
 
@@ -38,7 +38,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kGet>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
 }
 
@@ -49,7 +49,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kDelete>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
 }
 
@@ -60,7 +60,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kPut>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
 }
 
@@ -71,7 +71,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kGet>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
 }
 
@@ -82,7 +82,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kDelete>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
 }
 
@@ -93,7 +93,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kPut>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
 }
 
@@ -104,7 +104,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kGet>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
 }
 
@@ -115,7 +115,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kMaidNode,
                      MessageAction::kDelete>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
 }
 
@@ -147,7 +147,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kDataGetter,
                      MessageAction::kGet>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kOwnerDirectoryManager, routing_.kNodeId());
 }
 
@@ -158,7 +158,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kDataGetter,
                      MessageAction::kGet>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kGroupDirectoryManager, NodeId(name->string()));
 }
 
@@ -169,7 +169,7 @@ PersonaId DataPolicy<passport::Maid,
                      Persona::kDataGetter,
                      MessageAction::kGet>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
-    const passport::PublicPmid::name_type& /*data_holder_name*/) const {
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
   return PersonaId(Persona::kWorldDirectoryManager, routing_.kNodeId());
 }
 

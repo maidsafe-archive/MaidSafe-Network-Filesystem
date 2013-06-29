@@ -116,7 +116,6 @@ enum class Persona : int32_t {
   kMpidManager,
   kMpidNode,
   kVersionManager,
-  kStructuredDataManager,
   kOwnerDirectoryManager,
   kGroupDirectoryManager,
   kWorldDirectoryManager,

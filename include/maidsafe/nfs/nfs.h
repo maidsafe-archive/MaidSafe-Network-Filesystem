@@ -47,7 +47,7 @@ class NetworkFileSystem : public PutPolicy,
         PostPolicy(routing, signing_fob) {}
 };
 
-//  typedef NetworkFileSystem<GetFromMetadataManager<Persona::kMaidNode>,
+//  typedef NetworkFileSystem<GetFromDataManager<Persona::kMaidNode>,
 //                            PutToDataHolder<passport::Maid>,
 //                            NoPost<passport::Maid>,
 //                            NoDelete<passport::Maid>> TemporaryClientMaidNfs;

@@ -127,13 +127,13 @@ Message::ClientValidation& Message::ClientValidation::operator=(ClientValidation
 Message::Message(Persona destination_persona,
                  const PersonaId& source,
                  const Data& data,
-                 const passport::PublicPmid::name_type& data_holder)
+                 const passport::PublicPmid::name_type& pmid_node)
     : message_id_(detail::GetNewMessageId(source.node_id)),
       destination_persona_(destination_persona),
       source_(source),
       data_(data),
       client_validation_(),
-      data_holder_(data_holder) {
+      pmid_node_(pmid_node) {
   if (!ValidateInputs())
     ThrowError(CommonErrors::invalid_parameter);
 }
@@ -144,7 +144,7 @@ Message::Message(const Message& other)
       source_(other.source_),
       data_(other.data_),
       client_validation_(other.client_validation_),
-      data_holder_(other.data_holder_) {}
+      pmid_node_(other.pmid_node_) {}
 
 Message& Message::operator=(const Message& other) {
   message_id_ = other.message_id_;
@@ -152,7 +152,7 @@ Message& Message::operator=(const Message& other) {
   source_ = other.source_;
   data_ = other.data_;
   client_validation_ = other.client_validation_;
-  data_holder_ = other.data_holder_;
+  pmid_node_ = other.pmid_node_;
   return *this;
 }
 
@@ -162,7 +162,7 @@ Message::Message(Message&& other)
       source_(std::move(other.source_)),
       data_(std::move(other.data_)),
       client_validation_(std::move(other.client_validation_)),
-      data_holder_(std::move(other.data_holder_)) {}
+      pmid_node_(std::move(other.pmid_node_)) {}
 
 Message& Message::operator=(Message&& other) {
   message_id_ = std::move(other.message_id_);
@@ -170,7 +170,7 @@ Message& Message::operator=(Message&& other) {
   source_ = std::move(other.source_);
   data_ = std::move(other.data_);
   client_validation_ = std::move(other.client_validation_);
-  data_holder_ = std::move(other.data_holder_);
+  pmid_node_ = std::move(other.pmid_node_);
   return *this;
 }
 
@@ -183,7 +183,7 @@ Message::Message(const serialised_type& serialised_message)
       source_(),
       data_(),
       client_validation_(),
-      data_holder_() {
+      pmid_node_() {
   protobuf::Message proto_message;
   if (!proto_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
@@ -207,8 +207,8 @@ Message::Message(const serialised_type& serialised_message)
     client_validation_.data_signature = asymm::Signature(proto_client_validation.data_signature());
   }
 
-  if (proto_message.has_data_holder())
-    data_holder_ = passport::PublicPmid::name_type((Identity(proto_message.data_holder())));
+  if (proto_message.has_pmid_node())
+    pmid_node_ = passport::PublicPmid::name_type((Identity(proto_message.pmid_node())));
 
   if (!ValidateInputs())
     ThrowError(CommonErrors::invalid_parameter);
@@ -252,7 +252,7 @@ Message::serialised_type Message::Serialise() const {
           client_validation_.data_signature.string());
     }
     if (HasDataHolder())
-      proto_message.set_data_holder(data_holder_->string());
+      proto_message.set_pmid_node(pmid_node_->string());
     serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
   }
   catch(const std::exception&) {
