@@ -80,15 +80,15 @@ class Message {
   };
 
   typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
-  // In the context of a MaidClient doing a Put, the data_holder arg represents a hint to a
+  // In the context of a MaidClient doing a Put, the pmid_node arg represents a hint to a
   // DataHolder the client would want to store the data (i.e. one of its own vaults).  In the
-  // context of a MetadataManger sending to PmidAccountHolder, the data_holder represents the name
-  // of the actual DataHolder chosen (the PmidAccountHolder should be managing this DataHolder's
+  // context of a MetadataManger sending to PmidManager, the pmid_node represents the name
+  // of the actual DataHolder chosen (the PmidManager should be managing this DataHolder's
   // account).
   Message(Persona destination_persona,
           const PersonaId& source,
           const Data& data,
-          const passport::PublicPmid::name_type& data_holder = passport::PublicPmid::name_type());
+          const passport::PublicPmid::name_type& pmid_node = passport::PublicPmid::name_type());
   Message(const Message& other);
   Message& operator=(const Message& other);
   Message(Message&& other);
@@ -109,8 +109,8 @@ class Message {
   Data data() const { return data_; }
   ClientValidation client_validation() const { return client_validation_; }
   bool HasClientValidation() const { return client_validation_.name.IsInitialised(); }
-  passport::PublicPmid::name_type data_holder() const { return data_holder_; }
-  bool HasDataHolder() const { return data_holder_->IsInitialised(); }
+  passport::PublicPmid::name_type pmid_node() const { return pmid_node_; }
+  bool HasDataHolder() const { return pmid_node_->IsInitialised(); }
 
  private:
   bool ValidateInputs() const;
@@ -120,7 +120,7 @@ class Message {
   PersonaId source_;
   Data data_;
   ClientValidation client_validation_;
-  passport::PublicPmid::name_type data_holder_;
+  passport::PublicPmid::name_type pmid_node_;
 };
 
 }  // namespace nfs

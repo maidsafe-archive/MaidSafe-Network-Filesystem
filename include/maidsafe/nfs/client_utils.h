@@ -62,7 +62,7 @@ class GetOp {
 template<typename Data>
 void Put(ClientMaidNfs& client_maid_nfs,
          const Data& data,
-         const passport::PublicPmid::name_type& data_holder_hint,
+         const passport::PublicPmid::name_type& pmid_node_hint,
          int successes_required,
          std::function<void(Reply)> result);
 

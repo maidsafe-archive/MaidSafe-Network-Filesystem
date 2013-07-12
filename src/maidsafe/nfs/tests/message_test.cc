@@ -55,9 +55,9 @@ class MessageTest : public testing::Test {
         data_type_(static_cast<DataTagValue>(RandomUint32() % 13)),
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
-        data_holder_(passport::PublicPmid::name_type(Identity(RandomString(NodeId::kSize)))),
+        pmid_node_(passport::PublicPmid::name_type(Identity(RandomString(NodeId::kSize)))),
         message_(destination_persona_, source_,
-                      Message::Data(data_type_, name_, content_, action_), data_holder_) {}
+                      Message::Data(data_type_, name_, content_, action_), pmid_node_) {}
 
   MessageAction action_;
   Persona destination_persona_;
@@ -66,7 +66,7 @@ class MessageTest : public testing::Test {
   DataTagValue data_type_;
   Identity name_;
   NonEmptyString content_;
-  passport::PublicPmid::name_type data_holder_;
+  passport::PublicPmid::name_type pmid_node_;
   Message message_;
 };
 
@@ -78,7 +78,7 @@ TEST_F(MessageTest, BEH_CheckGetters) {
   EXPECT_EQ(data_type_, message_.data().type);
   EXPECT_EQ(name_, message_.data().name);
   EXPECT_EQ(content_, message_.data().content);
-  EXPECT_EQ(data_holder_, message_.data_holder());
+  EXPECT_EQ(pmid_node_, message_.pmid_node());
 }
 
 TEST_F(MessageTest, BEH_SerialiseThenParse) {
@@ -92,7 +92,7 @@ TEST_F(MessageTest, BEH_SerialiseThenParse) {
   EXPECT_EQ(data_type_, recovered_message.data().type);
   EXPECT_EQ(name_, recovered_message.data().name);
   EXPECT_EQ(content_, recovered_message.data().content);
-  EXPECT_EQ(data_holder_, recovered_message.data_holder());
+  EXPECT_EQ(pmid_node_, recovered_message.pmid_node());
 }
 
 TEST_F(MessageTest, BEH_SerialiseParseReserialiseReparse) {
@@ -110,7 +110,7 @@ TEST_F(MessageTest, BEH_SerialiseParseReserialiseReparse) {
   EXPECT_EQ(data_type_, recovered_message2.data().type);
   EXPECT_EQ(name_, recovered_message2.data().name);
   EXPECT_EQ(content_, recovered_message2.data().content);
-  EXPECT_EQ(data_holder_, recovered_message2.data_holder());
+  EXPECT_EQ(pmid_node_, recovered_message2.pmid_node());
 }
 
 TEST_F(MessageTest, BEH_AssignMessage) {
@@ -123,7 +123,7 @@ TEST_F(MessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message2.data().type);
   EXPECT_EQ(name_, message2.data().name);
   EXPECT_EQ(content_, message2.data().content);
-  EXPECT_EQ(data_holder_, message2.data_holder());
+  EXPECT_EQ(pmid_node_, message2.pmid_node());
 
   Message message3(message_);
 
@@ -134,7 +134,7 @@ TEST_F(MessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message3.data().type);
   EXPECT_EQ(name_, message3.data().name);
   EXPECT_EQ(content_, message3.data().content);
-  EXPECT_EQ(data_holder_, message3.data_holder());
+  EXPECT_EQ(pmid_node_, message3.pmid_node());
 
   Message message4 = std::move(message3);
 
@@ -145,7 +145,7 @@ TEST_F(MessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message4.data().type);
   EXPECT_EQ(name_, message4.data().name);
   EXPECT_EQ(content_, message4.data().content);
-  EXPECT_EQ(data_holder_, message4.data_holder());
+  EXPECT_EQ(pmid_node_, message4.pmid_node());
 
   Message message5(std::move(message4));
 
@@ -156,7 +156,7 @@ TEST_F(MessageTest, BEH_AssignMessage) {
   EXPECT_EQ(data_type_, message5.data().type);
   EXPECT_EQ(name_, message5.data().name);
   EXPECT_EQ(content_, message5.data().content);
-  EXPECT_EQ(data_holder_, message5.data_holder());
+  EXPECT_EQ(pmid_node_, message5.pmid_node());
 }
 
 TEST_F(MessageTest, BEH_DefaultValues) {

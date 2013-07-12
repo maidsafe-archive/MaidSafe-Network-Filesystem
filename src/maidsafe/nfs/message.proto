@@ -33,7 +33,7 @@ message Message {
   required PersonaId source = 3;
   required Data data = 4;
   optional ClientValidation client_validation = 5;
-  optional bytes data_holder = 6;
+  optional bytes pmid_node = 6;
 }
 
 // MAID Client send to MAID Account Holder

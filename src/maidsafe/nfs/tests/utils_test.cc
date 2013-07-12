@@ -190,8 +190,8 @@ template<typename T>
 class UtilsTest : public testing::Test {
  protected:
   std::string MakeSerialisedMessage(const std::pair<Identity, NonEmptyString>& name_and_content) {
-    Persona destination_persona(Persona::kMetadataManager);
-    PersonaId source(Persona::kClientMaid, NodeId(NodeId::kRandomId));
+    Persona destination_persona(Persona::kDataManager);
+    PersonaId source(Persona::kMaidNode, NodeId(NodeId::kRandomId));
     Message::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
                            name_and_content.second, MessageAction::kGet);
     Message message(destination_persona, source, data);

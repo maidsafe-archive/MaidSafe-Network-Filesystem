@@ -65,12 +65,12 @@ void GetOp<Data>::HandleFailure(const maidsafe_error& error) {
 template<typename Data>
 void Put(ClientMaidNfs& client_maid_nfs,
          const Data& data,
-         const passport::PublicPmid::name_type& data_holder_hint,
+         const passport::PublicPmid::name_type& pmid_node_hint,
          int successes_required,
          std::function<void(Reply)> result) {
   auto put_op(std::make_shared<OperationOp>(successes_required, result));
   client_maid_nfs.Put(data,
-                      data_holder_hint,
+                      pmid_node_hint,
                       [put_op](std::string serialised_reply) {
                            HandleOperationReply(put_op, serialised_reply);
                       });

@@ -50,7 +50,7 @@ class ClientPostPolicy {
 
   void RegisterPmid(const NonEmptyString& serialised_pmid_registration,
                     const routing::ResponseFunctor& callback) {
-    Message message(Persona::kMaidAccountHolder, kSource_,
+    Message message(Persona::kMaidManager, kSource_,
                     Message::Data(kSigningFob_->name().data, serialised_pmid_registration,
                                   MessageAction::kRegisterPmid));
     MessageWrapper message_wrapper(message.Serialise());
@@ -60,7 +60,7 @@ class ClientPostPolicy {
 
   void UnregisterPmid(const NonEmptyString& serialised_pmid_unregistration,
                       const routing::ResponseFunctor& callback) {
-    Message message(Persona::kMaidAccountHolder, kSource_,
+    Message message(Persona::kMaidManager, kSource_,
                     Message::Data(kSigningFob_->name().data, serialised_pmid_unregistration,
                                   MessageAction::kUnregisterPmid));
     MessageWrapper message_wrapper(message.Serialise());
@@ -74,7 +74,7 @@ class ClientPostPolicy {
   const PersonaId kSource_;
 };
 
-typedef ClientPostPolicy<passport::Maid, Persona::kClientMaid> ClientMaidPostPolicy;
+typedef ClientPostPolicy<passport::Maid, Persona::kMaidNode> ClientMaidPostPolicy;
 
 }  // namespace nfs
 
