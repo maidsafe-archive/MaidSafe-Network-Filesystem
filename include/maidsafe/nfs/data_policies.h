@@ -221,7 +221,7 @@ typedef DeleteDataPolicy<passport::Pmid, Persona::kMaidManager> MaidManagerDelet
 
 typedef NoPut<passport::Pmid> VersionManagerPutPolicy;
 typedef NoGet<passport::Pmid> VersionManagerGetPolicy;
-typedef NoDelete<passport::Pmid>VersionManagerDeletePolicy;
+typedef NoDelete<passport::Pmid> VersionManagerDeletePolicy;
 
 
 typedef PutReducerDataPolicy<passport::Pmid, Persona::kDataManager> DataManagerPutPolicy;
@@ -229,12 +229,13 @@ typedef GetReducerDataPolicy<passport::Pmid, Persona::kDataManager> DataManagerG
 typedef DeleteReducerDataPolicy<passport::Pmid,
                                 Persona::kDataManager> DataManagerDeletePolicy;
 
-typedef PutReducerDataPolicy<passport::Pmid,
-                             Persona::kPmidManager> PmidManagerPutPolicy;
-typedef GetReducerDataPolicy<passport::Pmid,
-                             Persona::kPmidManager> PmidManagerGetPolicy;
-typedef DeleteReducerDataPolicy<passport::Pmid,
-                                Persona::kPmidManager> PmidManagerDeletePolicy;
+typedef PutReducerDataPolicy<passport::Pmid, Persona::kPmidManager> PmidManagerPutPolicy;
+typedef GetReducerDataPolicy<passport::Pmid, Persona::kPmidManager> PmidManagerGetPolicy;
+typedef DeleteReducerDataPolicy<passport::Pmid, Persona::kPmidManager> PmidManagerDeletePolicy;
+
+typedef NoPut<passport::Pmid> PmidNodePutPolicy;
+typedef GetDataPolicy<passport::Pmid, Persona::kPmidNode> PmidNodeGetPolicy;
+typedef NoDelete<passport::Pmid> PmidNodeDeletePolicy;
 
 }  // namespace nfs
 
