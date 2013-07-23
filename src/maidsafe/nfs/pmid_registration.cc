@@ -89,6 +89,25 @@ PmidRegistration::PmidRegistration(const serialised_type& serialised_pmid_regist
   pmid_signature_ = asymm::Signature(signed_details.pmid_signature());
 }
 
+PmidRegistration::PmidRegistration(const PmidRegistration& other)
+    : maid_name_(other.maid_name_),
+      pmid_name_(other.pmid_name_),
+      unregister_(other.unregister_),
+      maid_signature_(other.maid_signature_),
+      pmid_signature_(other.pmid_signature_) {}
+
+PmidRegistration::PmidRegistration(PmidRegistration&& other)
+    : maid_name_(std::move(other.maid_name_)),
+      pmid_name_(std::move(other.pmid_name_)),
+      unregister_(std::move(other.unregister_)),
+      maid_signature_(std::move(other.maid_signature_)),
+      pmid_signature_(std::move(other.pmid_signature_)) {}
+
+PmidRegistration& PmidRegistration::operator=(PmidRegistration other) {
+  swap(*this, other);
+  return *this;
+}
+
 bool PmidRegistration::Validate(const passport::PublicMaid& public_maid,
                                 const passport::PublicPmid& public_pmid) const {
   auto serialised_details(GetSerialisedDetails(maid_name_, pmid_name_, unregister_));
@@ -112,6 +131,15 @@ PmidRegistration::serialised_type PmidRegistration::Serialise() const {
                                  pmid_signature_).string());
   proto_pmid_registration.set_maid_signature(maid_signature_.string());
   return serialised_type(NonEmptyString(proto_pmid_registration.SerializeAsString()));
+}
+
+void swap(PmidRegistration& lhs, PmidRegistration& rhs) {
+  using std::swap;
+  swap(lhs.maid_name_, rhs.maid_name_);
+  swap(lhs.pmid_name_, rhs.pmid_name_);
+  swap(lhs.unregister_, rhs.unregister_);
+  swap(lhs.maid_signature_, rhs.maid_signature_);
+  swap(lhs.pmid_signature_, rhs.pmid_signature_);
 }
 
 }  // namespace nfs

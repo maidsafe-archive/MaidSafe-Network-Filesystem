@@ -32,6 +32,9 @@ class PmidRegistration {
                    const passport::Pmid& pmid,
                    bool unregister);
   explicit PmidRegistration(const serialised_type& serialised_pmid_registration);
+  PmidRegistration(const PmidRegistration& other);
+  PmidRegistration(PmidRegistration&& other);
+  PmidRegistration& operator=(PmidRegistration other);
   bool Validate(const passport::PublicMaid& public_maid,
                 const passport::PublicPmid& public_pmid) const;
   serialised_type Serialise() const;
@@ -39,7 +42,10 @@ class PmidRegistration {
   passport::PublicPmid::name_type pmid_name() const { return pmid_name_; }
   bool unregister() const { return unregister_; }
 
+  friend void swap(PmidRegistration& lhs, PmidRegistration& rhs);
+
  private:
+  PmidRegistration();
   passport::PublicMaid::name_type maid_name_;
   passport::PublicPmid::name_type pmid_name_;
   bool unregister_;

@@ -31,9 +31,7 @@ namespace test {
 
 class StructuredDataTest : public testing::Test {
  protected:
-
   StructuredDataTest() {}
-
 };
 
 TEST_F(StructuredDataTest, BEH_Constructor) {
@@ -46,7 +44,7 @@ TEST_F(StructuredDataTest, BEH_Constructor) {
   StructuredData structured_data_copy(structured_data_ori);
 
   uint32_t num_of_versions(RandomUint32() % 256 + 10);
-  for(uint32_t i(0); i < num_of_versions; ++i) {
+  for (uint32_t i(0); i < num_of_versions; ++i) {
     StructuredDataVersions::VersionName version_name(
         RandomUint32(), ImmutableData::name_type(Identity(RandomString(64))));
     versions.push_back(version_name);
@@ -55,7 +53,7 @@ TEST_F(StructuredDataTest, BEH_Constructor) {
   StructuredData structured_data(versions);
   auto versions_fetched(structured_data.versions());
   EXPECT_EQ(num_of_versions + 1, versions_fetched.size());
-  for(uint32_t i(0); i < (num_of_versions + 1); ++i) {
+  for (uint32_t i(0); i < (num_of_versions + 1); ++i) {
     EXPECT_EQ(versions[i].id, versions_fetched[i].id);
     EXPECT_EQ(versions[i].index, versions_fetched[i].index);
   }
@@ -65,8 +63,10 @@ TEST_F(StructuredDataTest, BEH_Serialise) {
   {
     bool expect_exception(false);
     try {
-      StructuredData structured_data(StructuredData::serialised_type(NonEmptyString(RandomString(64))));
-    } catch (...) {
+      StructuredData structured_data(
+          StructuredData::serialised_type(NonEmptyString(RandomString(64))));
+    }
+    catch(...) {
       expect_exception = true;
     }
     EXPECT_TRUE(expect_exception);
@@ -74,7 +74,7 @@ TEST_F(StructuredDataTest, BEH_Serialise) {
 
   std::vector<StructuredDataVersions::VersionName> versions;
   uint32_t num_of_versions(RandomUint32() % 256 + 10);
-  for(uint32_t i(0); i < num_of_versions; ++i) {
+  for (uint32_t i(0); i < num_of_versions; ++i) {
     StructuredDataVersions::VersionName version_name(
         RandomUint32(), ImmutableData::name_type(Identity(RandomString(64))));
     versions.push_back(version_name);
@@ -84,7 +84,7 @@ TEST_F(StructuredDataTest, BEH_Serialise) {
   StructuredData structured_data_serialise(structured_data_ori.Serialise());
   auto versions_parsed(structured_data_serialise.versions());
   EXPECT_EQ(num_of_versions, versions_parsed.size());
-  for(uint32_t i(0); i < num_of_versions; ++i) {
+  for (uint32_t i(0); i < num_of_versions; ++i) {
     EXPECT_EQ(versions[i].id, versions_parsed[i].id);
     EXPECT_EQ(versions[i].index, versions_parsed[i].index);
   }
