@@ -40,6 +40,8 @@ enum class MessageAction : int32_t {
   kUnregisterPmid,
   kDeleteBranchUntilFork,
   kGetBranch,
+  kCreateAccount,
+  kRemoveAccount,
   kConnect,
   kGetPmidHealth,
   kGetPmidTotals,
@@ -48,8 +50,7 @@ enum class MessageAction : int32_t {
   kPmidTotals,
   kGetElementList,
   kSynchronise,
-  kAccountTransfer,
-  kCreatePmidAccount
+  kAccountTransfer
 };
 
 template <typename Elem, typename Traits>
