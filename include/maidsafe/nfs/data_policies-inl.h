@@ -70,6 +70,8 @@ MessageWrapper DataPolicy<SigningFob, source_persona, action>::ConstructMessageW
   return MessageWrapper(message.Serialise());
 }
 
+
+
 // ============================== ClientMaid ==============================
 
 // Put to MaidManager for all data types except directories.
@@ -238,8 +240,8 @@ template<typename Data>
 void DataPolicy<passport::Maid,
                 Persona::kMaidNode,
                 MessageAction::kGet>::Send(const NodeId& destination,
-                                                 const std::string& serialised_message,
-                                                 const routing::ResponseFunctor& callback) {
+                                           const std::string& serialised_message,
+                                           const routing::ResponseFunctor& callback) {
   routing_.SendGroup(destination, serialised_message, IsCacheable<Data>(), callback);
 }
 
@@ -446,8 +448,8 @@ template<typename Data>
 void DataPolicy<passport::Pmid,
                 Persona::kPmidManager,
                 MessageAction::kPut>::Send(const NodeId& destination,
-                                                 const std::string& serialised_message,
-                                                 const routing::ResponseFunctor& callback) {
+                                           const std::string& serialised_message,
+                                           const routing::ResponseFunctor& callback) {
   routing_.SendDirect(destination, serialised_message, false, callback);
 }
 
@@ -457,9 +459,50 @@ template<typename Data>
 void DataPolicy<passport::Pmid,
                 Persona::kPmidManager,
                 MessageAction::kDelete>::Send(const NodeId& destination,
-                                                    const std::string& serialised_message,
-                                                    const routing::ResponseFunctor& callback) {
+                                              const std::string& serialised_message,
+                                              const routing::ResponseFunctor& callback) {
   routing_.SendDirect(destination, serialised_message, false, callback);
+}
+
+
+
+// ============================== PmidNode ==============================
+
+// Get from DataManager for all data types.
+template<>
+template<typename Data>
+PersonaId DataPolicy<passport::Pmid,
+                     Persona::kPmidNode,
+                     MessageAction::kGet>::GetDestination(
+    const typename Data::name_type& name,
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
+  return PersonaId(Persona::kDataManager, NodeId(name->string()));
+}
+
+// Get for all data types doesn't use pmid_node field of Message.
+template<>
+template<typename Data>
+Message DataPolicy<passport::Pmid,
+                   Persona::kPmidNode,
+                   MessageAction::kGet>::ConstructMessage(
+    Persona destination_persona,
+    const typename Data::name_type& name,
+    const NonEmptyString& content,
+    const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
+  return Message(destination_persona, kSource_,
+                 Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
+                               MessageAction::kGet));
+}
+
+// Get for all data types should use the Cacheable trait of the data type.
+template<>
+template<typename Data>
+void DataPolicy<passport::Pmid,
+                Persona::kPmidNode,
+                MessageAction::kGet>::Send(const NodeId& destination,
+                                           const std::string& serialised_message,
+                                           const routing::ResponseFunctor& callback) {
+  routing_.SendGroup(destination, serialised_message, IsCacheable<Data>(), callback);
 }
 
 
@@ -525,8 +568,8 @@ template<typename Data>
 void DataPolicy<passport::Maid,
                 Persona::kDataGetter,
                 MessageAction::kGet>::Send(const NodeId& destination,
-                                                 const std::string& serialised_message,
-                                                 const routing::ResponseFunctor& callback) {
+                                           const std::string& serialised_message,
+                                           const routing::ResponseFunctor& callback) {
   routing_.SendGroup(destination, serialised_message, IsCacheable<Data>(), callback);
 }
 

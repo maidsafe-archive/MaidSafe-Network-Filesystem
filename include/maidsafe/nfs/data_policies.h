@@ -223,11 +223,9 @@ typedef NoPut<passport::Pmid> VersionManagerPutPolicy;
 typedef NoGet<passport::Pmid> VersionManagerGetPolicy;
 typedef NoDelete<passport::Pmid> VersionManagerDeletePolicy;
 
-
 typedef PutReducerDataPolicy<passport::Pmid, Persona::kDataManager> DataManagerPutPolicy;
 typedef GetReducerDataPolicy<passport::Pmid, Persona::kDataManager> DataManagerGetPolicy;
-typedef DeleteReducerDataPolicy<passport::Pmid,
-                                Persona::kDataManager> DataManagerDeletePolicy;
+typedef DeleteReducerDataPolicy<passport::Pmid, Persona::kDataManager> DataManagerDeletePolicy;
 
 typedef PutReducerDataPolicy<passport::Pmid, Persona::kPmidManager> PmidManagerPutPolicy;
 typedef GetReducerDataPolicy<passport::Pmid, Persona::kPmidManager> PmidManagerGetPolicy;

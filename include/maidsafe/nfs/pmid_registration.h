@@ -28,9 +28,7 @@ namespace nfs {
 class PmidRegistration {
  public:
   typedef TaggedValue<NonEmptyString, struct SerialisedPmidRegistrationTag> serialised_type;
-  PmidRegistration(const passport::Maid& maid,
-                   const passport::Pmid& pmid,
-                   bool unregister);
+  PmidRegistration(const passport::Maid& maid, const passport::Pmid& pmid, bool unregister);
   explicit PmidRegistration(const serialised_type& serialised_pmid_registration);
   PmidRegistration(const PmidRegistration& other);
   PmidRegistration(PmidRegistration&& other);
