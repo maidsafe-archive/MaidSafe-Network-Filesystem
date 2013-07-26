@@ -44,6 +44,7 @@ class GetOp {
   std::future<std::unique_ptr<Data>> GetFutureFromPromise() { return promise_.get_future(); }
   void SetPromiseValue(Data&& data);
   void HandleFailure(const maidsafe_error& error);
+  bool IsPromiseSet() const;
 
  private:
   GetOp(const GetOp&);

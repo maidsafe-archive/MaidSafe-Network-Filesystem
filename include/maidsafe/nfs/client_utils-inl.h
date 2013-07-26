@@ -59,6 +59,12 @@ void GetOp<Data>::HandleFailure(const maidsafe_error& error) {
     promise_.set_exception(std::make_exception_ptr(GetMostFrequentError(errors_)));
 }
 
+template<typename Data>
+bool GetOp<Data>::IsPromiseSet() const {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return promise_set_;
+}
+
 }  // namespace detail
 
 
