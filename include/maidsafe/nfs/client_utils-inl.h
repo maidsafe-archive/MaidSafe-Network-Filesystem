@@ -29,7 +29,7 @@ License.
 
 #include "maidsafe/routing/parameters.h"
 
-#include "maidsafe/nfs/reply.h"
+#include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/nfs.h"
 #include "maidsafe/nfs/utils.h"
 
@@ -73,7 +73,7 @@ void Put(ClientMaidNfs& client_maid_nfs,
          const Data& data,
          const passport::PublicPmid::name_type& pmid_node_hint,
          int successes_required,
-         std::function<void(Reply)> result) {
+         std::function<void(Message)> result) {
   auto put_op(std::make_shared<OperationOp>(successes_required, result));
   client_maid_nfs.Put(data,
                       pmid_node_hint,
@@ -88,10 +88,10 @@ std::future<std::unique_ptr<Data>> Get(ClientMaidNfs& client_maid_nfs,
   auto get_op(std::make_shared<detail::GetOp<Data>>());
   client_maid_nfs.Get<Data>(name, [get_op, name] (std::string serialised_reply) {
     try {
-      Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
-      if (!reply.IsSuccess())
+      Message reply((Message::serialised_type(NonEmptyString(serialised_reply))));
+      if (!reply.data().IsSuccess())
         throw reply.error();
-      Data data(name, (typename Data::serialised_type(reply.data())));
+      Data data(name, (typename Data::serialised_type(reply.data().content())));
       get_op->SetPromiseValue(std::move(data));
     }
     catch(const maidsafe_error& error) {
@@ -110,7 +110,7 @@ template<typename Data>
 void Delete(ClientMaidNfs& client_maid_nfs,
             const typename Data::name_type& name,
             int successes_required,
-            std::function<void(Reply)> result) {
+            std::function<void(Message)> result) {
   auto delete_op(std::make_shared<OperationOp>(successes_required, result));
   client_maid_nfs.Delete<Data>(name,
                                [delete_op] (std::string serialised_reply) {

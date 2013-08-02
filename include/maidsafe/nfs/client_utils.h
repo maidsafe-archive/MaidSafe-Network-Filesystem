@@ -25,7 +25,7 @@ License.
 
 #include "maidsafe/common/error.h"
 
-#include "maidsafe/nfs/reply.h"
+#include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/nfs.h"
 
 
@@ -65,7 +65,7 @@ void Put(ClientMaidNfs& client_maid_nfs,
          const Data& data,
          const passport::PublicPmid::name_type& pmid_node_hint,
          int successes_required,
-         std::function<void(Reply)> result);
+         std::function<void(Message)> result);
 
 // TODO(Fraser#5#): 2013-06-13 - We have to use a unique_ptr here because MS won't fix their
 // implementation of future to not require the shared state's type (e.g. public key) to be
@@ -78,7 +78,7 @@ template<typename Data>
 void Delete(ClientMaidNfs& client_maid_nfs,
             const typename Data::name_type& name,
             int successes_required,
-            std::function<void(Reply)> result);
+            std::function<void(Message)> result);
 
 }  // namespace nfs
 

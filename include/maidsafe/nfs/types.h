@@ -179,7 +179,7 @@ std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& o
 template<Persona PersonaType>
 struct PersonaTypes;
 
-typedef TaggedValue<Identity, struct MessageIdTag> MessageId;
+typedef TaggedValue<int32_t, struct MessageIdTag> MessageId;
 
 }  // namespace nfs
 

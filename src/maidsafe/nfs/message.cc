@@ -27,12 +27,39 @@ namespace maidsafe {
 
 namespace nfs {
 
+namespace {
+
+maidsafe_error GetError(int error_value, const std::string& error_category_name) {
+  if (error_category_name == std::string(GetCommonCategory().name()))
+    return MakeError(static_cast<CommonErrors>(error_value));
+  if (error_category_name == std::string(GetAsymmCategory().name()))
+    return MakeError(static_cast<AsymmErrors>(error_value));
+  if (error_category_name == std::string(GetPassportCategory().name()))
+    return MakeError(static_cast<PassportErrors>(error_value));
+  if (error_category_name == std::string(GetNfsCategory().name()))
+    return MakeError(static_cast<NfsErrors>(error_value));
+  if (error_category_name == std::string(GetRoutingCategory().name()))
+    return MakeError(static_cast<RoutingErrors>(error_value));
+  if (error_category_name == std::string(GetVaultCategory().name()))
+    return MakeError(static_cast<VaultErrors>(error_value));
+  if (error_category_name == std::string(GetLifeStuffCategory().name()))
+    return MakeError(static_cast<LifeStuffErrors>(error_value));
+
+  ThrowError(CommonErrors::parsing_error);
+  return MakeError(CommonErrors::parsing_error);
+}
+
+}  // unnamed namespace
+
+
+
 Message::Data::Data()
     : type(),
       name(),
       originator(),
       content(),
-      action(static_cast<MessageAction>(-1)) {}
+      action(static_cast<MessageAction>(-1)),
+      error() {}
 
 Message::Data::Data(DataTagValue type_in,
                     const Identity& name_in,
@@ -42,7 +69,8 @@ Message::Data::Data(DataTagValue type_in,
       name(name_in),
       originator(),
       content(content_in),
-      action(action_in) {}
+      action(action_in),
+      error() {}
 
 Message::Data::Data(DataTagValue type_in,
                     const Identity& name_in,
@@ -53,7 +81,8 @@ Message::Data::Data(DataTagValue type_in,
       name(name_in),
       originator(originator_in),
       content(content_in),
-      action(action_in) {}
+      action(action_in),
+      error() {}
 
 Message::Data::Data(const Identity& name_in,
                     const NonEmptyString& content_in,
@@ -62,8 +91,8 @@ Message::Data::Data(const Identity& name_in,
       name(name_in),
       originator(),
       content(content_in),
-      action(action_in) {}
-
+      action(action_in),
+      error() {}
 
 
 Message::Data::Data(const Data& other)
@@ -71,7 +100,8 @@ Message::Data::Data(const Data& other)
       name(other.name),
       originator(other.originator),
       content(other.content),
-      action(other.action) {}
+      action(other.action),
+      error(other.error) {}
 
 Message::Data& Message::Data::operator=(const Data& other) {
   type = other.type;
@@ -79,6 +109,7 @@ Message::Data& Message::Data::operator=(const Data& other) {
   originator = other.originator;
   content = other.content;
   action = other.action;
+  error = other.error;
   return *this;
 }
 
@@ -87,7 +118,8 @@ Message::Data::Data(Data&& other)
       name(std::move(other.name)),
       originator(std::move(other.originator)),
       content(std::move(other.content)),
-      action(std::move(other.action)) {}
+      action(std::move(other.action)),
+      error(std::move(other.error)) {}
 
 Message::Data& Message::Data::operator=(Data&& other) {
   type = std::move(other.type);
@@ -95,13 +127,19 @@ Message::Data& Message::Data::operator=(Data&& other) {
   originator = std::move(other.originator);
   content = std::move(other.content);
   action = std::move(other.action);
+  error = std::move(other.error);
   return *this;
+}
+
+bool Message::Data::IsSuccess() const {
+  static std::error_code success((MakeError(CommonErrors::success)).code());
+  return error && error->code() == success;
 }
 
 Message::ClientValidation::ClientValidation() : name(), data_signature() {}
 
 Message::ClientValidation::ClientValidation(const passport::PublicMaid::name_type& name_in,
-                                                const asymm::Signature& data_signature_in)
+                                            const asymm::Signature& data_signature_in)
     : name(name_in),
       data_signature(data_signature_in) {}
 
@@ -109,8 +147,7 @@ Message::ClientValidation::ClientValidation(const ClientValidation& other)
     : name(other.name),
       data_signature(other.data_signature) {}
 
-Message::ClientValidation& Message::ClientValidation::operator=(
-    const ClientValidation& other) {
+Message::ClientValidation& Message::ClientValidation::operator=(const ClientValidation& other) {
   name = other.name;
   data_signature = other.data_signature;
   return *this;
@@ -129,12 +166,12 @@ Message::ClientValidation& Message::ClientValidation::operator=(ClientValidation
 
 
 Message::Message(Persona destination_persona,
-                 const PersonaId& source,
+                 Persona source_persona,
                  const Data& data,
                  const passport::PublicPmid::name_type& pmid_node)
-    : message_id_(detail::GetNewMessageId(source.node_id)),
+    : message_id_(detail::GetNewMessageId()),
       destination_persona_(destination_persona),
-      source_(source),
+      source_persona_(source_persona),
       data_(data),
       client_validation_(),
       pmid_node_(pmid_node) {
@@ -145,7 +182,7 @@ Message::Message(Persona destination_persona,
 Message::Message(const Message& other)
     : message_id_(other.message_id_),
       destination_persona_(other.destination_persona_),
-      source_(other.source_),
+      source_persona_(other.source_persona_),
       data_(other.data_),
       client_validation_(other.client_validation_),
       pmid_node_(other.pmid_node_) {}
@@ -153,7 +190,7 @@ Message::Message(const Message& other)
 Message& Message::operator=(const Message& other) {
   message_id_ = other.message_id_;
   destination_persona_ = other.destination_persona_;
-  source_ = other.source_;
+  source_persona_ = other.source_persona_;
   data_ = other.data_;
   client_validation_ = other.client_validation_;
   pmid_node_ = other.pmid_node_;
@@ -163,7 +200,7 @@ Message& Message::operator=(const Message& other) {
 Message::Message(Message&& other)
     : message_id_(std::move(other.message_id_)),
       destination_persona_(std::move(other.destination_persona_)),
-      source_(std::move(other.source_)),
+      source_persona_(std::move(other.source_persona_)),
       data_(std::move(other.data_)),
       client_validation_(std::move(other.client_validation_)),
       pmid_node_(std::move(other.pmid_node_)) {}
@@ -171,7 +208,7 @@ Message::Message(Message&& other)
 Message& Message::operator=(Message&& other) {
   message_id_ = std::move(other.message_id_);
   destination_persona_ = std::move(other.destination_persona_);
-  source_ = std::move(other.source_);
+  source_persona_ = std::move(other.source_persona_);
   data_ = std::move(other.data_);
   client_validation_ = std::move(other.client_validation_);
   pmid_node_ = std::move(other.pmid_node_);
@@ -184,7 +221,7 @@ Message& Message::operator=(Message&& other) {
 Message::Message(const serialised_type& serialised_message)
     : message_id_(),
       destination_persona_(),
-      source_(),
+      source_persona_(),
       data_(),
       client_validation_(),
       pmid_node_() {
@@ -192,10 +229,9 @@ Message::Message(const serialised_type& serialised_message)
   if (!proto_message.ParseFromString(serialised_message->string()))
     ThrowError(CommonErrors::parsing_error);
 
-  message_id_ = MessageId(Identity(proto_message.message_id()));
+  message_id_ = MessageId(proto_message.message_id());
   destination_persona_ = static_cast<Persona>(proto_message.destination_persona());
-  source_.persona = static_cast<Persona>(proto_message.source().persona());
-  source_.node_id = NodeId(proto_message.source().node_id());
+  source_persona_ = static_cast<Persona>(proto_message.source_persona());
 
   auto& proto_data(proto_message.data());
   if (proto_data.has_type())
@@ -204,6 +240,10 @@ Message::Message(const serialised_type& serialised_message)
   if (proto_data.has_content())
     data_.content = NonEmptyString(proto_data.content());
   data_.action = static_cast<MessageAction>(proto_data.action());
+  if (proto_data.has_error()) {
+    data_.error = GetError(proto_data.error().error_value(),
+                           proto_data.error().error_category_name());
+  }
 
   if (proto_message.has_client_validation()) {
     auto& proto_client_validation(proto_message.client_validation());
@@ -219,10 +259,10 @@ Message::Message(const serialised_type& serialised_message)
 }
 
 bool Message::ValidateInputs() const {
-  return data_.type && data_.name.IsInitialised() && !source_.node_id.IsZero();
+  return data_.type && data_.name.IsInitialised();
 }
 
-void Message::SignData(const asymm::PrivateKey& signer_private_key) {
+void Message::SignData(const Identity& client_name, const asymm::PrivateKey& signer_private_key) {
   protobuf::Message::Data data;
   if (data_.type)
     data.set_type(static_cast<uint32_t>(*data_.type));
@@ -231,7 +271,7 @@ void Message::SignData(const asymm::PrivateKey& signer_private_key) {
     data.set_content(data_.content.string());
   data.set_action(static_cast<int32_t>(data_.action));
   asymm::PlainText serialised_data(data.SerializeAsString());
-  client_validation_.name = Identity(source_.node_id.string());
+  client_validation_.name = client_name;
   client_validation_.data_signature = asymm::Sign(serialised_data, signer_private_key);
 }
 
@@ -239,17 +279,20 @@ Message::serialised_type Message::Serialise() const {
   serialised_type serialised_message;
   try {
     protobuf::Message proto_message;
-    proto_message.set_message_id(message_id_->string());
+    proto_message.set_message_id(message_id_.data);
     proto_message.set_destination_persona(static_cast<int32_t>(destination_persona_));
-    proto_message.mutable_source()->set_persona(
-        static_cast<int32_t>(source_.persona));
-    proto_message.mutable_source()->set_node_id(source_.node_id.string());
+    proto_message.set_source_persona(static_cast<int32_t>(source_persona_));
     if (data_.type)
       proto_message.mutable_data()->set_type(static_cast<uint32_t>(*data_.type));
     proto_message.mutable_data()->set_name(data_.name.string());
     if (data_.content.IsInitialised())
       proto_message.mutable_data()->set_content(data_.content.string());
     proto_message.mutable_data()->set_action(static_cast<int32_t>(data_.action));
+    if (data_.error) {
+      proto_message.mutable_data()->mutable_error()->set_error_value(data_.error->code().value());
+      proto_message.mutable_data()->mutable_error()->set_error_category_name(
+          data_.error->code().category().name());
+    }
     if (HasClientValidation()) {
       proto_message.mutable_client_validation()->set_name(client_validation_.name.string());
       proto_message.mutable_client_validation()->set_data_signature(

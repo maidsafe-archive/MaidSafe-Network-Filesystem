@@ -22,7 +22,7 @@ License.
 
 #include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/message_wrapper.h"
-#include "maidsafe/nfs/persona_id.h"
+
 
 namespace maidsafe {
 
@@ -45,12 +45,11 @@ class ClientPostPolicy {
  public:
   ClientPostPolicy(routing::Routing& routing, const SigningFob& signing_fob)
       : routing_(routing),
-        kSigningFob_(new SigningFob(signing_fob)),
-        kSource_(source_persona, routing_.kNodeId()) {}
+        kSigningFob_(new SigningFob(signing_fob)) {}
 
   void RegisterPmid(const NonEmptyString& serialised_pmid_registration,
                     const routing::ResponseFunctor& callback) {
-    Message message(Persona::kMaidManager, kSource_,
+    Message message(Persona::kMaidManager, kSourcePersona_,
                     Message::Data(kSigningFob_->name().data, serialised_pmid_registration,
                                   MessageAction::kRegisterPmid));
     MessageWrapper message_wrapper(message.Serialise());
@@ -60,7 +59,7 @@ class ClientPostPolicy {
 
   void UnregisterPmid(const NonEmptyString& serialised_pmid_unregistration,
                       const routing::ResponseFunctor& callback) {
-    Message message(Persona::kMaidManager, kSource_,
+    Message message(Persona::kMaidManager, kSourcePersona_,
                     Message::Data(kSigningFob_->name().data, serialised_pmid_unregistration,
                                   MessageAction::kUnregisterPmid));
     MessageWrapper message_wrapper(message.Serialise());
@@ -71,7 +70,7 @@ class ClientPostPolicy {
  private:
   routing::Routing& routing_;
   const std::unique_ptr<const SigningFob> kSigningFob_;
-  const PersonaId kSource_;
+  static const Persona kSourcePersona_ = source_persona;
 };
 
 typedef ClientPostPolicy<passport::Maid, Persona::kMaidNode> ClientMaidPostPolicy;

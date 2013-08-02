@@ -24,7 +24,7 @@ License.
 
 #include "maidsafe/routing/parameters.h"
 
-#include "maidsafe/nfs/reply.h"
+#include "maidsafe/nfs/message.h"
 
 
 namespace maidsafe {
@@ -33,25 +33,24 @@ namespace nfs {
 
 namespace detail {
 
-MessageId GetNewMessageId(const NodeId& source_node_id) {
+MessageId GetNewMessageId() {
   static int32_t random_element(RandomInt32());
-  return MessageId(Identity(crypto::Hash<crypto::SHA512>(source_node_id.string() +
-                                                         std::to_string(random_element++))));
+  return MessageId(random_element++);
 }
 
 }  // namespace detail
 
 
-std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentReply(
-    const std::vector<Reply>& replies,
+std::pair<std::vector<Message>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+    const std::vector<Message>& replies,
     int successes_required) {
   auto most_frequent_itr(std::end(replies));
   int successes(0), most_frequent(0);
   typedef std::map<std::error_code, int> Count;
   Count count;
   for (auto itr(std::begin(replies)); itr != std::end(replies); ++itr) {
-    int this_reply_count(++count[(*itr).error().code()]);
-    if ((*itr).IsSuccess()) {
+    int this_reply_count(++count[(*itr).data().error->code()]);
+    if ((*itr).data().IsSuccess()) {
       if (++successes >= successes_required)
         return std::make_pair(itr, true);
     } else if (this_reply_count > most_frequent) {
@@ -62,7 +61,7 @@ std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentRepl
   return std::make_pair(most_frequent_itr, false);
 }
 
-OperationOp::OperationOp(int successes_required, std::function<void(Reply)> callback)
+OperationOp::OperationOp(int successes_required, std::function<void(Message)> callback)
     : mutex_(),
       successes_required_(successes_required),
       callback_(callback),
@@ -72,9 +71,9 @@ OperationOp::OperationOp(int successes_required, std::function<void(Reply)> call
     ThrowError(CommonErrors::invalid_parameter);
 }
 
-void OperationOp::HandleReply(Reply&& reply) {
-  std::function<void(Reply)> callback;
-  std::unique_ptr<Reply> result_ptr;
+void OperationOp::HandleReply(Message&& reply) {
+  std::function<void(Message)> callback;
+  std::unique_ptr<Message> result_ptr;
   {
     std::lock_guard<std::mutex> lock(mutex_);
     if (callback_executed_)
@@ -85,7 +84,7 @@ void OperationOp::HandleReply(Reply&& reply) {
       // Operation has succeeded or failed overall
       callback = callback_;
       callback_executed_ = true;
-      result_ptr = std::unique_ptr<Reply>(new Reply(*result.first));
+      result_ptr = std::unique_ptr<Message>(new Message(*result.first));
     } else {
       return;
     }
@@ -93,19 +92,19 @@ void OperationOp::HandleReply(Reply&& reply) {
   callback(*result_ptr);
 }
 
-void HandleOperationReply(std::shared_ptr<OperationOp> op,
-                          const std::string& serialised_reply) {
+void HandleOperationReply(std::shared_ptr<OperationOp> op, const std::string& serialised_reply) {
   try {
-    Reply reply((Reply::serialised_type(NonEmptyString(serialised_reply))));
+    Message reply((Message::serialised_type(NonEmptyString(serialised_reply))));
     op->HandleReply(std::move(reply));
   }
   catch(const maidsafe_error& error) {
     LOG(kWarning) << "nfs error: " << error.code() << " - " << error.what();
-    op->HandleReply(Reply(error));
+    op->HandleReply(Message(Persona::kDataGetter, Persona::kDataGetter, Message::Data(error)));
   }
   catch(const std::exception& e) {
     LOG(kWarning) << "nfs error: " << e.what();
-    op->HandleReply(Reply(CommonErrors::unknown));
+    op->HandleReply(Message(Persona::kDataGetter, Persona::kDataGetter,
+                    Message::Data(CommonErrors::unknown)));
   }
 }
 

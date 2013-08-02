@@ -14,23 +14,27 @@ License.
 */
 
 package maidsafe.nfs.protobuf;
-import "maidsafe/nfs/persona_id.proto";
 
 message Message {
+  message Error {
+    required int32 error_value = 1;
+    required bytes error_category_name = 2;
+  }
   message Data {
     optional uint32 type = 1;
     required bytes name = 2;
     optional bytes originator = 3;
     optional bytes content = 4;
     required int32 action = 5;
+    optional Error error = 6;
   }
   message ClientValidation {
     required bytes name = 1;
     required bytes data_signature = 2;
   }
-  required bytes message_id = 1;
+  required int32 message_id = 1;
   required int32 destination_persona = 2;
-  required PersonaId source = 3;
+  required int32 source_persona = 3;
   required Data data = 4;
   optional ClientValidation client_validation = 5;
   optional bytes pmid_node = 6;

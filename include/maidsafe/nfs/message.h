@@ -20,18 +20,20 @@ License.
 #include <functional>
 #include <ostream>
 #include <string>
+#include <system_error>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "boost/optional/optional.hpp"
 
+#include "maidsafe/common/error.h"
 #include "maidsafe/common/node_id.h"
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
 #include "maidsafe/passport/types.h"
 
-#include "maidsafe/nfs/persona_id.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -55,16 +57,42 @@ class Message {
     Data(const Identity& name_in,
          const NonEmptyString& content_in,
          MessageAction action_in);
+    // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
+    template<typename ErrorCode>
+    explicit Data(ErrorCode error_code,
+                  typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
+        : type(),
+          name(),
+          originator(),
+          content(),
+          action(static_cast<MessageAction>(-1)),
+          error(MakeError(error_code)) {}
+    template<typename Error>
+    explicit Data(Error error,
+                  typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
+        : type(),
+          name(),
+          originator(),
+          content(),
+          action(static_cast<MessageAction>(-1)),
+          error(error) {
+      static_assert(std::is_same<Error, maidsafe_error>::value ||
+                    std::is_base_of<maidsafe_error, Error>::value,
+                    "Error type must be a MaidSafe-specific type");
+    }
     Data(const Data& other);
     Data& operator=(const Data& other);
     Data(Data&& other);
     Data& operator=(Data&& other);
+
+    bool IsSuccess() const;
 
     boost::optional<DataTagValue> type;
     Identity name;
     Identity originator;
     NonEmptyString content;
     MessageAction action;
+    boost::optional<maidsafe_error> error;
   };
   struct ClientValidation {
     ClientValidation();
@@ -86,7 +114,7 @@ class Message {
   // of the actual DataHolder chosen (the PmidManager should be managing this DataHolder's
   // account).
   Message(Persona destination_persona,
-          const PersonaId& source,
+          Persona source_persona,
           const Data& data,
           const passport::PublicPmid::name_type& pmid_node = passport::PublicPmid::name_type());
   Message(const Message& other);
@@ -95,9 +123,9 @@ class Message {
   Message& operator=(Message&& other);
 
   explicit Message(const serialised_type& serialised_message);
-  // This should only be called from client NFS.  It adds an ClientValidation containing
+  // This should only be called from client NFS.  It adds a ClientValidation containing
   // source's node ID, and a signature of the data serialised.
-  void SignData(const asymm::PrivateKey& signer_private_key);
+  void SignData(const Identity& client_name, const asymm::PrivateKey& signer_private_key);
   serialised_type Serialise() const;
   std::pair<serialised_type, asymm::Signature> SerialiseAndSign(
       const asymm::PrivateKey& signer_private_key) const;
@@ -105,7 +133,7 @@ class Message {
 
   MessageId message_id() const { return message_id_; }
   Persona destination_persona() const { return destination_persona_; }
-  PersonaId source() const { return source_; }
+  Persona source_persona() const { return source_persona_; }
   Data data() const { return data_; }
   ClientValidation client_validation() const { return client_validation_; }
   bool HasClientValidation() const { return client_validation_.name.IsInitialised(); }
@@ -117,7 +145,7 @@ class Message {
 
   MessageId message_id_;
   Persona destination_persona_;
-  PersonaId source_;
+  Persona source_persona_;
   Data data_;
   ClientValidation client_validation_;
   passport::PublicPmid::name_type pmid_node_;

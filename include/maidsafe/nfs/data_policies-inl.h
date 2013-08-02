@@ -40,15 +40,13 @@ namespace nfs {
 template<typename SigningFob, Persona source_persona, MessageAction action>
 DataPolicy<SigningFob, source_persona, action>::DataPolicy(routing::Routing& routing)
     : routing_(routing),
-      kSigningFob_(),
-      kSource_(PersonaId(source_persona, routing.kNodeId())) {}
+      kSigningFob_() {}
 
 template<typename SigningFob, Persona source_persona, MessageAction action>
 DataPolicy<SigningFob, source_persona, action>::DataPolicy(routing::Routing& routing,
                                                            const SigningFob& signing_fob)
     : routing_(routing),
-      kSigningFob_(new SigningFob(signing_fob)),
-      kSource_(PersonaId(source_persona, routing.kNodeId())) {}
+      kSigningFob_(new SigningFob(signing_fob)) {}
 
 template<typename SigningFob, Persona source_persona, MessageAction action>
 template<typename Data>
@@ -58,12 +56,12 @@ void DataPolicy<SigningFob, source_persona, action>::ExecuteAction(
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& pmid_node_name) {
   auto destination(GetDestination<Data>(name, pmid_node_name));
-  auto message(ConstructMessage<Data>(destination.persona, name, content, pmid_node_name));
+  auto message(ConstructMessage<Data>(destination.first, name, content, pmid_node_name));
   SignDataIfRequired(message);
-  Send<Data>(destination.node_id, message.Serialise()->string(), callback);
+  Send<Data>(destination.second, message.Serialise()->string(), callback);
 }
 
-// Default doesn't sign _message
+// Default doesn't sign message
 template<typename SigningFob, Persona source_persona, MessageAction action>
 MessageWrapper DataPolicy<SigningFob, source_persona, action>::ConstructMessageWrapper(
     const Message& message) const {
@@ -77,114 +75,114 @@ MessageWrapper DataPolicy<SigningFob, source_persona, action>::ConstructMessageW
 // Put to MaidManager for all data types except directories.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kPut>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kPut>::GetDestination(
     const typename Data::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return PersonaId(Persona::kMaidManager, routing_.kNodeId());
+  return std::make_pair(Persona::kMaidManager, routing_.kNodeId());
 }
 
 // Get from DataManager for all data types except directories.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kGet>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kGet>::GetDestination(
     const typename Data::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return PersonaId(Persona::kDataManager, NodeId(name->string()));
+  return std::make_pair(Persona::kDataManager, NodeId(name->string()));
 }
 
 // Delete from MaidManager for all data types except directories.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kDelete>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kDelete>::GetDestination(
     const typename Data::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return PersonaId(Persona::kMaidManager, routing_.kNodeId());
+  return std::make_pair(Persona::kMaidManager, routing_.kNodeId());
 }
 
 // Put to OwnerDirectoryManager for OwnerDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kPut>::GetDestination<OwnerDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kPut>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Get from OwnerDirectoryManager for OwnerDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kGet>::GetDestination<OwnerDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kGet>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Delete from OwnerDirectoryManager for OwnerDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kDelete>::GetDestination<OwnerDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kDelete>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Put to GroupDirectoryManager for GroupDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kPut>::GetDestination<GroupDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kPut>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Get from GroupDirectoryManager for GroupDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kGet>::GetDestination<GroupDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kGet>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Delete from GroupDirectoryManager for GroupDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kDelete>::GetDestination<GroupDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kDelete>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Put to WorldDirectoryManager for WorldDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kPut>::GetDestination<WorldDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kPut>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Get from WorldDirectoryManager for WorldDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kGet>::GetDestination<WorldDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kGet>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Delete from WorldDirectoryManager for WorldDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kMaidNode,
-                     MessageAction::kDelete>::GetDestination<WorldDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kMaidNode,
+                                      MessageAction::kDelete>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
@@ -198,7 +196,7 @@ Message DataPolicy<passport::Maid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& pmid_node_hint) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kPut),
                  pmid_node_hint);
@@ -214,7 +212,7 @@ Message DataPolicy<passport::Maid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_hint*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kGet));
 }
@@ -229,7 +227,7 @@ Message DataPolicy<passport::Maid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_hint*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kDelete));
 }
@@ -252,23 +250,23 @@ void DataPolicy<passport::Maid,
 // Put to DataManager for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kMaidManager,
-                     MessageAction::kPut>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kMaidManager,
+                                      MessageAction::kPut>::GetDestination(
     const typename Data::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return PersonaId(Persona::kDataManager, NodeId(name->string()));
+  return std::make_pair(Persona::kDataManager, NodeId(name->string()));
 }
 
 // Delete from DataManager for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kMaidManager,
-                     MessageAction::kDelete>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kMaidManager,
+                                      MessageAction::kDelete>::GetDestination(
     const typename Data::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return PersonaId(Persona::kDataManager, NodeId(name->string()));
+  return std::make_pair(Persona::kDataManager, NodeId(name->string()));
 }
 
 // Put for all data types uses pmid_node_hint.
@@ -281,7 +279,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& pmid_node_hint) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kPut),
                  pmid_node_hint);
@@ -297,7 +295,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_hint*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kDelete));
 }
@@ -309,34 +307,34 @@ Message DataPolicy<passport::Pmid,
 // Put to PmidManager for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kDataManager,
-                     MessageAction::kPut>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kDataManager,
+                                      MessageAction::kPut>::GetDestination(
     const typename Data::name_type& /*name*/,
     const passport::PublicPmid::name_type& pmid_node_name) const {
-  return PersonaId(Persona::kPmidManager, NodeId(pmid_node_name->string()));
+  return std::make_pair(Persona::kPmidManager, NodeId(pmid_node_name->string()));
 }
 
 // Get from DataHolder for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kDataManager,
-                     MessageAction::kGet>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kDataManager,
+                                      MessageAction::kGet>::GetDestination(
     const typename Data::name_type& /*name*/,
     const passport::PublicPmid::name_type& pmid_node_name) const {
-  return PersonaId(Persona::kPmidNode, NodeId(pmid_node_name->string()));
+  return std::make_pair(Persona::kPmidNode, NodeId(pmid_node_name->string()));
 }
 
 // Delete from PmidManager for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kDataManager,
-                     MessageAction::kDelete>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kDataManager,
+                                      MessageAction::kDelete>::GetDestination(
     const typename Data::name_type& /*name*/,
     const passport::PublicPmid::name_type& pmid_node_name) const {
-  return PersonaId(Persona::kPmidManager, NodeId(pmid_node_name->string()));
+  return std::make_pair(Persona::kPmidManager, NodeId(pmid_node_name->string()));
 }
 
 // Put for all data types uses pmid_node field of Message.
@@ -349,7 +347,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& pmid_node_name) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kPut),
                  pmid_node_name);
@@ -365,7 +363,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kGet));
 }
@@ -380,7 +378,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& pmid_node_name) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kDelete),
                  pmid_node_name);
@@ -393,23 +391,23 @@ Message DataPolicy<passport::Pmid,
 // Put to DataHolder for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kPmidManager,
-                     MessageAction::kPut>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kPmidManager,
+                                      MessageAction::kPut>::GetDestination(
     const typename Data::name_type& /*name*/,
     const passport::PublicPmid::name_type& pmid_node_name) const {
-  return PersonaId(Persona::kPmidNode, NodeId(pmid_node_name->string()));
+  return std::make_pair(Persona::kPmidNode, NodeId(pmid_node_name->string()));
 }
 
 // Delete from DataHolder for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kPmidManager,
-                     MessageAction::kDelete>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kPmidManager,
+                                      MessageAction::kDelete>::GetDestination(
     const typename Data::name_type& /*name*/,
     const passport::PublicPmid::name_type& pmid_node_name) const {
-  return PersonaId(Persona::kPmidNode, NodeId(pmid_node_name->string()));
+  return std::make_pair(Persona::kPmidNode, NodeId(pmid_node_name->string()));
 }
 
 // Put for all data types doesn't use pmid_node field of Message.
@@ -422,7 +420,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kPut));
 }
@@ -437,7 +435,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kDelete));
 }
@@ -471,12 +469,12 @@ void DataPolicy<passport::Pmid,
 // Get from DataManager for all data types.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Pmid,
-                     Persona::kPmidNode,
-                     MessageAction::kGet>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Pmid,
+                                      Persona::kPmidNode,
+                                      MessageAction::kGet>::GetDestination(
     const typename Data::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return PersonaId(Persona::kDataManager, NodeId(name->string()));
+  return std::make_pair(Persona::kDataManager, NodeId(name->string()));
 }
 
 // Get for all data types doesn't use pmid_node field of Message.
@@ -489,7 +487,7 @@ Message DataPolicy<passport::Pmid,
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kGet));
 }
@@ -512,38 +510,38 @@ void DataPolicy<passport::Pmid,
 // Get from DataManager for all data types except directories.
 template<>
 template<typename Data>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kDataGetter,
-                     MessageAction::kGet>::GetDestination(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kDataGetter,
+                                      MessageAction::kGet>::GetDestination(
     const typename Data::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const {
-  return PersonaId(Persona::kDataManager, NodeId(name->string()));
+  return std::make_pair(Persona::kDataManager, NodeId(name->string()));
 }
 
 // Get from OwnerDirectoryManager for OwnerDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kDataGetter,
-                     MessageAction::kGet>::GetDestination<OwnerDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kDataGetter,
+                                      MessageAction::kGet>::GetDestination<OwnerDirectory>(
     const typename OwnerDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Get from GroupDirectoryManager for GroupDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kDataGetter,
-                     MessageAction::kGet>::GetDestination<GroupDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kDataGetter,
+                                      MessageAction::kGet>::GetDestination<GroupDirectory>(
     const typename GroupDirectory::name_type& name,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
 // Get from WorldDirectoryManager for WorldDirectory data.
 template<>
 template<>
-PersonaId DataPolicy<passport::Maid,
-                     Persona::kDataGetter,
-                     MessageAction::kGet>::GetDestination<WorldDirectory>(
+std::pair<Persona, NodeId> DataPolicy<passport::Maid,
+                                      Persona::kDataGetter,
+                                      MessageAction::kGet>::GetDestination<WorldDirectory>(
     const typename WorldDirectory::name_type& /*name*/,
     const passport::PublicPmid::name_type& /*pmid_node_name*/) const;
 
@@ -557,7 +555,7 @@ MessageAction::kGet>::ConstructMessage(
     const typename Data::name_type& name,
     const NonEmptyString& content,
     const passport::PublicPmid::name_type& /*pmid_node_hint*/) const {
-  return Message(destination_persona, kSource_,
+  return Message(destination_persona, kSourcePersona_,
                  Message::Data(Data::name_type::tag_type::kEnumValue, name.data, content,
                                MessageAction::kGet));
 }

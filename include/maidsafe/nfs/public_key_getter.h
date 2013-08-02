@@ -24,7 +24,7 @@ License.
 #include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/nfs.h"
-#include "maidsafe/nfs/reply.h"
+
 
 namespace maidsafe {
 
@@ -39,7 +39,7 @@ class PublicKeyGetter {
 
   template<typename Data>
   void GetKey(const typename Data::name_type& key_name,
-              std::function<void(Reply)> get_key_functor);
+              std::function<void(Message)> get_key_functor);
 
  private:
   std::unique_ptr<KeyGetterNfs> key_getter_nfs_;
@@ -50,7 +50,7 @@ class PublicKeyGetter {
 
 template<typename Data>
 void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
-                             std::function<void(Reply)> get_key_functor) {
+                             std::function<void(Message)> get_key_functor) {
   static_assert(passport::is_public_key_type<Data>::value,
                 "Error, type must be a PublicKey type");
 #ifdef TESTING
@@ -69,7 +69,7 @@ void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
 template<>
 void PublicKeyGetter::GetKey<passport::PublicPmid>(
     const typename passport::PublicPmid::name_type& key_name,
-    std::function<void(Reply)> get_key_functor);
+    std::function<void(Message)> get_key_functor);
 
 }  // namespace nfs
 

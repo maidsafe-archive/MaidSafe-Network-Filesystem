@@ -41,7 +41,7 @@ PublicKeyGetter::PublicKeyGetter(routing::Routing& routing,
 template<>
 void PublicKeyGetter::GetKey<passport::PublicPmid>(
     const typename passport::PublicPmid::name_type& key_name,
-    std::function<void(Reply)> get_key_functor) {
+    std::function<void(Message)> get_key_functor) {
 #ifdef TESTING
   if (key_getter_nfs_) {
 #endif
@@ -55,10 +55,14 @@ void PublicKeyGetter::GetKey<passport::PublicPmid>(
     auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
         [&key_name](const passport::PublicPmid& pmid) { return pmid.name() == key_name; }));
     if (itr == kAllPmids_.end()) {
-      Reply reply(NfsErrors::failed_to_get_data);
+      Message reply(Persona::kDataGetter, Persona::kDataGetter,
+                    Message::Data(NfsErrors::failed_to_get_data));
       return get_key_functor(reply);
     }
-    Reply reply(CommonErrors::success, (*itr).Serialise().data);
+    Message::Data data(CommonErrors::success);
+    data.name = key_name;
+    data.content = (*itr).Serialise().data;
+    Message reply(Persona::kDataGetter, Persona::kDataGetter, data);
     get_key_functor(reply);
   }
 #endif

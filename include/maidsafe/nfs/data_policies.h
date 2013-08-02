@@ -18,13 +18,14 @@ License.
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "maidsafe/common/node_id.h"
 #include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/message.h"
 #include "maidsafe/nfs/message_wrapper.h"
-#include "maidsafe/nfs/persona_id.h"
 
 
 namespace maidsafe {
@@ -48,8 +49,9 @@ class DataPolicy {
 
  private:
   template<typename Data>
-  PersonaId GetDestination(const typename Data::name_type& name,
-                           const passport::PublicPmid::name_type& pmid_node_name) const;
+  std::pair<Persona, NodeId> GetDestination(
+      const typename Data::name_type& name,
+      const passport::PublicPmid::name_type& pmid_node_name) const;
   template<typename Data>
   Message ConstructMessage(Persona destination_persona,
                            const typename Data::name_type& name,
@@ -69,7 +71,7 @@ class DataPolicy {
 
   routing::Routing& routing_;
   const std::unique_ptr<const SigningFob> kSigningFob_;
-  const PersonaId kSource_;
+  static const Persona kSourcePersona_ = source_persona;
 };
 
 

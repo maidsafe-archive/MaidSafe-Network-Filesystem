@@ -34,11 +34,11 @@ namespace maidsafe {
 
 namespace nfs {
 
-class Reply;
+class Message;
 
 namespace detail {
 
-MessageId GetNewMessageId(const NodeId& source_node_id);
+MessageId GetNewMessageId();
 
 }  // namespace detail
 
@@ -50,15 +50,15 @@ bool IsCacheable();
 // <iterator to most frequent failed reply, false>.  If there is more than one most frequent type,
 // (e.g. 2 'no_such_element' and 2 'invalid_parameter') the iterator points to the first which
 // reaches the frequency.
-std::pair<std::vector<Reply>::const_iterator, bool> GetSuccessOrMostFrequentReply(
-    const std::vector<Reply>& replies,
+std::pair<std::vector<Message>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+    const std::vector<Message>& replies,
     int successes_required);
 
 // Put, delete and PublicKeyGet(as use callback only, don't return future)
 class OperationOp {
  public:
-  OperationOp(int successes_required, std::function<void(Reply)> callback);
-  void HandleReply(Reply&& reply);
+  OperationOp(int successes_required, std::function<void(Message)> callback);
+  void HandleReply(Message&& reply);
 
  private:
   OperationOp(const OperationOp&);
@@ -68,8 +68,8 @@ class OperationOp {
 
   mutable std::mutex mutex_;
   int successes_required_;
-  std::function<void(Reply)> callback_;
-  std::vector<Reply> replies_;
+  std::function<void(Message)> callback_;
+  std::vector<Message> replies_;
   bool callback_executed_;
 };
 
