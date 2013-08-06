@@ -16,44 +16,127 @@ License.
 #ifndef MAIDSAFE_NFS_MESSAGE_WRAPPER_H_
 #define MAIDSAFE_NFS_MESSAGE_WRAPPER_H_
 
-#include <cstdint>
+#include <string>
+#include <tuple>
+#include <utility>
 
-#include "maidsafe/common/rsa.h"
-#include "maidsafe/common/types.h"
+#include "maidsafe/common/tagged_value.h"
+
+#include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
 
-class MessageWrapper {
- public:
-  typedef TaggedValue<NonEmptyString, struct SerialisedMessageWrapperTag> serialised_type;
+namespace detail {
 
-  explicit MessageWrapper(const NonEmptyString& serialised_inner_message,
-                          const asymm::Signature& signature = asymm::Signature());
-  explicit MessageWrapper(NonEmptyString&& serialised_inner_message,
-                          const asymm::Signature& signature = asymm::Signature());
-  explicit MessageWrapper(const serialised_type& serialised_message);
+struct DestinationTag;
+struct SourceTag;
+typedef TaggedValue<Persona, struct detail::DestinationTag> DestinationTaggedValue;
+typedef TaggedValue<Persona, struct detail::SourceTag> SourceTaggedValue;
+
+}  // namespace detail
+
+
+
+typedef std::tuple<MessageAction, detail::DestinationTaggedValue, detail::SourceTaggedValue,
+                   MessageId, std::string> TypeErasedMessageWrapper;
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+struct MessageWrapper {
+  // For use with new messages (a new message_id is automatically applied).
+  MessageWrapper(const std::string& serialised_message_in);
+  MessageWrapper(std::string&& serialised_message_in);
+
+  // For use when handling incoming messages where the sender has already set the message_id.
+  MessageWrapper(const TypeErasedMessageWrapper& parsed_message_wrapper);
+
   MessageWrapper(const MessageWrapper& other);
-  MessageWrapper& operator=(const MessageWrapper& other);
   MessageWrapper(MessageWrapper&& other);
-  MessageWrapper& operator=(MessageWrapper&& other);
+  MessageWrapper& operator=(MessageWrapper other);
 
-  serialised_type Serialise() const;
+  std::string Serialise() const;
 
-  template<typename InnerMessageType>
-  typename InnerMessageType::serialised_type serialised_inner_message() const;
-  asymm::Signature signature() const { return signature_; }
+  friend void swap(MessageWrapper& lhs, MessageWrapper& rhs);
+
+  MessageId message_id;
+  std::string serialised_message;
 
  private:
-  NonEmptyString serialised_inner_message_;
-  asymm::Signature signature_;
+  static const detail::DestinationTaggedValue kDestinationTaggedValue;
+  static const detail::SourceTaggedValue kSourceTaggedValue;
 };
 
-template<typename InnerMessageType>
-typename InnerMessageType::serialised_type MessageWrapper::serialised_inner_message() const {
-  return typename InnerMessageType::serialised_type(serialised_inner_message_);
+
+
+// ==================== Implementation =============================================================
+namespace detail {
+
+MessageId GetNewMessageId();
+
+TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper);
+
+std::string SerialiseMessageWrapper(MessageAction action,
+                                    DestinationTaggedValue destination_persona,
+                                    SourceTaggedValue source_persona,
+                                    MessageId message_id,
+                                    const std::string& serialised_message);
+
+}  // namespace detail
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+MessageWrapper<action, DestinationPersona, SourcePersona>::MessageWrapper(
+    const std::string& serialised_message_in)
+        : message_id(detail::GetNewMessageId()),
+          serialised_message(serialised_message_in) {}
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+MessageWrapper<action, DestinationPersona, SourcePersona>::MessageWrapper(
+    std::string&& serialised_message_in)
+        : message_id(detail::GetNewMessageId()),
+          serialised_message(std::move(serialised_message_in)) {}
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+MessageWrapper<action, DestinationPersona, SourcePersona>::MessageWrapper(
+    const TypeErasedMessageWrapper& parsed_message_wrapper)
+        : message_id(std::get<3>(parsed_message_wrapper)),
+          serialised_message(std::get<4>(parsed_message_wrapper)) {}
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+MessageWrapper<action, DestinationPersona, SourcePersona>::MessageWrapper(
+    const MessageWrapper& other)
+        : message_id(other.message_id),
+          serialised_message(other.serialised_message) {}
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+MessageWrapper<action, DestinationPersona, SourcePersona>::MessageWrapper(MessageWrapper&& other)
+    : message_id(std::move(other.message_id)),
+      serialised_message(std::move(other.serialised_message)) {}
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+MessageWrapper<action, DestinationPersona, SourcePersona>&
+    MessageWrapper<action, DestinationPersona, SourcePersona>::operator=(MessageWrapper other) {
+  swap(*this, other);
+  return *this;
+}
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+std::string MessageWrapper<action, DestinationPersona, SourcePersona>::Serialise() const {
+  return detail::SerialiseMessageWrapper(
+      action,
+      DestinationTaggedValue(kDestinationTaggedValue),
+      SourceTaggedValue(kSourceTaggedValue),
+      message_id,
+      serialised_message);
+}
+
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+void swap(MessageWrapper<action, DestinationPersona, SourcePersona>& lhs,
+          MessageWrapper<action, DestinationPersona, SourcePersona>& rhs) {
+  using std::swap;
+  swap(lhs.message_id, rhs.message_id);
+  swap(lhs.serialised_message, rhs.serialised_message);
 }
 
 }  // namespace nfs

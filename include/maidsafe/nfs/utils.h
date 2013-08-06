@@ -36,12 +36,6 @@ namespace nfs {
 
 class Message;
 
-namespace detail {
-
-MessageId GetNewMessageId();
-
-}  // namespace detail
-
 template<typename Data>
 bool IsCacheable();
 

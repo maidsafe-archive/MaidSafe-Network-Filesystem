@@ -24,61 +24,52 @@ namespace maidsafe {
 
 namespace nfs {
 
-MessageWrapper::MessageWrapper(const NonEmptyString& serialised_inner_message,
-                               const asymm::Signature& signature)
-    : serialised_inner_message_(serialised_inner_message),
-      signature_(signature) {}
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+const detail::DestinationTaggedValue
+    MessageWrapper<action, DestinationPersona, SourcePersona>::kDestinationTaggedValue =
+        typename DestinationPersona::value;
 
-MessageWrapper::MessageWrapper(NonEmptyString&& serialised_inner_message,
-                               const asymm::Signature& signature)
-    : serialised_inner_message_(std::move(serialised_inner_message)),
-      signature_(signature) {}
+template<MessageAction action, typename DestinationPersona, typename SourcePersona>
+const detail::SourceTaggedValue
+    MessageWrapper<action, DestinationPersona, SourcePersona>::kSourceTaggedValue =
+        typename SourcePersona::value;
 
-MessageWrapper::MessageWrapper(const MessageWrapper& other)
-    : serialised_inner_message_(other.serialised_inner_message_),
-      signature_(other.signature_) {}
 
-MessageWrapper& MessageWrapper::operator=(const MessageWrapper& other) {
-  serialised_inner_message_ = other.serialised_inner_message_;
-  signature_ = other.signature_;
-  return *this;
+namespace detail {
+
+MessageId GetNewMessageId() {
+  static int32_t random_element(RandomInt32());
+  return MessageId(random_element++);
 }
 
-MessageWrapper::MessageWrapper(MessageWrapper&& other)
-    : serialised_inner_message_(std::move(other.serialised_inner_message_)),
-      signature_(std::move(other.signature_)) {}
-
-MessageWrapper& MessageWrapper::operator=(MessageWrapper&& other) {
-  serialised_inner_message_ = std::move(other.serialised_inner_message_);
-  signature_ = std::move(other.signature_);
-  return *this;
-}
-
-MessageWrapper::MessageWrapper(const serialised_type& serialised_message)
-    : serialised_inner_message_(),
-      signature_() {
-  protobuf::MessageWrapper proto_message;
-  if (!proto_message.ParseFromString(serialised_message->string()))
+TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper) {
+  protobuf::MessageWrapper proto_message_wrapper;
+  if (!proto_message_wrapper.ParseFromString(serialised_message_wrapper))
     ThrowError(CommonErrors::parsing_error);
-  serialised_inner_message_ = NonEmptyString(proto_message.serialised_message());
-  if (proto_message.has_signature())
-    signature_ = asymm::Signature(proto_message.signature());
+
+  return std::make_tuple(
+      static_cast<MessageAction>(proto_message_wrapper.action()),
+      DestinationTaggedValue(static_cast<Persona>(proto_message_wrapper.destination_persona())),
+      SourceTaggedValue(static_cast<Persona>(proto_message_wrapper.source_persona())),
+      MessageId(proto_message_wrapper.message_id()),
+      proto_message_wrapper.serialised_message());
 }
 
-MessageWrapper::serialised_type MessageWrapper::Serialise() const {
-  serialised_type serialised_message;
-  try {
-    protobuf::MessageWrapper proto_message;
-    proto_message.set_serialised_message(serialised_inner_message_.string());
-    serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
-    if (signature_.IsInitialised())
-      proto_message.set_signature(signature_.string());
-  }
-  catch(const std::exception&) {
-    ThrowError(CommonErrors::invalid_parameter);
-  }
-  return serialised_message;
+std::string SerialiseMessageWrapper(MessageAction action,
+                                    DestinationTaggedValue destination_persona,
+                                    SourceTaggedValue source_persona,
+                                    MessageId message_id,
+                                    const std::string& serialised_message) {
+  protobuf::MessageWrapper proto_message_wrapper;
+  proto_message_wrapper.set_action(static_cast<int32_t>(action));
+  proto_message_wrapper.set_destination_persona(static_cast<int32_t>(destination_persona.data));
+  proto_message_wrapper.set_source_persona(static_cast<int32_t>(source_persona.data));
+  proto_message_wrapper.set_message_id(message_id.data);
+  proto_message_wrapper.set_serialised_message(serialised_message);
+  return proto_message_wrapper.SerializeAsString();
 }
+
+}  // namespace detail
 
 }  // namespace nfs
 

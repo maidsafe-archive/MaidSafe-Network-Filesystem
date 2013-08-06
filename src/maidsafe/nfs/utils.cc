@@ -31,16 +31,6 @@ namespace maidsafe {
 
 namespace nfs {
 
-namespace detail {
-
-MessageId GetNewMessageId() {
-  static int32_t random_element(RandomInt32());
-  return MessageId(random_element++);
-}
-
-}  // namespace detail
-
-
 std::pair<std::vector<Message>::const_iterator, bool> GetSuccessOrMostFrequentReply(
     const std::vector<Message>& replies,
     int successes_required) {

@@ -61,18 +61,25 @@ enum class MessageAction : int32_t {
 };
 
 enum class Persona : int32_t {
+  kMaidNode,
+  kMpidNode,
+  kDataGetter,
   kMaidManager,
   kDataManager,
   kPmidManager,
   kPmidNode,
-  kMaidNode,
   kMpidManager,
-  kMpidNode,
-  kVersionManager,
-  kOwnerDirectoryManager,
-  kGroupDirectoryManager,
-  kWorldDirectoryManager,
-  kDataGetter
+  kVersionManager
+};
+
+template<Persona PersonaType>
+struct DestinationPersona {
+  static const Persona value = PersonaType;
+};
+
+template<Persona PersonaType>
+struct SourcePersona {
+  static const Persona value = PersonaType;
 };
 
 template<Persona PersonaType>
