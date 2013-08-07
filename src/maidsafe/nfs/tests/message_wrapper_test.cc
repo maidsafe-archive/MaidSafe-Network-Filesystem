@@ -1,87 +1,146 @@
-///* Copyright 2012 MaidSafe.net limited
-//
-//This MaidSafe Software is licensed under the MaidSafe.net Commercial License, version 1.0 or later,
-//and The General Public License (GPL), version 3. By contributing code to this project You agree to
-//the terms laid out in the MaidSafe Contributor Agreement, version 1.0, found in the root directory
-//of this project at LICENSE, COPYING and CONTRIBUTOR respectively and also available at:
-//
-//http://www.novinet.com/license
-//
-//Unless required by applicable law or agreed to in writing, software distributed under the License is
-//distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-//implied. See the License for the specific language governing permissions and limitations under the
-//License.
-//*/
-//
-//#include "maidsafe/nfs/message.h"
-//
-//#include "maidsafe/common/log.h"
-//#include "maidsafe/common/test.h"
-//#include "maidsafe/common/utils.h"
-//#include "maidsafe/data_types/data_type_values.h"
-//
-//#include "maidsafe/nfs/message.pb.h"
-//#include "maidsafe/nfs/types.h"
-//
-//
-//namespace maidsafe {
-//
-//namespace nfs {
-//
-//namespace test {
-//
-//namespace {
-//
-//MessageAction GenerateAction() {
-//  return static_cast<MessageAction>(RandomUint32() % 3);
-//}
-//
-//PersonaId GenerateSource() {
-//  PersonaId source;
-//  // matches Persona enum in types.h
-//  source.persona = static_cast<Persona>(RandomUint32() % 7);
-//  source.node_id = NodeId(NodeId::kRandomId);
-//  return source;
-//}
-//
-//}  // unnamed namespace
-//
-//class MessageTest : public testing::Test {
-// protected:
-//  MessageTest()
-//      : action_(GenerateAction()),
-//        destination_persona_(static_cast<Persona>(RandomUint32() % 7)),
-//        source_(GenerateSource()),
-//        data_type_(static_cast<DataTagValue>(RandomUint32() % 13)),
-//        name_(RandomString(NodeId::kSize)),
-//        content_(RandomString(1 + RandomUint32() % 50)),
-//        pmid_node_(passport::PublicPmid::name_type(Identity(RandomString(NodeId::kSize)))),
-//        message_(destination_persona_, source_,
-//                      Message::Data(data_type_, name_, content_, action_), pmid_node_) {}
-//
-//  MessageAction action_;
-//  Persona destination_persona_;
-//  PersonaId source_;
-//  Message::Data data_;
-//  DataTagValue data_type_;
-//  Identity name_;
-//  NonEmptyString content_;
-//  passport::PublicPmid::name_type pmid_node_;
-//  Message message_;
-//};
-//
-//TEST_F(MessageTest, BEH_CheckGetters) {
-//  EXPECT_EQ(action_, message_.data().action);
-//  EXPECT_EQ(destination_persona_, message_.destination_persona());
-//  EXPECT_EQ(source_.persona, message_.source().persona);
-//  EXPECT_EQ(source_.node_id, message_.source().node_id);
-//  EXPECT_EQ(data_type_, message_.data().type);
-//  EXPECT_EQ(name_, message_.data().name);
-//  EXPECT_EQ(content_, message_.data().content);
-//  EXPECT_EQ(pmid_node_, message_.pmid_node());
-//}
-//
-//TEST_F(MessageTest, BEH_SerialiseThenParse) {
+/* Copyright 2013 MaidSafe.net limited
+
+This MaidSafe Software is licensed under the MaidSafe.net Commercial License, version 1.0 or later,
+and The General Public License (GPL), version 3. By contributing code to this project You agree to
+the terms laid out in the MaidSafe Contributor Agreement, version 1.0, found in the root directory
+of this project at LICENSE, COPYING and CONTRIBUTOR respectively and also available at:
+
+http://www.novinet.com/license
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is
+distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing permissions and limitations under the
+License.
+*/
+
+#include "maidsafe/nfs/message_wrapper.h"
+
+#include <string>
+
+#include "boost/variant/static_visitor.hpp"
+#include "boost/variant/variant.hpp"
+
+#include "maidsafe/common/log.h"
+#include "maidsafe/common/test.h"
+#include "maidsafe/common/utils.h"
+
+#include "maidsafe/nfs/message_wrapper_variant.h"
+#include "maidsafe/nfs/types.h"
+
+
+namespace maidsafe {
+
+namespace nfs {
+
+namespace test {
+
+namespace {
+
+typedef MessageWrapper<MessageAction::kGetRequest,
+                       DestinationPersona<Persona::kDataManager>,
+                       SourcePersona<Persona::kMaidNode>> MaidNodeGet;
+typedef MessageWrapper<MessageAction::kPutRequest,
+                       DestinationPersona<Persona::kMaidManager>,
+                       SourcePersona<Persona::kMaidNode>> MaidNodePut;
+typedef MessageWrapper<MessageAction::kDeleteRequest,
+                       DestinationPersona<Persona::kMaidManager>,
+                       SourcePersona<Persona::kMaidNode>> MaidNodeDelete;
+
+}  // unnamed namespace
+
+typedef boost::variant<MaidNodePut, MaidNodeDelete> MaidManagerServiceMessages;
+typedef boost::variant<MaidNodeGet> DataManagerServiceMessages;
+
+struct MaidManagerService {
+  std::string HandlePut(const MaidNodePut& message) {
+    LOG(kInfo) << "MaidManager handling Put for message " << message.serialised_message;
+    return message.serialised_message;
+  }
+  std::string HandleDelete(const MaidNodeDelete& message) {
+    LOG(kInfo) << "MaidManager handling Delete for message " << message.serialised_message;
+    return message.serialised_message;
+  }
+};
+
+struct DataManagerService {
+  std::string HandleGet(const MaidNodeGet& message) {
+    LOG(kInfo) << "DataManager handling Get for message " << message.serialised_message;
+    return message.serialised_message;
+  }
+};
+
+class MaidManagerDemuxer : public boost::static_visitor<std::string> {
+ public:
+  explicit MaidManagerDemuxer(MaidManagerService& service) : service_(service) {}
+  template<typename Message>
+  std::string operator()(const Message&) const {
+    ThrowError(CommonErrors::invalid_parameter);
+    return "";
+  }
+  template<>
+  std::string operator()(const MaidNodePut& message) const {
+    return service_.HandlePut(message);
+  }
+  template<>
+  std::string operator()(const MaidNodeDelete& message) const {
+    return service_.HandleDelete(message);
+  }
+
+ private:
+  MaidManagerService& service_;
+};
+
+class DataManagerDemuxer : public boost::static_visitor<std::string> {
+ public:
+  explicit DataManagerDemuxer(DataManagerService& service) : service_(service) {}
+  template<typename Message>
+  std::string operator()(const Message&) const {
+    ThrowError(CommonErrors::invalid_parameter);
+    return "";
+  }
+  template<>
+  std::string operator()(const MaidNodeGet& message) const {
+    return service_.HandleGet(message);
+  }
+
+ private:
+  DataManagerService& service_;
+};
+
+TEST(MessageWrapperTest, BEH_CheckVariant) {
+  MaidNodeGet get("m1");
+  MaidNodePut put("m2");
+  MaidNodeDelete del("m3");
+
+  auto serialised_get(get.Serialise());
+  auto serialised_put(put.Serialise());
+  auto serialised_del(del.Serialise());
+
+  MaidManagerService maid_manager_service;
+  MaidManagerDemuxer maid_manager_demuxer(maid_manager_service);
+  DataManagerService data_manager_service;
+  DataManagerDemuxer data_manager_demuxer(data_manager_service);
+
+  EXPECT_THROW(GetVariant<MaidManagerServiceMessages>(ParseMessageWrapper(serialised_get)),
+               maidsafe_error);
+  auto parsed_get(GetVariant<DataManagerServiceMessages>(ParseMessageWrapper(serialised_get)));
+  EXPECT_THROW(boost::apply_visitor(maid_manager_demuxer, parsed_get), maidsafe_error);
+  EXPECT_EQ(get.serialised_message, boost::apply_visitor(data_manager_demuxer, parsed_get));
+
+  auto parsed_put(GetVariant<MaidManagerServiceMessages>(ParseMessageWrapper(serialised_put)));
+  EXPECT_THROW(GetVariant<DataManagerServiceMessages>(ParseMessageWrapper(serialised_put)),
+               maidsafe_error);
+  EXPECT_EQ(put.serialised_message, boost::apply_visitor(maid_manager_demuxer, parsed_put));
+  EXPECT_THROW(boost::apply_visitor(data_manager_demuxer, parsed_put), maidsafe_error);
+
+  auto parsed_del(GetVariant<MaidManagerServiceMessages>(ParseMessageWrapper(serialised_del)));
+  EXPECT_THROW(GetVariant<DataManagerServiceMessages>(ParseMessageWrapper(serialised_del)),
+               maidsafe_error);
+  EXPECT_EQ(del.serialised_message, boost::apply_visitor(maid_manager_demuxer, parsed_del));
+  EXPECT_THROW(boost::apply_visitor(data_manager_demuxer, parsed_del), maidsafe_error);
+}
+
+//TEST_F(MessageWrapperTest, BEH_SerialiseThenParse) {
 //  auto serialised_message(message_.Serialise());
 //  Message recovered_message(serialised_message);
 //
@@ -95,7 +154,7 @@
 //  EXPECT_EQ(pmid_node_, recovered_message.pmid_node());
 //}
 //
-//TEST_F(MessageTest, BEH_SerialiseParseReserialiseReparse) {
+//TEST_F(MessageWrapperTest, BEH_SerialiseParseReserialiseReparse) {
 //  auto serialised_message(message_.Serialise());
 //  Message recovered_message(serialised_message);
 //
@@ -113,7 +172,7 @@
 //  EXPECT_EQ(pmid_node_, recovered_message2.pmid_node());
 //}
 //
-//TEST_F(MessageTest, BEH_AssignMessage) {
+//TEST_F(MessageWrapperTest, BEH_AssignMessage) {
 //  Message message2 = message_;
 //
 //  EXPECT_EQ(action_, message2.data().action);
@@ -159,7 +218,7 @@
 //  EXPECT_EQ(pmid_node_, message5.pmid_node());
 //}
 //
-//TEST_F(MessageTest, BEH_DefaultValues) {
+//TEST_F(MessageWrapperTest, BEH_DefaultValues) {
 //  Message message(destination_persona_, source_, message_.data());
 //  EXPECT_EQ(action_, message.data().action);
 //  EXPECT_EQ(destination_persona_, message.destination_persona());
@@ -171,20 +230,20 @@
 //  EXPECT_FALSE(message.HasDataHolder());
 //}
 //
-//TEST_F(MessageTest, BEH_InvalidSource) {
+//TEST_F(MessageWrapperTest, BEH_InvalidSource) {
 //  PersonaId bad_source(GenerateSource());
 //  bad_source.node_id = NodeId();
 //  EXPECT_THROW(Message(destination_persona_, bad_source, message_.data()),
 //               common_error);
 //}
 //
-//TEST_F(MessageTest, BEH_InvalidName) {
+//TEST_F(MessageWrapperTest, BEH_InvalidName) {
 //  EXPECT_THROW(Message(destination_persona_, source_,
 //                           Message::Data(data_type_, Identity(), content_, action_)),
 //               common_error);
 //}
 //
-//TEST_F(MessageTest, BEH_SignData) {
+//TEST_F(MessageWrapperTest, BEH_SignData) {
 //  EXPECT_FALSE(message_.client_validation().name.IsInitialised());
 //  EXPECT_FALSE(message_.client_validation().data_signature.IsInitialised());
 //  EXPECT_FALSE(message_.HasClientValidation());
@@ -209,7 +268,7 @@
 //  EXPECT_TRUE(message_.HasClientValidation());
 //}
 //
-//TEST_F(MessageTest, BEH_SerialiseAndSignThenValidate) {
+//TEST_F(MessageWrapperTest, BEH_SerialiseAndSignThenValidate) {
 //  Message::serialised_type serialised_message(message_.Serialise());
 //  asymm::Keys keys(asymm::GenerateKeyPair());
 //  auto result(message_.SerialiseAndSign(keys.private_key));
@@ -224,9 +283,9 @@
 //  asymm::Keys false_keys(asymm::GenerateKeyPair());
 //  EXPECT_FALSE(message_.Validate(asymm::Signature(result.second), false_keys.public_key));
 //}
-//
-//}  // namespace test
-//
-//}  // namespace nfs
-//
-//}  // namespace maidsafe
+
+}  // namespace test
+
+}  // namespace nfs
+
+}  // namespace maidsafe

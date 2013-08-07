@@ -58,40 +58,32 @@ Message::Data::Data()
       name(),
       originator(),
       content(),
-      action(static_cast<MessageAction>(-1)),
       error() {}
 
 Message::Data::Data(DataTagValue type_in,
                     const Identity& name_in,
-                    const NonEmptyString& content_in,
-                    MessageAction action_in)
+                    const NonEmptyString& content_in)
     : type(type_in),
       name(name_in),
       originator(),
       content(content_in),
-      action(action_in),
       error() {}
 
 Message::Data::Data(DataTagValue type_in,
                     const Identity& name_in,
                     const Identity& originator_in,
-                    const NonEmptyString& content_in,
-                    MessageAction action_in)
+                    const NonEmptyString& content_in)
     : type(type_in),
       name(name_in),
       originator(originator_in),
       content(content_in),
-      action(action_in),
       error() {}
 
-Message::Data::Data(const Identity& name_in,
-                    const NonEmptyString& content_in,
-                    MessageAction action_in)
+Message::Data::Data(const Identity& name_in, const NonEmptyString& content_in)
     : type(),
       name(name_in),
       originator(),
       content(content_in),
-      action(action_in),
       error() {}
 
 
@@ -100,7 +92,6 @@ Message::Data::Data(const Data& other)
       name(other.name),
       originator(other.originator),
       content(other.content),
-      action(other.action),
       error(other.error) {}
 
 Message::Data& Message::Data::operator=(const Data& other) {
@@ -108,7 +99,6 @@ Message::Data& Message::Data::operator=(const Data& other) {
   name = other.name;
   originator = other.originator;
   content = other.content;
-  action = other.action;
   error = other.error;
   return *this;
 }
@@ -118,7 +108,6 @@ Message::Data::Data(Data&& other)
       name(std::move(other.name)),
       originator(std::move(other.originator)),
       content(std::move(other.content)),
-      action(std::move(other.action)),
       error(std::move(other.error)) {}
 
 Message::Data& Message::Data::operator=(Data&& other) {
@@ -126,7 +115,6 @@ Message::Data& Message::Data::operator=(Data&& other) {
   name = std::move(other.name);
   originator = std::move(other.originator);
   content = std::move(other.content);
-  action = std::move(other.action);
   error = std::move(other.error);
   return *this;
 }
@@ -239,7 +227,6 @@ Message::Message(const serialised_type& serialised_message)
   data_.name = Identity(proto_data.name());
   if (proto_data.has_content())
     data_.content = NonEmptyString(proto_data.content());
-  data_.action = static_cast<MessageAction>(proto_data.action());
   if (proto_data.has_error()) {
     data_.error = GetError(proto_data.error().error_value(),
                            proto_data.error().error_category_name());
@@ -269,7 +256,6 @@ void Message::SignData(const Identity& client_name, const asymm::PrivateKey& sig
   data.set_name(data_.name.string());
   if (data_.content.IsInitialised())
     data.set_content(data_.content.string());
-  data.set_action(static_cast<int32_t>(data_.action));
   asymm::PlainText serialised_data(data.SerializeAsString());
   client_validation_.name = client_name;
   client_validation_.data_signature = asymm::Sign(serialised_data, signer_private_key);
@@ -287,7 +273,6 @@ Message::serialised_type Message::Serialise() const {
     proto_message.mutable_data()->set_name(data_.name.string());
     if (data_.content.IsInitialised())
       proto_message.mutable_data()->set_content(data_.content.string());
-    proto_message.mutable_data()->set_action(static_cast<int32_t>(data_.action));
     if (data_.error) {
       proto_message.mutable_data()->mutable_error()->set_error_value(data_.error->code().value());
       proto_message.mutable_data()->mutable_error()->set_error_category_name(

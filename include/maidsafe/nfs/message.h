@@ -47,16 +47,13 @@ class Message {
     Data();
     Data(DataTagValue type_in,
          const Identity& name_in,
-         const NonEmptyString& content_in,
-         MessageAction action_in);
+         const NonEmptyString& content_in);
     Data(DataTagValue type_in,
          const Identity& name_in,
          const Identity& originator_in,
-         const NonEmptyString& content_in,
-         MessageAction action_in);
+         const NonEmptyString& content_in);
     Data(const Identity& name_in,
-         const NonEmptyString& content_in,
-         MessageAction action_in);
+         const NonEmptyString& content_in);
     // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
     template<typename ErrorCode>
     explicit Data(ErrorCode error_code,
@@ -65,7 +62,6 @@ class Message {
           name(),
           originator(),
           content(),
-          action(static_cast<MessageAction>(-1)),
           error(MakeError(error_code)) {}
     template<typename Error>
     explicit Data(Error error,
@@ -74,7 +70,6 @@ class Message {
           name(),
           originator(),
           content(),
-          action(static_cast<MessageAction>(-1)),
           error(error) {
       static_assert(std::is_same<Error, maidsafe_error>::value ||
                     std::is_base_of<maidsafe_error, Error>::value,
@@ -91,7 +86,6 @@ class Message {
     Identity name;
     Identity originator;
     NonEmptyString content;
-    MessageAction action;
     boost::optional<maidsafe_error> error;
   };
   struct ClientValidation {

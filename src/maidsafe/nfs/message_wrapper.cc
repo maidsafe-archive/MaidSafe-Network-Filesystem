@@ -24,35 +24,11 @@ namespace maidsafe {
 
 namespace nfs {
 
-template<MessageAction action, typename DestinationPersona, typename SourcePersona>
-const detail::DestinationTaggedValue
-    MessageWrapper<action, DestinationPersona, SourcePersona>::kDestinationTaggedValue =
-        typename DestinationPersona::value;
-
-template<MessageAction action, typename DestinationPersona, typename SourcePersona>
-const detail::SourceTaggedValue
-    MessageWrapper<action, DestinationPersona, SourcePersona>::kSourceTaggedValue =
-        typename SourcePersona::value;
-
-
 namespace detail {
 
 MessageId GetNewMessageId() {
   static int32_t random_element(RandomInt32());
   return MessageId(random_element++);
-}
-
-TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper) {
-  protobuf::MessageWrapper proto_message_wrapper;
-  if (!proto_message_wrapper.ParseFromString(serialised_message_wrapper))
-    ThrowError(CommonErrors::parsing_error);
-
-  return std::make_tuple(
-      static_cast<MessageAction>(proto_message_wrapper.action()),
-      DestinationTaggedValue(static_cast<Persona>(proto_message_wrapper.destination_persona())),
-      SourceTaggedValue(static_cast<Persona>(proto_message_wrapper.source_persona())),
-      MessageId(proto_message_wrapper.message_id()),
-      proto_message_wrapper.serialised_message());
 }
 
 std::string SerialiseMessageWrapper(MessageAction action,
@@ -70,6 +46,22 @@ std::string SerialiseMessageWrapper(MessageAction action,
 }
 
 }  // namespace detail
+
+
+
+TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper) {
+  protobuf::MessageWrapper proto_message_wrapper;
+  if (!proto_message_wrapper.ParseFromString(serialised_message_wrapper))
+    ThrowError(CommonErrors::parsing_error);
+
+  return std::make_tuple(
+      static_cast<MessageAction>(proto_message_wrapper.action()),
+      detail::DestinationTaggedValue(
+          static_cast<Persona>(proto_message_wrapper.destination_persona())),
+      detail::SourceTaggedValue(static_cast<Persona>(proto_message_wrapper.source_persona())),
+      MessageId(proto_message_wrapper.message_id()),
+      proto_message_wrapper.serialised_message());
+}
 
 }  // namespace nfs
 
