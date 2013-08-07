@@ -77,18 +77,20 @@ class MaidManagerDemuxer : public boost::static_visitor<std::string> {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
-  template<>
-  std::string operator()(const MaidNodePut& message) const {
-    return service_.HandlePut(message);
-  }
-  template<>
-  std::string operator()(const MaidNodeDelete& message) const {
-    return service_.HandleDelete(message);
-  }
 
  private:
   MaidManagerService& service_;
 };
+
+template<>
+std::string MaidManagerDemuxer::operator()(const MaidNodePut& message) const {
+  return service_.HandlePut(message);
+}
+
+template<>
+std::string MaidManagerDemuxer::operator()(const MaidNodeDelete& message) const {
+  return service_.HandleDelete(message);
+}
 
 class DataManagerDemuxer : public boost::static_visitor<std::string> {
  public:
@@ -98,14 +100,15 @@ class DataManagerDemuxer : public boost::static_visitor<std::string> {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
-  template<>
-  std::string operator()(const MaidNodeGet& message) const {
-    return service_.HandleGet(message);
-  }
 
  private:
   DataManagerService& service_;
 };
+
+template<>
+std::string DataManagerDemuxer::operator()(const MaidNodeGet& message) const {
+  return service_.HandleGet(message);
+}
 
 TEST(MessageWrapperTest, BEH_CheckVariant) {
   MaidNodeGet get("m1");

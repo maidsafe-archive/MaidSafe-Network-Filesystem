@@ -78,9 +78,15 @@ struct DestinationPersona {
 };
 
 template<Persona PersonaType>
+const Persona DestinationPersona<PersonaType>::value;
+
+template<Persona PersonaType>
 struct SourcePersona {
   static const Persona value = PersonaType;
 };
+
+template<Persona PersonaType>
+const Persona SourcePersona<PersonaType>::value;
 
 template<Persona PersonaType>
 struct PersonaTypes;

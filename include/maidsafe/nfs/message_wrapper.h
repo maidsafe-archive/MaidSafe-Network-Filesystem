@@ -93,12 +93,12 @@ std::string SerialiseMessageWrapper(MessageAction action,
 template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
 const detail::DestinationTaggedValue
     MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::kDestinationTaggedValue =
-        detail::DestinationTaggedValue(typename DestinationPersonaType::value);
+        detail::DestinationTaggedValue(DestinationPersonaType::value);
 
 template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
 const detail::SourceTaggedValue
     MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::kSourceTaggedValue =
-        detail::SourceTaggedValue(typename SourcePersonaType::value);
+        detail::SourceTaggedValue(SourcePersonaType::value);
 
 template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
 MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::MessageWrapper()

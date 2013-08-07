@@ -79,28 +79,28 @@ void MaidNodeDispatcher::SendGetRequest(const typename Data::name_type& data_nam
   typedef routing::SingleToGroupMessage RoutingMessage;
   static const routing::Cacheable cacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
                                                                         routing::Cacheable::kNone);
-  static const nfs::MessageAction kAction(nfs::MessageAction::kGetRequest);
-  static const nfs::Persona kDestinationPersona(nfs::Persona::kDataManager);
-  static const DataTagValue kDataEnumValue(Data::name_type::tag_type::kEnumValue);
+//  static const nfs::MessageAction kAction(nfs::MessageAction::kGetRequest);
+//  static const nfs::Persona kDestinationPersona(nfs::Persona::kDataManager);
+//  static const DataTagValue kDataEnumValue(Data::name_type::tag_type::kEnumValue);
 
-  nfs::Message::Data inner_data(kDataEnumValue, data_name.data, NonEmptyString(), kAction);
-  nfs::Message inner(kDestinationPersona, kSourcePersona_, inner_data);
-  RoutingMessage message(inner.Serialise()->string(), Sender(),
+//  nfs::Message::Data inner_data(kDataEnumValue, data_name.data, NonEmptyString(), kAction);
+//  nfs::Message inner(kDestinationPersona, kSourcePersona_, inner_data);
+  RoutingMessage message(/*inner.Serialise()->string()*/"msg", Sender(),
                          routing::GroupId(NodeId(data_name->string())), cacheable);
   routing_.Send(message);
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendGetVersionRequest(const typename Data::name_type& data_name) {
+void MaidNodeDispatcher::SendGetVersionRequest(const typename Data::name_type& /*data_name*/) {
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendPutRequest(const Data& data,
-                                        const passport::Pmid::name_type& pmid_node_hint) {
+void MaidNodeDispatcher::SendPutRequest(const Data& /*data*/,
+                                        const passport::Pmid::name_type& /*pmid_node_hint*/) {
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendDeleteRequest(const typename Data::name_type& data_name) {
+void MaidNodeDispatcher::SendDeleteRequest(const typename Data::name_type& /*data_name*/) {
 }
 
 }  // namespace nfs
