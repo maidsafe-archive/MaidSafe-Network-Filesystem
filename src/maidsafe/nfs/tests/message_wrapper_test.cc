@@ -84,7 +84,7 @@ class MaidManagerServiceImpl {
   typedef boost::variant<MaidNodePut, MaidNodeDelete> Messages;
 
   template<typename T>
-  std::string Handle(const T& message) {
+  std::string Handle(const T& /*message*/) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
@@ -109,7 +109,7 @@ class DataManagerServiceImpl {
   typedef boost::variant<MaidNodeGet> Messages;
 
   template<typename T>
-  std::string Handle(const T& message) {
+  std::string Handle(const T& /*message*/) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
