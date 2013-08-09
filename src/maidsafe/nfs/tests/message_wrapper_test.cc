@@ -37,14 +37,14 @@ namespace test {
 namespace {
 
 typedef MessageWrapper<MessageAction::kGetRequest,
-                       DestinationPersona<Persona::kDataManager>,
-                       SourcePersona<Persona::kMaidNode>> MaidNodeGet;
+                       SourcePersona<Persona::kMaidNode>,
+                       DestinationPersona<Persona::kDataManager>> MaidNodeGet;
 typedef MessageWrapper<MessageAction::kPutRequest,
-                       DestinationPersona<Persona::kMaidManager>,
-                       SourcePersona<Persona::kMaidNode>> MaidNodePut;
+                       SourcePersona<Persona::kMaidNode>,
+                       DestinationPersona<Persona::kMaidManager>> MaidNodePut;
 typedef MessageWrapper<MessageAction::kDeleteRequest,
-                       DestinationPersona<Persona::kMaidManager>,
-                       SourcePersona<Persona::kMaidNode>> MaidNodeDelete;
+                       SourcePersona<Persona::kMaidNode>,
+                       DestinationPersona<Persona::kMaidManager>> MaidNodeDelete;
 
 }  // unnamed namespace
 
@@ -84,7 +84,7 @@ class MaidManagerServiceImpl {
   typedef boost::variant<MaidNodePut, MaidNodeDelete> Messages;
 
   template<typename T>
-  std::string Handle(const T& /*message*/) {
+  std::string Handle(const T& message) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
@@ -109,7 +109,7 @@ class DataManagerServiceImpl {
   typedef boost::variant<MaidNodeGet> Messages;
 
   template<typename T>
-  std::string Handle(const T& /*message*/) {
+  std::string Handle(const T& message) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }

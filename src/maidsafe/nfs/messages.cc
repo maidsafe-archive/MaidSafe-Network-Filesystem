@@ -13,14 +13,15 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/nfs/message.h"
+#include "maidsafe/nfs/messages.h"
 
-#include "maidsafe/common/crypto.h"
-#include "maidsafe/common/error.h"
-#include "maidsafe/common/utils.h"
+#include <cstdint>
 
-#include "maidsafe/nfs/message.pb.h"
-#include "maidsafe/nfs/utils.h"
+//#include "maidsafe/common/crypto.h"
+//#include "maidsafe/common/utils.h"
+//
+#include "maidsafe/nfs/messages.pb.h"
+//#include "maidsafe/nfs/utils.h"
 
 
 namespace maidsafe {
@@ -53,6 +54,198 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
 
 
 
+DataName::DataName(DataTagValue type_in, const Identity& raw_name_in)
+    : type(type_in),
+      raw_name(raw_name_in) {}
+
+DataName::DataName() : type(DataTagValue::kAnmidValue), raw_name() {}
+
+DataName::DataName(const DataName& other) : type(other.type), raw_name(other.raw_name) {}
+
+DataName::DataName(DataName&& other)
+    : type(std::move(other.type)),
+      raw_name(std::move(other.raw_name)) {}
+
+DataName& DataName::operator=(DataName other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataName::DataName(const std::string& serialised_copy)
+    : type(DataTagValue::kAnmidValue),
+      raw_name() {
+  protobuf::DataName proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  type = static_cast<DataTagValue>(proto_copy.type());
+  raw_name = Identity(proto_copy.raw_name());
+}
+
+std::string DataName::Serialise() const {
+  protobuf::DataName proto_data_name;
+  proto_data_name.set_type(static_cast<uint32_t>(type));
+  return proto_data_name.SerializeAsString();
+}
+
+void swap(DataName& lhs, DataName& rhs) {
+  using std::swap;
+  swap(lhs.type, rhs.type);
+  swap(lhs.raw_name, rhs.raw_name);
+}
+
+
+
+ReturnCode::ReturnCode() : value(CommonErrors::success) {}
+
+ReturnCode::ReturnCode(const ReturnCode& other) : value(other.value) {}
+
+ReturnCode::ReturnCode(ReturnCode&& other) : value(std::move(other.value)) {}
+
+ReturnCode& ReturnCode::operator=(ReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+ReturnCode::ReturnCode(const std::string& serialised_copy)
+    : value([&serialised_copy] {
+          protobuf::ReturnCode proto_copy;
+          if (!proto_copy.ParseFromString(serialised_copy))
+            ThrowError(CommonErrors::parsing_error);
+          return GetError(proto_copy.error_value(), proto_copy.error_category_name());
+        }()) {}
+
+std::string ReturnCode::Serialise() const {
+  protobuf::ReturnCode proto_copy;
+  proto_copy.set_error_value(value.code().value());
+  proto_copy.set_error_category_name(value.code().category().name());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(ReturnCode& lhs, ReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.value, rhs.value);
+}
+
+
+
+DataNameAndContent::DataNameAndContent(DataTagValue type_in,
+                                       const Identity& name_in,
+                                       const NonEmptyString& content_in)
+    : name(type_in, name_in),
+      content(content_in) {}
+
+DataNameAndContent::DataNameAndContent() : name(), content() {}
+
+DataNameAndContent::DataNameAndContent(const DataNameAndContent& other)
+    : name(other.name),
+      content(other.content) {}
+  
+DataNameAndContent::DataNameAndContent(DataNameAndContent&& other)
+    : name(std::move(other.name)),
+      content(std::move(other.content)) {}
+
+DataNameAndContent& DataNameAndContent::operator=(DataNameAndContent other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndContent::DataNameAndContent(const std::string& serialised_copy)
+    : name(),
+      content() {
+  protobuf::DataNameAndContent proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  name = DataName(static_cast<DataTagValue>(proto_copy.name().type()),
+                  Identity(proto_copy.name().raw_name()));
+  content = NonEmptyString(proto_copy.content());
+}
+
+std::string DataNameAndContent::Serialise() const {
+  protobuf::DataNameAndContent proto_copy;
+  proto_copy.mutable_name()->set_type(static_cast<uint32_t>(name.type));
+  proto_copy.mutable_name()->set_raw_name(name.raw_name.string());
+  proto_copy.set_content(content.string());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.content, rhs.content);
+}
+
+
+
+DataNameContentAndHolder::DataNameContentAndHolder(DataTagValue type_in,
+                                                   const Identity& name_in,
+                                                   const NonEmptyString& content_in,
+                                                   const Identity& holder_id_in)
+    : name_and_content(type_in, name_in, content_in),
+      holder_id(holder_id_in) {}
+
+DataNameContentAndHolder::DataNameContentAndHolder() : name_and_content(), holder_id() {}
+
+DataNameContentAndHolder::DataNameContentAndHolder(const DataNameContentAndHolder& other)
+    : name_and_content(other.name_and_content),
+      holder_id(other.holder_id) {}
+
+DataNameContentAndHolder::DataNameContentAndHolder(DataNameContentAndHolder&& other)
+    : name_and_content(std::move(other.name_and_content)),
+      holder_id(std::move(other.holder_id)) {}
+
+DataNameContentAndHolder& DataNameContentAndHolder::operator=(DataNameContentAndHolder other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameContentAndHolder::DataNameContentAndHolder(const std::string& serialised_copy)
+    : name_and_content(),
+      holder_id() {
+  protobuf::DataNameContentAndHolder proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  name_and_content = DataNameAndContent(
+    static_cast<DataTagValue>(proto_copy.name_and_content().name().type()),
+    Identity(proto_copy.name_and_content().name().raw_name()),
+    NonEmptyString(proto_copy.name_and_content().content()));
+  holder_id = Identity(proto_copy.holder_id());
+}
+
+std::string DataNameContentAndHolder::Serialise() const {
+  protobuf::DataNameContentAndHolder proto_copy;
+  proto_copy.mutable_name_and_content()->mutable_name()->set_type(
+      static_cast<uint32_t>(name_and_content.name.type));
+  proto_copy.mutable_name_and_content()->mutable_name()->set_raw_name(
+      name_and_content.name.raw_name.string());
+  proto_copy.mutable_name_and_content()->set_content(name_and_content.content.string());
+  proto_copy.set_holder_id(holder_id.string());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataNameContentAndHolder& lhs, DataNameContentAndHolder& rhs) {
+  using std::swap;
+  swap(lhs.name_and_content, rhs.name_and_content);
+  swap(lhs.holder_id, rhs.holder_id);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 Message::Data::Data()
     : type(),
       name(),
@@ -304,7 +497,7 @@ bool Message::Validate(const asymm::Signature& signature,
                        const asymm::PublicKey& signer_public_key) const {
   asymm::PlainText serialised(Serialise().data);
   return asymm::CheckSignature(serialised, signature, signer_public_key);
-}
+}*/
 
 }  // namespace nfs
 

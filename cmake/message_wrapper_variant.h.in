@@ -52,22 +52,22 @@ MessageWrapperVariant GetVariantFromMessage(
   return MessageWrapperVariant();
 }
 
-template<typename MessageWrapperVariant, MessageAction action, typename DestinationPersonaType>
-void HandleDestination(MessageWrapperVariant& variant, const TypeErasedMessageWrapper& message) {
-  auto source_persona(std::get<2>(message).data);
-  switch (source_persona) {
-@SourceSwitch@    default:
-      LOG(kError) << "Unknown source persona " << static_cast<int32_t>(source_persona);
+template<typename MessageWrapperVariant, MessageAction action, typename SourcePersonaType>
+void HandleSource(MessageWrapperVariant& variant, const TypeErasedMessageWrapper& message) {
+  auto destination_persona(std::get<2>(message).data);
+  switch (destination_persona) {
+@DestinationSwitch@    default:
+      LOG(kError) << "Unknown destination persona " << static_cast<int32_t>(destination_persona);
       ThrowError(CommonErrors::invalid_parameter);
   }
 }
 
 template<typename MessageWrapperVariant, MessageAction action>
 void HandleAction(MessageWrapperVariant& variant, const TypeErasedMessageWrapper& message) {
-  auto destination_persona(std::get<1>(message).data);
-  switch (destination_persona) {
-@DestinationSwitch@    default:
-      LOG(kError) << "Unknown destination persona " << static_cast<int32_t>(destination_persona);
+  auto source_persona(std::get<1>(message).data);
+  switch (source_persona) {
+@SourceSwitch@    default:
+      LOG(kError) << "Unknown source persona " << static_cast<int32_t>(source_persona);
       ThrowError(CommonErrors::invalid_parameter);
   }
 }

@@ -18,7 +18,7 @@ License.
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/utils.h"
 
-#include "maidsafe/nfs/message.pb.h"
+#include "maidsafe/nfs/messages.pb.h"
 
 
 namespace maidsafe {
@@ -62,7 +62,7 @@ PmidRegistration::PmidRegistration(const passport::Maid& maid,
   maid_signature_ = asymm::Sign(serialised_signed_details, maid.private_key());
 }
 
-PmidRegistration::PmidRegistration(const serialised_type& serialised_pmid_registration)
+PmidRegistration::PmidRegistration(const std::string& serialised_copy)
     : maid_name_(),
       pmid_name_(),
       unregister_(),
@@ -73,7 +73,7 @@ PmidRegistration::PmidRegistration(const serialised_type& serialised_pmid_regist
     ThrowError(CommonErrors::parsing_error);
   });
   protobuf::PmidRegistration proto_pmid_registration;
-  if (!proto_pmid_registration.ParseFromString(serialised_pmid_registration->string()))
+  if (!proto_pmid_registration.ParseFromString(serialised_copy))
     fail();
   protobuf::PmidRegistration::SignedDetails signed_details;
   if (!signed_details.ParseFromString(proto_pmid_registration.serialised_signed_details()))
@@ -124,13 +124,13 @@ bool PmidRegistration::Validate(const passport::PublicMaid& public_maid,
   return true;
 }
 
-PmidRegistration::serialised_type PmidRegistration::Serialise() const {
+std::string PmidRegistration::Serialise() const {
   protobuf::PmidRegistration proto_pmid_registration;
   proto_pmid_registration.set_serialised_signed_details(
       GetSerialisedSignedDetails(GetSerialisedDetails(maid_name_, pmid_name_, unregister_),
                                  pmid_signature_).string());
   proto_pmid_registration.set_maid_signature(maid_signature_.string());
-  return serialised_type(NonEmptyString(proto_pmid_registration.SerializeAsString()));
+  return proto_pmid_registration.SerializeAsString();
 }
 
 void swap(PmidRegistration& lhs, PmidRegistration& rhs) {

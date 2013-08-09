@@ -17,8 +17,8 @@ package maidsafe.nfs.protobuf;
 
 message MessageWrapper {
   required int32 action = 1;
-  required int32 destination_persona = 2;
-  required int32 source_persona = 3;
+  required int32 source_persona = 2;
+  required int32 destination_persona = 3;
   required int32 message_id = 4;
   required bytes serialised_message = 5;
 }

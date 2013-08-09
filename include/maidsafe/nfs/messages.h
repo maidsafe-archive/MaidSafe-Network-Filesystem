@@ -13,36 +13,144 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#ifndef MAIDSAFE_NFS_MESSAGE_H_
-#define MAIDSAFE_NFS_MESSAGE_H_
+#ifndef MAIDSAFE_NFS_MESSAGES_H_
+#define MAIDSAFE_NFS_MESSAGES_H_
 
-#include <cstdint>
-#include <functional>
-#include <ostream>
+//#include <cstdint>
+//#include <functional>
+//#include <ostream>
 #include <string>
-#include <system_error>
-#include <type_traits>
-#include <utility>
-#include <vector>
-
-#include "boost/optional/optional.hpp"
+//#include <system_error>
+//#include <type_traits>
+//#include <utility>
+//#include <vector>
 
 #include "maidsafe/common/error.h"
-#include "maidsafe/common/node_id.h"
-#include "maidsafe/common/rsa.h"
+//#include "maidsafe/common/node_id.h"
+//#include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
-#include "maidsafe/passport/types.h"
-
-#include "maidsafe/nfs/types.h"
+//#include "maidsafe/passport/types.h"
+//
+//#include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
 
-class Message {
- public:
+struct DataName {
+  template<typename Data>
+  explicit DataName(const typename Data::name_type& name)
+      : type(Data::name_type::tag_type::kEnumValue),
+        raw_name(name_in.data) {}
+
+  DataName(DataTagValue type_in, const Identity& raw_name_in);
+
+  DataName();
+  DataName(const DataName& other);
+  DataName(DataName&& other);
+  DataName& operator=(DataName other);
+
+  explicit DataName(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataTagValue type;
+  Identity raw_name;
+};
+
+void swap(DataName& lhs, DataName& rhs);
+
+
+
+struct ReturnCode {
+  // This c'tor designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
+  template<typename ErrorCode>
+  explicit ReturnCode(ErrorCode error_code,
+                      typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
+      : value(MakeError(error_code)) {}
+
+  template<typename Error>
+  explicit ReturnCode(Error error,
+                      typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
+      : value(error) {}
+
+  ReturnCode();
+  ReturnCode(const ReturnCode& other);
+  ReturnCode(ReturnCode&& other);
+  ReturnCode& operator=(ReturnCode other);
+
+  explicit ReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  maidsafe_error value;
+};
+
+void swap(ReturnCode& lhs, ReturnCode& rhs);
+
+
+
+struct DataNameAndContent {
+  template<typename Data>
+  explicit DataNameAndContent(const Data& data)
+      : name<Data>(Data.name()),
+        content(data.Serialise().data) {}
+
+  DataNameAndContent(DataTagValue type_in,
+                     const Identity& name_in,
+                     const NonEmptyString& content_in);
+
+  DataNameAndContent();
+  DataNameAndContent(const DataNameAndContent& other);
+  DataNameAndContent(DataNameAndContent&& other);
+  DataNameAndContent& operator=(DataNameAndContent other);
+
+  explicit DataNameAndContent(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName name;
+  NonEmptyString content;
+};
+
+void swap(DataNameAndContent& lhs, DataNameAndContent& rhs);
+
+
+
+struct DataNameContentAndHolder {
+  template<typename Data>
+  DataNameContentAndHolder(const Data& data, const Identity& holder_id_in)
+      : name_and_content<Data>(data),
+        holder_id(holder_id_in) {}
+
+  DataNameContentAndHolder(DataTagValue type_in,
+                           const Identity& name_in,
+                           const NonEmptyString& content_in,
+                           const Identity& holder_id_in);
+
+  DataNameContentAndHolder();
+  DataNameContentAndHolder(const DataNameContentAndHolder& other);
+  DataNameContentAndHolder(DataNameContentAndHolder&& other);
+  DataNameContentAndHolder& operator=(DataNameContentAndHolder other);
+
+  explicit DataNameContentAndHolder(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataNameAndContent name_and_content;
+  Identity holder_id;
+};
+
+void swap(DataNameContentAndHolder& lhs, DataNameContentAndHolder& rhs);
+
+
+
+
+typedef DataName MaidNodeGetRequest, MaidNodeGetVersionRequest, MaidNodeDeleteRequest;
+typedef DataNameContentAndHolder MaidNodePutRequest;
+
+
+
+
+/*
   struct Data {
     Data();
     Data(DataTagValue type_in,
@@ -54,7 +162,6 @@ class Message {
          const NonEmptyString& content_in);
     Data(const Identity& name_in,
          const NonEmptyString& content_in);
-    // Designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
     template<typename ErrorCode>
     explicit Data(ErrorCode error_code,
                   typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
@@ -143,10 +250,10 @@ class Message {
   Data data_;
   ClientValidation client_validation_;
   passport::PublicPmid::name_type pmid_node_;
-};
+};*/
 
 }  // namespace nfs
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_MESSAGE_H_
+#endif  // MAIDSAFE_NFS_MESSAGES_H_

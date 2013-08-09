@@ -16,6 +16,8 @@ License.
 #ifndef MAIDSAFE_NFS_PMID_REGISTRATION_H_
 #define MAIDSAFE_NFS_PMID_REGISTRATION_H_
 
+#include <string>
+
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/passport/types.h"
@@ -27,15 +29,14 @@ namespace nfs {
 
 class PmidRegistration {
  public:
-  typedef TaggedValue<NonEmptyString, struct SerialisedPmidRegistrationTag> serialised_type;
   PmidRegistration(const passport::Maid& maid, const passport::Pmid& pmid, bool unregister);
-  explicit PmidRegistration(const serialised_type& serialised_pmid_registration);
+  explicit PmidRegistration(const std::string& serialised_copy);
   PmidRegistration(const PmidRegistration& other);
   PmidRegistration(PmidRegistration&& other);
   PmidRegistration& operator=(PmidRegistration other);
   bool Validate(const passport::PublicMaid& public_maid,
                 const passport::PublicPmid& public_pmid) const;
-  serialised_type Serialise() const;
+  std::string Serialise() const;
   passport::PublicMaid::name_type maid_name() const { return maid_name_; }
   passport::PublicPmid::name_type pmid_name() const { return pmid_name_; }
   bool unregister() const { return unregister_; }

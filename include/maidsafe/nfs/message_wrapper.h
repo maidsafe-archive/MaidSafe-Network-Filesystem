@@ -31,19 +31,19 @@ namespace nfs {
 
 namespace detail {
 
-struct DestinationTag;
 struct SourceTag;
-typedef TaggedValue<Persona, struct detail::DestinationTag> DestinationTaggedValue;
+struct DestinationTag;
 typedef TaggedValue<Persona, struct detail::SourceTag> SourceTaggedValue;
+typedef TaggedValue<Persona, struct detail::DestinationTag> DestinationTaggedValue;
 
 }  // namespace detail
 
 
 
-typedef std::tuple<MessageAction, detail::DestinationTaggedValue, detail::SourceTaggedValue,
+typedef std::tuple<MessageAction, detail::SourceTaggedValue, detail::DestinationTaggedValue,
                    MessageId, std::string> TypeErasedMessageWrapper;
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
 struct MessageWrapper {
   MessageWrapper();
 
@@ -69,8 +69,8 @@ struct MessageWrapper {
   std::string serialised_message;
 
  private:
-  static const detail::DestinationTaggedValue kDestinationTaggedValue;
   static const detail::SourceTaggedValue kSourceTaggedValue;
+  static const detail::DestinationTaggedValue kDestinationTaggedValue;
 };
 
 TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper);
@@ -83,63 +83,63 @@ namespace detail {
 MessageId GetNewMessageId();
 
 std::string SerialiseMessageWrapper(MessageAction action,
-                                    DestinationTaggedValue destination_persona,
                                     SourceTaggedValue source_persona,
+                                    DestinationTaggedValue destination_persona,
                                     MessageId message_id,
                                     const std::string& serialised_message);
 
 }  // namespace detail
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-const detail::DestinationTaggedValue
-    MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::kDestinationTaggedValue =
-        detail::DestinationTaggedValue(DestinationPersonaType::value);
-
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
 const detail::SourceTaggedValue
-    MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::kSourceTaggedValue =
+    MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::kSourceTaggedValue =
         detail::SourceTaggedValue(SourcePersonaType::value);
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::MessageWrapper()
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+const detail::DestinationTaggedValue
+    MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::kDestinationTaggedValue =
+        detail::DestinationTaggedValue(DestinationPersonaType::value);
+
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::MessageWrapper()
         : message_id(0),
           serialised_message() {}
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::MessageWrapper(
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::MessageWrapper(
     const std::string& serialised_message_in)
         : message_id(detail::GetNewMessageId()),
           serialised_message(serialised_message_in) {}
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::MessageWrapper(
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::MessageWrapper(
     const TypeErasedMessageWrapper& parsed_message_wrapper)
         : message_id(std::get<3>(parsed_message_wrapper)),
           serialised_message(std::get<4>(parsed_message_wrapper)) {}
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::MessageWrapper(
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::MessageWrapper(
     const MessageWrapper& other)
         : message_id(other.message_id),
           serialised_message(other.serialised_message) {}
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::MessageWrapper(
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::MessageWrapper(
     MessageWrapper&& other)
         : message_id(std::move(other.message_id)),
           serialised_message(std::move(other.serialised_message)) {}
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-MessageWrapper<action, DestinationPersonaType, SourcePersonaType>&
-    MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::operator=(
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+MessageWrapper<action, SourcePersonaType, DestinationPersonaType>&
+    MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::operator=(
         MessageWrapper other) {
   swap(*this, other);
   return *this;
 }
 
-template<MessageAction action, typename DestinationPersonaType, typename SourcePersonaType>
-std::string MessageWrapper<action, DestinationPersonaType, SourcePersonaType>::Serialise() const {
-  return detail::SerialiseMessageWrapper(action, kDestinationTaggedValue, kSourceTaggedValue,
+template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
+std::string MessageWrapper<action, SourcePersonaType, DestinationPersonaType>::Serialise() const {
+  return detail::SerialiseMessageWrapper(action, kSourceTaggedValue, kDestinationTaggedValue,
                                          message_id, serialised_message);
 }
 

@@ -39,36 +39,36 @@ class Message;
 template<typename Data>
 bool IsCacheable();
 
-// If 'replies' contains >= n successsful replies where n is 'successes_required', returns
-// <iterator to nth successful reply, true> otherwise
-// <iterator to most frequent failed reply, false>.  If there is more than one most frequent type,
-// (e.g. 2 'no_such_element' and 2 'invalid_parameter') the iterator points to the first which
-// reaches the frequency.
-std::pair<std::vector<Message>::const_iterator, bool> GetSuccessOrMostFrequentReply(
-    const std::vector<Message>& replies,
-    int successes_required);
-
-// Put, delete and PublicKeyGet(as use callback only, don't return future)
-class OperationOp {
- public:
-  OperationOp(int successes_required, std::function<void(Message)> callback);
-  void HandleReply(Message&& reply);
-
- private:
-  OperationOp(const OperationOp&);
-  OperationOp& operator=(const OperationOp&);
-  OperationOp(OperationOp&&);
-  OperationOp& operator=(OperationOp&&);
-
-  mutable std::mutex mutex_;
-  int successes_required_;
-  std::function<void(Message)> callback_;
-  std::vector<Message> replies_;
-  bool callback_executed_;
-};
-
-// Put, delete and PublicKeyGet(as use callback only, don't return future)
-void HandleOperationReply(std::shared_ptr<OperationOp> op, const std::string& serialised_reply);
+//// If 'replies' contains >= n successsful replies where n is 'successes_required', returns
+//// <iterator to nth successful reply, true> otherwise
+//// <iterator to most frequent failed reply, false>.  If there is more than one most frequent type,
+//// (e.g. 2 'no_such_element' and 2 'invalid_parameter') the iterator points to the first which
+//// reaches the frequency.
+//std::pair<std::vector<Message>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+//    const std::vector<Message>& replies,
+//    int successes_required);
+//
+//// Put, delete and PublicKeyGet(as use callback only, don't return future)
+//class OperationOp {
+// public:
+//  OperationOp(int successes_required, std::function<void(Message)> callback);
+//  void HandleReply(Message&& reply);
+//
+// private:
+//  OperationOp(const OperationOp&);
+//  OperationOp& operator=(const OperationOp&);
+//  OperationOp(OperationOp&&);
+//  OperationOp& operator=(OperationOp&&);
+//
+//  mutable std::mutex mutex_;
+//  int successes_required_;
+//  std::function<void(Message)> callback_;
+//  std::vector<Message> replies_;
+//  bool callback_executed_;
+//};
+//
+//// Put, delete and PublicKeyGet(as use callback only, don't return future)
+//void HandleOperationReply(std::shared_ptr<OperationOp> op, const std::string& serialised_reply);
 
 }  // namespace nfs
 

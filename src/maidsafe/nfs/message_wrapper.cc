@@ -32,14 +32,14 @@ MessageId GetNewMessageId() {
 }
 
 std::string SerialiseMessageWrapper(MessageAction action,
-                                    DestinationTaggedValue destination_persona,
                                     SourceTaggedValue source_persona,
+                                    DestinationTaggedValue destination_persona,
                                     MessageId message_id,
                                     const std::string& serialised_message) {
   protobuf::MessageWrapper proto_message_wrapper;
   proto_message_wrapper.set_action(static_cast<int32_t>(action));
-  proto_message_wrapper.set_destination_persona(static_cast<int32_t>(destination_persona.data));
   proto_message_wrapper.set_source_persona(static_cast<int32_t>(source_persona.data));
+  proto_message_wrapper.set_destination_persona(static_cast<int32_t>(destination_persona.data));
   proto_message_wrapper.set_message_id(message_id.data);
   proto_message_wrapper.set_serialised_message(serialised_message);
   return proto_message_wrapper.SerializeAsString();
@@ -56,9 +56,9 @@ TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_messa
 
   return std::make_tuple(
       static_cast<MessageAction>(proto_message_wrapper.action()),
+      detail::SourceTaggedValue(static_cast<Persona>(proto_message_wrapper.source_persona())),
       detail::DestinationTaggedValue(
           static_cast<Persona>(proto_message_wrapper.destination_persona())),
-      detail::SourceTaggedValue(static_cast<Persona>(proto_message_wrapper.source_persona())),
       MessageId(proto_message_wrapper.message_id()),
       proto_message_wrapper.serialised_message());
 }

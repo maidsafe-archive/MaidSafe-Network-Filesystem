@@ -24,79 +24,79 @@ License.
 
 #include "maidsafe/routing/parameters.h"
 
-#include "maidsafe/nfs/message.h"
+//#include "maidsafe/nfs/message.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
 
-std::pair<std::vector<Message>::const_iterator, bool> GetSuccessOrMostFrequentReply(
-    const std::vector<Message>& replies,
-    int successes_required) {
-  auto most_frequent_itr(std::end(replies));
-  int successes(0), most_frequent(0);
-  typedef std::map<std::error_code, int> Count;
-  Count count;
-  for (auto itr(std::begin(replies)); itr != std::end(replies); ++itr) {
-    int this_reply_count(++count[(*itr).data().error->code()]);
-    if ((*itr).data().IsSuccess()) {
-      if (++successes >= successes_required)
-        return std::make_pair(itr, true);
-    } else if (this_reply_count > most_frequent) {
-      most_frequent = this_reply_count;
-      most_frequent_itr = itr;
-    }
-  }
-  return std::make_pair(most_frequent_itr, false);
-}
-
-OperationOp::OperationOp(int successes_required, std::function<void(Message)> callback)
-    : mutex_(),
-      successes_required_(successes_required),
-      callback_(callback),
-      replies_(),
-      callback_executed_(!callback) {
-  if ((callback && successes_required <= 0) || (!callback && successes_required != 0))
-    ThrowError(CommonErrors::invalid_parameter);
-}
-
-void OperationOp::HandleReply(Message&& reply) {
-  std::function<void(Message)> callback;
-  std::unique_ptr<Message> result_ptr;
-  {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (callback_executed_)
-      return;
-    replies_.push_back(std::move(reply));
-    auto result(GetSuccessOrMostFrequentReply(replies_, successes_required_));
-    if (result.second || replies_.size() == routing::Parameters::node_group_size) {
-      // Operation has succeeded or failed overall
-      callback = callback_;
-      callback_executed_ = true;
-      result_ptr = std::unique_ptr<Message>(new Message(*result.first));
-    } else {
-      return;
-    }
-  }
-  callback(*result_ptr);
-}
-
-void HandleOperationReply(std::shared_ptr<OperationOp> op, const std::string& serialised_reply) {
-  try {
-    Message reply((Message::serialised_type(NonEmptyString(serialised_reply))));
-    op->HandleReply(std::move(reply));
-  }
-  catch(const maidsafe_error& error) {
-    LOG(kWarning) << "nfs error: " << error.code() << " - " << error.what();
-    op->HandleReply(Message(Persona::kDataGetter, Persona::kDataGetter, Message::Data(error)));
-  }
-  catch(const std::exception& e) {
-    LOG(kWarning) << "nfs error: " << e.what();
-    op->HandleReply(Message(Persona::kDataGetter, Persona::kDataGetter,
-                    Message::Data(CommonErrors::unknown)));
-  }
-}
+//std::pair<std::vector<Message>::const_iterator, bool> GetSuccessOrMostFrequentReply(
+//    const std::vector<Message>& replies,
+//    int successes_required) {
+//  auto most_frequent_itr(std::end(replies));
+//  int successes(0), most_frequent(0);
+//  typedef std::map<std::error_code, int> Count;
+//  Count count;
+//  for (auto itr(std::begin(replies)); itr != std::end(replies); ++itr) {
+//    int this_reply_count(++count[(*itr).data().error->code()]);
+//    if ((*itr).data().IsSuccess()) {
+//      if (++successes >= successes_required)
+//        return std::make_pair(itr, true);
+//    } else if (this_reply_count > most_frequent) {
+//      most_frequent = this_reply_count;
+//      most_frequent_itr = itr;
+//    }
+//  }
+//  return std::make_pair(most_frequent_itr, false);
+//}
+//
+//OperationOp::OperationOp(int successes_required, std::function<void(Message)> callback)
+//    : mutex_(),
+//      successes_required_(successes_required),
+//      callback_(callback),
+//      replies_(),
+//      callback_executed_(!callback) {
+//  if ((callback && successes_required <= 0) || (!callback && successes_required != 0))
+//    ThrowError(CommonErrors::invalid_parameter);
+//}
+//
+//void OperationOp::HandleReply(Message&& reply) {
+//  std::function<void(Message)> callback;
+//  std::unique_ptr<Message> result_ptr;
+//  {
+//    std::lock_guard<std::mutex> lock(mutex_);
+//    if (callback_executed_)
+//      return;
+//    replies_.push_back(std::move(reply));
+//    auto result(GetSuccessOrMostFrequentReply(replies_, successes_required_));
+//    if (result.second || replies_.size() == routing::Parameters::node_group_size) {
+//      // Operation has succeeded or failed overall
+//      callback = callback_;
+//      callback_executed_ = true;
+//      result_ptr = std::unique_ptr<Message>(new Message(*result.first));
+//    } else {
+//      return;
+//    }
+//  }
+//  callback(*result_ptr);
+//}
+//
+//void HandleOperationReply(std::shared_ptr<OperationOp> op, const std::string& serialised_reply) {
+//  try {
+//    Message reply((Message::serialised_type(NonEmptyString(serialised_reply))));
+//    op->HandleReply(std::move(reply));
+//  }
+//  catch(const maidsafe_error& error) {
+//    LOG(kWarning) << "nfs error: " << error.code() << " - " << error.what();
+//    op->HandleReply(Message(Persona::kDataGetter, Persona::kDataGetter, Message::Data(error)));
+//  }
+//  catch(const std::exception& e) {
+//    LOG(kWarning) << "nfs error: " << e.what();
+//    op->HandleReply(Message(Persona::kDataGetter, Persona::kDataGetter,
+//                    Message::Data(CommonErrors::unknown)));
+//  }
+//}
 
 }  // namespace nfs
 
