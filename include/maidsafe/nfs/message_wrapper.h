@@ -43,6 +43,14 @@ typedef TaggedValue<Persona, struct detail::DestinationTag> DestinationTaggedVal
 typedef std::tuple<MessageAction, detail::SourceTaggedValue, detail::DestinationTaggedValue,
                    MessageId, std::string> TypeErasedMessageWrapper;
 
+template<typename Message>
+struct Sender;
+
+template<typename Message>
+struct Receiver;
+
+
+
 template<MessageAction action, typename SourcePersonaType, typename DestinationPersonaType>
 struct MessageWrapper {
   MessageWrapper();
