@@ -47,6 +47,13 @@ asymm::PlainText GetSerialisedSignedDetails(const asymm::PlainText& serialised_d
 
 }  //  unnamed namespace
 
+PmidRegistration::PmidRegistration()
+    : maid_name_(),
+      pmid_name_(),
+      unregister_(false),
+      maid_signature_(),
+      pmid_signature_() {}
+
 PmidRegistration::PmidRegistration(const passport::Maid& maid,
                                    const passport::Pmid& pmid,
                                    bool unregister)

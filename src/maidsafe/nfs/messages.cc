@@ -54,6 +54,7 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
 
 
 
+// ==================== DataName ===================================================================
 DataName::DataName(DataTagValue type_in, const Identity& raw_name_in)
     : type(type_in),
       raw_name(raw_name_in) {}
@@ -84,6 +85,7 @@ DataName::DataName(const std::string& serialised_copy)
 std::string DataName::Serialise() const {
   protobuf::DataName proto_data_name;
   proto_data_name.set_type(static_cast<uint32_t>(type));
+  proto_data_name.set_raw_name(raw_name.string());
   return proto_data_name.SerializeAsString();
 }
 
@@ -95,6 +97,7 @@ void swap(DataName& lhs, DataName& rhs) {
 
 
 
+// ==================== ReturnCode =================================================================
 ReturnCode::ReturnCode() : value(CommonErrors::success) {}
 
 ReturnCode::ReturnCode(const ReturnCode& other) : value(other.value) {}
@@ -128,12 +131,232 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) {
 
 
 
-DataNameAndContent::DataNameAndContent(DataTagValue type_in,
-                                       const Identity& name_in,
-                                       const NonEmptyString& content_in)
-    : name(type_in, name_in),
-      content(content_in) {}
+// ==================== DataNameAndReturnCode ======================================================
+DataNameAndReturnCode::DataNameAndReturnCode() : name(), return_code() {}
 
+DataNameAndReturnCode::DataNameAndReturnCode(const DataNameAndReturnCode& other)
+    : name(other.name),
+      return_code(other.return_code) {}
+  
+DataNameAndReturnCode::DataNameAndReturnCode(DataNameAndReturnCode&& other)
+    : name(std::move(other.name)),
+      return_code(std::move(other.return_code)) {}
+
+DataNameAndReturnCode& DataNameAndReturnCode::operator=(DataNameAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndReturnCode::DataNameAndReturnCode(const std::string& serialised_copy)
+    : name(),
+      return_code() {
+  protobuf::DataNameAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  name = DataName(proto_copy.serialised_name());
+  return_code = ReturnCode(proto_copy.serialised_return_code());
+}
+
+std::string DataNameAndReturnCode::Serialise() const {
+  protobuf::DataNameAndReturnCode proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.return_code, rhs.return_code);
+}
+
+
+
+// ==================== DataNameAndVersion =========================================================
+DataNameAndVersion::DataNameAndVersion() : data_name(), version_name() {}
+
+DataNameAndVersion::DataNameAndVersion(const DataNameAndVersion& other)
+    : data_name(other.data_name),
+      version_name(other.version_name) {}
+  
+DataNameAndVersion::DataNameAndVersion(DataNameAndVersion&& other)
+    : data_name(std::move(other.data_name)),
+      version_name(std::move(other.version_name)) {}
+
+DataNameAndVersion& DataNameAndVersion::operator=(DataNameAndVersion other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndVersion::DataNameAndVersion(const std::string& serialised_copy)
+    : data_name(),
+      version_name() {
+  protobuf::DataNameAndVersion proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  data_name = DataName(proto_copy.serialised_data_name());
+  version_name = StructuredDataVersions::VersionName(proto_copy.serialised_version_name());
+}
+
+std::string DataNameAndVersion::Serialise() const {
+  protobuf::DataNameAndVersion proto_copy;
+  proto_copy.set_serialised_data_name(data_name.Serialise());
+  proto_copy.set_serialised_version_name(version_name.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) {
+  using std::swap;
+  swap(lhs.data_name, rhs.data_name);
+  swap(lhs.version_name, rhs.version_name);
+}
+
+
+
+// ==================== DataNameVersionAndReturnCode ===============================================
+DataNameVersionAndReturnCode::DataNameVersionAndReturnCode()
+    : data_name_and_version(),
+      return_code() {}
+
+DataNameVersionAndReturnCode::DataNameVersionAndReturnCode(
+    const DataNameVersionAndReturnCode& other)
+        : data_name_and_version(other.data_name_and_version),
+          return_code(other.return_code) {}
+  
+DataNameVersionAndReturnCode::DataNameVersionAndReturnCode(DataNameVersionAndReturnCode&& other)
+    : data_name_and_version(std::move(other.data_name_and_version)),
+      return_code(std::move(other.return_code)) {}
+
+DataNameVersionAndReturnCode& DataNameVersionAndReturnCode::operator=(
+    DataNameVersionAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameVersionAndReturnCode::DataNameVersionAndReturnCode(const std::string& serialised_copy)
+    : data_name_and_version(),
+      return_code() {
+  protobuf::DataNameVersionAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  data_name_and_version = DataNameAndVersion(proto_copy.serialised_data_name_and_version());
+  return_code = ReturnCode(proto_copy.serialised_return_code());
+}
+
+std::string DataNameVersionAndReturnCode::Serialise() const {
+  protobuf::DataNameVersionAndReturnCode proto_copy;
+  proto_copy.set_serialised_data_name_and_version(data_name_and_version.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.data_name_and_version, rhs.data_name_and_version);
+  swap(lhs.return_code, rhs.return_code);
+}
+
+
+
+// ==================== DataNameOldNewVersion ======================================================
+DataNameOldNewVersion::DataNameOldNewVersion()
+    : data_name(),
+      old_version_name(),
+      new_version_name() {}
+
+DataNameOldNewVersion::DataNameOldNewVersion(const DataNameOldNewVersion& other)
+    : data_name(other.data_name),
+      old_version_name(other.old_version_name),
+      new_version_name(other.new_version_name) {}
+  
+DataNameOldNewVersion::DataNameOldNewVersion(DataNameOldNewVersion&& other)
+    : data_name(std::move(other.data_name)),
+      old_version_name(std::move(other.old_version_name)),
+      new_version_name(std::move(other.new_version_name)) {}
+
+DataNameOldNewVersion& DataNameOldNewVersion::operator=(DataNameOldNewVersion other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameOldNewVersion::DataNameOldNewVersion(const std::string& serialised_copy)
+    : data_name(),
+      old_version_name(),
+      new_version_name() {
+  protobuf::DataNameOldNewVersion proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  data_name = DataName(proto_copy.serialised_data_name());
+  old_version_name = StructuredDataVersions::VersionName(proto_copy.serialised_old_version_name());
+  new_version_name = StructuredDataVersions::VersionName(proto_copy.serialised_new_version_name());
+}
+
+std::string DataNameOldNewVersion::Serialise() const {
+  protobuf::DataNameOldNewVersion proto_copy;
+  proto_copy.set_serialised_data_name(data_name.Serialise());
+  proto_copy.set_serialised_old_version_name(old_version_name.Serialise());
+  proto_copy.set_serialised_new_version_name(new_version_name.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) {
+  using std::swap;
+  swap(lhs.data_name, rhs.data_name);
+  swap(lhs.old_version_name, rhs.old_version_name);
+  swap(lhs.new_version_name, rhs.new_version_name);
+}
+
+
+
+// ==================== DataNameOldNewVersionAndReturnCode =========================================
+DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode()
+    : data_name_old_new_version(),
+      return_code() {}
+
+DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode(
+    const DataNameOldNewVersionAndReturnCode& other)
+        : data_name_old_new_version(other.data_name_old_new_version),
+          return_code(other.return_code) {}
+  
+DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode(
+    DataNameOldNewVersionAndReturnCode&& other)
+        : data_name_old_new_version(std::move(other.data_name_old_new_version)),
+          return_code(std::move(other.return_code)) {}
+
+DataNameOldNewVersionAndReturnCode& DataNameOldNewVersionAndReturnCode::operator=(
+    DataNameOldNewVersionAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode(
+    const std::string& serialised_copy)
+        : data_name_old_new_version(),
+          return_code() {
+  protobuf::DataNameOldNewVersionAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  data_name_old_new_version =
+      DataNameOldNewVersion(proto_copy.serialised_data_name_old_new_version());
+  return_code = ReturnCode(proto_copy.serialised_return_code());
+}
+
+std::string DataNameOldNewVersionAndReturnCode::Serialise() const {
+  protobuf::DataNameOldNewVersionAndReturnCode proto_copy;
+  proto_copy.set_serialised_data_name_old_new_version(data_name_old_new_version.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataNameOldNewVersionAndReturnCode& lhs, DataNameOldNewVersionAndReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.data_name_old_new_version, rhs.data_name_old_new_version);
+  swap(lhs.return_code, rhs.return_code);
+}
+
+
+
+// ==================== DataNameAndContent =========================================================
 DataNameAndContent::DataNameAndContent() : name(), content() {}
 
 DataNameAndContent::DataNameAndContent(const DataNameAndContent& other)
@@ -155,15 +378,13 @@ DataNameAndContent::DataNameAndContent(const std::string& serialised_copy)
   protobuf::DataNameAndContent proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
-  name = DataName(static_cast<DataTagValue>(proto_copy.name().type()),
-                  Identity(proto_copy.name().raw_name()));
+  name = DataName(proto_copy.serialised_name());
   content = NonEmptyString(proto_copy.content());
 }
 
 std::string DataNameAndContent::Serialise() const {
   protobuf::DataNameAndContent proto_copy;
-  proto_copy.mutable_name()->set_type(static_cast<uint32_t>(name.type));
-  proto_copy.mutable_name()->set_raw_name(name.raw_name.string());
+  proto_copy.set_serialised_name(name.Serialise());
   proto_copy.set_content(content.string());
   return proto_copy.SerializeAsString();
 }
@@ -176,329 +397,171 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) {
 
 
 
-DataNameContentAndPmidHint::DataNameContentAndPmidHint(DataTagValue type_in,
-                                                       const Identity& name_in,
-                                                       const NonEmptyString& content_in,
-                                                       const Identity& pmid_hint_in)
-    : name_and_content(type_in, name_in, content_in),
-      pmid_hint(pmid_hint_in) {}
+// ==================== DataAndReturnCode ==========================================================
+DataAndReturnCode::DataAndReturnCode() : data(), return_code() {}
 
-DataNameContentAndPmidHint::DataNameContentAndPmidHint() : name_and_content(), pmid_hint() {}
+DataAndReturnCode::DataAndReturnCode(const DataAndReturnCode& other)
+    : data(other.data),
+      return_code(other.return_code) {}
 
-DataNameContentAndPmidHint::DataNameContentAndPmidHint(const DataNameContentAndPmidHint& other)
-    : name_and_content(other.name_and_content),
-      pmid_hint(other.pmid_hint) {}
+DataAndReturnCode::DataAndReturnCode(DataAndReturnCode&& other)
+    : data(std::move(other.data)),
+      return_code(std::move(other.return_code)) {}
 
-DataNameContentAndPmidHint::DataNameContentAndPmidHint(DataNameContentAndPmidHint&& other)
-    : name_and_content(std::move(other.name_and_content)),
-      pmid_hint(std::move(other.pmid_hint)) {}
-
-DataNameContentAndPmidHint& DataNameContentAndPmidHint::operator=(
-    DataNameContentAndPmidHint other) {
+DataAndReturnCode& DataAndReturnCode::operator=(DataAndReturnCode other) {
   swap(*this, other);
   return *this;
 }
 
-DataNameContentAndPmidHint::DataNameContentAndPmidHint(const std::string& serialised_copy)
-    : name_and_content(),
-      pmid_hint() {
-  protobuf::DataNameContentAndPmidHint proto_copy;
+DataAndReturnCode::DataAndReturnCode(const std::string& serialised_copy)
+    : data(),
+      return_code() {
+  protobuf::DataAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
-  name_and_content = DataNameAndContent(
-    static_cast<DataTagValue>(proto_copy.name_and_content().name().type()),
-    Identity(proto_copy.name_and_content().name().raw_name()),
-    NonEmptyString(proto_copy.name_and_content().content()));
+  data = DataNameAndContent(proto_copy.serialised_data_name_and_content());
+  return_code = ReturnCode(proto_copy.serialised_return_code());
+}
+
+std::string DataAndReturnCode::Serialise() const {
+  protobuf::DataAndReturnCode proto_copy;
+  proto_copy.set_serialised_data_name_and_content(data.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.data, rhs.data);
+  swap(lhs.return_code, rhs.return_code);
+}
+
+
+
+// ==================== DataAndPmidHint ============================================================
+DataAndPmidHint::DataAndPmidHint() : data(), pmid_hint() {}
+
+DataAndPmidHint::DataAndPmidHint(const DataAndPmidHint& other)
+    : data(other.data),
+      pmid_hint(other.pmid_hint) {}
+
+DataAndPmidHint::DataAndPmidHint(DataAndPmidHint&& other)
+    : data(std::move(other.data)),
+      pmid_hint(std::move(other.pmid_hint)) {}
+
+DataAndPmidHint& DataAndPmidHint::operator=(DataAndPmidHint other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataAndPmidHint::DataAndPmidHint(const std::string& serialised_copy)
+    : data(),
+      pmid_hint() {
+  protobuf::DataAndPmidHint proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  data = DataNameAndContent(proto_copy.serialised_data_name_and_content());
   pmid_hint = Identity(proto_copy.pmid_hint());
 }
 
-std::string DataNameContentAndPmidHint::Serialise() const {
-  protobuf::DataNameContentAndPmidHint proto_copy;
-  proto_copy.mutable_name_and_content()->mutable_name()->set_type(
-      static_cast<uint32_t>(name_and_content.name.type));
-  proto_copy.mutable_name_and_content()->mutable_name()->set_raw_name(
-      name_and_content.name.raw_name.string());
-  proto_copy.mutable_name_and_content()->set_content(name_and_content.content.string());
+std::string DataAndPmidHint::Serialise() const {
+  protobuf::DataAndPmidHint proto_copy;
+  proto_copy.set_serialised_data_name_and_content(data.Serialise());
   proto_copy.set_pmid_hint(pmid_hint.string());
   return proto_copy.SerializeAsString();
 }
 
-void swap(DataNameContentAndPmidHint& lhs, DataNameContentAndPmidHint& rhs) {
+void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) {
   using std::swap;
-  swap(lhs.name_and_content, rhs.name_and_content);
+  swap(lhs.data, rhs.data);
   swap(lhs.pmid_hint, rhs.pmid_hint);
 }
 
 
 
+// ==================== DataPmidHintAndReturnCode ==================================================
+DataPmidHintAndReturnCode::DataPmidHintAndReturnCode() : data_and_pmid_hint(), return_code() {}
 
+DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(const DataPmidHintAndReturnCode& other)
+    : data_and_pmid_hint(other.data_and_pmid_hint),
+      return_code(other.return_code) {}
 
+DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(DataPmidHintAndReturnCode&& other)
+    : data_and_pmid_hint(std::move(other.data_and_pmid_hint)),
+      return_code(std::move(other.return_code)) {}
 
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-Message::Data::Data()
-    : type(),
-      name(),
-      originator(),
-      content(),
-      error() {}
-
-Message::Data::Data(DataTagValue type_in,
-                    const Identity& name_in,
-                    const NonEmptyString& content_in)
-    : type(type_in),
-      name(name_in),
-      originator(),
-      content(content_in),
-      error() {}
-
-Message::Data::Data(DataTagValue type_in,
-                    const Identity& name_in,
-                    const Identity& originator_in,
-                    const NonEmptyString& content_in)
-    : type(type_in),
-      name(name_in),
-      originator(originator_in),
-      content(content_in),
-      error() {}
-
-Message::Data::Data(const Identity& name_in, const NonEmptyString& content_in)
-    : type(),
-      name(name_in),
-      originator(),
-      content(content_in),
-      error() {}
-
-
-Message::Data::Data(const Data& other)
-    : type(other.type),
-      name(other.name),
-      originator(other.originator),
-      content(other.content),
-      error(other.error) {}
-
-Message::Data& Message::Data::operator=(const Data& other) {
-  type = other.type;
-  name = other.name;
-  originator = other.originator;
-  content = other.content;
-  error = other.error;
+DataPmidHintAndReturnCode& DataPmidHintAndReturnCode::operator=(DataPmidHintAndReturnCode other) {
+  swap(*this, other);
   return *this;
 }
 
-Message::Data::Data(Data&& other)
-    : type(std::move(other.type)),
-      name(std::move(other.name)),
-      originator(std::move(other.originator)),
-      content(std::move(other.content)),
-      error(std::move(other.error)) {}
-
-Message::Data& Message::Data::operator=(Data&& other) {
-  type = std::move(other.type);
-  name = std::move(other.name);
-  originator = std::move(other.originator);
-  content = std::move(other.content);
-  error = std::move(other.error);
-  return *this;
-}
-
-bool Message::Data::IsSuccess() const {
-  static std::error_code success((MakeError(CommonErrors::success)).code());
-  return error && error->code() == success;
-}
-
-Message::ClientValidation::ClientValidation() : name(), data_signature() {}
-
-Message::ClientValidation::ClientValidation(const passport::PublicMaid::name_type& name_in,
-                                            const asymm::Signature& data_signature_in)
-    : name(name_in),
-      data_signature(data_signature_in) {}
-
-Message::ClientValidation::ClientValidation(const ClientValidation& other)
-    : name(other.name),
-      data_signature(other.data_signature) {}
-
-Message::ClientValidation& Message::ClientValidation::operator=(const ClientValidation& other) {
-  name = other.name;
-  data_signature = other.data_signature;
-  return *this;
-}
-
-Message::ClientValidation::ClientValidation(ClientValidation&& other)
-    : name(std::move(other.name)),
-      data_signature(std::move(other.data_signature)) {}
-
-Message::ClientValidation& Message::ClientValidation::operator=(ClientValidation&& other) {
-  name = std::move(other.name);
-  data_signature = std::move(other.data_signature);
-  return *this;
-}
-
-
-
-Message::Message(Persona destination_persona,
-                 Persona source_persona,
-                 const Data& data,
-                 const passport::PublicPmid::name_type& pmid_node)
-    : message_id_(detail::GetNewMessageId()),
-      destination_persona_(destination_persona),
-      source_persona_(source_persona),
-      data_(data),
-      client_validation_(),
-      pmid_node_(pmid_node) {
-  if (!ValidateInputs())
-    ThrowError(CommonErrors::invalid_parameter);
-}
-
-Message::Message(const Message& other)
-    : message_id_(other.message_id_),
-      destination_persona_(other.destination_persona_),
-      source_persona_(other.source_persona_),
-      data_(other.data_),
-      client_validation_(other.client_validation_),
-      pmid_node_(other.pmid_node_) {}
-
-Message& Message::operator=(const Message& other) {
-  message_id_ = other.message_id_;
-  destination_persona_ = other.destination_persona_;
-  source_persona_ = other.source_persona_;
-  data_ = other.data_;
-  client_validation_ = other.client_validation_;
-  pmid_node_ = other.pmid_node_;
-  return *this;
-}
-
-Message::Message(Message&& other)
-    : message_id_(std::move(other.message_id_)),
-      destination_persona_(std::move(other.destination_persona_)),
-      source_persona_(std::move(other.source_persona_)),
-      data_(std::move(other.data_)),
-      client_validation_(std::move(other.client_validation_)),
-      pmid_node_(std::move(other.pmid_node_)) {}
-
-Message& Message::operator=(Message&& other) {
-  message_id_ = std::move(other.message_id_);
-  destination_persona_ = std::move(other.destination_persona_);
-  source_persona_ = std::move(other.source_persona_);
-  data_ = std::move(other.data_);
-  client_validation_ = std::move(other.client_validation_);
-  pmid_node_ = std::move(other.pmid_node_);
-  return *this;
-}
-
-// TODO(Fraser#5#): 2012-12-24 - Once MSVC eventually handles delegating constructors, we can make
-//                  this more efficient by using a lambda which returns the parsed protobuf
-//                  inside a private constructor taking a single arg of type protobuf.
-Message::Message(const serialised_type& serialised_message)
-    : message_id_(),
-      destination_persona_(),
-      source_persona_(),
-      data_(),
-      client_validation_(),
-      pmid_node_() {
-  protobuf::Message proto_message;
-  if (!proto_message.ParseFromString(serialised_message->string()))
+DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(const std::string& serialised_copy)
+    : data_and_pmid_hint(),
+      return_code() {
+  protobuf::DataPmidHintAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
-
-  message_id_ = MessageId(proto_message.message_id());
-  destination_persona_ = static_cast<Persona>(proto_message.destination_persona());
-  source_persona_ = static_cast<Persona>(proto_message.source_persona());
-
-  auto& proto_data(proto_message.data());
-  if (proto_data.has_type())
-    data_.type = static_cast<DataTagValue>(proto_data.type());
-  data_.name = Identity(proto_data.name());
-  if (proto_data.has_content())
-    data_.content = NonEmptyString(proto_data.content());
-  if (proto_data.has_error()) {
-    data_.error = GetError(proto_data.error().error_value(),
-                           proto_data.error().error_category_name());
-  }
-
-  if (proto_message.has_client_validation()) {
-    auto& proto_client_validation(proto_message.client_validation());
-    client_validation_.name = Identity(proto_client_validation.name());
-    client_validation_.data_signature = asymm::Signature(proto_client_validation.data_signature());
-  }
-
-  if (proto_message.has_pmid_node())
-    pmid_node_ = passport::PublicPmid::name_type((Identity(proto_message.pmid_node())));
-
-  if (!ValidateInputs())
-    ThrowError(CommonErrors::invalid_parameter);
+  data_and_pmid_hint = DataAndPmidHint(proto_copy.serialised_data_and_pmid_hint());
+  return_code = ReturnCode(proto_copy.serialised_return_code());
 }
 
-bool Message::ValidateInputs() const {
-  return data_.type && data_.name.IsInitialised();
+std::string DataPmidHintAndReturnCode::Serialise() const {
+  protobuf::DataPmidHintAndReturnCode proto_copy;
+  proto_copy.set_serialised_data_and_pmid_hint(data_and_pmid_hint.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
 }
 
-void Message::SignData(const Identity& client_name, const asymm::PrivateKey& signer_private_key) {
-  protobuf::Message::Data data;
-  if (data_.type)
-    data.set_type(static_cast<uint32_t>(*data_.type));
-  data.set_name(data_.name.string());
-  if (data_.content.IsInitialised())
-    data.set_content(data_.content.string());
-  asymm::PlainText serialised_data(data.SerializeAsString());
-  client_validation_.name = client_name;
-  client_validation_.data_signature = asymm::Sign(serialised_data, signer_private_key);
+void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.data_and_pmid_hint, rhs.data_and_pmid_hint);
+  swap(lhs.return_code, rhs.return_code);
 }
 
-Message::serialised_type Message::Serialise() const {
-  serialised_type serialised_message;
-  try {
-    protobuf::Message proto_message;
-    proto_message.set_message_id(message_id_.data);
-    proto_message.set_destination_persona(static_cast<int32_t>(destination_persona_));
-    proto_message.set_source_persona(static_cast<int32_t>(source_persona_));
-    if (data_.type)
-      proto_message.mutable_data()->set_type(static_cast<uint32_t>(*data_.type));
-    proto_message.mutable_data()->set_name(data_.name.string());
-    if (data_.content.IsInitialised())
-      proto_message.mutable_data()->set_content(data_.content.string());
-    if (data_.error) {
-      proto_message.mutable_data()->mutable_error()->set_error_value(data_.error->code().value());
-      proto_message.mutable_data()->mutable_error()->set_error_category_name(
-          data_.error->code().category().name());
-    }
-    if (HasClientValidation()) {
-      proto_message.mutable_client_validation()->set_name(client_validation_.name.string());
-      proto_message.mutable_client_validation()->set_data_signature(
-          client_validation_.data_signature.string());
-    }
-    if (HasDataHolder())
-      proto_message.set_pmid_node(pmid_node_->string());
-    serialised_message = serialised_type(NonEmptyString(proto_message.SerializeAsString()));
-  }
-  catch(const std::exception&) {
-    ThrowError(CommonErrors::invalid_parameter);
-  }
-  return serialised_message;
+
+
+// ==================== PmidRegistrationAndReturnCode ==============================================
+PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode()
+    : pmid_registration(),
+      return_code() {}
+
+PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(
+    const PmidRegistrationAndReturnCode& other)
+        : pmid_registration(other.pmid_registration),
+          return_code(other.return_code) {}
+
+PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(PmidRegistrationAndReturnCode&& other)
+    : pmid_registration(std::move(other.pmid_registration)),
+      return_code(std::move(other.return_code)) {}
+
+PmidRegistrationAndReturnCode& PmidRegistrationAndReturnCode::operator=(
+    PmidRegistrationAndReturnCode other) {
+  swap(*this, other);
+  return *this;
 }
 
-std::pair<Message::serialised_type, asymm::Signature> Message::SerialiseAndSign(
-    const asymm::PrivateKey& signer_private_key) const {
-  auto serialised(Serialise());
-  auto signature(asymm::Sign(asymm::PlainText(serialised.data), signer_private_key));
-  return std::make_pair(serialised, signature);
+PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(const std::string& serialised_copy)
+    : pmid_registration(),
+      return_code() {
+  protobuf::PmidRegistrationAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  pmid_registration = PmidRegistration(proto_copy.serialised_pmid_registration());
+  return_code = ReturnCode(proto_copy.serialised_return_code());
 }
 
-bool Message::Validate(const asymm::Signature& signature,
-                       const asymm::PublicKey& signer_public_key) const {
-  asymm::PlainText serialised(Serialise().data);
-  return asymm::CheckSignature(serialised, signature, signer_public_key);
-}*/
+std::string PmidRegistrationAndReturnCode::Serialise() const {
+  protobuf::PmidRegistrationAndReturnCode proto_copy;
+  proto_copy.set_serialised_pmid_registration(pmid_registration.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.pmid_registration, rhs.pmid_registration);
+  swap(lhs.return_code, rhs.return_code);
+}
 
 }  // namespace nfs
 

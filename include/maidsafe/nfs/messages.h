@@ -16,28 +16,27 @@ License.
 #ifndef MAIDSAFE_NFS_MESSAGES_H_
 #define MAIDSAFE_NFS_MESSAGES_H_
 
-//#include <cstdint>
-//#include <functional>
-//#include <ostream>
 #include <string>
-//#include <system_error>
-//#include <type_traits>
-//#include <utility>
-//#include <vector>
 
 #include "maidsafe/common/error.h"
-//#include "maidsafe/common/node_id.h"
-//#include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
-//#include "maidsafe/passport/types.h"
-//
-//#include "maidsafe/nfs/types.h"
+#include "maidsafe/data_types/structured_data_versions.h"
+
+#include "maidsafe/nfs/pmid_registration.h"
 
 
 namespace maidsafe {
 
 namespace nfs {
+
+struct Empty {
+  Empty() {}
+  explicit Empty(const std::string&) {}
+  std::string Serialise() const { return ""; }
+};
+
+
 
 struct DataName {
   template<typename DataNameType>
@@ -90,6 +89,91 @@ void swap(ReturnCode& lhs, ReturnCode& rhs);
 
 
 
+struct DataNameAndReturnCode {
+  DataNameAndReturnCode();
+  DataNameAndReturnCode(const DataNameAndReturnCode& other);
+  DataNameAndReturnCode(DataNameAndReturnCode&& other);
+  DataNameAndReturnCode& operator=(DataNameAndReturnCode other);
+
+  explicit DataNameAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName name;
+  ReturnCode return_code;
+};
+
+void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs);
+
+
+
+struct DataNameAndVersion {
+  DataNameAndVersion();
+  DataNameAndVersion(const DataNameAndVersion& other);
+  DataNameAndVersion(DataNameAndVersion&& other);
+  DataNameAndVersion& operator=(DataNameAndVersion other);
+
+  explicit DataNameAndVersion(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName data_name;
+  StructuredDataVersions::VersionName version_name;
+};
+
+void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs);
+
+
+
+struct DataNameVersionAndReturnCode {
+  DataNameVersionAndReturnCode();
+  DataNameVersionAndReturnCode(const DataNameVersionAndReturnCode& other);
+  DataNameVersionAndReturnCode(DataNameVersionAndReturnCode&& other);
+  DataNameVersionAndReturnCode& operator=(DataNameVersionAndReturnCode other);
+
+  explicit DataNameVersionAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataNameAndVersion data_name_and_version;
+  ReturnCode return_code;
+};
+
+void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs);
+
+
+
+struct DataNameOldNewVersion {
+  DataNameOldNewVersion();
+  DataNameOldNewVersion(const DataNameOldNewVersion& other);
+  DataNameOldNewVersion(DataNameOldNewVersion&& other);
+  DataNameOldNewVersion& operator=(DataNameOldNewVersion other);
+
+  explicit DataNameOldNewVersion(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName data_name;
+  StructuredDataVersions::VersionName old_version_name, new_version_name;
+};
+
+void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs);
+
+
+
+struct DataNameOldNewVersionAndReturnCode {
+  DataNameOldNewVersionAndReturnCode();
+  DataNameOldNewVersionAndReturnCode(const DataNameOldNewVersionAndReturnCode& other);
+  DataNameOldNewVersionAndReturnCode(DataNameOldNewVersionAndReturnCode&& other);
+  DataNameOldNewVersionAndReturnCode& operator=(DataNameOldNewVersionAndReturnCode other);
+
+  explicit DataNameOldNewVersionAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataNameOldNewVersion data_name_old_new_version;
+  ReturnCode return_code;
+};
+
+void swap(DataNameOldNewVersionAndReturnCode& lhs, DataNameOldNewVersionAndReturnCode& rhs);
+
+
+
 struct DataNameAndContent {
   template<typename Data>
   explicit DataNameAndContent(const Data& data)
@@ -116,141 +200,77 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs);
 
 
 
-struct DataNameContentAndPmidHint {
-  template<typename Data>
-  DataNameContentAndPmidHint(const Data& data, const Identity& pmid_hint_in)
-      : name_and_content(data),
-        pmid_hint(pmid_hint_in) {}
+struct DataAndReturnCode {
+  DataAndReturnCode();
+  DataAndReturnCode(const DataAndReturnCode& other);
+  DataAndReturnCode(DataAndReturnCode&& other);
+  DataAndReturnCode& operator=(DataAndReturnCode other);
 
-  DataNameContentAndPmidHint(DataTagValue type_in,
-                             const Identity& name_in,
-                             const NonEmptyString& content_in,
-                             const Identity& pmid_hint_in);
-
-  DataNameContentAndPmidHint();
-  DataNameContentAndPmidHint(const DataNameContentAndPmidHint& other);
-  DataNameContentAndPmidHint(DataNameContentAndPmidHint&& other);
-  DataNameContentAndPmidHint& operator=(DataNameContentAndPmidHint other);
-
-  explicit DataNameContentAndPmidHint(const std::string& serialised_copy);
+  explicit DataAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  DataNameAndContent name_and_content;
+  DataNameAndContent data;
+  ReturnCode return_code;
+};
+
+void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs);
+
+
+
+struct DataAndPmidHint {
+  DataAndPmidHint();
+  DataAndPmidHint(const DataAndPmidHint& other);
+  DataAndPmidHint(DataAndPmidHint&& other);
+  DataAndPmidHint& operator=(DataAndPmidHint other);
+
+  explicit DataAndPmidHint(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataNameAndContent data;
   Identity pmid_hint;
 };
 
-void swap(DataNameContentAndPmidHint& lhs, DataNameContentAndPmidHint& rhs);
+void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs);
+
+
+
+struct DataPmidHintAndReturnCode {
+  DataPmidHintAndReturnCode();
+  DataPmidHintAndReturnCode(const DataPmidHintAndReturnCode& other);
+  DataPmidHintAndReturnCode(DataPmidHintAndReturnCode&& other);
+  DataPmidHintAndReturnCode& operator=(DataPmidHintAndReturnCode other);
+
+  explicit DataPmidHintAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataAndPmidHint data_and_pmid_hint;
+  ReturnCode return_code;
+};
+
+void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs);
+
+
+
+struct PmidRegistrationAndReturnCode {
+  PmidRegistrationAndReturnCode();
+  PmidRegistrationAndReturnCode(const PmidRegistrationAndReturnCode& other);
+  PmidRegistrationAndReturnCode(PmidRegistrationAndReturnCode&& other);
+  PmidRegistrationAndReturnCode& operator=(PmidRegistrationAndReturnCode other);
+
+  explicit PmidRegistrationAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  PmidRegistration pmid_registration;
+  ReturnCode return_code;
+};
+
+void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs);
 
 
 
 
 typedef DataName MaidNodeGetRequest, MaidNodeGetVersionRequest, MaidNodeDeleteRequest;
-typedef DataNameContentAndPmidHint MaidNodePutRequest;
-
-
-
-
-/*
-  struct Data {
-    Data();
-    Data(DataTagValue type_in,
-         const Identity& name_in,
-         const NonEmptyString& content_in);
-    Data(DataTagValue type_in,
-         const Identity& name_in,
-         const Identity& originator_in,
-         const NonEmptyString& content_in);
-    Data(const Identity& name_in,
-         const NonEmptyString& content_in);
-    template<typename ErrorCode>
-    explicit Data(ErrorCode error_code,
-                  typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
-        : type(),
-          name(),
-          originator(),
-          content(),
-          error(MakeError(error_code)) {}
-    template<typename Error>
-    explicit Data(Error error,
-                  typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
-        : type(),
-          name(),
-          originator(),
-          content(),
-          error(error) {
-      static_assert(std::is_same<Error, maidsafe_error>::value ||
-                    std::is_base_of<maidsafe_error, Error>::value,
-                    "Error type must be a MaidSafe-specific type");
-    }
-    Data(const Data& other);
-    Data& operator=(const Data& other);
-    Data(Data&& other);
-    Data& operator=(Data&& other);
-
-    bool IsSuccess() const;
-
-    boost::optional<DataTagValue> type;
-    Identity name;
-    Identity originator;
-    NonEmptyString content;
-    boost::optional<maidsafe_error> error;
-  };
-  struct ClientValidation {
-    ClientValidation();
-    ClientValidation(const passport::PublicMaid::name_type& name_in,
-                     const asymm::Signature& data_signature_in);
-    ClientValidation(const ClientValidation& other);
-    ClientValidation& operator=(const ClientValidation& other);
-    ClientValidation(ClientValidation&& other);
-    ClientValidation& operator=(ClientValidation&& other);
-
-    Identity name;
-    asymm::Signature data_signature;
-  };
-
-  typedef TaggedValue<NonEmptyString, struct SerialisedMessageTag> serialised_type;
-  // In the context of a MaidClient doing a Put, the pmid_node arg represents a hint to a
-  // DataHolder the client would want to store the data (i.e. one of its own vaults).  In the
-  // context of a MetadataManger sending to PmidManager, the pmid_node represents the name
-  // of the actual DataHolder chosen (the PmidManager should be managing this DataHolder's
-  // account).
-  Message(Persona destination_persona,
-          Persona source_persona,
-          const Data& data,
-          const passport::PublicPmid::name_type& pmid_node = passport::PublicPmid::name_type());
-  Message(const Message& other);
-  Message& operator=(const Message& other);
-  Message(Message&& other);
-  Message& operator=(Message&& other);
-
-  explicit Message(const serialised_type& serialised_message);
-  // This should only be called from client NFS.  It adds a ClientValidation containing
-  // source's node ID, and a signature of the data serialised.
-  void SignData(const Identity& client_name, const asymm::PrivateKey& signer_private_key);
-  serialised_type Serialise() const;
-  std::pair<serialised_type, asymm::Signature> SerialiseAndSign(
-      const asymm::PrivateKey& signer_private_key) const;
-  bool Validate(const asymm::Signature& signature, const asymm::PublicKey& signer_public_key) const;
-
-  MessageId message_id() const { return message_id_; }
-  Persona destination_persona() const { return destination_persona_; }
-  Persona source_persona() const { return source_persona_; }
-  Data data() const { return data_; }
-  ClientValidation client_validation() const { return client_validation_; }
-  bool HasClientValidation() const { return client_validation_.name.IsInitialised(); }
-  passport::PublicPmid::name_type pmid_node() const { return pmid_node_; }
-  bool HasDataHolder() const { return pmid_node_->IsInitialised(); }
-
- private:
-  bool ValidateInputs() const;
-
-  MessageId message_id_;
-  Persona destination_persona_;
-  Persona source_persona_;
-  Data data_;
-  ClientValidation client_validation_;
-  passport::PublicPmid::name_type pmid_node_;
-};*/
+typedef DataAndPmidHint MaidNodePutRequest;
 
 }  // namespace nfs
 

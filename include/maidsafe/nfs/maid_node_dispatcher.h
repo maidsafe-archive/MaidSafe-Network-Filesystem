@@ -20,8 +20,10 @@ License.
 #include "maidsafe/common/types.h"
 #include "maidsafe/passport/types.h"
 #include "maidsafe/data_types/data_type_values.h"
+#include "maidsafe/data_types/structured_data_versions.h"
 #include "maidsafe/routing/message.h"
 #include "maidsafe/routing/routing_api.h"
+#include "maidsafe/routing/timer.h"
 
 #include "maidsafe/nfs/types.h"
 
@@ -39,16 +41,29 @@ class MaidNodeDispatcher {
   MaidNodeDispatcher(routing::Routing& routing, const passport::Maid& signing_fob);
 
   template<typename Data>
-  void SendGetRequest(const typename Data::name_type& data_name);
-
-  template<typename Data>
-  void SendGetVersionRequest(const typename Data::name_type& data_name);
+  void SendGetRequest(routing::TaskId task_id, const typename Data::name_type& data_name);
 
   template<typename Data>
   void SendPutRequest(const Data& data, const passport::Pmid::name_type& pmid_node_hint);
 
   template<typename Data>
   void SendDeleteRequest(const typename Data::name_type& data_name);
+
+  template<typename Data>
+  void SendGetVersionsRequest(const typename Data::name_type& data_name);
+
+  template<typename Data>
+  void SendGetBranchRequest(const typename Data::name_type& data_name,
+                            const StructuredDataVersions::VersionName& branch_tip);
+
+  template<typename Data>
+  void SendPutVersionRequest(const typename Data::name_type& data_name,
+                             const StructuredDataVersions::VersionName& old_version_name,
+                             const StructuredDataVersions::VersionName& new_version_name);
+
+  template<typename Data>
+  void SendDeleteBranchUntilForkRequest(const typename Data::name_type& data_name,
+                                        const StructuredDataVersions::VersionName& branch_tip);
 
   void SendCreateAccountRequest();
 
@@ -75,23 +90,21 @@ class MaidNodeDispatcher {
 
 // ==================== Implementation =============================================================
 template<typename Data>
-void MaidNodeDispatcher::SendGetRequest(const typename Data::name_type& data_name) {
-  typedef routing::SingleToGroupMessage RoutingMessage;
-  static const routing::Cacheable cacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
-                                                                        routing::Cacheable::kNone);
-//  static const nfs::MessageAction kAction(nfs::MessageAction::kGetRequest);
-//  static const nfs::Persona kDestinationPersona(nfs::Persona::kDataManager);
-//  static const DataTagValue kDataEnumValue(Data::name_type::tag_type::kEnumValue);
-
-//  nfs::Message::Data inner_data(kDataEnumValue, data_name.data, NonEmptyString(), kAction);
-//  nfs::Message inner(kDestinationPersona, kSourcePersona_, inner_data);
-  RoutingMessage message(/*inner.Serialise()->string()*/"msg", Sender(),
-                         routing::GroupId(NodeId(data_name->string())), cacheable);
-  routing_.Send(message);
+void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
+                                        const typename Data::name_type& data_name) {
+  typedef GetRequestFromMaidNodeToDataManager NfsMessage;
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+  static const NfsMessage::Sender kSender(routing::SingleId(routing_.kNodeId()));
+  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
+                                                                         routing::Cacheable::kNone);
+  NfsMessage nfs_message(MessageId(task_id), NfsMessage::Contents(data_name));
+  NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
+  RoutingMessage routing_message(nfs_message.Serialise(), kSender, receiver, kCacheable);
+  routing_.Send(routing_message);
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendGetVersionRequest(const typename Data::name_type& /*data_name*/) {
+void MaidNodeDispatcher::SendGetVersionsRequest(const typename Data::name_type& /*data_name*/) {
 }
 
 template<typename Data>

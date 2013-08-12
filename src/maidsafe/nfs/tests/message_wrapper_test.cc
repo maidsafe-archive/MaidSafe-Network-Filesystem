@@ -24,7 +24,7 @@ License.
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
 
-#include "maidsafe/nfs/message_wrapper_variant.h"
+#include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/messages.h"
 #include "maidsafe/nfs/types.h"
 
@@ -37,18 +37,9 @@ namespace test {
 
 namespace {
 
-typedef MessageWrapper<MessageAction::kGetRequest,
-                       SourcePersona<Persona::kMaidNode>,
-                       DestinationPersona<Persona::kDataManager,
-                       DataName>> MaidNodeGet;
-typedef MessageWrapper<MessageAction::kPutRequest,
-                       SourcePersona<Persona::kMaidNode>,
-                       DestinationPersona<Persona::kMaidManager,
-                       DataNameContentAndPmidHint>> MaidNodePut;
-typedef MessageWrapper<MessageAction::kDeleteRequest,
-                       SourcePersona<Persona::kMaidNode>,
-                       DestinationPersona<Persona::kMaidManager>,
-                       DataName> MaidNodeDelete;
+typedef GetRequestFromMaidNodeToDataManager GetRequest;
+typedef PutRequestFromMaidNodeToMaidManager PutRequest;
+typedef DeleteRequestFromMaidNodeToMaidManager DeleteRequest;
 
 }  // unnamed namespace
 
@@ -72,7 +63,8 @@ class Service {
   Service() : impl_(), demuxer_(impl_) {}
 
   std::string HandleMessage(const TypeErasedMessageWrapper& message) {
-    auto variant_message(GetVariant<Messages>(message));
+    Messages variant_message;
+    GetVariant(message, variant_message);
     return boost::apply_visitor(demuxer_, variant_message);
   }
 
@@ -85,7 +77,7 @@ class Service {
 
 class MaidManagerServiceImpl {
  public:
-  typedef boost::variant<MaidNodePut, MaidNodeDelete> Messages;
+  typedef MaidManagerServiceMessages Messages;
 
   template<typename T>
   std::string Handle(const T& /*message*/) {
@@ -95,22 +87,22 @@ class MaidManagerServiceImpl {
 };
 
 template<>
-std::string MaidManagerServiceImpl::Handle(const MaidNodePut& message) {
-  LOG(kInfo) << "MaidManager handling Put for message " << message.serialised_message;
-  return message.serialised_message;
+std::string MaidManagerServiceImpl::Handle(const PutRequest& message) {
+  LOG(kInfo) << "MaidManager handling Put";
+  return message.contents.data.name.raw_name.string();
 }
 
 template<>
-std::string MaidManagerServiceImpl::Handle(const MaidNodeDelete& message) {
-  LOG(kInfo) << "MaidManager handling Delete for message " << message.serialised_message;
-  return message.serialised_message;
+std::string MaidManagerServiceImpl::Handle(const DeleteRequestFromMaidNodeToMaidManager& message) {
+  LOG(kInfo) << "MaidManager handling Delete";
+  return message.contents.raw_name.string();
 }
 
 
 
 class DataManagerServiceImpl {
  public:
-  typedef boost::variant<MaidNodeGet> Messages;
+  typedef DataManagerServiceMessages Messages;
 
   template<typename T>
   std::string Handle(const T& /*message*/) {
@@ -120,17 +112,24 @@ class DataManagerServiceImpl {
 };
 
 template<>
-std::string DataManagerServiceImpl::Handle(const MaidNodeGet& message) {
-  LOG(kInfo) << "DataManager handling Get for message " << message.serialised_message;
-  return message.serialised_message;
+std::string DataManagerServiceImpl::Handle(const GetRequest& message) {
+  LOG(kInfo) << "DataManager handling Get";
+  return message.contents.raw_name.string();
 }
 
 
 
 TEST(MessageWrapperTest, BEH_CheckVariant) {
-  MaidNodeGet get("m1");
-  MaidNodePut put("m2");
-  MaidNodeDelete del("m3");
+  ImmutableData data1(NonEmptyString("data 1"));
+  ImmutableData data2(NonEmptyString("data 2"));
+  ImmutableData data3(NonEmptyString("data 3"));
+
+  GetRequest get(GetRequest::Contents(data1.name()));
+  PutRequest::Contents put_contents;
+  put_contents.data = DataNameAndContent(data2);
+  put_contents.pmid_hint = Identity(RandomString(crypto::SHA512::DIGESTSIZE));
+  PutRequest put(put_contents);
+  DeleteRequest del(DeleteRequest::Contents(data3.name()));
 
   auto serialised_get(get.Serialise());
   auto serialised_put(put.Serialise());
@@ -144,12 +143,12 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
   auto tuple_del(ParseMessageWrapper(serialised_del));
 
   EXPECT_THROW(maid_manager_service.HandleMessage(tuple_get), maidsafe_error);
-  EXPECT_EQ(get.serialised_message, data_manager_service.HandleMessage(tuple_get));
+  EXPECT_EQ(data1.name()->string(), data_manager_service.HandleMessage(tuple_get));
 
-  EXPECT_EQ(put.serialised_message, maid_manager_service.HandleMessage(tuple_put));
+  EXPECT_EQ(data2.name()->string(), maid_manager_service.HandleMessage(tuple_put));
   EXPECT_THROW(data_manager_service.HandleMessage(tuple_put), maidsafe_error);
 
-  EXPECT_EQ(del.serialised_message, maid_manager_service.HandleMessage(tuple_del));
+  EXPECT_EQ(data3.name()->string(), maid_manager_service.HandleMessage(tuple_del));
   EXPECT_THROW(data_manager_service.HandleMessage(tuple_del), maidsafe_error);
 }
 

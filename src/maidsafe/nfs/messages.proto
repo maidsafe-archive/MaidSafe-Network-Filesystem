@@ -25,14 +25,50 @@ message ReturnCode {
   required bytes error_category_name = 2;
 }
 
+message DataNameAndReturnCode {
+  required bytes serialised_name = 1;
+  required bytes serialised_return_code = 2;
+}
+
+message DataNameAndVersion {
+  required bytes serialised_data_name = 1;
+  required bytes serialised_version_name = 2;
+}
+
+message DataNameVersionAndReturnCode {
+  required bytes serialised_data_name_and_version = 1;
+  required bytes serialised_return_code = 2;
+}
+
+message DataNameOldNewVersion {
+  required bytes serialised_data_name = 1;
+  required bytes serialised_old_version_name = 2;
+  required bytes serialised_new_version_name = 3;
+}
+
+message DataNameOldNewVersionAndReturnCode {
+  required bytes serialised_data_name_old_new_version = 1;
+  required bytes serialised_return_code = 2;
+}
+
 message DataNameAndContent {
-  required DataName name = 1;
+  required bytes serialised_name = 1;
   required bytes content = 2;
 }
 
-message DataNameContentAndPmidHint {
-  required DataNameAndContent name_and_content = 1;
+message DataAndReturnCode {
+  required bytes serialised_data_name_and_content = 1;
+  required bytes serialised_return_code = 2;
+}
+
+message DataAndPmidHint {
+  required bytes serialised_data_name_and_content = 1;
   required bytes pmid_hint = 2;
+}
+
+message DataPmidHintAndReturnCode {
+  required bytes serialised_data_and_pmid_hint = 1;
+  required bytes serialised_return_code = 2;
 }
 
 message PmidRegistration {
@@ -49,32 +85,7 @@ message PmidRegistration {
   required bytes maid_signature = 2;
 }
 
-
-
-
-
-message Message {
-  message Error {
-    required int32 error_value = 1;
-    required bytes error_category_name = 2;
-  }
-  message Data {
-    optional uint32 type = 1;
-    required bytes name = 2;
-    optional bytes originator = 3;
-    optional bytes content = 4;
-    required int32 action = 5;
-    optional Error error = 6;
-  }
-  message ClientValidation {
-    required bytes name = 1;
-    required bytes data_signature = 2;
-  }
-  required int32 message_id = 1;
-  required int32 destination_persona = 2;
-  required int32 source_persona = 3;
-  required Data data = 4;
-  optional ClientValidation client_validation = 5;
-  optional bytes pmid_node = 6;
+message PmidRegistrationAndReturnCode {
+  required bytes serialised_pmid_registration = 1;
+  required bytes serialised_return_code = 2;
 }
-

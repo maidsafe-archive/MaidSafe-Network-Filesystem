@@ -29,6 +29,7 @@ namespace nfs {
 
 class PmidRegistration {
  public:
+  PmidRegistration();
   PmidRegistration(const passport::Maid& maid, const passport::Pmid& pmid, bool unregister);
   explicit PmidRegistration(const std::string& serialised_copy);
   PmidRegistration(const PmidRegistration& other);
@@ -44,7 +45,6 @@ class PmidRegistration {
   friend void swap(PmidRegistration& lhs, PmidRegistration& rhs);
 
  private:
-  PmidRegistration();
   passport::PublicMaid::name_type maid_name_;
   passport::PublicPmid::name_type pmid_name_;
   bool unregister_;
