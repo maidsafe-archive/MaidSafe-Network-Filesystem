@@ -40,10 +40,10 @@ namespace maidsafe {
 namespace nfs {
 
 struct DataName {
-  template<typename Data>
-  explicit DataName(const typename Data::name_type& name)
-      : type(Data::name_type::tag_type::kEnumValue),
-        raw_name(name_in.data) {}
+  template<typename DataNameType>
+  explicit DataName(const DataNameType& data_name)
+      : type(DataNameType::tag_type::kEnumValue),
+        raw_name(data_name.data) {}
 
   DataName(DataTagValue type_in, const Identity& raw_name_in);
 
@@ -93,7 +93,7 @@ void swap(ReturnCode& lhs, ReturnCode& rhs);
 struct DataNameAndContent {
   template<typename Data>
   explicit DataNameAndContent(const Data& data)
-      : name<Data>(Data.name()),
+      : name(data.name()),
         content(data.Serialise().data) {}
 
   DataNameAndContent(DataTagValue type_in,
@@ -116,36 +116,36 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs);
 
 
 
-struct DataNameContentAndHolder {
+struct DataNameContentAndPmidHint {
   template<typename Data>
-  DataNameContentAndHolder(const Data& data, const Identity& holder_id_in)
-      : name_and_content<Data>(data),
-        holder_id(holder_id_in) {}
+  DataNameContentAndPmidHint(const Data& data, const Identity& pmid_hint_in)
+      : name_and_content(data),
+        pmid_hint(pmid_hint_in) {}
 
-  DataNameContentAndHolder(DataTagValue type_in,
-                           const Identity& name_in,
-                           const NonEmptyString& content_in,
-                           const Identity& holder_id_in);
+  DataNameContentAndPmidHint(DataTagValue type_in,
+                             const Identity& name_in,
+                             const NonEmptyString& content_in,
+                             const Identity& pmid_hint_in);
 
-  DataNameContentAndHolder();
-  DataNameContentAndHolder(const DataNameContentAndHolder& other);
-  DataNameContentAndHolder(DataNameContentAndHolder&& other);
-  DataNameContentAndHolder& operator=(DataNameContentAndHolder other);
+  DataNameContentAndPmidHint();
+  DataNameContentAndPmidHint(const DataNameContentAndPmidHint& other);
+  DataNameContentAndPmidHint(DataNameContentAndPmidHint&& other);
+  DataNameContentAndPmidHint& operator=(DataNameContentAndPmidHint other);
 
-  explicit DataNameContentAndHolder(const std::string& serialised_copy);
+  explicit DataNameContentAndPmidHint(const std::string& serialised_copy);
   std::string Serialise() const;
 
   DataNameAndContent name_and_content;
-  Identity holder_id;
+  Identity pmid_hint;
 };
 
-void swap(DataNameContentAndHolder& lhs, DataNameContentAndHolder& rhs);
+void swap(DataNameContentAndPmidHint& lhs, DataNameContentAndPmidHint& rhs);
 
 
 
 
 typedef DataName MaidNodeGetRequest, MaidNodeGetVersionRequest, MaidNodeDeleteRequest;
-typedef DataNameContentAndHolder MaidNodePutRequest;
+typedef DataNameContentAndPmidHint MaidNodePutRequest;
 
 
 

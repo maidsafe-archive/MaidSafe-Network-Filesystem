@@ -176,56 +176,57 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) {
 
 
 
-DataNameContentAndHolder::DataNameContentAndHolder(DataTagValue type_in,
-                                                   const Identity& name_in,
-                                                   const NonEmptyString& content_in,
-                                                   const Identity& holder_id_in)
+DataNameContentAndPmidHint::DataNameContentAndPmidHint(DataTagValue type_in,
+                                                       const Identity& name_in,
+                                                       const NonEmptyString& content_in,
+                                                       const Identity& pmid_hint_in)
     : name_and_content(type_in, name_in, content_in),
-      holder_id(holder_id_in) {}
+      pmid_hint(pmid_hint_in) {}
 
-DataNameContentAndHolder::DataNameContentAndHolder() : name_and_content(), holder_id() {}
+DataNameContentAndPmidHint::DataNameContentAndPmidHint() : name_and_content(), pmid_hint() {}
 
-DataNameContentAndHolder::DataNameContentAndHolder(const DataNameContentAndHolder& other)
+DataNameContentAndPmidHint::DataNameContentAndPmidHint(const DataNameContentAndPmidHint& other)
     : name_and_content(other.name_and_content),
-      holder_id(other.holder_id) {}
+      pmid_hint(other.pmid_hint) {}
 
-DataNameContentAndHolder::DataNameContentAndHolder(DataNameContentAndHolder&& other)
+DataNameContentAndPmidHint::DataNameContentAndPmidHint(DataNameContentAndPmidHint&& other)
     : name_and_content(std::move(other.name_and_content)),
-      holder_id(std::move(other.holder_id)) {}
+      pmid_hint(std::move(other.pmid_hint)) {}
 
-DataNameContentAndHolder& DataNameContentAndHolder::operator=(DataNameContentAndHolder other) {
+DataNameContentAndPmidHint& DataNameContentAndPmidHint::operator=(
+    DataNameContentAndPmidHint other) {
   swap(*this, other);
   return *this;
 }
 
-DataNameContentAndHolder::DataNameContentAndHolder(const std::string& serialised_copy)
+DataNameContentAndPmidHint::DataNameContentAndPmidHint(const std::string& serialised_copy)
     : name_and_content(),
-      holder_id() {
-  protobuf::DataNameContentAndHolder proto_copy;
+      pmid_hint() {
+  protobuf::DataNameContentAndPmidHint proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
   name_and_content = DataNameAndContent(
     static_cast<DataTagValue>(proto_copy.name_and_content().name().type()),
     Identity(proto_copy.name_and_content().name().raw_name()),
     NonEmptyString(proto_copy.name_and_content().content()));
-  holder_id = Identity(proto_copy.holder_id());
+  pmid_hint = Identity(proto_copy.pmid_hint());
 }
 
-std::string DataNameContentAndHolder::Serialise() const {
-  protobuf::DataNameContentAndHolder proto_copy;
+std::string DataNameContentAndPmidHint::Serialise() const {
+  protobuf::DataNameContentAndPmidHint proto_copy;
   proto_copy.mutable_name_and_content()->mutable_name()->set_type(
       static_cast<uint32_t>(name_and_content.name.type));
   proto_copy.mutable_name_and_content()->mutable_name()->set_raw_name(
       name_and_content.name.raw_name.string());
   proto_copy.mutable_name_and_content()->set_content(name_and_content.content.string());
-  proto_copy.set_holder_id(holder_id.string());
+  proto_copy.set_pmid_hint(pmid_hint.string());
   return proto_copy.SerializeAsString();
 }
 
-void swap(DataNameContentAndHolder& lhs, DataNameContentAndHolder& rhs) {
+void swap(DataNameContentAndPmidHint& lhs, DataNameContentAndPmidHint& rhs) {
   using std::swap;
   swap(lhs.name_and_content, rhs.name_and_content);
-  swap(lhs.holder_id, rhs.holder_id);
+  swap(lhs.pmid_hint, rhs.pmid_hint);
 }
 
 

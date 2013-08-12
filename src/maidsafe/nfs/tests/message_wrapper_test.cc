@@ -25,6 +25,7 @@ License.
 #include "maidsafe/common/utils.h"
 
 #include "maidsafe/nfs/message_wrapper_variant.h"
+#include "maidsafe/nfs/messages.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -38,13 +39,16 @@ namespace {
 
 typedef MessageWrapper<MessageAction::kGetRequest,
                        SourcePersona<Persona::kMaidNode>,
-                       DestinationPersona<Persona::kDataManager>> MaidNodeGet;
+                       DestinationPersona<Persona::kDataManager,
+                       DataName>> MaidNodeGet;
 typedef MessageWrapper<MessageAction::kPutRequest,
                        SourcePersona<Persona::kMaidNode>,
-                       DestinationPersona<Persona::kMaidManager>> MaidNodePut;
+                       DestinationPersona<Persona::kMaidManager,
+                       DataNameContentAndPmidHint>> MaidNodePut;
 typedef MessageWrapper<MessageAction::kDeleteRequest,
                        SourcePersona<Persona::kMaidNode>,
-                       DestinationPersona<Persona::kMaidManager>> MaidNodeDelete;
+                       DestinationPersona<Persona::kMaidManager>,
+                       DataName> MaidNodeDelete;
 
 }  // unnamed namespace
 
@@ -84,7 +88,7 @@ class MaidManagerServiceImpl {
   typedef boost::variant<MaidNodePut, MaidNodeDelete> Messages;
 
   template<typename T>
-  std::string Handle(const T& message) {
+  std::string Handle(const T& /*message*/) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
@@ -109,7 +113,7 @@ class DataManagerServiceImpl {
   typedef boost::variant<MaidNodeGet> Messages;
 
   template<typename T>
-  std::string Handle(const T& message) {
+  std::string Handle(const T& /*message*/) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }

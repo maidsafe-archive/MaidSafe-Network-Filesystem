@@ -30,9 +30,9 @@ message DataNameAndContent {
   required bytes content = 2;
 }
 
-message DataNameContentAndHolder {
+message DataNameContentAndPmidHint {
   required DataNameAndContent name_and_content = 1;
-  required bytes holder_id = 2;
+  required bytes pmid_hint = 2;
 }
 
 message PmidRegistration {
