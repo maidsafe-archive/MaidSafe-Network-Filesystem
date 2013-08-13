@@ -7,8 +7,8 @@ Action:PutVersionRequest              Source:MaidNode:Single          Destinatio
 Action:DeleteBranchUntilForkRequest   Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::DataNameAndVersion
 Action:CreateAccountRequest           Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::Empty                       HasResponse
 Action:RemoveAccountRequest           Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::Empty                       HasResponse
-Action:RegisterPmidRequest            Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::DataName                    HasResponse
-Action:UnregisterPmidRequest          Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::DataName                    HasResponse
+Action:RegisterPmidRequest            Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::PmidRegistration            HasResponse
+Action:UnregisterPmidRequest          Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::PmidRegistration            HasResponse
 Action:GetPmidHealthRequest           Source:MaidNode:Single          Destination:MaidManager:Group     Contents:nfs::DataName                    HasResponse
 
 Action:GetResponse                    Source:MaidManager:Group        Destination:MaidNode:Single       Contents:nfs::DataAndReturnCode

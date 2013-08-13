@@ -51,14 +51,16 @@ class MaidNodeDispatcher {
   void SendDeleteRequest(const typename Data::Name& data_name);
 
   template<typename Data>
-  void SendGetVersionsRequest(const typename Data::Name& data_name);
+  void SendGetVersionsRequest(routing::TaskId task_id, const typename Data::Name& data_name);
 
   template<typename Data>
-  void SendGetBranchRequest(const typename Data::Name& data_name,
+  void SendGetBranchRequest(routing::TaskId task_id,
+                            const typename Data::Name& data_name,
                             const StructuredDataVersions::VersionName& branch_tip);
 
   template<typename Data>
-  void SendPutVersionRequest(const typename Data::Name& data_name,
+  void SendPutVersionRequest(routing::TaskId task_id,
+                             const typename Data::Name& data_name,
                              const StructuredDataVersions::VersionName& old_version_name,
                              const StructuredDataVersions::VersionName& new_version_name);
 
@@ -66,13 +68,16 @@ class MaidNodeDispatcher {
   void SendDeleteBranchUntilForkRequest(const typename Data::Name& data_name,
                                         const StructuredDataVersions::VersionName& branch_tip);
 
-  void SendCreateAccountRequest();
+  void SendCreateAccountRequest(routing::TaskId task_id);
 
-  void SendRemoveAccountRequest();
+  void SendRemoveAccountRequest(routing::TaskId task_id);
 
-  void SendRegisterPmidRequest(const passport::Pmid& pmid);
+  void SendRegisterPmidRequest(routing::TaskId task_id, const PmidRegistration& pmid_registration);
 
-  void SendUnregisterPmidRequest(const passport::Pmid& pmid);
+  void SendUnregisterPmidRequest(routing::TaskId task_id,
+                                 const PmidRegistration& pmid_registration);
+
+  void SendGetPmidHealthRequest(const passport::Pmid& pmid);
 
  private:
   MaidNodeDispatcher();
@@ -80,11 +85,13 @@ class MaidNodeDispatcher {
   MaidNodeDispatcher(MaidNodeDispatcher&&);
   MaidNodeDispatcher& operator=(MaidNodeDispatcher);
 
-  routing::SingleSource Sender() const;
+  template<typename Message>
+  void CheckSourcePersonaType() const;
 
   routing::Routing& routing_;
   const passport::Pmid kSigningFob_;
-  static const nfs::Persona kSourcePersona_;
+  const routing::SingleSource kThisNodeAsSender_;
+  const routing::GroupId kMaidManagerReceiver_;
 };
 
 
@@ -94,27 +101,113 @@ template<typename Data>
 void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
                                         const typename Data::Name& data_name) {
   typedef GetRequestFromMaidNodeToDataManager NfsMessage;
+  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
+                "The source Persona must be kMaidNode.");
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  static const NfsMessage::Sender kSender(routing::SingleId(routing_.kNodeId()));
   static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
                                                                          routing::Cacheable::kNone);
   NfsMessage nfs_message((MessageId(task_id), NfsMessage::Contents(data_name)));
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
-  RoutingMessage routing_message(nfs_message.Serialise(), kSender, receiver, kCacheable);
+  RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
   routing_.Send(routing_message);
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendGetVersionsRequest(const typename Data::Name& /*data_name*/) {
+void MaidNodeDispatcher::SendPutRequest(const Data& data,
+                                        const passport::Pmid::Name& pmid_node_hint) {
+  typedef PutRequestFromMaidNodeToMaidManager NfsMessage;
+  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
+                "The source Persona must be kMaidNode.");
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kPut :
+                                                                         routing::Cacheable::kNone);
+  NfsMessage::Contents contents;
+  contents.data = data;
+  contents.pmid_hint = pmid_node_hint.value;
+  NfsMessage nfs_message(contents);
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendPutRequest(const Data& /*data*/,
-                                        const passport::Pmid::Name& /*pmid_node_hint*/) {
+void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& data_name) {
+  typedef DeleteRequestFromMaidNodeToMaidManager NfsMessage;
+  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
+                "The source Persona must be kMaidNode.");
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage nfs_message(NfsMessage::Contents(data_name));
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& /*data_name*/) {
+void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
+                                                const typename Data::Name& data_name) {
+  typedef GetVersionsRequestFromMaidNodeToVersionManager NfsMessage;
+  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
+                "The source Persona must be kMaidNode.");
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage nfs_message(MessageId(task_id), NfsMessage::Contents(data_name));
+  NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
+}
+
+template<typename Data>
+void MaidNodeDispatcher::SendGetBranchRequest(
+    routing::TaskId task_id,
+    const typename Data::Name& data_name,
+    const StructuredDataVersions::VersionName& branch_tip) {
+  typedef GetBranchRequestFromMaidNodeToVersionManager NfsMessage;
+  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
+                "The source Persona must be kMaidNode.");
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage::Contents contents;
+  contents.data_name = DataName(data_name);
+  contents.version_name = branch_tip;
+  NfsMessage nfs_message(MessageId(task_id), contents);
+  NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
+}
+
+template<typename Data>
+void MaidNodeDispatcher::SendPutVersionRequest(
+    routing::TaskId task_id,
+    const typename Data::Name& data_name,
+    const StructuredDataVersions::VersionName& old_version_name,
+    const StructuredDataVersions::VersionName& new_version_name) {
+  typedef PutVersionRequestFromMaidNodeToMaidManager NfsMessage;
+  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
+                "The source Persona must be kMaidNode.");
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage::Contents contents;
+  contents.data_name = DataName(data_name);
+  contents.old_version_name = old_version_name;
+  contents.new_version_name = new_version_name;
+  NfsMessage nfs_message(MessageId(task_id), contents);
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+}
+
+template<typename Data>
+void MaidNodeDispatcher::SendDeleteBranchUntilForkRequest(
+    const typename Data::Name& data_name,
+    const StructuredDataVersions::VersionName& branch_tip) {
+  typedef DeleteBranchUntilForkRequestFromMaidNodeToMaidManager NfsMessage;
+  CheckSourcePersonaType<NfsMessage>();
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage::Contents contents;
+  contents.data_name = DataName(data_name);
+  contents.version_name = branch_tip;
+  NfsMessage nfs_message(contents);
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+}
+
+template<typename Message>
+void MaidNodeDispatcher::CheckSourcePersonaType() const {
+  static_assert(Message::SourcePersona::value == Persona::kMaidNode,
+                "The source Persona must be kMaidNode.");
 }
 
 }  // namespace nfs
