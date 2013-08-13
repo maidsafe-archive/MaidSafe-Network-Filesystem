@@ -45,7 +45,7 @@ StructuredData::StructuredData(const serialised_type& serialised_message) : vers
   for (auto i(0); i < proto_structured_data.versions_size(); ++i) {
     versions_.emplace_back(
         proto_structured_data.versions(i).index(),
-        ImmutableData::name_type(Identity(proto_structured_data.versions(i).id())));
+        ImmutableData::Name(Identity(proto_structured_data.versions(i).id())));
   }
 }
 

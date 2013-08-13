@@ -40,7 +40,7 @@
 //
 //template<>
 //void PublicKeyGetter::GetKey<passport::PublicPmid>(
-//    const typename passport::PublicPmid::name_type& key_name,
+//    const typename passport::PublicPmid::Name& key_name,
 //    std::function<void(Message)> get_key_functor) {
 //#ifdef TESTING
 //  if (key_getter_nfs_) {

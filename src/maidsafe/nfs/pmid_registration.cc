@@ -27,8 +27,8 @@ namespace nfs {
 
 namespace {
 
-asymm::PlainText GetSerialisedDetails(const passport::PublicMaid::name_type& maid_name,
-                                      const passport::PublicPmid::name_type& pmid_name,
+asymm::PlainText GetSerialisedDetails(const passport::PublicMaid::Name& maid_name,
+                                      const passport::PublicPmid::Name& pmid_name,
                                       bool unregister) {
   protobuf::PmidRegistration::SignedDetails::Details details;
   details.set_maid_name(maid_name->string());
@@ -89,8 +89,8 @@ PmidRegistration::PmidRegistration(const std::string& serialised_copy)
   if (!details.ParseFromString(signed_details.serialised_details()))
     fail();
 
-  maid_name_ = passport::PublicMaid::name_type(Identity(details.maid_name()));
-  pmid_name_ = passport::PublicPmid::name_type(Identity(details.pmid_name()));
+  maid_name_ = passport::PublicMaid::Name(Identity(details.maid_name()));
+  pmid_name_ = passport::PublicPmid::Name(Identity(details.pmid_name()));
   unregister_ = details.unregister();
   maid_signature_ = asymm::Signature(proto_pmid_registration.maid_signature());
   pmid_signature_ = asymm::Signature(signed_details.pmid_signature());

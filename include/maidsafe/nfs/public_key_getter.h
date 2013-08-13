@@ -38,7 +38,7 @@
 //                      std::vector<passport::PublicPmid>());
 //
 //  template<typename Data>
-//  void GetKey(const typename Data::name_type& key_name,
+//  void GetKey(const typename Data::Name& key_name,
 //              std::function<void(Message)> get_key_functor);
 //
 // private:
@@ -49,7 +49,7 @@
 //};
 //
 //template<typename Data>
-//void PublicKeyGetter::GetKey(const typename Data::name_type& key_name,
+//void PublicKeyGetter::GetKey(const typename Data::Name& key_name,
 //                             std::function<void(Message)> get_key_functor) {
 //  static_assert(passport::is_public_key_type<Data>::value,
 //                "Error, type must be a PublicKey type");
@@ -68,7 +68,7 @@
 //
 //template<>
 //void PublicKeyGetter::GetKey<passport::PublicPmid>(
-//    const typename passport::PublicPmid::name_type& key_name,
+//    const typename passport::PublicPmid::Name& key_name,
 //    std::function<void(Message)> get_key_functor);
 //
 //}  // namespace nfs

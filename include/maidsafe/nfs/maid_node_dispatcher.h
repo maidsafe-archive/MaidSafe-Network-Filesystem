@@ -41,28 +41,28 @@ class MaidNodeDispatcher {
   MaidNodeDispatcher(routing::Routing& routing, const passport::Maid& signing_fob);
 
   template<typename Data>
-  void SendGetRequest(routing::TaskId task_id, const typename Data::name_type& data_name);
+  void SendGetRequest(routing::TaskId task_id, const typename Data::Name& data_name);
 
   template<typename Data>
-  void SendPutRequest(const Data& data, const passport::Pmid::name_type& pmid_node_hint);
+  void SendPutRequest(const Data& data, const passport::Pmid::Name& pmid_node_hint);
 
   template<typename Data>
-  void SendDeleteRequest(const typename Data::name_type& data_name);
+  void SendDeleteRequest(const typename Data::Name& data_name);
 
   template<typename Data>
-  void SendGetVersionsRequest(const typename Data::name_type& data_name);
+  void SendGetVersionsRequest(const typename Data::Name& data_name);
 
   template<typename Data>
-  void SendGetBranchRequest(const typename Data::name_type& data_name,
+  void SendGetBranchRequest(const typename Data::Name& data_name,
                             const StructuredDataVersions::VersionName& branch_tip);
 
   template<typename Data>
-  void SendPutVersionRequest(const typename Data::name_type& data_name,
+  void SendPutVersionRequest(const typename Data::Name& data_name,
                              const StructuredDataVersions::VersionName& old_version_name,
                              const StructuredDataVersions::VersionName& new_version_name);
 
   template<typename Data>
-  void SendDeleteBranchUntilForkRequest(const typename Data::name_type& data_name,
+  void SendDeleteBranchUntilForkRequest(const typename Data::Name& data_name,
                                         const StructuredDataVersions::VersionName& branch_tip);
 
   void SendCreateAccountRequest();
@@ -91,7 +91,7 @@ class MaidNodeDispatcher {
 // ==================== Implementation =============================================================
 template<typename Data>
 void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
-                                        const typename Data::name_type& data_name) {
+                                        const typename Data::Name& data_name) {
   typedef GetRequestFromMaidNodeToDataManager NfsMessage;
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const NfsMessage::Sender kSender(routing::SingleId(routing_.kNodeId()));
@@ -104,16 +104,16 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendGetVersionsRequest(const typename Data::name_type& /*data_name*/) {
+void MaidNodeDispatcher::SendGetVersionsRequest(const typename Data::Name& /*data_name*/) {
 }
 
 template<typename Data>
 void MaidNodeDispatcher::SendPutRequest(const Data& /*data*/,
-                                        const passport::Pmid::name_type& /*pmid_node_hint*/) {
+                                        const passport::Pmid::Name& /*pmid_node_hint*/) {
 }
 
 template<typename Data>
-void MaidNodeDispatcher::SendDeleteRequest(const typename Data::name_type& /*data_name*/) {
+void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& /*data_name*/) {
 }
 
 }  // namespace nfs

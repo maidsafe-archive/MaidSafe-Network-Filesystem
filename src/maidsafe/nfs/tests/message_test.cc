@@ -55,7 +55,7 @@ class MessageTest : public testing::Test {
         data_type_(static_cast<DataTagValue>(RandomUint32() % 13)),
         name_(RandomString(NodeId::kSize)),
         content_(RandomString(1 + RandomUint32() % 50)),
-        pmid_node_(passport::PublicPmid::name_type(Identity(RandomString(NodeId::kSize)))),
+        pmid_node_(passport::PublicPmid::Name(Identity(RandomString(NodeId::kSize)))),
         message_(destination_persona_, source_,
                       Message::Data(data_type_, name_, content_, action_), pmid_node_) {}
 
@@ -66,7 +66,7 @@ class MessageTest : public testing::Test {
   DataTagValue data_type_;
   Identity name_;
   NonEmptyString content_;
-  passport::PublicPmid::name_type pmid_node_;
+  passport::PublicPmid::Name pmid_node_;
   Message message_;
 };
 
@@ -213,10 +213,10 @@ TEST_F(MessageTest, BEH_SerialiseAndSignThenValidate) {
   Message::serialised_type serialised_message(message_.Serialise());
   asymm::Keys keys(asymm::GenerateKeyPair());
   auto result(message_.SerialiseAndSign(keys.private_key));
-  EXPECT_EQ(serialised_message.data.string(), result.first.data.string());
-  asymm::PlainText serialised_data(result.first.data.string());
+  EXPECT_EQ(serialised_message->string(), result.first->string());
+  asymm::PlainText serialised_data(result.first->string());
   EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
-  serialised_data = asymm::PlainText(serialised_message.data.string());
+  serialised_data = asymm::PlainText(serialised_message->string());
   EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
 
   EXPECT_TRUE(message_.Validate(result.second, keys.public_key));

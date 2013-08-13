@@ -34,7 +34,7 @@
 //  NoPost() {}
 //  NoPost(routing::Routing&, const SigningFob&) {}
 //  template<typename Data>
-//  void Post(const typename Data::name_type& /*name*/) {}
+//  void Post(const typename Data::Name& /*name*/) {}
 //
 // protected:
 //  ~NoPost() {}

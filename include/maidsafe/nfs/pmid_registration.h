@@ -38,15 +38,15 @@ class PmidRegistration {
   bool Validate(const passport::PublicMaid& public_maid,
                 const passport::PublicPmid& public_pmid) const;
   std::string Serialise() const;
-  passport::PublicMaid::name_type maid_name() const { return maid_name_; }
-  passport::PublicPmid::name_type pmid_name() const { return pmid_name_; }
+  passport::PublicMaid::Name maid_name() const { return maid_name_; }
+  passport::PublicPmid::Name pmid_name() const { return pmid_name_; }
   bool unregister() const { return unregister_; }
 
   friend void swap(PmidRegistration& lhs, PmidRegistration& rhs);
 
  private:
-  passport::PublicMaid::name_type maid_name_;
-  passport::PublicPmid::name_type pmid_name_;
+  passport::PublicMaid::Name maid_name_;
+  passport::PublicPmid::Name pmid_name_;
   bool unregister_;
   asymm::Signature maid_signature_;
   asymm::Signature pmid_signature_;

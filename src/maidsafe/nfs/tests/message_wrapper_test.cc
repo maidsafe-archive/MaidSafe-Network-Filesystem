@@ -284,10 +284,10 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 //  Message::serialised_type serialised_message(message_.Serialise());
 //  asymm::Keys keys(asymm::GenerateKeyPair());
 //  auto result(message_.SerialiseAndSign(keys.private_key));
-//  EXPECT_EQ(serialised_message.data.string(), result.first.data.string());
-//  asymm::PlainText serialised_data(result.first.data.string());
+//  EXPECT_EQ(serialised_message->string(), result.first->string());
+//  asymm::PlainText serialised_data(result.first->string());
 //  EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
-//  serialised_data = asymm::PlainText(serialised_message.data.string());
+//  serialised_data = asymm::PlainText(serialised_message->string());
 //  EXPECT_TRUE(asymm::CheckSignature(serialised_data, result.second, keys.public_key));
 //
 //  EXPECT_TRUE(message_.Validate(result.second, keys.public_key));

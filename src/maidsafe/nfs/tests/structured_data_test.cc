@@ -37,7 +37,7 @@ class StructuredDataTest : public testing::Test {
 TEST_F(StructuredDataTest, BEH_Constructor) {
   std::vector<StructuredDataVersions::VersionName> versions;
   StructuredDataVersions::VersionName version_name(
-      RandomUint32(), ImmutableData::name_type(Identity(RandomString(64))));
+      RandomUint32(), ImmutableData::Name(Identity(RandomString(64))));
   versions.push_back(version_name);
 
   StructuredData structured_data_ori(versions);
@@ -46,7 +46,7 @@ TEST_F(StructuredDataTest, BEH_Constructor) {
   uint32_t num_of_versions(RandomUint32() % 256 + 10);
   for (uint32_t i(0); i < num_of_versions; ++i) {
     StructuredDataVersions::VersionName version_name(
-        RandomUint32(), ImmutableData::name_type(Identity(RandomString(64))));
+        RandomUint32(), ImmutableData::Name(Identity(RandomString(64))));
     versions.push_back(version_name);
   }
 
@@ -76,7 +76,7 @@ TEST_F(StructuredDataTest, BEH_Serialise) {
   uint32_t num_of_versions(RandomUint32() % 256 + 10);
   for (uint32_t i(0); i < num_of_versions; ++i) {
     StructuredDataVersions::VersionName version_name(
-        RandomUint32(), ImmutableData::name_type(Identity(RandomString(64))));
+        RandomUint32(), ImmutableData::Name(Identity(RandomString(64))));
     versions.push_back(version_name);
   }
 

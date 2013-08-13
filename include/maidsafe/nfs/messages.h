@@ -41,8 +41,8 @@ struct Empty {
 struct DataName {
   template<typename DataNameType>
   explicit DataName(const DataNameType& data_name)
-      : type(DataNameType::tag_type::kEnumValue),
-        raw_name(data_name.data) {}
+      : type(DataNameType::data_type::Tag::kValue),
+        raw_name(data_name.value) {}
 
   DataName(DataTagValue type_in, const Identity& raw_name_in);
 

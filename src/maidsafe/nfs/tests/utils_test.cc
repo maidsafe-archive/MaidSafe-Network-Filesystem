@@ -53,7 +53,7 @@ std::pair<Identity, NonEmptyString> GetNameAndContent();
 
 template<typename Fob>
 std::pair<Identity, NonEmptyString> MakeNameAndContentPair(const Fob& fob) {
-  maidsafe::passport::detail::PublicFob<typename Fob::name_type::tag_type> public_fob(fob);
+  maidsafe::passport::detail::PublicFob<typename Fob::Name::tag_type> public_fob(fob);
   return std::make_pair(public_fob.name().data, public_fob.Serialise().data);
 }
 
@@ -166,7 +166,7 @@ template<>
 std::pair<Identity, NonEmptyString> GetNameAndContent<OwnerDirectory>() {
   NonEmptyString value(RandomString(RandomUint32() % 10000 + 10));
   Identity name(crypto::Hash<crypto::SHA512>(value));
-  OwnerDirectory owner_directory(OwnerDirectory::name_type(name), value);
+  OwnerDirectory owner_directory(OwnerDirectory::Name(name), value);
   return std::make_pair(owner_directory.name().data, owner_directory.Serialise().data);
 }
 
@@ -174,7 +174,7 @@ template<>
 std::pair<Identity, NonEmptyString> GetNameAndContent<GroupDirectory>() {
   NonEmptyString value(RandomString(RandomUint32() % 10000 + 10));
   Identity name(crypto::Hash<crypto::SHA512>(value));
-  GroupDirectory group_directory(GroupDirectory::name_type(name), value);
+  GroupDirectory group_directory(GroupDirectory::Name(name), value);
   return std::make_pair(group_directory.name().data, group_directory.Serialise().data);
 }
 
@@ -182,7 +182,7 @@ template<>
 std::pair<Identity, NonEmptyString> GetNameAndContent<WorldDirectory>() {
   NonEmptyString value(RandomString(RandomUint32() % 10000 + 10));
   Identity name(crypto::Hash<crypto::SHA512>(value));
-  WorldDirectory world_directory(WorldDirectory::name_type(name), value);
+  WorldDirectory world_directory(WorldDirectory::Name(name), value);
   return std::make_pair(world_directory.name().data, world_directory.Serialise().data);
 }
 
@@ -192,8 +192,8 @@ class UtilsTest : public testing::Test {
   std::string MakeSerialisedMessage(const std::pair<Identity, NonEmptyString>& name_and_content) {
     Persona destination_persona(Persona::kDataManager);
     PersonaId source(Persona::kMaidNode, NodeId(NodeId::kRandomId));
-    Message::Data data(T::name_type::tag_type::kEnumValue, name_and_content.first,
-                           name_and_content.second, MessageAction::kGet);
+    Message::Data data(T::Name::tag_type::kValue, name_and_content.first,
+                       name_and_content.second, MessageAction::kGet);
     Message message(destination_persona, source, data);
     MessageWrapper message_wrapper(message.Serialise());
     return message_wrapper.Serialise()->string();

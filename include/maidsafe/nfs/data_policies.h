@@ -42,21 +42,21 @@
 ////  ~DataPolicy() {}
 ////  template<typename Data>
 ////  void ExecuteAction(routing::ResponseFunctor callback,
-////                     const typename Data::name_type& name,
+////                     const typename Data::Name& name,
 ////                     const NonEmptyString& content = NonEmptyString(),
-////                     const passport::PublicPmid::name_type& pmid_node_name =
-////      passport::PublicPmid::name_type());
+////                     const passport::PublicPmid::Name& pmid_node_name =
+////      passport::PublicPmid::Name());
 ////
 //// private:
 ////  template<typename Data>
 ////  std::pair<Persona, NodeId> GetDestination(
-////      const typename Data::name_type& name,
-////      const passport::PublicPmid::name_type& pmid_node_name) const;
+////      const typename Data::Name& name,
+////      const passport::PublicPmid::Name& pmid_node_name) const;
 ////  template<typename Data>
 ////  Message ConstructMessage(Persona destination_persona,
-////                           const typename Data::name_type& name,
+////                           const typename Data::Name& name,
 ////                           const NonEmptyString& content,
-////                           const passport::PublicPmid::name_type& pmid_node_name) const;
+////                           const passport::PublicPmid::Name& pmid_node_name) const;
 ////  MessageWrapper ConstructMessageWrapper(const Message& message) const;
 ////  // Default no-op.
 ////  void SignDataIfRequired(Message& /*message*/) const {}
@@ -83,7 +83,7 @@
 ////      : DataPolicy<SigningFob, source_persona, MessageAction::kPut>(routing, signing_fob) {}
 ////  template<typename Data>
 ////  void Put(const Data& data,
-////           const passport::PublicPmid::name_type& pmid_node_hint,
+////           const passport::PublicPmid::Name& pmid_node_hint,
 ////           const routing::ResponseFunctor& callback) {
 ////    this->template ExecuteAction<Data>(callback, data.name(), data.Serialise().data,
 ////                                       pmid_node_hint);
@@ -97,7 +97,7 @@
 ////      : DataPolicy<SigningFob, source_persona, MessageAction::kGet>(routing) {}
 ////
 ////  template<typename Data>
-////  void Get(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
+////  void Get(const typename Data::Name& name, const routing::ResponseFunctor& callback) {
 ////    this->template ExecuteAction<Data>(callback, name);
 ////  }
 ////};
@@ -108,7 +108,7 @@
 ////  DeleteDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
 ////      : DataPolicy<SigningFob, source_persona, MessageAction::kDelete>(routing, signing_fob) {}
 ////  template<typename Data>
-////  void Delete(const typename Data::name_type& name, const routing::ResponseFunctor& callback) {
+////  void Delete(const typename Data::Name& name, const routing::ResponseFunctor& callback) {
 ////    this->template ExecuteAction<Data>(callback, name);
 ////  }
 ////};
@@ -120,7 +120,7 @@
 ////  PutReducerDataPolicy(routing::Routing& routing, const SigningFob& signing_fob)
 ////      : DataPolicy<SigningFob, source_persona, MessageAction::kPut>(routing, signing_fob) {}
 ////  template<typename Data>
-////  void Put(const passport::PublicPmid::name_type& pmid_node_name,
+////  void Put(const passport::PublicPmid::Name& pmid_node_name,
 ////           const Data& data,
 ////           const routing::ResponseFunctor& callback) {
 ////    this->template ExecuteAction<Data>(callback, data.name(), data.Serialise().data,
@@ -135,8 +135,8 @@
 ////      : DataPolicy<SigningFob, source_persona, MessageAction::kGet>(routing) {}
 ////
 ////  template<typename Data>
-////  void Get(const passport::PublicPmid::name_type& pmid_node_name,
-////           const typename Data::name_type& name,
+////  void Get(const passport::PublicPmid::Name& pmid_node_name,
+////           const typename Data::Name& name,
 ////           const routing::ResponseFunctor& callback) {
 ////    this->template ExecuteAction<Data>(callback, name, NonEmptyString(), pmid_node_name);
 ////  }
@@ -152,8 +152,8 @@
 ////                   source_persona,
 ////                   MessageAction::kDelete>(routing, signing_fob) {}
 ////  template<typename Data>
-////  void Delete(const passport::PublicPmid::name_type& pmid_node_name,
-////              const typename Data::name_type& name,
+////  void Delete(const passport::PublicPmid::Name& pmid_node_name,
+////              const typename Data::Name& name,
 ////              const routing::ResponseFunctor& callback) {
 ////    this->template ExecuteAction<Data>(callback, name, NonEmptyString(), pmid_node_name);
 ////  }
@@ -168,7 +168,7 @@
 //                   Persona::kDataGetter,
 //                   MessageAction::kGet>(routing)*/ {}
 //  template<typename Data>
-//  void Get(const typename Data::name_type& /*name*/, const routing::ResponseFunctor& /*callback*/) {
+//  void Get(const typename Data::Name& /*name*/, const routing::ResponseFunctor& /*callback*/) {
 //    //this->template ExecuteAction<Data>(callback, name);
 //  }
 //};
@@ -193,9 +193,9 @@
 //  NoGet() {}
 //  explicit NoGet(routing::Routing&) {}
 //  template<typename Data>
-//  void Get(const typename Data::name_type&, const routing::ResponseFunctor&) {}
+//  void Get(const typename Data::Name&, const routing::ResponseFunctor&) {}
 //  template<typename Data>
-//  void Get(const NodeId&, const typename Data::name_type&, const routing::ResponseFunctor&) {}
+//  void Get(const NodeId&, const typename Data::Name&, const routing::ResponseFunctor&) {}
 // protected:
 //  ~NoGet() {}
 //};
@@ -206,9 +206,9 @@
 //  NoDelete() {}
 //  NoDelete(routing::Routing&, const SigningFob&) {}
 //  template<typename Data>
-//  void Delete(const typename Data::name_type&, const routing::ResponseFunctor&) {}
+//  void Delete(const typename Data::Name&, const routing::ResponseFunctor&) {}
 //  template<typename Data>
-//  void Delete(const NodeId&, const typename Data::name_type&, const routing::ResponseFunctor&) {}
+//  void Delete(const NodeId&, const typename Data::Name&, const routing::ResponseFunctor&) {}
 // protected:
 //  ~NoDelete() {}
 //};

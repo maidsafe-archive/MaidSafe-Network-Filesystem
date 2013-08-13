@@ -63,7 +63,7 @@
 //template<typename Data>
 //void Put(ClientMaidNfs& client_maid_nfs,
 //         const Data& data,
-//         const passport::PublicPmid::name_type& pmid_node_hint,
+//         const passport::PublicPmid::Name& pmid_node_hint,
 //         int successes_required,
 //         std::function<void(Message)> result);
 //
@@ -72,11 +72,11 @@
 //// default-constructible.
 //template<typename Data>
 //std::future<std::unique_ptr<Data>> Get(ClientMaidNfs& client_maid_nfs,
-//                                       const typename Data::name_type& name);
+//                                       const typename Data::Name& name);
 //
 //template<typename Data>
 //void Delete(ClientMaidNfs& client_maid_nfs,
-//            const typename Data::name_type& name,
+//            const typename Data::Name& name,
 //            int successes_required,
 //            std::function<void(Message)> result);
 //

@@ -71,7 +71,7 @@
 //template<typename Data>
 //void Put(ClientMaidNfs& client_maid_nfs,
 //         const Data& data,
-//         const passport::PublicPmid::name_type& pmid_node_hint,
+//         const passport::PublicPmid::Name& pmid_node_hint,
 //         int successes_required,
 //         std::function<void(Message)> result) {
 //  auto put_op(std::make_shared<OperationOp>(successes_required, result));
@@ -84,7 +84,7 @@
 //
 //template<typename Data>
 //std::future<std::unique_ptr<Data>> Get(ClientMaidNfs& client_maid_nfs,
-//                                       const typename Data::name_type& name) {
+//                                       const typename Data::Name& name) {
 //  auto get_op(std::make_shared<detail::GetOp<Data>>());
 //  client_maid_nfs.Get<Data>(name, [get_op, name] (std::string serialised_reply) {
 //    try {
@@ -108,7 +108,7 @@
 //
 //template<typename Data>
 //void Delete(ClientMaidNfs& client_maid_nfs,
-//            const typename Data::name_type& name,
+//            const typename Data::Name& name,
 //            int successes_required,
 //            std::function<void(Message)> result) {
 //  auto delete_op(std::make_shared<OperationOp>(successes_required, result));
