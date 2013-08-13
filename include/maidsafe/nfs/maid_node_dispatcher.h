@@ -101,8 +101,7 @@ template<typename Data>
 void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
                                         const typename Data::Name& data_name) {
   typedef GetRequestFromMaidNodeToDataManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
                                                                          routing::Cacheable::kNone);
@@ -116,8 +115,7 @@ template<typename Data>
 void MaidNodeDispatcher::SendPutRequest(const Data& data,
                                         const passport::Pmid::Name& pmid_node_hint) {
   typedef PutRequestFromMaidNodeToMaidManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kPut :
                                                                          routing::Cacheable::kNone);
@@ -132,8 +130,7 @@ void MaidNodeDispatcher::SendPutRequest(const Data& data,
 template<typename Data>
 void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& data_name) {
   typedef DeleteRequestFromMaidNodeToMaidManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
   NfsMessage nfs_message((NfsMessage::Contents(data_name)));
@@ -144,8 +141,7 @@ template<typename Data>
 void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
                                                 const typename Data::Name& data_name) {
   typedef GetVersionsRequestFromMaidNodeToVersionManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
   NfsMessage nfs_message((MessageId(task_id), NfsMessage::Contents(data_name)));
@@ -159,8 +155,7 @@ void MaidNodeDispatcher::SendGetBranchRequest(
     const typename Data::Name& data_name,
     const StructuredDataVersions::VersionName& branch_tip) {
   typedef GetBranchRequestFromMaidNodeToVersionManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
   NfsMessage::Contents contents;
@@ -178,8 +173,7 @@ void MaidNodeDispatcher::SendPutVersionRequest(
     const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name) {
   typedef PutVersionRequestFromMaidNodeToMaidManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
   NfsMessage::Contents contents;

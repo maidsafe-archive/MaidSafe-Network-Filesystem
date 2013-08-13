@@ -37,8 +37,7 @@ void MaidNodeDispatcher::SendCreateAccountRequest(routing::TaskId task_id) {
 
 void MaidNodeDispatcher::SendRemoveAccountRequest(routing::TaskId task_id) {
   typedef RemoveAccountRequestFromMaidNodeToMaidManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage nfs_message(MessageId(task_id), (NfsMessage::Contents()));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
@@ -47,8 +46,7 @@ void MaidNodeDispatcher::SendRemoveAccountRequest(routing::TaskId task_id) {
 void MaidNodeDispatcher::SendRegisterPmidRequest(routing::TaskId task_id,
                                                  const PmidRegistration& pmid_registration) {
   typedef RegisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   assert(!pmid_registration.unregister());
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage nfs_message(MessageId(task_id), pmid_registration);
@@ -58,8 +56,7 @@ void MaidNodeDispatcher::SendRegisterPmidRequest(routing::TaskId task_id,
 void MaidNodeDispatcher::SendUnregisterPmidRequest(routing::TaskId task_id,
                                                    const PmidRegistration& pmid_registration) {
   typedef UnregisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   assert(pmid_registration.unregister());
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage nfs_message(MessageId(task_id), pmid_registration);
@@ -68,8 +65,7 @@ void MaidNodeDispatcher::SendUnregisterPmidRequest(routing::TaskId task_id,
 
 void MaidNodeDispatcher::SendGetPmidHealthRequest(const passport::Pmid& pmid) {
   typedef GetPmidHealthRequestFromMaidNodeToMaidManager NfsMessage;
-  static_assert(NfsMessage::SourcePersona::value == Persona::kMaidNode,
-                "The source Persona must be kMaidNode.");
+  CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage nfs_message(NfsMessage::Contents(pmid.name()));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
