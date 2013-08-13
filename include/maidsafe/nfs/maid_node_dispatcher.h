@@ -125,7 +125,8 @@ void MaidNodeDispatcher::SendPutRequest(const Data& data,
   contents.data = data;
   contents.pmid_hint = pmid_node_hint.value;
   NfsMessage nfs_message(contents);
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_,
+                               kCacheable));
 }
 
 template<typename Data>
@@ -135,7 +136,7 @@ void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& data_name)
                 "The source Persona must be kMaidNode.");
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
-  NfsMessage nfs_message(NfsMessage::Contents(data_name));
+  NfsMessage nfs_message((NfsMessage::Contents(data_name)));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
@@ -147,7 +148,7 @@ void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
                 "The source Persona must be kMaidNode.");
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
-  NfsMessage nfs_message(MessageId(task_id), NfsMessage::Contents(data_name));
+  NfsMessage nfs_message((MessageId(task_id), NfsMessage::Contents(data_name)));
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
