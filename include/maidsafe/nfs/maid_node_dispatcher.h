@@ -25,6 +25,7 @@ License.
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/routing/timer.h"
 
+#include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -97,7 +98,7 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
   static const NfsMessage::Sender kSender(routing::SingleId(routing_.kNodeId()));
   static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
                                                                          routing::Cacheable::kNone);
-  NfsMessage nfs_message(MessageId(task_id), NfsMessage::Contents(data_name));
+  NfsMessage nfs_message((MessageId(task_id), NfsMessage::Contents(data_name)));
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kSender, receiver, kCacheable);
   routing_.Send(routing_message);
