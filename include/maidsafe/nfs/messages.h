@@ -36,7 +36,10 @@ struct Empty {
   std::string Serialise() const { return ""; }
 };
 
-
+template <typename A, typename B>
+bool CheckMutuallyExclusive(const A& a, const B& b) {
+  return (!a != !b);
+}
 
 struct DataName {
   template<typename DataNameType>
@@ -215,7 +218,21 @@ struct DataAndReturnCode {
 
 void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs);
 
+struct DataOrDataNameAndReturnCode {
+  typedef std::pair<DataName, ReturnCode> DataNameAndReturnCode;
+  DataOrDataNameAndReturnCode();
+  DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other);
+  DataOrDataNameAndReturnCode(DataOrDataNameAndReturnCode&& other);
+  DataOrDataNameAndReturnCode& operator=(DataOrDataNameAndReturnCode other);
 
+  explicit DataOrDataNameAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  boost::optional<DataNameAndContent> data;
+  boost::optional<DataNameAndReturnCode> data_name_and_return_code;
+};
+
+void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs);
 
 struct DataAndPmidHint {
   DataAndPmidHint();

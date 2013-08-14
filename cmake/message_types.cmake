@@ -18,3 +18,7 @@ Action:DeleteRequest                  Source:MaidManager:Group        Destinatio
 
 Action:PutRequest                     Source:PmidManager:Group        Destination:PmidNode:Single       Contents:nfs::DataNameAndContent           HasResponse
 Action:DeleteRequest                  Source:PmidManager:Group        Destination:PmidNode:Single       Contents:nfs::DataName
+
+Action:PutRequest                     Source:DataManager:Group        Destination:PmidManager:Group     Contents:nfs::DataNameAndContent           HasResponse
+Action:GetRequest                     Source:DataManager:Group        Destination:PmidNode:Single       Contents:nfs::DataName                     HasResponse
+Action:GetResponse                    Source:DataManager:Group        Destination:MaidNode:Single       Contents:nfs::DataOrDataNameAndReturnCode

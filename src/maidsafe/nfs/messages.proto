@@ -30,6 +30,12 @@ message DataNameAndReturnCode {
   required bytes serialised_return_code = 2;
 }
 
+message DataOrDataNameAndReturnCode {
+optional bytes serialised_data_name_and_content = 1;
+optional bytes serialised_name = 2;
+optional bytes serialised_return_code = 3;
+}
+
 message DataNameAndVersion {
   required bytes serialised_data_name = 1;
   required bytes serialised_version_name = 2;
