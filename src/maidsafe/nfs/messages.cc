@@ -171,6 +171,65 @@ void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) {
 }
 
 
+// ==================== DataNameAndReturnCode ======================================================
+DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode() : data(), data_name_and_return_code() {}
+
+DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other)
+    : data(other.data),
+      data_name_and_return_code(other.data_name_and_return_code) {}
+
+DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(DataOrDataNameAndReturnCode&& other)
+    : data(std::move(other.data)),
+      data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
+
+DataOrDataNameAndReturnCode& DataOrDataNameAndReturnCode::operator=(
+    DataOrDataNameAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(const std::string& serialised_copy)
+    : data(),
+      data_name_and_return_code() {
+  protobuf::DataOrDataNameAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+
+
+  if (proto_copy.has_serialised_data_name_and_content())
+    data = DataNameAndContent(proto_copy.serialised_data_name_and_content());
+  if (proto_copy.has_serialised_name() && proto_copy.has_serialised_return_code()) {
+    data_name_and_return_code->first = DataName(proto_copy.serialised_name());
+    data_name_and_return_code->second = ReturnCode(proto_copy.serialised_return_code());
+  }
+  if (!CheckMutuallyExclusive(data, data_name_and_return_code)) {
+    assert(false);
+    ThrowError(CommonErrors::parsing_error);
+  }
+}
+
+std::string DataOrDataNameAndReturnCode::Serialise() const {
+  if (!CheckMutuallyExclusive(data, data_name_and_return_code)) {
+    assert(false);
+    ThrowError(CommonErrors::serialisation_error);
+  }
+  protobuf::DataOrDataNameAndReturnCode proto_copy;
+
+  if (data) {
+    proto_copy.set_serialised_data_name_and_content(data->Serialise());
+  } else {
+    proto_copy.set_serialised_name(data_name_and_return_code->first.Serialise());
+    proto_copy.set_serialised_return_code(data_name_and_return_code->second.Serialise());
+  }
+  return proto_copy.SerializeAsString();
+}
+
+void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) {
+  using std::swap;
+  swap(lhs.data, rhs.data);
+  swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
+}
+
 
 // ==================== DataNameAndVersion =========================================================
 DataNameAndVersion::DataNameAndVersion() : data_name(), version_name() {}
