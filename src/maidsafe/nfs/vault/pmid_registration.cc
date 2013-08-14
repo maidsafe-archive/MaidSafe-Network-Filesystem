@@ -13,17 +13,17 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/nfs/pmid_registration.h"
+#include "maidsafe/nfs/vault/pmid_registration.h"
 
 #include "maidsafe/common/rsa.h"
 #include "maidsafe/common/utils.h"
 
-#include "maidsafe/nfs/messages.pb.h"
+#include "maidsafe/nfs/vault/pmid_registration.pb.h"
 
 
 namespace maidsafe {
 
-namespace nfs {
+namespace nfs_vault {
 
 namespace {
 
@@ -140,7 +140,7 @@ std::string PmidRegistration::Serialise() const {
   return proto_pmid_registration.SerializeAsString();
 }
 
-void swap(PmidRegistration& lhs, PmidRegistration& rhs) {
+void swap(PmidRegistration& lhs, PmidRegistration& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.maid_name_, rhs.maid_name_);
   swap(lhs.pmid_name_, rhs.pmid_name_);
@@ -149,6 +149,6 @@ void swap(PmidRegistration& lhs, PmidRegistration& rhs) {
   swap(lhs.pmid_signature_, rhs.pmid_signature_);
 }
 
-}  // namespace nfs
+}  // namespace nfs_vault
 
 }  // namespace maidsafe

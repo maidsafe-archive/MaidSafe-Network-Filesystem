@@ -40,17 +40,24 @@ set(OutputFile ${PROJECT_SOURCE_DIR}/include/maidsafe/nfs/message_types.h)
 set(InputFile ${PROJECT_SOURCE_DIR}/cmake/message_types.h.in)
 set(MessageTypes ${PROJECT_SOURCE_DIR}/cmake/message_types.cmake)
 # An apparent bug in CMake means that file(READ...) can only be done from within
-# CMAKE_CURRENT_BINARY_DIR.  Hence message_types.cmake is copied here to allow configure.cmake to work.
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_types.cmake
-                   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MessageTypes} ${CMAKE_CURRENT_BINARY_DIR}/message_types.cmake
-                   DEPENDS ${MessageTypes}
-                   COMMENT "Copying message_types.cmake to ${CMAKE_CURRENT_BINARY_DIR}")
+# CMAKE_CURRENT_BINARY_DIR.  Hence message_types.meta files are copied here to allow configure.cmake to work.
+file(GLOB_RECURSE MetaFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.message_types.meta")
+foreach(MetaFile ${MetaFiles})
+  set(IntermediateOutputFile "${CMAKE_CURRENT_BINARY_DIR}/copied_message_types/${MetaFile}")
+  get_filename_component(FilePath "${IntermediateOutputFile}" PATH)
+  list(APPEND IntermediateOutputFiles "${IntermediateOutputFile}")
+  add_custom_command(OUTPUT "${IntermediateOutputFile}"
+                     COMMAND ${CMAKE_COMMAND} -E make_directory ${FilePath}
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${MetaFile}" "${IntermediateOutputFile}"
+                     DEPENDS ${MessageTypes}
+                     COMMENT "Copying ${MetaFile} to ${CMAKE_CURRENT_BINARY_DIR}/copied_message_types/")
+endforeach()
 set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
 add_custom_command(OUTPUT ${OutputFile}
                    COMMAND ${CMAKE_COMMAND} -DOutputFile="${OutputFile}"
                                             -DInputFile="${InputFile}"
                                             -P ${PROJECT_SOURCE_DIR}/cmake/configure.cmake
-                   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/message_types.cmake
+                   DEPENDS ${IntermediateOutputFiles}
                            ${InputFile}
                            ${PROJECT_SOURCE_DIR}/cmake/configure.cmake
                    COMMENT "Configuring message_types.h")
@@ -60,23 +67,29 @@ source_group("Nfs API Files" FILES ${OutputFile})
 source_group("Nfs CMake Files" FILES ${CMAKE_CURRENT_LIST_FILE}
                                      ${InputFile}
                                      ${PROJECT_SOURCE_DIR}/cmake/configure.cmake
-                                     ${PROJECT_SOURCE_DIR}/cmake/message_types.cmake)
+                                     ${MetaFiles})
 
 glob_dir(Nfs ${PROJECT_SOURCE_DIR}/src/maidsafe/nfs Nfs)
+glob_dir(NfsClient ${PROJECT_SOURCE_DIR}/src/maidsafe/nfs/client "Nfs Client")
+glob_dir(NfsVault ${PROJECT_SOURCE_DIR}/src/maidsafe/nfs/vault "Nfs Vault")
 glob_dir(NfsTests ${PROJECT_SOURCE_DIR}/src/maidsafe/nfs/tests Tests)
 
 
 #==================================================================================================#
 # Define MaidSafe libraries and executables                                                        #
 #==================================================================================================#
-ms_add_static_library(nfs ${NfsAllFiles} ${OutputFile} ${InputFile}
+ms_add_static_library(nfs_core ${NfsAllFiles} ${OutputFile} ${InputFile}
                       ${PROJECT_SOURCE_DIR}/cmake/configure.cmake
-                      ${PROJECT_SOURCE_DIR}/cmake/message_types.cmake)
-target_link_libraries(maidsafe_nfs maidsafe_routing)
+                      ${MetaFiles})
+ms_add_static_library(nfs_client ${NfsClientAllFiles})
+ms_add_static_library(nfs_vault ${NfsVaultAllFiles})
+target_link_libraries(maidsafe_nfs_core maidsafe_routing)
+target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
+target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(MaidsafeTesting)
   ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})
-  target_link_libraries(TESTnfs maidsafe_nfs maidsafe_private)
+  target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_private)
 endif()
 
 rename_outdated_built_exes()
@@ -86,9 +99,6 @@ rename_outdated_built_exes()
 # Set compiler and linker flags                                                                    #
 #==================================================================================================#
 include(standard_flags)
-if(MSVC AND MaidsafeTesting)
-  set_target_properties(TESTnfs PROPERTIES COMPILE_FLAGS "/bigobj")
-endif()
 
 
 #==================================================================================================#
@@ -97,14 +107,6 @@ endif()
 if(MaidsafeTesting)
   add_style_test()
   add_gtests(TESTnfs)
-# label_as_critical_tests(IdentityPacketsTest.BEH_Full
-                          #IdentityPacketsTest.BEH_ChangeDetails
-                          #nfsTest.BEH_SigningPackets
-                          #nfsTest.BEH_IdentityPackets
-                          #nfsTest.BEH_ChangingIdentityPackets
-                          #nfsTest.BEH_MoveMaidsafeInbox
-                          #  nfsTest.BEH_SerialiseParse
-                          #                          )
   add_project_experimental()
   test_summary_output()
 endif()

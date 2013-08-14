@@ -13,8 +13,8 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#ifndef MAIDSAFE_NFS_MAID_NODE_DISPATCHER_H_
-#define MAIDSAFE_NFS_MAID_NODE_DISPATCHER_H_
+#ifndef MAIDSAFE_NFS_CLIENT_MAID_NODE_DISPATCHER_H_
+#define MAIDSAFE_NFS_CLIENT_MAID_NODE_DISPATCHER_H_
 
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
@@ -27,6 +27,7 @@ License.
 
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/types.h"
+#include "maidsafe/nfs/vault/pmid_registration.h"
 
 
 namespace maidsafe {
@@ -72,10 +73,11 @@ class MaidNodeDispatcher {
 
   void SendRemoveAccountRequest(routing::TaskId task_id);
 
-  void SendRegisterPmidRequest(routing::TaskId task_id, const PmidRegistration& pmid_registration);
+  void SendRegisterPmidRequest(routing::TaskId task_id,
+                               const nfs_vault::PmidRegistration& pmid_registration);
 
   void SendUnregisterPmidRequest(routing::TaskId task_id,
-                                 const PmidRegistration& pmid_registration);
+                                 const nfs_vault::PmidRegistration& pmid_registration);
 
   void SendGetPmidHealthRequest(const passport::Pmid& pmid);
 
@@ -208,4 +210,4 @@ void MaidNodeDispatcher::CheckSourcePersonaType() const {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_MAID_NODE_DISPATCHER_H_
+#endif  // MAIDSAFE_NFS_CLIENT_MAID_NODE_DISPATCHER_H_

@@ -13,7 +13,7 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/nfs/maid_node_dispatcher.h"
+#include "maidsafe/nfs/client/maid_node_dispatcher.h"
 
 
 namespace maidsafe {
@@ -41,8 +41,9 @@ void MaidNodeDispatcher::SendRemoveAccountRequest(routing::TaskId task_id) {
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-void MaidNodeDispatcher::SendRegisterPmidRequest(routing::TaskId task_id,
-                                                 const PmidRegistration& pmid_registration) {
+void MaidNodeDispatcher::SendRegisterPmidRequest(
+    routing::TaskId task_id,
+    const nfs_vault::PmidRegistration& pmid_registration) {
   typedef RegisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   assert(!pmid_registration.unregister());
@@ -51,8 +52,9 @@ void MaidNodeDispatcher::SendRegisterPmidRequest(routing::TaskId task_id,
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-void MaidNodeDispatcher::SendUnregisterPmidRequest(routing::TaskId task_id,
-                                                   const PmidRegistration& pmid_registration) {
+void MaidNodeDispatcher::SendUnregisterPmidRequest(
+    routing::TaskId task_id,
+    const nfs_vault::PmidRegistration& pmid_registration) {
   typedef UnregisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   assert(pmid_registration.unregister());

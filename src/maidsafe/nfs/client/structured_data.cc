@@ -13,21 +13,23 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/nfs/structured_data.h"
+#include "maidsafe/nfs/client/structured_data.h"
 
 #include <utility>
 
 #include "maidsafe/common/error.h"
 
-#include "maidsafe/nfs/structured_data.pb.h"
+#include "maidsafe/nfs/client/structured_data.pb.h"
 
 
 namespace maidsafe {
 
-namespace nfs {
+namespace nfs_client {
 
 StructuredData::StructuredData(const std::vector<StructuredDataVersions::VersionName>& versions)
     : versions_(versions) {}
+
+StructuredData::StructuredData() : versions_() {}
 
 StructuredData::StructuredData(const StructuredData& other) : versions_(other.versions_) {}
 
@@ -38,25 +40,19 @@ StructuredData& StructuredData::operator=(StructuredData other) {
   return *this;
 }
 
-StructuredData::StructuredData(const serialised_type& serialised_message) : versions_() {
+StructuredData::StructuredData(const std::string& serialised_copy) : versions_() {
   protobuf::StructuredData proto_structured_data;
-  if (!proto_structured_data.ParseFromString(serialised_message->string()))
+  if (!proto_structured_data.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
-  for (auto i(0); i < proto_structured_data.versions_size(); ++i) {
-    versions_.emplace_back(
-        proto_structured_data.versions(i).index(),
-        ImmutableData::Name(Identity(proto_structured_data.versions(i).id())));
-  }
+  for (auto i(0); i < proto_structured_data.serialised_versions_size(); ++i)
+    versions_.emplace_back(proto_structured_data.serialised_versions(i));
 }
 
-StructuredData::serialised_type StructuredData::Serialise() const {
+std::string StructuredData::Serialise() const {
   protobuf::StructuredData proto_structured_data;
-  for (const auto& version : versions_) {
-    auto proto_version = proto_structured_data.add_versions();
-    proto_version->set_index(version.index);
-    proto_version->set_id(version.id->string());
-  }
-  return serialised_type(NonEmptyString(proto_structured_data.SerializeAsString()));
+  for (const auto& version : versions_)
+    proto_structured_data.add_serialised_versions(version.Serialise());
+  return proto_structured_data.SerializeAsString();
 }
 
 void swap(StructuredData& lhs, StructuredData& rhs) MAIDSAFE_NOEXCEPT {
@@ -64,6 +60,6 @@ void swap(StructuredData& lhs, StructuredData& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.versions_, rhs.versions_);
 }
 
-}  // namespace nfs
+}  // namespace nfs_client
 
 }  // namespace maidsafe

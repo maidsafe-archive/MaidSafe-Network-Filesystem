@@ -13,14 +13,9 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/nfs/maid_node_service.h"
+package maidsafe.nfs_client.protobuf;
 
+message StructuredData {
+  repeated bytes serialised_versions = 1;
+}
 
-namespace maidsafe {
-
-namespace nfs {
-
-
-}  // namespace nfs
-
-}  // namespace maidsafe

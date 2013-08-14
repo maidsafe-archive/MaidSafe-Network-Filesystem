@@ -13,11 +13,12 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#ifndef MAIDSAFE_NFS_PMID_REGISTRATION_H_
-#define MAIDSAFE_NFS_PMID_REGISTRATION_H_
+#ifndef MAIDSAFE_NFS_VAULT_PMID_REGISTRATION_H_
+#define MAIDSAFE_NFS_VAULT_PMID_REGISTRATION_H_
 
 #include <string>
 
+#include "maidsafe/common/config.h"
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/passport/types.h"
@@ -25,7 +26,7 @@ License.
 
 namespace maidsafe {
 
-namespace nfs {
+namespace nfs_vault {
 
 class PmidRegistration {
  public:
@@ -42,7 +43,7 @@ class PmidRegistration {
   passport::PublicPmid::Name pmid_name() const { return pmid_name_; }
   bool unregister() const { return unregister_; }
 
-  friend void swap(PmidRegistration& lhs, PmidRegistration& rhs);
+  friend void swap(PmidRegistration& lhs, PmidRegistration& rhs) MAIDSAFE_NOEXCEPT;
 
  private:
   passport::PublicMaid::Name maid_name_;
@@ -52,8 +53,8 @@ class PmidRegistration {
   asymm::Signature pmid_signature_;
 };
 
-}  // namespace nfs
+}  // namespace nfs_vault
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_PMID_REGISTRATION_H_
+#endif  // MAIDSAFE_NFS_VAULT_PMID_REGISTRATION_H_

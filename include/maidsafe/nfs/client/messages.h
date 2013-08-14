@@ -1,4 +1,4 @@
-/* Copyright 2012 MaidSafe.net limited
+/* Copyright 2013 MaidSafe.net limited
 
 This MaidSafe Software is licensed under the MaidSafe.net Commercial License, version 1.0 or later,
 and The General Public License (GPL), version 3. By contributing code to this project You agree to
@@ -13,54 +13,25 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#ifndef MAIDSAFE_NFS_MESSAGES_H_
-#define MAIDSAFE_NFS_MESSAGES_H_
+#ifndef MAIDSAFE_NFS_CLIENT_MESSAGES_H_
+#define MAIDSAFE_NFS_CLIENT_MESSAGES_H_
 
 #include <string>
+#include <system_error>
+#include <type_traits>
 
+#include "maidsafe/common/config.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
-#include "maidsafe/data_types/structured_data_versions.h"
 
-#include "maidsafe/nfs/pmid_registration.h"
+#include "maidsafe/nfs/client/structured_data.h"
+#include "maidsafe/nfs/vault/messages.h"
 
 
 namespace maidsafe {
 
-namespace nfs {
-
-struct Empty {
-  Empty() {}
-  explicit Empty(const std::string&) {}
-  std::string Serialise() const { return ""; }
-};
-
-
-
-struct DataName {
-  template<typename DataNameType>
-  explicit DataName(const DataNameType& data_name)
-      : type(DataNameType::data_type::Tag::kValue),
-        raw_name(data_name.value) {}
-
-  DataName(DataTagValue type_in, const Identity& raw_name_in);
-
-  DataName();
-  DataName(const DataName& other);
-  DataName(DataName&& other);
-  DataName& operator=(DataName other);
-
-  explicit DataName(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  DataTagValue type;
-  Identity raw_name;
-};
-
-void swap(DataName& lhs, DataName& rhs);
-
-
+namespace nfs_client {
 
 struct ReturnCode {
   // This c'tor designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
@@ -85,7 +56,7 @@ struct ReturnCode {
   maidsafe_error value;
 };
 
-void swap(ReturnCode& lhs, ReturnCode& rhs);
+void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
@@ -98,28 +69,11 @@ struct DataNameAndReturnCode {
   explicit DataNameAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  DataName name;
+  nfs_vault::DataName name;
   ReturnCode return_code;
 };
 
-void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs);
-
-
-
-struct DataNameAndVersion {
-  DataNameAndVersion();
-  DataNameAndVersion(const DataNameAndVersion& other);
-  DataNameAndVersion(DataNameAndVersion&& other);
-  DataNameAndVersion& operator=(DataNameAndVersion other);
-
-  explicit DataNameAndVersion(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  DataName data_name;
-  StructuredDataVersions::VersionName version_name;
-};
-
-void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs);
+void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
@@ -132,28 +86,11 @@ struct DataNameVersionAndReturnCode {
   explicit DataNameVersionAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  DataNameAndVersion data_name_and_version;
+  nfs_vault::DataNameAndVersion data_name_and_version;
   ReturnCode return_code;
 };
 
-void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs);
-
-
-
-struct DataNameOldNewVersion {
-  DataNameOldNewVersion();
-  DataNameOldNewVersion(const DataNameOldNewVersion& other);
-  DataNameOldNewVersion(DataNameOldNewVersion&& other);
-  DataNameOldNewVersion& operator=(DataNameOldNewVersion other);
-
-  explicit DataNameOldNewVersion(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  DataName data_name;
-  StructuredDataVersions::VersionName old_version_name, new_version_name;
-};
-
-void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs);
+void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
@@ -166,37 +103,12 @@ struct DataNameOldNewVersionAndReturnCode {
   explicit DataNameOldNewVersionAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  DataNameOldNewVersion data_name_old_new_version;
+  nfs_vault::DataNameOldNewVersion data_name_old_new_version;
   ReturnCode return_code;
 };
 
-void swap(DataNameOldNewVersionAndReturnCode& lhs, DataNameOldNewVersionAndReturnCode& rhs);
-
-
-
-struct DataNameAndContent {
-  template<typename Data>
-  explicit DataNameAndContent(const Data& data)
-      : name(data.name()),
-        content(data.Serialise().data) {}
-
-  DataNameAndContent(DataTagValue type_in,
-                     const Identity& name_in,
-                     const NonEmptyString& content_in);
-
-  DataNameAndContent();
-  DataNameAndContent(const DataNameAndContent& other);
-  DataNameAndContent(DataNameAndContent&& other);
-  DataNameAndContent& operator=(DataNameAndContent other);
-
-  explicit DataNameAndContent(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  DataName name;
-  NonEmptyString content;
-};
-
-void swap(DataNameAndContent& lhs, DataNameAndContent& rhs);
+void swap(DataNameOldNewVersionAndReturnCode& lhs,
+          DataNameOldNewVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
@@ -209,28 +121,11 @@ struct DataAndReturnCode {
   explicit DataAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  DataNameAndContent data;
+  nfs_vault::DataNameAndContent data;
   ReturnCode return_code;
 };
 
-void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs);
-
-
-
-struct DataAndPmidHint {
-  DataAndPmidHint();
-  DataAndPmidHint(const DataAndPmidHint& other);
-  DataAndPmidHint(DataAndPmidHint&& other);
-  DataAndPmidHint& operator=(DataAndPmidHint other);
-
-  explicit DataAndPmidHint(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  DataNameAndContent data;
-  Identity pmid_hint;
-};
-
-void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs);
+void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
@@ -243,11 +138,11 @@ struct DataPmidHintAndReturnCode {
   explicit DataPmidHintAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  DataAndPmidHint data_and_pmid_hint;
+  nfs_vault::DataAndPmidHint data_and_pmid_hint;
   ReturnCode return_code;
 };
 
-void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs);
+void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
@@ -260,20 +155,14 @@ struct PmidRegistrationAndReturnCode {
   explicit PmidRegistrationAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  PmidRegistration pmid_registration;
+  nfs_vault::PmidRegistration pmid_registration;
   ReturnCode return_code;
 };
 
-void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs);
+void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-
-
-
-typedef DataName MaidNodeGetRequest, MaidNodeGetVersionRequest, MaidNodeDeleteRequest;
-typedef DataAndPmidHint MaidNodePutRequest;
-
-}  // namespace nfs
+}  // namespace nfs_client
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_MESSAGES_H_
+#endif  // MAIDSAFE_NFS_CLIENT_MESSAGES_H_

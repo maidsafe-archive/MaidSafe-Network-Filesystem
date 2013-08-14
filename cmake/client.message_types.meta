@@ -1,0 +1,2 @@
+Action:GetResponse                    Source:MaidManager:Group        Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_vault::DataAndReturnCode
+Action:PutResponse                    Source:MaidManager:Group        Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_vault::DataPmidHintAndReturnCode

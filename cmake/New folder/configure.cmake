@@ -18,18 +18,9 @@
 #==================================================================================================#
 
 
-file(GLOB_RECURSE MetaFilesSrc "${CMAKE_CURRENT_SOURCE_DIR}/*.message_types.meta")
-file(GLOB_RECURSE MetaFilesBin "${CMAKE_CURRENT_BINARY_DIR}/*.message_types.meta")
-file(GLOB_RECURSE MetaFiles "*.message_types.meta")
+file(GLOB_RECURSE MetaFiles "${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.message_types.meta")
 message("\${CMAKE_CURRENT_SOURCE_DIR} - ${CMAKE_CURRENT_SOURCE_DIR}")
-message("\${CMAKE_CURRENT_BINARY_DIR} - ${CMAKE_CURRENT_BINARY_DIR}")
-message("\${MetaFilesSrc} - ${MetaFilesSrc}")
-message("\${MetaFilesBin} - ${MetaFilesBin}")
 message(FATAL_ERROR "\${MetaFiles} - ${MetaFiles}")
-#   file(READ "${MetaFile}" Contents)
-#   string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" "" FileName "${MetaFile}")
-#   set(AllContents "${AllContents}// =========== ${FileName} ===========\n${Contents}\n\n")
-# message("\${AllContents} - ${AllContents}")
 
 file(STRINGS message_types.cmake AllTypes)
 foreach(MessageType ${AllTypes})

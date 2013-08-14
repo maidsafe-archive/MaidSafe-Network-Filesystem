@@ -17,14 +17,8 @@ License.
 #define MAIDSAFE_NFS_TYPES_H_
 
 #include <cstdint>
-#include <functional>
-#include <ostream>
-#include <string>
 
-#include "maidsafe/data_types/structured_data_versions.h"
-#include "maidsafe/data_types/data_name_variant.h"
-#include "maidsafe/common/node_id.h"
-#include "maidsafe/common/types.h"
+#include "maidsafe/common/tagged_value.h"
 
 
 namespace maidsafe {
@@ -95,7 +89,8 @@ const Persona SourcePersona<PersonaType>::value;
 template<Persona PersonaType>
 struct PersonaTypes;
 
-typedef TaggedValue<int32_t, struct MessageIdTag> MessageId;
+namespace detail { struct MessageIdTag; }
+typedef TaggedValue<int32_t, detail::MessageIdTag> MessageId;
 
 }  // namespace nfs
 

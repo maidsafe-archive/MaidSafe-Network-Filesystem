@@ -1,4 +1,4 @@
-/* Copyright 2013 MaidSafe.net limited
+/* Copyright 2012 MaidSafe.net limited
 
 This MaidSafe Software is licensed under the MaidSafe.net Commercial License, version 1.0 or later,
 and The General Public License (GPL), version 3. By contributing code to this project You agree to
@@ -13,14 +13,18 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-package maidsafe.nfs.protobuf;
+package maidsafe.nfs_vault.protobuf;
 
-message Versions {
-  required uint64 index = 1;
-  required bytes id = 2;
+message PmidRegistration {
+  message SignedDetails {
+    message Details {
+      required bytes maid_name = 1;
+      required bytes pmid_name = 2;
+      required bool unregister = 3;
+    }
+    required bytes serialised_details = 1;
+    required bytes pmid_signature = 2;
+  }
+  required bytes serialised_signed_details = 1;
+  required bytes maid_signature = 2;
 }
-
-message StructuredData {
-  repeated Versions versions = 1;
-}
-
