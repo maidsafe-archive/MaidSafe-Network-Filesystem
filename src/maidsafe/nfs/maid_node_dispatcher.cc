@@ -20,10 +20,8 @@ namespace maidsafe {
 
 namespace nfs {
 
-MaidNodeDispatcher::MaidNodeDispatcher(routing::Routing& routing,
-                                       const passport::Maid& signing_fob)
+MaidNodeDispatcher::MaidNodeDispatcher(routing::Routing& routing)
     : routing_(routing),
-      kSigningFob_(signing_fob),
       kThisNodeAsSender_(routing_.kNodeId()),
       kMaidManagerReceiver_(routing_.kNodeId()) {}
 

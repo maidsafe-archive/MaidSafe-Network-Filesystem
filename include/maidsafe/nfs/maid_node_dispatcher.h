@@ -39,7 +39,7 @@ namespace nfs {
 
 class MaidNodeDispatcher {
  public:
-  MaidNodeDispatcher(routing::Routing& routing, const passport::Maid& signing_fob);
+  explicit MaidNodeDispatcher(routing::Routing& routing);
 
   template<typename Data>
   void SendGetRequest(routing::TaskId task_id, const typename Data::Name& data_name);
@@ -89,7 +89,6 @@ class MaidNodeDispatcher {
   void CheckSourcePersonaType() const;
 
   routing::Routing& routing_;
-  const passport::Pmid kSigningFob_;
   const routing::SingleSource kThisNodeAsSender_;
   const routing::GroupId kMaidManagerReceiver_;
 };
