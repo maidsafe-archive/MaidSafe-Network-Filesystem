@@ -38,20 +38,31 @@ include_directories(${routing_SOURCE_DIR}/include)
 #==================================================================================================#
 set(OutputFile ${PROJECT_SOURCE_DIR}/include/maidsafe/nfs/message_types.h)
 set(InputFile ${PROJECT_SOURCE_DIR}/cmake/message_types.h.in)
-set(MessageTypes ${PROJECT_SOURCE_DIR}/cmake/message_types.cmake)
+set(IntermediateDir "${CMAKE_CURRENT_BINARY_DIR}/copied_message_types")
+
 # An apparent bug in CMake means that file(READ...) can only be done from within
 # CMAKE_CURRENT_BINARY_DIR.  Hence message_types.meta files are copied here to allow configure.cmake to work.
-file(GLOB_RECURSE MetaFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.message_types.meta")
+file(GLOB_RECURSE MetaFiles "${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.message_types.meta")
 foreach(MetaFile ${MetaFiles})
-  set(IntermediateOutputFile "${CMAKE_CURRENT_BINARY_DIR}/copied_message_types/${MetaFile}")
+  string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" "" RelativeMetaFile "${MetaFile}")
+  set(IntermediateOutputFile "${IntermediateDir}/${RelativeMetaFile}")
   get_filename_component(FilePath "${IntermediateOutputFile}" PATH)
   list(APPEND IntermediateOutputFiles "${IntermediateOutputFile}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${FilePath}")
   add_custom_command(OUTPUT "${IntermediateOutputFile}"
-                     COMMAND ${CMAKE_COMMAND} -E make_directory ${FilePath}
-                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${MetaFile}" "${IntermediateOutputFile}"
-                     DEPENDS ${MessageTypes}
-                     COMMENT "Copying ${MetaFile} to ${CMAKE_CURRENT_BINARY_DIR}/copied_message_types/")
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${MetaFile}" "${IntermediateOutputFile}"
+                     DEPENDS "${MetaFile}"
+                     COMMENT "Copying ${RelativeMetaFile} to ${IntermediateDir}/")
 endforeach()
+
+# Grab the list of files currently in the binary dir and remove any which are no longer required
+file(GLOB_RECURSE ExtraMetaFiles "${IntermediateDir}/*.message_types.meta")
+list(REMOVE_ITEM ExtraMetaFiles ${IntermediateOutputFiles})
+foreach(ExtraMetaFile ${ExtraMetaFiles})
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove "${ExtraMetaFile}")
+  message(STATUS "Removed \"${ExtraMetaFile}\"")
+endforeach()
+
 set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
 add_custom_command(OUTPUT ${OutputFile}
                    COMMAND ${CMAKE_COMMAND} -DOutputFile="${OutputFile}"

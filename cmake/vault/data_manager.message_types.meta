@@ -1,0 +1,5 @@
+Action:GetRequest                     Source:MaidNode:Single          Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
+Action:PutRequest                     Source:MaidManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataAndPmidHint
+Action:DeleteRequest                  Source:MaidManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
+Action:PutResponse                    Source:PmidManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_client::DataNameAndReturnCode
+Action:StateChange                    Source:PmidManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataName

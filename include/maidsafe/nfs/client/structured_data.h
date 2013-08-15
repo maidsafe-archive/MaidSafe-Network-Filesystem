@@ -39,7 +39,7 @@ struct StructuredData {
   explicit StructuredData(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  std::vector<StructuredDataVersions::VersionName> versions_;
+  std::vector<StructuredDataVersions::VersionName> versions;
 };
 
 void swap(StructuredData& lhs, StructuredData& rhs) MAIDSAFE_NOEXCEPT;

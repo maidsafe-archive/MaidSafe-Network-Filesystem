@@ -27,7 +27,9 @@ License.
 
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/types.h"
+#include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
+#include "maidsafe/nfs/vault/messages.h"
 
 
 namespace maidsafe {

@@ -16,6 +16,7 @@ License.
 #include "maidsafe/nfs/message_wrapper.h"
 
 #include "maidsafe/common/error.h"
+#include "maidsafe/common/utils.h"
 
 #include "maidsafe/nfs/message_wrapper.pb.h"
 

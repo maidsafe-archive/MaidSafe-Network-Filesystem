@@ -18,48 +18,101 @@
 #==================================================================================================#
 
 
-file(GLOB_RECURSE MetaFilesSrc "${CMAKE_CURRENT_SOURCE_DIR}/*.message_types.meta")
-file(GLOB_RECURSE MetaFilesBin "${CMAKE_CURRENT_BINARY_DIR}/*.message_types.meta")
-file(GLOB_RECURSE MetaFiles "*.message_types.meta")
-message("\${CMAKE_CURRENT_SOURCE_DIR} - ${CMAKE_CURRENT_SOURCE_DIR}")
-message("\${CMAKE_CURRENT_BINARY_DIR} - ${CMAKE_CURRENT_BINARY_DIR}")
-message("\${MetaFilesSrc} - ${MetaFilesSrc}")
-message("\${MetaFilesBin} - ${MetaFilesBin}")
-message(FATAL_ERROR "\${MetaFiles} - ${MetaFiles}")
-#   file(READ "${MetaFile}" Contents)
-#   string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" "" FileName "${MetaFile}")
-#   set(AllContents "${AllContents}// =========== ${FileName} ===========\n${Contents}\n\n")
-# message("\${AllContents} - ${AllContents}")
-
-file(STRINGS message_types.cmake AllTypes)
-foreach(MessageType ${AllTypes})
-  string(REGEX REPLACE ".*Action:([^ ]*).*" "\\1" Action "${MessageType}")
-  string(REGEX REPLACE ".*Source:([^ ]*).*" "\\1" Source "${MessageType}")
-  string(REGEX MATCH "[^:]+" SourcePersona "${Source}")
-  string(REGEX REPLACE "[^:]+:(.*)" "\\1" RoutingSenderType "${Source}")
-  string(REGEX REPLACE ".*Destination:([^ ]*).*" "\\1" Destination "${MessageType}")
-  string(REGEX MATCH "[^:]+" DestinationPersona "${Destination}")
-  string(REGEX REPLACE "[^:]+:(.*)" "\\1" RoutingReceiverType "${Destination}")
-  string(REGEX REPLACE ".*Contents:([^ ]*).*" "\\1" Contents "${MessageType}")
-  string(REGEX MATCH "HasResponse" HasResponse "${MessageType}")
+file(GLOB_RECURSE MetaFiles "${CMAKE_CURRENT_BINARY_DIR}/*.message_types.meta")
+foreach(MetaFile ${MetaFiles})
+  # Get file path relative to ${CMAKE_CURRENT_BINARY_DIR}/copied_message_types
+  string(REPLACE "${CMAKE_CURRENT_BINARY_DIR}/copied_message_types/" "" FileName "${MetaFile}")
   
-  list(APPEND DestinationPersonas ${DestinationPersona})
-  list(APPEND ${DestinationPersona}ServiceMessages "${Action}:${SourcePersona}")
+  # Construct warning string
+  set(DevWarning "// Modify in nfs/cmake/${FileName} if required, not here.")
+  string(LENGTH "${DevWarning}" DevWarningLength)
+  if(DevWarningLength GREATER 100)
+    set(DevWarning "${DevWarning}     // NOLINT\n")
+  else()
+    set(DevWarning "${DevWarning}\n")
+  endif()
+  
+  # Read contents
+  file(STRINGS "${MetaFile}" AllTypes)
 
-  set(Typedef "// Auto-generated typedef.  Modify in nfs/cmake/message_types.cmake if required, not here.\n")
-  list(APPEND Typedef "typedef MessageWrapper<\n")
-  list(APPEND Typedef "    MessageAction::k${Action},\n")
-  list(APPEND Typedef "    SourcePersona<Persona::k${SourcePersona}>,\n")
-  list(APPEND Typedef "    routing::${RoutingSenderType}Source,\n")
-  list(APPEND Typedef "    DestinationPersona<Persona::k${DestinationPersona}>,\n")
-  list(APPEND Typedef "    routing::${RoutingReceiverType}Id,\n")
-  list(APPEND Typedef "    ${Contents}> ${Action}From${SourcePersona}To${DestinationPersona};\n\n")
+  set(LineNumber 0)
+  foreach(MessageType ${AllTypes})
+    math(EXPR LineNumber ${LineNumber}+1)
+    # Strip any comment (everything after a '#') and check we've still got some content left
+    string(REGEX REPLACE "([^#]*)(#.*)" "\\1" MessageType "${MessageType}")
 
-  list(APPEND Typedefs "${Typedef}")
+    if(MessageType)
+      # Get the Action type
+      string(REGEX REPLACE ".*[Aa][Cc][Tt][Ii][Oo][Nn]:([^ ]*).*" "\\1" Action "${MessageType}")
+
+      # Get the Source Persona and routing Sender types
+      string(REGEX REPLACE ".*[Ss][Oo][Uu][Rr][Cc][Ee]:([^ ]*).*" "\\1" Source "${MessageType}")
+      string(REGEX MATCH "[^:]+" SourcePersona "${Source}")
+      string(REGEX REPLACE "[^:]+:(.*)" "\\1" RoutingSenderType "${Source}")
+
+      # Get the Destination Persona and routing Receiver types
+      string(REGEX REPLACE ".*[Dd][Ee][Ss][Tt][Ii][Nn][Aa][Tt][Ii][Oo][Nn]:([^ ]*).*" "\\1"
+             Destination "${MessageType}")
+      string(REGEX MATCH "[^:]+" DestinationPersona "${Destination}")
+      string(REGEX REPLACE "[^:]+:(.*)" "\\1" RoutingReceiverType "${Destination}")
+
+      # Get the Contents field and check the type is 'struct' or 'class'
+      string(REGEX REPLACE ".*[Cc][Oo][Nn][Tt][Ee][Nn][Tt][Ss]:([^ ]*).*" "\\1"
+             Contents "${MessageType}")
+      string(REGEX MATCHALL "[^:]+" ContentsList "${Contents}")
+      list(GET ContentsList 0 ClassType)
+      if(NOT "${ClassType}" STREQUAL "struct" AND NOT "${ClassType}" STREQUAL "class")
+        set(ErrorMsg "\nError on line ${LineNumber} of nfs/cmake/${FileName}\nContents ")
+        set(ErrorMsg "${ErrorMsg}tag is '${ClassType}', but must be either 'struct' or 'class'.")
+        message(FATAL_ERROR "${ErrorMsg}")
+      endif()
+      # Get the Contents class name and namespace.  Construct the fully-qualified class name
+      list(GET ContentsList -1 ClassName)
+      list(REVERSE ContentsList)
+      list(REMOVE_AT ContentsList 0 -1)
+      set(Fwd "${ClassType} ${ClassName};")
+      set(QualifiedClassName ${ClassName})
+      foreach(Namespace ${ContentsList})
+        set(Fwd "namespace ${Namespace} { ${Fwd} }")
+        set(QualifiedClassName "${Namespace}::${QualifiedClassName}")
+      endforeach()
+
+      # Write the forward declaration if required
+      list(APPEND AllClasses ${QualifiedClassName})
+      list(LENGTH AllClasses AllClassesLengthBefore)
+      list(REMOVE_DUPLICATES AllClasses)
+      list(LENGTH AllClasses AllClassesLengthAfter)
+      if(AllClassesLengthBefore EQUAL AllClassesLengthAfter)
+        string(LENGTH "${Fwd}" FwdLength)
+        if(FwdLength GREATER 100)
+          set(Fwd "${Fwd}  // NOLINT")
+        endif()
+        list(APPEND Fwds "${Fwd}\n")
+      endif()
+
+      # Add Destination Persona and message details to global lists
+      list(APPEND DestinationPersonas ${DestinationPersona})
+      list(APPEND ${DestinationPersona}ServiceMessages "${Action}:${SourcePersona}")
+
+      # Write the typedef
+      set(Typedef "// Auto-generated typedef.\n")
+      list(APPEND Typedef "${DevWarning}")
+      list(APPEND Typedef "typedef MessageWrapper<\n")
+      list(APPEND Typedef "    MessageAction::k${Action},\n")
+      list(APPEND Typedef "    SourcePersona<Persona::k${SourcePersona}>,\n")
+      list(APPEND Typedef "    routing::${RoutingSenderType}Source,\n")
+      list(APPEND Typedef "    DestinationPersona<Persona::k${DestinationPersona}>,\n")
+      list(APPEND Typedef "    routing::${RoutingReceiverType}Id,\n")
+      list(APPEND Typedef "    ${QualifiedClassName}> ${Action}From${SourcePersona}To${DestinationPersona};\n\n")
+    
+      list(APPEND Typedefs "${Typedef}")
+    endif()
+  endforeach()
 endforeach()
 
 list(REMOVE_DUPLICATES DestinationPersonas)
 string(REPLACE "\n;" "\n" Typedefs "${Typedefs}")
+string(REPLACE "\n;" "\n" Fwds "${Fwds}")
 
 foreach(DestinationPersona ${DestinationPersonas})
   unset(Actions)
@@ -83,12 +136,14 @@ foreach(DestinationPersona ${DestinationPersonas})
   list(APPEND Variant "// ${DestinationPersona}\n")
   list(APPEND Variant "//==================================================================================================\n\n")
 
-  list(APPEND Variant "// Auto-generated typedef.  Modify in nfs/cmake/message_types.cmake if required, not here.\n")
+  list(APPEND Variant "// Auto-generated typedef.  Modify in nfs/cmake/*.message_types.meta if required, not here.\n")
   list(APPEND Variant "typedef boost::variant<\n    ${AllMessageTypedefs}> ${DestinationPersona}ServiceMessages;\n\n")
   
-  list(APPEND Variant "// Auto-generated function.  Modify in nfs/cmake/message_types.cmake if required, not here.\n")
-  list(APPEND Variant "void GetVariant(const TypeErasedMessageWrapper& message,\n")
-  list(APPEND Variant "                ${DestinationPersona}ServiceMessages& variant) {\n")
+  list(APPEND Variant "// Auto-generated function.  Modify in nfs/cmake/*.message_types.meta if required, not here.\n")
+  list(APPEND Variant "template<>\n")
+  list(APPEND Variant "void GetVariant<${DestinationPersona}ServiceMessages>(const TypeErasedMessageWrapper& message,\n")
+  string(REGEX REPLACE "." " " Spaces "${DestinationPersona}ServiceMessages")
+  list(APPEND Variant "                  ${Spaces}${DestinationPersona}ServiceMessages& variant) {\n")
   list(APPEND Variant "  auto action(std::get<0>(message));\n")
   list(APPEND Variant "  auto source_persona(std::get<1>(message).data);\n")
   list(APPEND Variant "  auto destination_persona(std::get<2>(message).data);\n")

@@ -16,6 +16,7 @@ License.
 #ifndef MAIDSAFE_NFS_MESSAGE_WRAPPER_H_
 #define MAIDSAFE_NFS_MESSAGE_WRAPPER_H_
 
+#include <memory>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -80,7 +81,7 @@ struct MessageWrapper {
   }
 
   MessageId message_id;
-  ContentsType contents;
+  std::shared_ptr<ContentsType> contents;
 
  private:
   static const detail::SourceTaggedValue kSourceTaggedValue;
@@ -156,7 +157,7 @@ MessageWrapper<action,
                RoutingReceiverType,
                ContentsType>::MessageWrapper(const ContentsType& contents_in)
     : message_id(detail::GetNewMessageId()),
-      contents(contents_in) {}
+      contents(std::make_shared<ContentsType>(contents_in)) {}
 
 template<MessageAction action,
          typename SourcePersonaType,
@@ -172,7 +173,7 @@ MessageWrapper<action,
                ContentsType>::MessageWrapper(MessageId message_id_in,
                                              const ContentsType& contents_in)
     : message_id(message_id_in),
-      contents(contents_in) {}
+      contents(std::make_shared<ContentsType>(contents_in)) {}
 
 template<MessageAction action,
          typename SourcePersonaType,
@@ -187,7 +188,7 @@ MessageWrapper<action,
                RoutingReceiverType,
                ContentsType>::MessageWrapper(const TypeErasedMessageWrapper& parsed_message_wrapper)
     : message_id(std::get<3>(parsed_message_wrapper)),
-      contents(std::get<4>(parsed_message_wrapper)) {}
+      contents(std::make_shared<ContentsType>(std::get<4>(parsed_message_wrapper))) {}
 
 template<MessageAction action,
          typename SourcePersonaType,
@@ -253,7 +254,7 @@ std::string MessageWrapper<action,
                            RoutingReceiverType,
                            ContentsType>::Serialise() const {
   return detail::SerialiseMessageWrapper(std::make_tuple(action, kSourceTaggedValue,
-      kDestinationTaggedValue, message_id, contents.Serialise()));
+      kDestinationTaggedValue, message_id, contents->Serialise()));
 }
 
 }  // namespace nfs

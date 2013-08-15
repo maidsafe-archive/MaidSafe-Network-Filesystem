@@ -25,7 +25,8 @@ License.
 #include "maidsafe/common/utils.h"
 
 #include "maidsafe/nfs/message_types.h"
-#include "maidsafe/nfs/messages.h"
+#include "maidsafe/nfs/client/messages.h"
+#include "maidsafe/nfs/vault/messages.h"
 #include "maidsafe/nfs/types.h"
 
 
@@ -89,13 +90,13 @@ class MaidManagerServiceImpl {
 template<>
 std::string MaidManagerServiceImpl::Handle(const PutRequest& message) {
   LOG(kInfo) << "MaidManager handling Put";
-  return message.contents.data.name.raw_name.string();
+  return message.contents->data.name.raw_name.string();
 }
 
 template<>
 std::string MaidManagerServiceImpl::Handle(const DeleteRequestFromMaidNodeToMaidManager& message) {
   LOG(kInfo) << "MaidManager handling Delete";
-  return message.contents.raw_name.string();
+  return message.contents->raw_name.string();
 }
 
 
@@ -114,7 +115,7 @@ class DataManagerServiceImpl {
 template<>
 std::string DataManagerServiceImpl::Handle(const GetRequest& message) {
   LOG(kInfo) << "DataManager handling Get";
-  return message.contents.raw_name.string();
+  return message.contents->raw_name.string();
 }
 
 
@@ -126,7 +127,7 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 
   GetRequest get(GetRequest::Contents(data1.name()));
   PutRequest::Contents put_contents;
-  put_contents.data = DataNameAndContent(data2);
+  put_contents.data = nfs_vault::DataNameAndContent(data2);
   put_contents.pmid_hint = Identity(RandomString(crypto::SHA512::DIGESTSIZE));
   PutRequest put(put_contents);
   DeleteRequest del(DeleteRequest::Contents(data3.name()));

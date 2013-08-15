@@ -33,6 +33,12 @@ namespace maidsafe {
 
 namespace nfs_client {
 
+                                                                        struct DataOrDataNameAndReturnCode {
+                                                                          explicit DataOrDataNameAndReturnCode(const std::string&) {}
+                                                                          std::string Serialise() const { return ""; }
+                                                                        };
+
+
 struct ReturnCode {
   // This c'tor designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
   template<typename ErrorCode>

@@ -30,13 +30,20 @@ License.
 
 #include "maidsafe/common/error.h"
 
+
+// Auto-generated forward declarations.
+// Modify in nfs/cmake/*.message_types.meta if required, not here.
 @Fwds@
+
 
 namespace maidsafe {
 
 namespace nfs {
 
 @Typedefs@
+
+template<typename T>
+void GetVariant(const TypeErasedMessageWrapper& message, T& variant);
 
 @Variants@
 

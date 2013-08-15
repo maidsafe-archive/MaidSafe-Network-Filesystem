@@ -26,38 +26,38 @@ namespace maidsafe {
 
 namespace nfs_client {
 
-StructuredData::StructuredData(const std::vector<StructuredDataVersions::VersionName>& versions)
-    : versions_(versions) {}
+StructuredData::StructuredData(const std::vector<StructuredDataVersions::VersionName>& versions_in)
+    : versions(versions_in) {}
 
-StructuredData::StructuredData() : versions_() {}
+StructuredData::StructuredData() : versions() {}
 
-StructuredData::StructuredData(const StructuredData& other) : versions_(other.versions_) {}
+StructuredData::StructuredData(const StructuredData& other) : versions(other.versions) {}
 
-StructuredData::StructuredData(StructuredData&& other) : versions_(std::move(other.versions_)) {}
+StructuredData::StructuredData(StructuredData&& other) : versions(std::move(other.versions)) {}
 
 StructuredData& StructuredData::operator=(StructuredData other) {
   swap(*this, other);
   return *this;
 }
 
-StructuredData::StructuredData(const std::string& serialised_copy) : versions_() {
+StructuredData::StructuredData(const std::string& serialised_copy) : versions() {
   protobuf::StructuredData proto_structured_data;
   if (!proto_structured_data.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
   for (auto i(0); i < proto_structured_data.serialised_versions_size(); ++i)
-    versions_.emplace_back(proto_structured_data.serialised_versions(i));
+    versions.emplace_back(proto_structured_data.serialised_versions(i));
 }
 
 std::string StructuredData::Serialise() const {
   protobuf::StructuredData proto_structured_data;
-  for (const auto& version : versions_)
+  for (const auto& version : versions)
     proto_structured_data.add_serialised_versions(version.Serialise());
   return proto_structured_data.SerializeAsString();
 }
 
 void swap(StructuredData& lhs, StructuredData& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
-  swap(lhs.versions_, rhs.versions_);
+  swap(lhs.versions, rhs.versions);
 }
 
 }  // namespace nfs_client

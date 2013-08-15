@@ -13,7 +13,7 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/nfs/structured_data.h"
+#include "maidsafe/nfs/client/structured_data.h"
 
 #include <memory>
 #include <vector>
@@ -40,8 +40,8 @@ TEST_F(StructuredDataTest, BEH_Constructor) {
       RandomUint32(), ImmutableData::Name(Identity(RandomString(64))));
   versions.push_back(version_name);
 
-  StructuredData structured_data_ori(versions);
-  StructuredData structured_data_copy(structured_data_ori);
+  nfs_client::StructuredData structured_data_ori(versions);
+  nfs_client::StructuredData structured_data_copy(structured_data_ori);
 
   uint32_t num_of_versions(RandomUint32() % 256 + 10);
   for (uint32_t i(0); i < num_of_versions; ++i) {
@@ -50,8 +50,8 @@ TEST_F(StructuredDataTest, BEH_Constructor) {
     versions.push_back(version_name);
   }
 
-  StructuredData structured_data(versions);
-  auto versions_fetched(structured_data.versions());
+  nfs_client::StructuredData structured_data(versions);
+  auto versions_fetched(structured_data.versions);
   EXPECT_EQ(num_of_versions + 1, versions_fetched.size());
   for (uint32_t i(0); i < (num_of_versions + 1); ++i) {
     EXPECT_EQ(versions[i].id, versions_fetched[i].id);
@@ -63,8 +63,7 @@ TEST_F(StructuredDataTest, BEH_Serialise) {
   {
     bool expect_exception(false);
     try {
-      StructuredData structured_data(
-          StructuredData::serialised_type(NonEmptyString(RandomString(64))));
+      nfs_client::StructuredData structured_data(RandomString(64));
     }
     catch(...) {
       expect_exception = true;
@@ -80,9 +79,9 @@ TEST_F(StructuredDataTest, BEH_Serialise) {
     versions.push_back(version_name);
   }
 
-  StructuredData structured_data_ori(versions);
-  StructuredData structured_data_serialise(structured_data_ori.Serialise());
-  auto versions_parsed(structured_data_serialise.versions());
+  nfs_client::StructuredData structured_data_ori(versions);
+  nfs_client::StructuredData structured_data_serialise(structured_data_ori.Serialise());
+  auto versions_parsed(structured_data_serialise.versions);
   EXPECT_EQ(num_of_versions, versions_parsed.size());
   for (uint32_t i(0); i < num_of_versions; ++i) {
     EXPECT_EQ(versions[i].id, versions_parsed[i].id);

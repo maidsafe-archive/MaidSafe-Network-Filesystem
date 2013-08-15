@@ -1,0 +1,3 @@
+Action:PutRequest                     Source:DataManager:Group        Destination:PmidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndContent
+Action:Synchronise                    Source:PmidManager:Group        Destination:PmidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndContent
+Action:AccountTransfer                Source:PmidManager:Group        Destination:PmidManager:Single    Contents:struct:maidsafe::nfs_vault::DataNameAndContent
