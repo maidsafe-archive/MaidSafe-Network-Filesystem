@@ -1,4 +1,4 @@
 Action:PutRequest                     Source:PmidManager:Group        Destination:PmidNode:Single       Contents:struct:maidsafe::nfs_vault::DataNameAndContent
 Action:DeleteRequest                  Source:PmidManager:Group        Destination:PmidNode:Single       Contents:struct:maidsafe::nfs_vault::DataName
 Action:GetRequest                     Source:DataManager:Group        Destination:PmidNode:Single       Contents:struct:maidsafe::nfs_vault::DataName
-Action:AccountTransfer                Source:PmidManager:Group        Destination:PmidNode:Single       Contents:struct:maidsafe::nfs_vault::DataNameAndContent
+Action:GetPmidAccountResponse         Source:PmidManager:Group        Destination:PmidNode:Single       Contents:struct:maidsafe::nfs_vault::DataNameAndContent

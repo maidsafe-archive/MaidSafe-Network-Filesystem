@@ -4,3 +4,4 @@ Action:PutRequest                     Source:MaidManager:Group        Destinatio
 Action:DeleteRequest                  Source:MaidManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
 Action:PutResponse                    Source:PmidManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_client::DataNameAndReturnCode
 Action:StateChange                    Source:PmidManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
+Action:GetRequest                     Source:PmidNode:Single          Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
