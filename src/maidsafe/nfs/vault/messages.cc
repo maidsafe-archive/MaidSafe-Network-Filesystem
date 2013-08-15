@@ -73,7 +73,7 @@ DataNameAndVersion::DataNameAndVersion() : data_name(), version_name() {}
 DataNameAndVersion::DataNameAndVersion(const DataNameAndVersion& other)
     : data_name(other.data_name),
       version_name(other.version_name) {}
-  
+
 DataNameAndVersion::DataNameAndVersion(DataNameAndVersion&& other)
     : data_name(std::move(other.data_name)),
       version_name(std::move(other.version_name)) {}
@@ -118,7 +118,7 @@ DataNameOldNewVersion::DataNameOldNewVersion(const DataNameOldNewVersion& other)
     : data_name(other.data_name),
       old_version_name(other.old_version_name),
       new_version_name(other.new_version_name) {}
-  
+
 DataNameOldNewVersion::DataNameOldNewVersion(DataNameOldNewVersion&& other)
     : data_name(std::move(other.data_name)),
       old_version_name(std::move(other.old_version_name)),
@@ -164,7 +164,7 @@ DataNameAndContent::DataNameAndContent() : name(), content() {}
 DataNameAndContent::DataNameAndContent(const DataNameAndContent& other)
     : name(other.name),
       content(other.content) {}
-  
+
 DataNameAndContent::DataNameAndContent(DataNameAndContent&& other)
     : name(std::move(other.name)),
       content(std::move(other.content)) {}

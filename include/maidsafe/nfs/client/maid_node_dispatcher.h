@@ -16,6 +16,8 @@ License.
 #ifndef MAIDSAFE_NFS_CLIENT_MAID_NODE_DISPATCHER_H_
 #define MAIDSAFE_NFS_CLIENT_MAID_NODE_DISPATCHER_H_
 
+#include <string>
+
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/passport/types.h"

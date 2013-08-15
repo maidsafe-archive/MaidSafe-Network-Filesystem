@@ -19,6 +19,9 @@ License.
 #include <string>
 #include <system_error>
 #include <type_traits>
+#include <utility>
+
+#include "boost/optional.hpp"
 
 #include "maidsafe/common/config.h"
 #include "maidsafe/common/error.h"
@@ -32,12 +35,6 @@ License.
 namespace maidsafe {
 
 namespace nfs_client {
-
-                                                                        struct DataOrDataNameAndReturnCode {
-                                                                          explicit DataOrDataNameAndReturnCode(const std::string&) {}
-                                                                          std::string Serialise() const { return ""; }
-                                                                        };
-
 
 struct ReturnCode {
   // This c'tor designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
@@ -132,6 +129,24 @@ struct DataAndReturnCode {
 };
 
 void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+
+
+
+struct DataOrDataNameAndReturnCode {
+  typedef std::pair<nfs_vault::DataName, ReturnCode> DataNameAndReturnCode;
+  DataOrDataNameAndReturnCode();
+  DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other);
+  DataOrDataNameAndReturnCode(DataOrDataNameAndReturnCode&& other);
+  DataOrDataNameAndReturnCode& operator=(DataOrDataNameAndReturnCode other);
+
+  explicit DataOrDataNameAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  boost::optional<nfs_vault::DataNameAndContent> data;
+  boost::optional<DataNameAndReturnCode> data_name_and_return_code;
+};
+
+void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
