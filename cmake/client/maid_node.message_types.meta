@@ -1,0 +1,5 @@
+Action:GetResponse                    Source:DataManager:Group        Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::DataOrDataNameAndReturnCode
+Action:PutResponse                    Source:MaidManager:Group        Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::DataPmidHintAndReturnCode
+Action:GetVersionsResponse            Source:VersionManager:Group     Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::StructuredDataOrDataNameAndReturnCode
+Action:GetBranchResponse              Source:VersionManager:Group     Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::StructuredDataOrDataNameAndReturnCode
+

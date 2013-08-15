@@ -13,8 +13,8 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#ifndef MAIDSAFE_NFS_CLIENT_MAID_NODE_SERVICE_H_
-#define MAIDSAFE_NFS_CLIENT_MAID_NODE_SERVICE_H_
+#ifndef MAIDSAFE_NFS_CLIENT_DATA_GETTER_SERVICE_H_
+#define MAIDSAFE_NFS_CLIENT_DATA_GETTER_SERVICE_H_
 
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/nfs/message_types.h"
@@ -26,12 +26,12 @@ namespace maidsafe {
 
 namespace nfs_client {
 
-class MaidNodeService {
+class DataGetterService {
  public:
-  typedef nfs::MaidNodeServiceMessages PublicMessages;
+  typedef nfs::DataGetterServiceMessages PublicMessages;
   typedef void VaultMessages;
 
-  MaidNodeService(routing::Routing& routing);
+  DataGetterService(routing::Routing& routing);
 
   template<typename T>
   void HandleMessage(const T& message,
@@ -40,35 +40,25 @@ class MaidNodeService {
     T::invalid_message_type_passed::should_be_one_of_the_specialisations_defined_below;
   }
 
+  typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
   template<>
-  void HandleMessage<nfs::GetResponseFromDataManagerToMaidNode>(
-      const nfs::GetResponseFromDataManagerToMaidNode& message,
-      const typename nfs::GetResponseFromDataManagerToMaidNode::Sender& sender,
-      const typename nfs::GetResponseFromDataManagerToMaidNode::Receiver& receiver);
+  void HandleMessage<GetResponse>(const GetResponse& message,
+                                  const typename GetResponse::Sender& sender,
+                                  const typename GetResponse::Receiver& receiver);
 
+  typedef nfs::GetVersionsResponseFromVersionManagerToDataGetter GetVersionsResponse;
   template<>
-  void HandleMessage<nfs::PutResponseFromMaidManagerToMaidNode>(
-      const nfs::PutResponseFromMaidManagerToMaidNode& message,
-      const typename nfs::PutResponseFromMaidManagerToMaidNode::Sender& sender,
-      const typename nfs::PutResponseFromMaidManagerToMaidNode::Receiver& receiver);
+  void HandleMessage<GetVersionsResponse>(const GetVersionsResponse& message,
+                                          const typename GetVersionsResponse::Sender& sender,
+                                          const typename GetVersionsResponse::Receiver& receiver);
 
+  typedef nfs::GetBranchResponseFromVersionManagerToDataGetter GetBranchResponse;
   template<>
-  void HandleMessage<nfs::GetVersionsResponseFromVersionManagerToMaidNode>(
-      const nfs::GetVersionsResponseFromVersionManagerToMaidNode& message,
-      const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Sender& sender,
-      const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Receiver& receiver);
-
-  template<>
-  void HandleMessage<nfs::GetBranchResponseFromVersionManagerToMaidNode>(
-      const nfs::GetBranchResponseFromVersionManagerToMaidNode& message,
-      const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Sender& sender,
-      const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Receiver& receiver);
+  void HandleMessage<GetBranchResponse>(const GetBranchResponse& message,
+                                        const typename GetBranchResponse::Sender& sender,
+                                        const typename GetBranchResponse::Receiver& receiver);
 
  private:
-  template<typename Data>
-  void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,
-                         const typename nfs::PutRequestFromMaidNodeToMaidManager::Sender& sender);
-
   //class DataVisitorPut : public boost::static_visitor<> {
   // public:
   //  DataVisitorPut(MaidManagerService* service,
@@ -93,4 +83,4 @@ class MaidNodeService {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_CLIENT_MAID_NODE_SERVICE_H_
+#endif  // MAIDSAFE_NFS_CLIENT_DATA_GETTER_SERVICE_H_

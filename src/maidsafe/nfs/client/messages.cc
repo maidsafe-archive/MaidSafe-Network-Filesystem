@@ -323,6 +323,73 @@ void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) MA
 
 
 
+// ==================== StructuredDataOrDataNameAndReturnCode ======================================
+StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode()
+    : structured_data(),
+      data_name_and_return_code() {}
+
+StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
+    const StructuredDataOrDataNameAndReturnCode& other)
+        : structured_data(other.structured_data),
+          data_name_and_return_code(other.data_name_and_return_code) {}
+
+StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
+    StructuredDataOrDataNameAndReturnCode&& other)
+        : structured_data(std::move(other.structured_data)),
+          data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
+
+StructuredDataOrDataNameAndReturnCode& StructuredDataOrDataNameAndReturnCode::operator=(
+    StructuredDataOrDataNameAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
+    const std::string& serialised_copy)
+        : structured_data(),
+          data_name_and_return_code() {
+  protobuf::StructuredDataOrDataNameAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+
+  if (proto_copy.has_serialised_structured_data())
+    structured_data.reset(StructuredData(proto_copy.serialised_structured_data()));
+  if (proto_copy.has_serialised_name() && proto_copy.has_serialised_return_code()) {
+    data_name_and_return_code.reset(std::make_pair(
+        nfs_vault::DataName(proto_copy.serialised_name()),
+        ReturnCode(proto_copy.serialised_return_code())));
+  }
+  if (!nfs::CheckMutuallyExclusive(structured_data, data_name_and_return_code)) {
+    assert(false);
+    ThrowError(CommonErrors::parsing_error);
+  }
+}
+
+std::string StructuredDataOrDataNameAndReturnCode::Serialise() const {
+  if (!nfs::CheckMutuallyExclusive(structured_data, data_name_and_return_code)) {
+    assert(false);
+    ThrowError(CommonErrors::serialisation_error);
+  }
+  protobuf::StructuredDataOrDataNameAndReturnCode proto_copy;
+
+  if (structured_data) {
+    proto_copy.set_serialised_structured_data(structured_data->Serialise());
+  } else {
+    proto_copy.set_serialised_name(data_name_and_return_code->first.Serialise());
+    proto_copy.set_serialised_return_code(data_name_and_return_code->second.Serialise());
+  }
+  return proto_copy.SerializeAsString();
+}
+
+void swap(StructuredDataOrDataNameAndReturnCode& lhs,
+          StructuredDataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.structured_data, rhs.structured_data);
+  swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
+}
+
+
+
 // ==================== DataPmidHintAndReturnCode ==================================================
 DataPmidHintAndReturnCode::DataPmidHintAndReturnCode() : data_and_pmid_hint(), return_code() {}
 
@@ -408,6 +475,6 @@ void swap(PmidRegistrationAndReturnCode& lhs,
   swap(lhs.return_code, rhs.return_code);
 }
 
-}  // namespace nfs
+}  // namespace nfs_client
 
 }  // namespace maidsafe

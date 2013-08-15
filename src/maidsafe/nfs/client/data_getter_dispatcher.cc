@@ -13,14 +13,16 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/nfs/client/maid_node_service.h"
+#include "maidsafe/nfs/client/data_getter_dispatcher.h"
 
 
 namespace maidsafe {
 
 namespace nfs_client {
 
-MaidNodeService::MaidNodeService(routing::Routing& routing) : routing_(routing) {}
+DataGetterDispatcher::DataGetterDispatcher(routing::Routing& routing)
+    : routing_(routing),
+      kThisNodeAsSender_(routing_.kNodeId()) {}
 
 }  // namespace nfs_client
 
