@@ -42,9 +42,6 @@ namespace nfs {
 
 @Typedefs@
 
-template<typename T>
-void GetVariant(const TypeErasedMessageWrapper& message, T& variant);
-
 @Variants@
 
 }  // namespace nfs
