@@ -150,6 +150,25 @@ void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) MA
 
 
 
+struct StructuredDataOrDataNameAndReturnCode {
+  typedef std::pair<nfs_vault::DataName, ReturnCode> DataNameAndReturnCode;
+  StructuredDataOrDataNameAndReturnCode();
+  StructuredDataOrDataNameAndReturnCode(const StructuredDataOrDataNameAndReturnCode& other);
+  StructuredDataOrDataNameAndReturnCode(StructuredDataOrDataNameAndReturnCode&& other);
+  StructuredDataOrDataNameAndReturnCode& operator=(StructuredDataOrDataNameAndReturnCode other);
+
+  explicit StructuredDataOrDataNameAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  boost::optional<StructuredData> structured_data;
+  boost::optional<DataNameAndReturnCode> data_name_and_return_code;
+};
+
+void swap(StructuredDataOrDataNameAndReturnCode& lhs,
+          StructuredDataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+
+
+
 struct DataPmidHintAndReturnCode {
   DataPmidHintAndReturnCode();
   DataPmidHintAndReturnCode(const DataPmidHintAndReturnCode& other);
