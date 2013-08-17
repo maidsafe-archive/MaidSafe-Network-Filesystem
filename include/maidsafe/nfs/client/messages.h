@@ -134,6 +134,13 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataOrDataNameAndReturnCode {
   typedef std::pair<nfs_vault::DataName, ReturnCode> DataNameAndReturnCode;
+  template<typename Data>
+  explicit DataOrDataNameAndReturnCode(const Data& data_in)
+      : data(nfs_vault::DataNameAndContent(data_in)),
+        data_name_and_return_code() {}
+
+  explicit DataOrDataNameAndReturnCode(const DataNameAndReturnCode& data_name_and_return_code_in);
+
   DataOrDataNameAndReturnCode();
   DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other);
   DataOrDataNameAndReturnCode(DataOrDataNameAndReturnCode&& other);

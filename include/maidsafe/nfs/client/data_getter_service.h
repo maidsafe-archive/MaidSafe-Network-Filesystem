@@ -31,7 +31,11 @@ class DataGetterService {
   typedef nfs::DataGetterServiceMessages PublicMessages;
   typedef void VaultMessages;
 
-  DataGetterService(routing::Routing& routing);
+  typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
+  typedef nfs::GetVersionsResponseFromVersionManagerToDataGetter GetVersionsResponse;
+  typedef nfs::GetBranchResponseFromVersionManagerToDataGetter GetBranchResponse;
+
+  explicit DataGetterService(routing::Routing& routing);
 
   template<typename T>
   void HandleMessage(const T& message,
@@ -40,23 +44,6 @@ class DataGetterService {
     T::invalid_message_type_passed::should_be_one_of_the_specialisations_defined_below;
   }
 
-  typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
-  template<>
-  void HandleMessage<GetResponse>(const GetResponse& message,
-                                  const typename GetResponse::Sender& sender,
-                                  const typename GetResponse::Receiver& receiver);
-
-  typedef nfs::GetVersionsResponseFromVersionManagerToDataGetter GetVersionsResponse;
-  template<>
-  void HandleMessage<GetVersionsResponse>(const GetVersionsResponse& message,
-                                          const typename GetVersionsResponse::Sender& sender,
-                                          const typename GetVersionsResponse::Receiver& receiver);
-
-  typedef nfs::GetBranchResponseFromVersionManagerToDataGetter GetBranchResponse;
-  template<>
-  void HandleMessage<GetBranchResponse>(const GetBranchResponse& message,
-                                        const typename GetBranchResponse::Sender& sender,
-                                        const typename GetBranchResponse::Receiver& receiver);
 
  private:
   //class DataVisitorPut : public boost::static_visitor<> {
@@ -78,6 +65,24 @@ class DataGetterService {
 
   routing::Routing& routing_;
 };
+
+template<>
+void DataGetterService::HandleMessage<DataGetterService::GetResponse>(
+    const GetResponse& message,
+    const typename GetResponse::Sender& sender,
+    const typename GetResponse::Receiver& receiver);
+
+template<>
+void DataGetterService::HandleMessage<DataGetterService::GetVersionsResponse>(
+    const GetVersionsResponse& message,
+    const typename GetVersionsResponse::Sender& sender,
+    const typename GetVersionsResponse::Receiver& receiver);
+
+template<>
+void DataGetterService::HandleMessage<DataGetterService::GetBranchResponse>(
+    const GetBranchResponse& message,
+    const typename GetBranchResponse::Sender& sender,
+    const typename GetBranchResponse::Receiver& receiver);
 
 }  // namespace nfs_client
 

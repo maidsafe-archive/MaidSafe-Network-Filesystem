@@ -21,12 +21,21 @@ License.
 #include "boost/variant/static_visitor.hpp"
 #include "boost/variant/variant.hpp"
 
+#include "maidsafe/routing/routing_api.h"
+
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/types.h"
 
 
 namespace maidsafe {
+
+namespace vault {
+
+template<typename T>
+inline bool GetVariant(const maidsafe::nfs::TypeErasedMessageWrapper& message, T& variant);
+
+}  // namespace vault
 
 namespace nfs {
 
@@ -53,65 +62,82 @@ class PersonaDemuxer : public boost::static_visitor<> {
 }  // namespace detail
 
 
+
 template<typename PersonaService>
 class Service {
  public:
   typedef typename PersonaService::PublicMessages PublicMessages;
   typedef typename PersonaService::VaultMessages VaultMessages;
 
-  explicit Service(routing::Routing& routing) : impl_(routing) {}
+  explicit Service(routing::Routing& routing) : impl_(routing) {
+    static_assert(!std::is_void<PublicMessages>::value || !std::is_void<VaultMessages>::value,
+                  "Both Message types cannot be 'void'.");
+    static_assert(!std::is_same<PublicMessages, VaultMessages>::value,
+                  "Both Message types cannot be the same.");
+  }
 
   template<typename Sender, typename Receiver>
   void HandleMessage(const nfs::TypeErasedMessageWrapper& message,
                      const Sender& sender,
                      const Receiver& receiver) {
-    if (!HandlePublicMessage(message, sender, receiver, std::is_void<PublicMessages>::type) &&
-        !HandleVaultMessage(message, sender, receiver, std::is_void<VaultMessages>::type)) {
+    const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(impl_, sender, receiver);
+    static const std::is_void<PublicMessages> public_messages_void_state;
+    static const std::is_void<VaultMessages> vault_messages_void_state;
+    if (!HandleMessage(message, demuxer, public_messages_void_state, vault_messages_void_state)) {
       LOG(kError) << "Invalid request.";
       ThrowError(CommonErrors::invalid_parameter);
     }
   }
 
  private:
-  template<typename Sender, typename Receiver>
-  bool HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message,
-                           const Sender& sender,
-                           const Receiver& receiver,
-                           std::true_type) {
-    return false;
-  }
+  typedef std::true_type IsVoid;
+  typedef std::false_type IsNotVoid;
 
-  template<typename Sender, typename Receiver>
-  bool HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message,
-                           const Sender& sender,
-                           const Receiver& receiver,
-                           std::false_type) {
-    static const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(impl_, sender,
-                                                                                  receiver);
+  template<typename Demuxer>
+  bool HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer) {
     PublicMessages public_variant_message;
-    return nfs::GetVariant(message, public_variant_message) &&
-           boost::apply_visitor(demuxer, public_variant_message);
+    if (!nfs::GetVariant(message, public_variant_message))
+      return false;
+    boost::apply_visitor(demuxer, public_variant_message);
+    return true;
   }
 
-  template<typename Sender, typename Receiver>
-  bool HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message,
-                          const Sender& sender,
-                          const Receiver& receiver,
-                          std::true_type) {
-    return false;
-  }
-
-  template<typename Sender, typename Receiver>
-  bool HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message,
-                          const Sender& sender,
-                          const Receiver& receiver,
-                          std::false_type) {
-    static const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(impl_, sender,
-                                                                                  receiver);
+  template<typename Demuxer>
+  bool HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer) {
     VaultMessages vault_variant_message;
     if (vault::GetVariant(message, vault_variant_message))
-      return boost::apply_visitor(demuxer, vault_variant_message);
+      return false;
+    boost::apply_visitor(demuxer, vault_variant_message);
+    return true;
   }
+
+  // Public messages only are non-void.
+  template<typename Demuxer>
+  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message,
+                     const Demuxer& demuxer,
+                     IsNotVoid,
+                     IsVoid) {
+    return HandlePublicMessage(message, demuxer);
+  }
+
+  // Vault messages only are non-void.
+  template<typename Demuxer>
+  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message,
+                     const Demuxer& demuxer,
+                     IsVoid,
+                     IsNotVoid) {
+    return HandleVaultMessage(message, demuxer);
+  }
+
+  // Both types of message are non-void.
+  template<typename Demuxer>
+  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message,
+                     const Demuxer& demuxer,
+                     IsNotVoid,
+                     IsNotVoid) {
+    return HandlePublicMessage(message, demuxer) && HandleVaultMessage(message, demuxer);
+  }
+
   PersonaService impl_;
 };
 

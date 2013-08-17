@@ -16,6 +16,8 @@ License.
 #ifndef MAIDSAFE_NFS_CLIENT_DATA_GETTER_DISPATCHER_H_
 #define MAIDSAFE_NFS_CLIENT_DATA_GETTER_DISPATCHER_H_
 
+#include <string>
+
 #include "maidsafe/data_types/structured_data_versions.h"
 #include "maidsafe/routing/message.h"
 #include "maidsafe/routing/routing_api.h"

@@ -263,6 +263,11 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
 
 
 // ==================== DataOrDataNameAndReturnCode ================================================
+DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(
+    const DataNameAndReturnCode& data_name_and_return_code_in)
+        : data(),
+          data_name_and_return_code(data_name_and_return_code_in) {}
+
 DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode() : data(), data_name_and_return_code() {}
 
 DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other)
