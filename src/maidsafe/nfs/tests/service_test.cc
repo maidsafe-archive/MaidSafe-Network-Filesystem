@@ -25,6 +25,7 @@ License.
 
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/message_wrapper.h"
+#include "maidsafe/nfs/client/data_getter_service.h"
 #include "maidsafe/nfs/client/maid_node_service.h"
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
@@ -46,6 +47,31 @@ TEST(MaidNodeService, BEH_All) {
   nfs_client::DataOrDataNameAndReturnCode contents(immutable_data);
 
   typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
+  GetResponse get_response(contents);
+  auto serialised_get_response(get_response.Serialise());
+
+  NodeId sender_node_id(NodeId::kRandomId);
+  NodeId sender_group_id(NodeId::kRandomId);
+  NodeId receiver_node_id(NodeId::kRandomId);
+  GetResponse::Sender sender((routing::GroupId(sender_node_id)),
+                             (routing::SingleId(sender_group_id)));
+  GetResponse::Receiver receiver(receiver_node_id);
+
+  auto response_tuple(ParseMessageWrapper(serialised_get_response));
+
+  service.HandleMessage(response_tuple, sender, receiver);
+}
+
+TEST(DataGetterService, BEH_All) {
+  passport::Anmaid anmaid;
+  passport::Maid maid(anmaid);
+  routing::Routing routing(maid);
+  maidsafe::nfs::Service<nfs_client::DataGetterService> service(routing);
+
+  ImmutableData immutable_data(NonEmptyString(RandomString(10)));
+  nfs_client::DataOrDataNameAndReturnCode contents(immutable_data);
+
+  typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
   GetResponse get_response(contents);
   auto serialised_get_response(get_response.Serialise());
 

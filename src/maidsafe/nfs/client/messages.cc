@@ -263,6 +263,7 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
 
 
 // ==================== DataOrDataNameAndReturnCode ================================================
+template<>
 DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(
     const DataNameAndReturnCode& data_name_and_return_code_in)
         : data(),
@@ -293,10 +294,9 @@ DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(const std::string& seri
 
   if (proto_copy.has_serialised_data_name_and_content())
     data.reset(nfs_vault::DataNameAndContent(proto_copy.serialised_data_name_and_content()));
-  if (proto_copy.has_serialised_name() && proto_copy.has_serialised_return_code()) {
-    data_name_and_return_code.reset(std::make_pair(
-        nfs_vault::DataName(proto_copy.serialised_name()),
-        ReturnCode(proto_copy.serialised_return_code())));
+  if (proto_copy.has_serialised_data_name_and_return_code()) {
+    data_name_and_return_code.reset(
+        DataNameAndReturnCode(proto_copy.serialised_data_name_and_return_code()));
   }
   if (!nfs::CheckMutuallyExclusive(data, data_name_and_return_code)) {
     assert(false);
@@ -311,12 +311,10 @@ std::string DataOrDataNameAndReturnCode::Serialise() const {
   }
   protobuf::DataOrDataNameAndReturnCode proto_copy;
 
-  if (data) {
+  if (data)
     proto_copy.set_serialised_data_name_and_content(data->Serialise());
-  } else {
-    proto_copy.set_serialised_name(data_name_and_return_code->first.Serialise());
-    proto_copy.set_serialised_return_code(data_name_and_return_code->second.Serialise());
-  }
+  else
+    proto_copy.set_serialised_data_name_and_return_code(data_name_and_return_code->Serialise());
   return proto_copy.SerializeAsString();
 }
 
@@ -359,10 +357,9 @@ StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
 
   if (proto_copy.has_serialised_structured_data())
     structured_data.reset(StructuredData(proto_copy.serialised_structured_data()));
-  if (proto_copy.has_serialised_name() && proto_copy.has_serialised_return_code()) {
-    data_name_and_return_code.reset(std::make_pair(
-        nfs_vault::DataName(proto_copy.serialised_name()),
-        ReturnCode(proto_copy.serialised_return_code())));
+  if (proto_copy.has_serialised_data_name_and_return_code()) {
+    data_name_and_return_code.reset(
+        DataNameAndReturnCode(proto_copy.serialised_data_name_and_return_code()));
   }
   if (!nfs::CheckMutuallyExclusive(structured_data, data_name_and_return_code)) {
     assert(false);
@@ -377,12 +374,10 @@ std::string StructuredDataOrDataNameAndReturnCode::Serialise() const {
   }
   protobuf::StructuredDataOrDataNameAndReturnCode proto_copy;
 
-  if (structured_data) {
+  if (structured_data)
     proto_copy.set_serialised_structured_data(structured_data->Serialise());
-  } else {
-    proto_copy.set_serialised_name(data_name_and_return_code->first.Serialise());
-    proto_copy.set_serialised_return_code(data_name_and_return_code->second.Serialise());
-  }
+  else
+    proto_copy.set_serialised_data_name_and_return_code(data_name_and_return_code->Serialise());
   return proto_copy.SerializeAsString();
 }
 
@@ -481,5 +476,45 @@ void swap(PmidRegistrationAndReturnCode& lhs,
 }
 
 }  // namespace nfs_client
+
+
+
+namespace nfs {
+
+template<>
+bool IsSuccess<nfs_client::DataOrDataNameAndReturnCode>(
+    const nfs_client::DataOrDataNameAndReturnCode& response) {
+  return response.data;
+}
+
+template<>
+std::error_code ErrorCode<nfs_client::DataOrDataNameAndReturnCode>(
+    const nfs_client::DataOrDataNameAndReturnCode& response) {
+  if (response.data_name_and_return_code)
+    return response.data_name_and_return_code->return_code.value.code();
+  else if(response.data)
+    return std::error_code(CommonErrors::success);
+  else
+    return std::error_code(NfsErrors::timed_out);
+}
+
+template<>
+bool IsSuccess<nfs_client::StructuredDataOrDataNameAndReturnCode>(
+    const nfs_client::StructuredDataOrDataNameAndReturnCode& response) {
+  return response.structured_data;
+}
+
+template<>
+std::error_code ErrorCode<nfs_client::StructuredDataOrDataNameAndReturnCode>(
+    const nfs_client::StructuredDataOrDataNameAndReturnCode& response) {
+  if (response.data_name_and_return_code)
+    return response.data_name_and_return_code->return_code.value.code();
+  else if(response.structured_data)
+    return std::error_code(CommonErrors::success);
+  else
+    return std::error_code(NfsErrors::timed_out);
+}
+
+}  // namespace nfs
 
 }  // namespace maidsafe

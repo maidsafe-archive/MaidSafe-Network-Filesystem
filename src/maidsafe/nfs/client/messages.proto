@@ -42,14 +42,12 @@ message DataAndReturnCode {
 
 message DataOrDataNameAndReturnCode {
   optional bytes serialised_data_name_and_content = 1;
-  optional bytes serialised_name = 2;
-  optional bytes serialised_return_code = 3;
+  optional bytes serialised_data_name_and_return_code = 2;
 }
 
 message StructuredDataOrDataNameAndReturnCode {
   optional bytes serialised_structured_data = 1;
-  optional bytes serialised_name = 2;
-  optional bytes serialised_return_code = 3;
+  optional bytes serialised_data_name_and_return_code = 2;
 }
 
 message DataPmidHintAndReturnCode {
