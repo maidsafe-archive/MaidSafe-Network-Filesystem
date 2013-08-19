@@ -492,7 +492,7 @@ std::error_code ErrorCode<nfs_client::DataOrDataNameAndReturnCode>(
     const nfs_client::DataOrDataNameAndReturnCode& response) {
   if (response.data_name_and_return_code)
     return response.data_name_and_return_code->return_code.value.code();
-  else if(response.data)
+  else if (response.data)
     return std::error_code(CommonErrors::success);
   else
     return std::error_code(NfsErrors::timed_out);
@@ -509,7 +509,7 @@ std::error_code ErrorCode<nfs_client::StructuredDataOrDataNameAndReturnCode>(
     const nfs_client::StructuredDataOrDataNameAndReturnCode& response) {
   if (response.data_name_and_return_code)
     return response.data_name_and_return_code->return_code.value.code();
-  else if(response.structured_data)
+  else if (response.structured_data)
     return std::error_code(CommonErrors::success);
   else
     return std::error_code(NfsErrors::timed_out);

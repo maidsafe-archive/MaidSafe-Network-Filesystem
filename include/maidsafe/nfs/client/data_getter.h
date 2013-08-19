@@ -65,6 +65,11 @@ class DataGetter {
       const GetBranchFunctor& response_functor,
       const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
 
+  // This should be the function used in the GroupToSingle (and maybe also SingleToSingle) functors
+  // passed to 'routing.Join'.
+  template<typename T>
+  void HandleMessage(const T& routing_message);
+
  private:
   DataGetter(const DataGetter&);
   DataGetter(DataGetter&&);
@@ -135,6 +140,18 @@ void DataGetter::GetBranch(const typename Data::Name& data_name,
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
       routing::Parameters::node_group_size * 2));
   dispatcher_.SendGetBranchRequest(task_id, data_name, branch_tip);
+}
+
+template<typename T>
+void DataGetter::HandleMessage(const T& routing_message) {
+  auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
+  const auto& destination_persona(std::get<2>(wrapper_tuple));
+  static_assert(std::is_same<decltype(destination_persona),
+                             const detail::DestinationTaggedValue&>::value,
+                "The value retrieved from the tuple isn't the destination type, but should be.");
+  if (destination_persona.data == nfs::Persona::kDataGetter)
+    return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
+  LOG(kError) << "Unhandled Persona";
 }
 
 }  // namespace nfs_client

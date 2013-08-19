@@ -17,6 +17,7 @@ License.
 #define MAIDSAFE_NFS_UTILS_H_
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <utility>

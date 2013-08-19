@@ -30,7 +30,11 @@ DataGetter::DataGetter(AsioService& asio_service,
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       dispatcher_(routing),
-      service_(routing)
+      service_([&]()->std::unique_ptr<DataGetterService>&& {
+          std::unique_ptr<DataGetterService> service(
+              new DataGetterService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
+          return std::move(service);
+      }())
 #ifdef TESTING
       , kAllPmids_(public_pmids_from_file)
 #endif
