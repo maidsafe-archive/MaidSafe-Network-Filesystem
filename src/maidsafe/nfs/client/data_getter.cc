@@ -43,40 +43,39 @@ DataGetter::DataGetter(AsioService& asio_service,
 #endif
 }
 
-
-
-/*
-
 template<>
-void PublicKeyGetter::GetKey<passport::PublicPmid>(
-    const typename passport::PublicPmid::Name& key_name,
-    std::function<void(Message)> get_key_functor) {
+void DataGetter::Get<passport::PublicPmid>(const typename passport::PublicPmid::Name& data_name,
+                                           const GetFunctor& response_functor,
+                                           const std::chrono::steady_clock::duration& timeout) {
 #ifdef TESTING
-  if (key_getter_nfs_) {
+  if (kAllPmids_.empty()) {
 #endif
-    auto get_op(std::make_shared<OperationOp>(1, get_key_functor));
-    key_getter_nfs_->Get<passport::PublicPmid>(key_name,
-                                               [get_op](std::string serialised_reply) {
-                                                 HandleOperationReply(get_op, serialised_reply);
-                                               });
+    typedef DataGetterService::GetResponse::Contents ResponseContents;
+    auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
+    auto task_id(get_timer_.AddTask(
+        timeout,
+        [op_data](ResponseContents get_response) {
+            op_data->HandleResponseContents(std::move(get_response));
+        },
+        // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+        routing::Parameters::node_group_size * 2));
+    dispatcher_.SendGetRequest<passport::PublicPmid>(task_id, data_name);
 #ifdef TESTING
   } else {
-    auto itr(std::find_if(kAllPmids_.begin(), kAllPmids_.end(),
-        [&key_name](const passport::PublicPmid& pmid) { return pmid.name() == key_name; }));
+    auto itr(std::find_if(std::begin(kAllPmids_), std::end(kAllPmids_),
+        [&data_name](const passport::PublicPmid& pmid) { return pmid.name() == data_name; }));
     if (itr == kAllPmids_.end()) {
-      Message reply(Persona::kDataGetter, Persona::kDataGetter,
-                    Message::Data(NfsErrors::failed_to_get_data));
-      return get_key_functor(reply);
+      DataNameAndReturnCode data_name_and_return_code;
+      data_name_and_return_code.name = nfs_vault::DataName(data_name);
+      data_name_and_return_code.return_code = ReturnCode(NfsErrors::failed_to_get_data);
+      DataOrDataNameAndReturnCode response(data_name_and_return_code);
+      return response_functor(response);
     }
-    Message::Data data(CommonErrors::success);
-    data.name = key_name;
-    data.content = (*itr).Serialise().data;
-    Message reply(Persona::kDataGetter, Persona::kDataGetter, data);
-    get_key_functor(reply);
+    DataOrDataNameAndReturnCode response(*itr);
+    response_functor(response);
   }
 #endif
 }
-*/
 
 }  // namespace nfs_client
 

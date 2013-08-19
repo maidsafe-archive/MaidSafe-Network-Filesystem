@@ -31,7 +31,7 @@ class MaidNodeService {
   typedef nfs::MaidNodeServiceMessages PublicMessages;
   typedef void VaultMessages;
 
-  MaidNodeService(routing::Routing& routing);
+  explicit MaidNodeService(routing::Routing& routing);
 
   template<typename T>
   void HandleMessage(const T& message,
@@ -39,30 +39,6 @@ class MaidNodeService {
                      const typename T::Receiver& receiver) {
     T::invalid_message_type_passed::should_be_one_of_the_specialisations_defined_below;
   }
-
-  template<>
-  void HandleMessage<nfs::GetResponseFromDataManagerToMaidNode>(
-      const nfs::GetResponseFromDataManagerToMaidNode& message,
-      const typename nfs::GetResponseFromDataManagerToMaidNode::Sender& sender,
-      const typename nfs::GetResponseFromDataManagerToMaidNode::Receiver& receiver);
-
-  template<>
-  void HandleMessage<nfs::PutResponseFromMaidManagerToMaidNode>(
-      const nfs::PutResponseFromMaidManagerToMaidNode& message,
-      const typename nfs::PutResponseFromMaidManagerToMaidNode::Sender& sender,
-      const typename nfs::PutResponseFromMaidManagerToMaidNode::Receiver& receiver);
-
-  template<>
-  void HandleMessage<nfs::GetVersionsResponseFromVersionManagerToMaidNode>(
-      const nfs::GetVersionsResponseFromVersionManagerToMaidNode& message,
-      const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Sender& sender,
-      const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Receiver& receiver);
-
-  template<>
-  void HandleMessage<nfs::GetBranchResponseFromVersionManagerToMaidNode>(
-      const nfs::GetBranchResponseFromVersionManagerToMaidNode& message,
-      const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Sender& sender,
-      const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Receiver& receiver);
 
  private:
   template<typename Data>
@@ -88,6 +64,32 @@ class MaidNodeService {
 
   routing::Routing& routing_;
 };
+
+
+
+template<>
+void MaidNodeService::HandleMessage<nfs::GetResponseFromDataManagerToMaidNode>(
+    const nfs::GetResponseFromDataManagerToMaidNode& message,
+    const typename nfs::GetResponseFromDataManagerToMaidNode::Sender& sender,
+    const typename nfs::GetResponseFromDataManagerToMaidNode::Receiver& receiver);
+
+template<>
+void MaidNodeService::HandleMessage<nfs::PutResponseFromMaidManagerToMaidNode>(
+    const nfs::PutResponseFromMaidManagerToMaidNode& message,
+    const typename nfs::PutResponseFromMaidManagerToMaidNode::Sender& sender,
+    const typename nfs::PutResponseFromMaidManagerToMaidNode::Receiver& receiver);
+
+template<>
+void MaidNodeService::HandleMessage<nfs::GetVersionsResponseFromVersionManagerToMaidNode>(
+    const nfs::GetVersionsResponseFromVersionManagerToMaidNode& message,
+    const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Sender& sender,
+    const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Receiver& receiver);
+
+template<>
+void MaidNodeService::HandleMessage<nfs::GetBranchResponseFromVersionManagerToMaidNode>(
+    const nfs::GetBranchResponseFromVersionManagerToMaidNode& message,
+    const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Sender& sender,
+    const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Receiver& receiver);
 
 }  // namespace nfs_client
 

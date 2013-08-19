@@ -22,6 +22,38 @@ namespace nfs_client {
 
 MaidNodeService::MaidNodeService(routing::Routing& routing) : routing_(routing) {}
 
+template<>
+void MaidNodeService::HandleMessage<nfs::GetResponseFromDataManagerToMaidNode>(
+    const nfs::GetResponseFromDataManagerToMaidNode& /*message*/,
+    const typename nfs::GetResponseFromDataManagerToMaidNode::Sender& /*sender*/,
+    const typename nfs::GetResponseFromDataManagerToMaidNode::Receiver& /*receiver*/) {
+  ThrowError(CommonErrors::unknown);  // Not implemented.
+}
+
+template<>
+void MaidNodeService::HandleMessage<nfs::PutResponseFromMaidManagerToMaidNode>(
+    const nfs::PutResponseFromMaidManagerToMaidNode& /*message*/,
+    const typename nfs::PutResponseFromMaidManagerToMaidNode::Sender& /*sender*/,
+    const typename nfs::PutResponseFromMaidManagerToMaidNode::Receiver& /*receiver*/) {
+  ThrowError(CommonErrors::unknown);  // Not implemented.
+}
+
+template<>
+void MaidNodeService::HandleMessage<nfs::GetVersionsResponseFromVersionManagerToMaidNode>(
+    const nfs::GetVersionsResponseFromVersionManagerToMaidNode& /*message*/,
+    const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Sender& /*sender*/,
+    const typename nfs::GetVersionsResponseFromVersionManagerToMaidNode::Receiver& /*receiver*/) {
+  ThrowError(CommonErrors::unknown);  // Not implemented.
+}
+
+template<>
+void MaidNodeService::HandleMessage<nfs::GetBranchResponseFromVersionManagerToMaidNode>(
+    const nfs::GetBranchResponseFromVersionManagerToMaidNode& /*message*/,
+    const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Sender& /*sender*/,
+    const typename nfs::GetBranchResponseFromVersionManagerToMaidNode::Receiver& /*receiver*/) {
+  ThrowError(CommonErrors::unknown);  // Not implemented.
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

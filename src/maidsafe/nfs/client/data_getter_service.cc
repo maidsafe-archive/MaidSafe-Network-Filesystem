@@ -22,6 +22,30 @@ namespace nfs_client {
 
 DataGetterService::DataGetterService(routing::Routing& routing) : routing_(routing) {}
 
+template<>
+void DataGetterService::HandleMessage<DataGetterService::GetResponse>(
+    const GetResponse& /*message*/,
+    const typename GetResponse::Sender& /*sender*/,
+    const typename GetResponse::Receiver& /*receiver*/) {
+  ThrowError(CommonErrors::unknown);  // Not implemented.
+}
+
+template<>
+void DataGetterService::HandleMessage<DataGetterService::GetVersionsResponse>(
+    const GetVersionsResponse& /*message*/,
+    const typename GetVersionsResponse::Sender& /*sender*/,
+    const typename GetVersionsResponse::Receiver& /*receiver*/) {
+  ThrowError(CommonErrors::unknown);  // Not implemented.
+}
+
+template<>
+void DataGetterService::HandleMessage<DataGetterService::GetBranchResponse>(
+    const GetBranchResponse& /*message*/,
+    const typename GetBranchResponse::Sender& /*sender*/,
+    const typename GetBranchResponse::Receiver& /*receiver*/) {
+  ThrowError(CommonErrors::unknown);  // Not implemented.
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

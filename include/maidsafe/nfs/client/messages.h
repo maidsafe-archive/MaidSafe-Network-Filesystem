@@ -30,6 +30,7 @@ License.
 
 #include "maidsafe/nfs/client/structured_data.h"
 #include "maidsafe/nfs/vault/messages.h"
+#include "maidsafe/nfs/utils.h"
 
 
 namespace maidsafe {
@@ -133,7 +134,11 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 struct DataOrDataNameAndReturnCode {
-  typedef std::pair<nfs_vault::DataName, ReturnCode> DataNameAndReturnCode;
+  template<typename Data>
+  explicit DataOrDataNameAndReturnCode(const Data& data_in)
+      : data(nfs_vault::DataNameAndContent(data_in)),
+        data_name_and_return_code() {}
+
   DataOrDataNameAndReturnCode();
   DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other);
   DataOrDataNameAndReturnCode(DataOrDataNameAndReturnCode&& other);
@@ -146,12 +151,15 @@ struct DataOrDataNameAndReturnCode {
   boost::optional<DataNameAndReturnCode> data_name_and_return_code;
 };
 
+template<>
+DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(
+    const DataNameAndReturnCode& data_name_and_return_code_in);
+
 void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
 struct StructuredDataOrDataNameAndReturnCode {
-  typedef std::pair<nfs_vault::DataName, ReturnCode> DataNameAndReturnCode;
   StructuredDataOrDataNameAndReturnCode();
   StructuredDataOrDataNameAndReturnCode(const StructuredDataOrDataNameAndReturnCode& other);
   StructuredDataOrDataNameAndReturnCode(StructuredDataOrDataNameAndReturnCode&& other);
@@ -202,6 +210,28 @@ struct PmidRegistrationAndReturnCode {
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_client
+
+
+
+namespace nfs {
+
+template<>
+bool IsSuccess<nfs_client::DataOrDataNameAndReturnCode>(
+    const nfs_client::DataOrDataNameAndReturnCode& response);
+
+template<>
+std::error_code ErrorCode<nfs_client::DataOrDataNameAndReturnCode>(
+    const nfs_client::DataOrDataNameAndReturnCode& response);
+
+template<>
+bool IsSuccess<nfs_client::StructuredDataOrDataNameAndReturnCode>(
+    const nfs_client::StructuredDataOrDataNameAndReturnCode& response);
+
+template<>
+std::error_code ErrorCode<nfs_client::StructuredDataOrDataNameAndReturnCode>(
+    const nfs_client::StructuredDataOrDataNameAndReturnCode& response);
+
+}  // namespace nfs
 
 }  // namespace maidsafe
 
