@@ -34,9 +34,9 @@ class MaidNodeService {
   explicit MaidNodeService(routing::Routing& routing);
 
   template<typename T>
-  void HandleMessage(const T& message,
-                     const typename T::Sender& sender,
-                     const typename T::Receiver& receiver) {
+  void HandleMessage(const T& /*message*/,
+                     const typename T::Sender& /*sender*/,
+                     const typename T::Receiver& /*receiver*/) {
     T::invalid_message_type_passed::should_be_one_of_the_specialisations_defined_below;
   }
 
