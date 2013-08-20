@@ -26,6 +26,7 @@ License.
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/routing/timer.h"
 
+#include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/service.h"
 #include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/client/data_getter_dispatcher.h"
@@ -147,7 +148,7 @@ void DataGetter::HandleMessage(const T& routing_message) {
   auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
   const auto& destination_persona(std::get<2>(wrapper_tuple));
   static_assert(std::is_same<decltype(destination_persona),
-                             const detail::DestinationTaggedValue&>::value,
+                             const nfs::detail::DestinationTaggedValue&>::value,
                 "The value retrieved from the tuple isn't the destination type, but should be.");
   if (destination_persona.data == nfs::Persona::kDataGetter)
     return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
