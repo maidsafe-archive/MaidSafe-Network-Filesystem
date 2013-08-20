@@ -17,6 +17,8 @@ License.
 #define MAIDSAFE_NFS_CLIENT_DATA_GETTER_SERVICE_H_
 
 #include "maidsafe/routing/routing_api.h"
+#include "maidsafe/routing/timer.h"
+
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
@@ -35,7 +37,11 @@ class DataGetterService {
   typedef nfs::GetVersionsResponseFromVersionManagerToDataGetter GetVersionsResponse;
   typedef nfs::GetBranchResponseFromVersionManagerToDataGetter GetBranchResponse;
 
-  explicit DataGetterService(routing::Routing& routing);
+  DataGetterService(
+      routing::Routing& routing,
+      routing::Timer<DataGetterService::GetResponse::Contents>& get_timer,
+      routing::Timer<DataGetterService::GetVersionsResponse::Contents>& get_versions_timer,
+      routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer);
 
   template<typename T>
   void HandleMessage(const T& message,
@@ -44,26 +50,11 @@ class DataGetterService {
     T::invalid_message_type_passed::should_be_one_of_the_specialisations_defined_below;
   }
 
-
  private:
-  //class DataVisitorPut : public boost::static_visitor<> {
-  // public:
-  //  DataVisitorPut(MaidManagerService* service,
-  //                 const nfs::PutRequestFromMaidNodeToMaidManager& message,
-  //                 const typename nfs::PutRequestFromMaidNodeToMaidManager::Sender& sender)
-  //      : service_(service),
-  //        message_(message),
-  //        sender_(sender) {}
-  //  template<typename DataName>
-  //  void operator()(const DataName& data_name) {
-  //    service_->HandlePut(data_name, message_, sender_);
-  //  }
-  //  MaidManagerService* service_;
-  //  const nfs::PutRequestFromMaidNodeToMaidManager& message_;
-  //  const typename nfs::PutRequestFromMaidNodeToMaidManager::Sender& sender_;
-  //};
-
   routing::Routing& routing_;
+  routing::Timer<DataGetterService::GetResponse::Contents>& get_timer_;
+  routing::Timer<DataGetterService::GetVersionsResponse::Contents>& get_versions_timer_;
+  routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer_;
 };
 
 template<>

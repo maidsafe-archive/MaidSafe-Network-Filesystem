@@ -45,23 +45,6 @@ class MaidNodeService {
   void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,
                          const typename nfs::PutRequestFromMaidNodeToMaidManager::Sender& sender);
 
-  //class DataVisitorPut : public boost::static_visitor<> {
-  // public:
-  //  DataVisitorPut(MaidManagerService* service,
-  //                 const nfs::PutRequestFromMaidNodeToMaidManager& message,
-  //                 const typename nfs::PutRequestFromMaidNodeToMaidManager::Sender& sender)
-  //      : service_(service),
-  //        message_(message),
-  //        sender_(sender) {}
-  //  template<typename DataName>
-  //  void operator()(const DataName& data_name) {
-  //    service_->HandlePut(data_name, message_, sender_);
-  //  }
-  //  MaidManagerService* service_;
-  //  const nfs::PutRequestFromMaidNodeToMaidManager& message_;
-  //  const typename nfs::PutRequestFromMaidNodeToMaidManager::Sender& sender_;
-  //};
-
   routing::Routing& routing_;
 };
 

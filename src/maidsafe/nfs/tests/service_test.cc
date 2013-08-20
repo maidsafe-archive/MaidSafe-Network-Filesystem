@@ -15,11 +15,13 @@ License.
 
 #include "maidsafe/nfs/service.h"
 
+#include "maidsafe/common/asio_service.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/common/utils.h"
 
 #include "maidsafe/routing/routing_api.h"
+#include "maidsafe/routing/timer.h"
 #include "maidsafe/passport/types.h"
 #include "maidsafe/data_types/immutable_data.h"
 
@@ -41,7 +43,9 @@ TEST(MaidNodeService, BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
-  maidsafe::nfs::Service<nfs_client::MaidNodeService> service(routing);
+  maidsafe::nfs::Service<nfs_client::MaidNodeService> service(
+      std::move(std::unique_ptr<nfs_client::MaidNodeService>(
+          new nfs_client::MaidNodeService(routing))));
 
   ImmutableData immutable_data(NonEmptyString(RandomString(10)));
   nfs_client::DataOrDataNameAndReturnCode contents(immutable_data);
@@ -66,7 +70,16 @@ TEST(DataGetterService, BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
-  maidsafe::nfs::Service<nfs_client::DataGetterService> service(routing);
+  AsioService asio_service(2);
+  routing::Timer<nfs_client::DataGetterService::GetResponse::Contents> get_timer(asio_service);
+  routing::Timer<nfs_client::DataGetterService::GetVersionsResponse::Contents>
+      get_versions_timer(asio_service);
+  routing::Timer<nfs_client::DataGetterService::GetBranchResponse::Contents>
+      get_branch_timer(asio_service);
+  maidsafe::nfs::Service<nfs_client::DataGetterService> service(
+      std::move(std::unique_ptr<nfs_client::DataGetterService>(
+          new nfs_client::DataGetterService(routing, get_timer, get_versions_timer,
+                                            get_branch_timer))));
 
   ImmutableData immutable_data(NonEmptyString(RandomString(10)));
   nfs_client::DataOrDataNameAndReturnCode contents(immutable_data);

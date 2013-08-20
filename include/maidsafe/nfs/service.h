@@ -16,12 +16,11 @@ License.
 #ifndef MAIDSAFE_NFS_SERVICE_H_
 #define MAIDSAFE_NFS_SERVICE_H_
 
+#include <memory>
 #include <type_traits>
 
 #include "boost/variant/static_visitor.hpp"
 #include "boost/variant/variant.hpp"
-
-#include "maidsafe/routing/routing_api.h"
 
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/message_wrapper.h"
@@ -69,7 +68,7 @@ class Service {
   typedef typename PersonaService::PublicMessages PublicMessages;
   typedef typename PersonaService::VaultMessages VaultMessages;
 
-  explicit Service(routing::Routing& routing) : impl_(routing) {
+  explicit Service(std::unique_ptr<PersonaService>&& impl) : impl_(std::move(impl)) {
     static_assert(!std::is_void<PublicMessages>::value || !std::is_void<VaultMessages>::value,
                   "Both Message types cannot be 'void'.");
     static_assert(!std::is_same<PublicMessages, VaultMessages>::value,
@@ -80,7 +79,8 @@ class Service {
   void HandleMessage(const nfs::TypeErasedMessageWrapper& message,
                      const Sender& sender,
                      const Receiver& receiver) {
-    const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(impl_, sender, receiver);
+    const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(*impl_, sender,
+                                                                           receiver);
     static const std::is_void<PublicMessages> public_messages_void_state;
     static const std::is_void<VaultMessages> vault_messages_void_state;
     if (!HandleMessage(message, demuxer, public_messages_void_state, vault_messages_void_state)) {
@@ -138,7 +138,7 @@ class Service {
     return HandlePublicMessage(message, demuxer) && HandleVaultMessage(message, demuxer);
   }
 
-  PersonaService impl_;
+  std::unique_ptr<PersonaService> impl_;
 };
 
 }  // namespace nfs
