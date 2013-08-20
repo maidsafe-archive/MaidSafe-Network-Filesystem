@@ -81,8 +81,8 @@ class Service {
                      const Receiver& receiver) {
     const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(*impl_, sender,
                                                                            receiver);
-    static const std::is_void<PublicMessages> public_messages_void_state;
-    static const std::is_void<VaultMessages> vault_messages_void_state;
+    static std::is_void<PublicMessages> public_messages_void_state;
+    static std::is_void<VaultMessages> vault_messages_void_state;
     if (!HandleMessage(message, demuxer, public_messages_void_state, vault_messages_void_state)) {
       LOG(kError) << "Invalid request.";
       ThrowError(CommonErrors::invalid_parameter);
