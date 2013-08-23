@@ -48,7 +48,7 @@ TEST(MaidNodeService, BEH_All) {
           new nfs_client::MaidNodeService(routing))));
 
   ImmutableData immutable_data(NonEmptyString(RandomString(10)));
-  nfs_client::DataOrDataNameAndReturnCode contents(immutable_data);
+  nfs_client::DataNameAndContentOrReturnCode contents(immutable_data);
 
   typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
   GetResponse get_response(contents);
@@ -82,7 +82,7 @@ TEST(DataGetterService, BEH_All) {
                                             get_branch_timer))));
 
   ImmutableData immutable_data(NonEmptyString(RandomString(10)));
-  nfs_client::DataOrDataNameAndReturnCode contents(immutable_data);
+  nfs_client::DataNameAndContentOrReturnCode contents(immutable_data);
 
   typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
   GetResponse get_response(contents);

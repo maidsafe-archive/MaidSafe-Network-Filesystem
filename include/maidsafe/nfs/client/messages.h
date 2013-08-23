@@ -133,18 +133,18 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
-struct DataOrDataNameAndReturnCode {
+struct DataNameAndContentOrReturnCode {
   template<typename Data>
-  explicit DataOrDataNameAndReturnCode(const Data& data_in)
+  explicit DataNameAndContentOrReturnCode(const Data& data_in)
       : data(nfs_vault::DataNameAndContent(data_in)),
         data_name_and_return_code() {}
 
-  DataOrDataNameAndReturnCode();
-  DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other);
-  DataOrDataNameAndReturnCode(DataOrDataNameAndReturnCode&& other);
-  DataOrDataNameAndReturnCode& operator=(DataOrDataNameAndReturnCode other);
+  DataNameAndContentOrReturnCode();
+  DataNameAndContentOrReturnCode(const DataNameAndContentOrReturnCode& other);
+  DataNameAndContentOrReturnCode(DataNameAndContentOrReturnCode&& other);
+  DataNameAndContentOrReturnCode& operator=(DataNameAndContentOrReturnCode other);
 
-  explicit DataOrDataNameAndReturnCode(const std::string& serialised_copy);
+  explicit DataNameAndContentOrReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
   boost::optional<nfs_vault::DataNameAndContent> data;
@@ -152,28 +152,30 @@ struct DataOrDataNameAndReturnCode {
 };
 
 template<>
-DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(
+DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndReturnCode& data_name_and_return_code_in);
 
-void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+void swap(DataNameAndContentOrReturnCode& lhs,
+          DataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
-struct StructuredDataOrDataNameAndReturnCode {
-  StructuredDataOrDataNameAndReturnCode();
-  StructuredDataOrDataNameAndReturnCode(const StructuredDataOrDataNameAndReturnCode& other);
-  StructuredDataOrDataNameAndReturnCode(StructuredDataOrDataNameAndReturnCode&& other);
-  StructuredDataOrDataNameAndReturnCode& operator=(StructuredDataOrDataNameAndReturnCode other);
+struct StructuredDataNameAndContentOrReturnCode {
+  StructuredDataNameAndContentOrReturnCode();
+  StructuredDataNameAndContentOrReturnCode(const StructuredDataNameAndContentOrReturnCode& other);
+  StructuredDataNameAndContentOrReturnCode(StructuredDataNameAndContentOrReturnCode&& other);
+  StructuredDataNameAndContentOrReturnCode& operator=(
+      StructuredDataNameAndContentOrReturnCode other);
 
-  explicit StructuredDataOrDataNameAndReturnCode(const std::string& serialised_copy);
+  explicit StructuredDataNameAndContentOrReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
   boost::optional<StructuredData> structured_data;
   boost::optional<DataNameAndReturnCode> data_name_and_return_code;
 };
 
-void swap(StructuredDataOrDataNameAndReturnCode& lhs,
-          StructuredDataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+void swap(StructuredDataNameAndContentOrReturnCode& lhs,
+          StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 
 
@@ -216,20 +218,20 @@ void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs
 namespace nfs {
 
 template<>
-bool IsSuccess<nfs_client::DataOrDataNameAndReturnCode>(
-    const nfs_client::DataOrDataNameAndReturnCode& response);
+bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
+    const nfs_client::DataNameAndContentOrReturnCode& response);
 
 template<>
-std::error_code ErrorCode<nfs_client::DataOrDataNameAndReturnCode>(
-    const nfs_client::DataOrDataNameAndReturnCode& response);
+std::error_code ErrorCode<nfs_client::DataNameAndContentOrReturnCode>(
+    const nfs_client::DataNameAndContentOrReturnCode& response);
 
 template<>
-bool IsSuccess<nfs_client::StructuredDataOrDataNameAndReturnCode>(
-    const nfs_client::StructuredDataOrDataNameAndReturnCode& response);
+bool IsSuccess<nfs_client::StructuredDataNameAndContentOrReturnCode>(
+    const nfs_client::StructuredDataNameAndContentOrReturnCode& response);
 
 template<>
-std::error_code ErrorCode<nfs_client::StructuredDataOrDataNameAndReturnCode>(
-    const nfs_client::StructuredDataOrDataNameAndReturnCode& response);
+std::error_code ErrorCode<nfs_client::StructuredDataNameAndContentOrReturnCode>(
+    const nfs_client::StructuredDataNameAndContentOrReturnCode& response);
 
 }  // namespace nfs
 

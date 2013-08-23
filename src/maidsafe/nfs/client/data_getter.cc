@@ -72,10 +72,10 @@ void DataGetter::Get<passport::PublicPmid>(const typename passport::PublicPmid::
       DataNameAndReturnCode data_name_and_return_code;
       data_name_and_return_code.name = nfs_vault::DataName(data_name);
       data_name_and_return_code.return_code = ReturnCode(NfsErrors::failed_to_get_data);
-      DataOrDataNameAndReturnCode response(data_name_and_return_code);
+      DataNameAndContentOrReturnCode response(data_name_and_return_code);
       return response_functor(response);
     }
-    DataOrDataNameAndReturnCode response(*itr);
+    DataNameAndContentOrReturnCode response(*itr);
     response_functor(response);
   }
 #endif

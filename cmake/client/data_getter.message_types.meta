@@ -1,3 +1,3 @@
-Action:GetResponse                    Source:DataManager:Group        Destination:DataGetter:Single     Contents:struct:maidsafe::nfs_client::DataOrDataNameAndReturnCode
-Action:GetVersionsResponse            Source:VersionManager:Group     Destination:DataGetter:Single     Contents:struct:maidsafe::nfs_client::StructuredDataOrDataNameAndReturnCode
-Action:GetBranchResponse              Source:VersionManager:Group     Destination:DataGetter:Single     Contents:struct:maidsafe::nfs_client::StructuredDataOrDataNameAndReturnCode
+Action:GetResponse                    Source:DataManager:Group        Destination:DataGetter:Single     Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode
+Action:GetVersionsResponse            Source:VersionManager:Group     Destination:DataGetter:Single     Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
+Action:GetBranchResponse              Source:VersionManager:Group     Destination:DataGetter:Single     Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode

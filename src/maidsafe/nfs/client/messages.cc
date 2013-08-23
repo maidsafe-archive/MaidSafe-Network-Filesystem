@@ -262,33 +262,37 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
 
 
 
-// ==================== DataOrDataNameAndReturnCode ================================================
+// ==================== DataNameAndContentOrReturnCode =============================================
 template<>
-DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(
+DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndReturnCode& data_name_and_return_code_in)
         : data(),
           data_name_and_return_code(data_name_and_return_code_in) {}
 
-DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode() : data(), data_name_and_return_code() {}
+DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode()
+    : data(),
+      data_name_and_return_code() {}
 
-DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(const DataOrDataNameAndReturnCode& other)
-    : data(other.data),
-      data_name_and_return_code(other.data_name_and_return_code) {}
+DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
+    const DataNameAndContentOrReturnCode& other)
+        : data(other.data),
+          data_name_and_return_code(other.data_name_and_return_code) {}
 
-DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(DataOrDataNameAndReturnCode&& other)
-    : data(std::move(other.data)),
-      data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
+DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
+    DataNameAndContentOrReturnCode&& other)
+        : data(std::move(other.data)),
+          data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
 
-DataOrDataNameAndReturnCode& DataOrDataNameAndReturnCode::operator=(
-    DataOrDataNameAndReturnCode other) {
+DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
+    DataNameAndContentOrReturnCode other) {
   swap(*this, other);
   return *this;
 }
 
-DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(const std::string& serialised_copy)
+DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(const std::string& serialised_copy)
     : data(),
       data_name_and_return_code() {
-  protobuf::DataOrDataNameAndReturnCode proto_copy;
+  protobuf::DataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
 
@@ -304,12 +308,12 @@ DataOrDataNameAndReturnCode::DataOrDataNameAndReturnCode(const std::string& seri
   }
 }
 
-std::string DataOrDataNameAndReturnCode::Serialise() const {
+std::string DataNameAndContentOrReturnCode::Serialise() const {
   if (!nfs::CheckMutuallyExclusive(data, data_name_and_return_code)) {
     assert(false);
     ThrowError(CommonErrors::serialisation_error);
   }
-  protobuf::DataOrDataNameAndReturnCode proto_copy;
+  protobuf::DataNameAndContentOrReturnCode proto_copy;
 
   if (data)
     proto_copy.set_serialised_data_name_and_content(data->Serialise());
@@ -318,7 +322,8 @@ std::string DataOrDataNameAndReturnCode::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
-void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+void swap(DataNameAndContentOrReturnCode& lhs,
+          DataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.data, rhs.data);
   swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
@@ -326,32 +331,32 @@ void swap(DataOrDataNameAndReturnCode& lhs, DataOrDataNameAndReturnCode& rhs) MA
 
 
 
-// ==================== StructuredDataOrDataNameAndReturnCode ======================================
-StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode()
+// ==================== StructuredDataNameAndContentOrReturnCode ===================================
+StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode()
     : structured_data(),
       data_name_and_return_code() {}
 
-StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
-    const StructuredDataOrDataNameAndReturnCode& other)
+StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode(
+    const StructuredDataNameAndContentOrReturnCode& other)
         : structured_data(other.structured_data),
           data_name_and_return_code(other.data_name_and_return_code) {}
 
-StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
-    StructuredDataOrDataNameAndReturnCode&& other)
+StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode(
+    StructuredDataNameAndContentOrReturnCode&& other)
         : structured_data(std::move(other.structured_data)),
           data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
 
-StructuredDataOrDataNameAndReturnCode& StructuredDataOrDataNameAndReturnCode::operator=(
-    StructuredDataOrDataNameAndReturnCode other) {
+StructuredDataNameAndContentOrReturnCode& StructuredDataNameAndContentOrReturnCode::operator=(
+    StructuredDataNameAndContentOrReturnCode other) {
   swap(*this, other);
   return *this;
 }
 
-StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
+StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode(
     const std::string& serialised_copy)
         : structured_data(),
           data_name_and_return_code() {
-  protobuf::StructuredDataOrDataNameAndReturnCode proto_copy;
+  protobuf::StructuredDataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
 
@@ -367,12 +372,12 @@ StructuredDataOrDataNameAndReturnCode::StructuredDataOrDataNameAndReturnCode(
   }
 }
 
-std::string StructuredDataOrDataNameAndReturnCode::Serialise() const {
+std::string StructuredDataNameAndContentOrReturnCode::Serialise() const {
   if (!nfs::CheckMutuallyExclusive(structured_data, data_name_and_return_code)) {
     assert(false);
     ThrowError(CommonErrors::serialisation_error);
   }
-  protobuf::StructuredDataOrDataNameAndReturnCode proto_copy;
+  protobuf::StructuredDataNameAndContentOrReturnCode proto_copy;
 
   if (structured_data)
     proto_copy.set_serialised_structured_data(structured_data->Serialise());
@@ -381,8 +386,8 @@ std::string StructuredDataOrDataNameAndReturnCode::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
-void swap(StructuredDataOrDataNameAndReturnCode& lhs,
-          StructuredDataOrDataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+void swap(StructuredDataNameAndContentOrReturnCode& lhs,
+          StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.structured_data, rhs.structured_data);
   swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
@@ -482,14 +487,14 @@ void swap(PmidRegistrationAndReturnCode& lhs,
 namespace nfs {
 
 template<>
-bool IsSuccess<nfs_client::DataOrDataNameAndReturnCode>(
-    const nfs_client::DataOrDataNameAndReturnCode& response) {
+bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
+    const nfs_client::DataNameAndContentOrReturnCode& response) {
   return response.data;
 }
 
 template<>
-std::error_code ErrorCode<nfs_client::DataOrDataNameAndReturnCode>(
-    const nfs_client::DataOrDataNameAndReturnCode& response) {
+std::error_code ErrorCode<nfs_client::DataNameAndContentOrReturnCode>(
+    const nfs_client::DataNameAndContentOrReturnCode& response) {
   if (response.data_name_and_return_code)
     return response.data_name_and_return_code->return_code.value.code();
   else if (response.data)
@@ -499,14 +504,14 @@ std::error_code ErrorCode<nfs_client::DataOrDataNameAndReturnCode>(
 }
 
 template<>
-bool IsSuccess<nfs_client::StructuredDataOrDataNameAndReturnCode>(
-    const nfs_client::StructuredDataOrDataNameAndReturnCode& response) {
+bool IsSuccess<nfs_client::StructuredDataNameAndContentOrReturnCode>(
+    const nfs_client::StructuredDataNameAndContentOrReturnCode& response) {
   return response.structured_data;
 }
 
 template<>
-std::error_code ErrorCode<nfs_client::StructuredDataOrDataNameAndReturnCode>(
-    const nfs_client::StructuredDataOrDataNameAndReturnCode& response) {
+std::error_code ErrorCode<nfs_client::StructuredDataNameAndContentOrReturnCode>(
+    const nfs_client::StructuredDataNameAndContentOrReturnCode& response) {
   if (response.data_name_and_return_code)
     return response.data_name_and_return_code->return_code.value.code();
   else if (response.structured_data)

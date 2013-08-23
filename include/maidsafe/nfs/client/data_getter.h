@@ -39,9 +39,9 @@ namespace nfs_client {
 
 class DataGetter {
  public:
-  typedef std::function<void(const DataOrDataNameAndReturnCode&)> GetFunctor;
-  typedef std::function<void(const StructuredDataOrDataNameAndReturnCode&)> GetVersionsFunctor;
-  typedef std::function<void(const StructuredDataOrDataNameAndReturnCode&)> GetBranchFunctor;
+  typedef std::function<void(const DataNameAndContentOrReturnCode&)> GetFunctor;
+  typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetVersionsFunctor;
+  typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetBranchFunctor;
   // all_pmids_from_file should only be non-empty if TESTING is defined
   DataGetter(AsioService& asio_service,
              routing::Routing& routing,
