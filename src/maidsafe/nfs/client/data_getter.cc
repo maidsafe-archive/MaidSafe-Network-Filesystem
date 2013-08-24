@@ -48,13 +48,15 @@ DataGetter::DataGetter(AsioService& asio_service,
 }
 
 template<>
-void DataGetter::Get<passport::PublicPmid>(const typename passport::PublicPmid::Name& data_name,
-                                           const GetFunctor& response_functor,
-                                           const std::chrono::steady_clock::duration& timeout) {
+boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
+    const typename passport::PublicPmid::Name& data_name,
+    const std::chrono::steady_clock::duration& timeout) {
 #ifdef TESTING
   if (kAllPmids_.empty()) {
 #endif
     typedef DataGetterService::GetResponse::Contents ResponseContents;
+    auto promise(std::make_shared<boost::promise<passport::PublicPmid>>());
+    HandleGetResult<passport::PublicPmid> response_functor(promise);
     auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
     auto task_id(get_timer_.AddTask(
         timeout,
@@ -64,19 +66,21 @@ void DataGetter::Get<passport::PublicPmid>(const typename passport::PublicPmid::
         // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
         routing::Parameters::node_group_size * 2));
     dispatcher_.SendGetRequest<passport::PublicPmid>(task_id, data_name);
+    return promise->get_future();
 #ifdef TESTING
   } else {
-    auto itr(std::find_if(std::begin(kAllPmids_), std::end(kAllPmids_),
-        [&data_name](const passport::PublicPmid& pmid) { return pmid.name() == data_name; }));
-    if (itr == kAllPmids_.end()) {
-      DataNameAndReturnCode data_name_and_return_code;
-      data_name_and_return_code.name = nfs_vault::DataName(data_name);
-      data_name_and_return_code.return_code = ReturnCode(NfsErrors::failed_to_get_data);
-      DataNameAndContentOrReturnCode response(data_name_and_return_code);
-      return response_functor(response);
+    boost::promise<passport::PublicPmid> promise;
+    try {
+      auto itr(std::find_if(std::begin(kAllPmids_), std::end(kAllPmids_),
+          [&data_name](const passport::PublicPmid& pmid) { return pmid.name() == data_name; }));
+      if (itr == kAllPmids_.end())
+        ThrowError(NfsErrors::failed_to_get_data);
+      promise.set_value(*itr);
     }
-    DataNameAndContentOrReturnCode response(*itr);
-    response_functor(response);
+    catch(...) {
+      promise.set_exception(boost::current_exception());
+    }
+    return promise.get_future();
   }
 #endif
 }

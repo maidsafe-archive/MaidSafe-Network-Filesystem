@@ -43,9 +43,16 @@ TEST(MaidNodeService, BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
+  AsioService asio_service(2);
+  routing::Timer<nfs_client::MaidNodeService::GetResponse::Contents> get_timer(asio_service);
+  routing::Timer<nfs_client::MaidNodeService::GetVersionsResponse::Contents>
+      get_versions_timer(asio_service);
+  routing::Timer<nfs_client::MaidNodeService::GetBranchResponse::Contents>
+      get_branch_timer(asio_service);
   maidsafe::nfs::Service<nfs_client::MaidNodeService> service(
       std::move(std::unique_ptr<nfs_client::MaidNodeService>(
-          new nfs_client::MaidNodeService(routing))));
+          new nfs_client::MaidNodeService(routing, get_timer, get_versions_timer,
+                                            get_branch_timer))));
 
   ImmutableData immutable_data(NonEmptyString(RandomString(10)));
   nfs_client::DataNameAndContentOrReturnCode contents(immutable_data);

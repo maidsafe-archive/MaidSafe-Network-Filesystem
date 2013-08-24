@@ -13,11 +13,12 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#ifndef MAIDSAFE_NFS_CLIENT_DATA_GETTER_H_
-#define MAIDSAFE_NFS_CLIENT_DATA_GETTER_H_
+#ifndef MAIDSAFE_NFS_CLIENT_MAID_NODE_NFS_H_
+#define MAIDSAFE_NFS_CLIENT_MAID_NODE_NFS_H_
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 #include "boost/thread/future.hpp"
@@ -32,29 +33,35 @@ License.
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/service.h"
 #include "maidsafe/nfs/utils.h"
-#include "maidsafe/nfs/client/client_utils.h"
-#include "maidsafe/nfs/client/data_getter_dispatcher.h"
-#include "maidsafe/nfs/client/data_getter_service.h"
+#include "maidsafe/nfs/client/maid_node_dispatcher.h"
+#include "maidsafe/nfs/client/maid_node_service.h"
 
 
 namespace maidsafe {
 
 namespace nfs_client {
 
-class DataGetter {
+class MaidNodeNfs {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
 
-  // all_pmids_from_file should only be non-empty if TESTING is defined
-  DataGetter(AsioService& asio_service,
-             routing::Routing& routing,
-             const std::vector<passport::PublicPmid>& public_pmids_from_file =
-                 std::vector<passport::PublicPmid>());
+  MaidNodeNfs(AsioService& asio_service,
+              routing::Routing& routing,
+              const passport::PublicPmid::Name& pmid_node_hint);
+
+  passport::PublicPmid::Name pmid_node_hint() const;
+  void set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint);
 
   template<typename Data>
   boost::future<Data> Get(
       const typename Data::Name& data_name,
       const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
+
+  template<typename Data>
+  void Put(const Data& data);
+
+  template<typename Data>
+  void Delete(const typename Data::Name& data_name);
 
   template<typename Data>
   VersionNamesFuture GetVersions(
@@ -67,6 +74,23 @@ class DataGetter {
       const StructuredDataVersions::VersionName& branch_tip,
       const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
 
+  template<typename Data>
+  void PutVersion(const typename Data::Name& data_name,
+                  const StructuredDataVersions::VersionName& old_version_name,
+                  const StructuredDataVersions::VersionName& new_version_name);
+
+  template<typename Data>
+  void DeleteBranchUntilFork(const typename Data::Name& data_name,
+                             const StructuredDataVersions::VersionName& branch_tip);
+
+  void CreateAccount();
+  void RemoveAccount();
+
+  void RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
+  void UnregisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
+
+  void GetPmidHealth(const passport::Pmid& pmid);
+
   // This should be the function used in the GroupToSingle (and maybe also SingleToSingle) functors
   // passed to 'routing.Join'.
   template<typename T>
@@ -78,32 +102,26 @@ class DataGetter {
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetBranchFunctor;
   typedef boost::promise<std::vector<StructuredDataVersions::VersionName>> VersionNamesPromise;
 
-  DataGetter(const DataGetter&);
-  DataGetter(DataGetter&&);
-  DataGetter& operator=(DataGetter);
+  MaidNodeNfs(const MaidNodeNfs&);
+  MaidNodeNfs(MaidNodeNfs&&);
+  MaidNodeNfs& operator=(MaidNodeNfs);
 
-  routing::Timer<DataGetterService::GetResponse::Contents> get_timer_;
-  routing::Timer<DataGetterService::GetVersionsResponse::Contents> get_versions_timer_;
-  routing::Timer<DataGetterService::GetBranchResponse::Contents> get_branch_timer_;
-  DataGetterDispatcher dispatcher_;
-  nfs::Service<DataGetterService> service_;
-#ifdef TESTING
-  std::vector<passport::PublicPmid> kAllPmids_;
-#endif
+  routing::Timer<MaidNodeService::GetResponse::Contents> get_timer_;
+  routing::Timer<MaidNodeService::GetVersionsResponse::Contents> get_versions_timer_;
+  routing::Timer<MaidNodeService::GetBranchResponse::Contents> get_branch_timer_;
+  MaidNodeDispatcher dispatcher_;
+  nfs::Service<MaidNodeService> service_;
+  mutable std::mutex pmid_node_hint_mutex_;
+  passport::PublicPmid::Name pmid_node_hint_;
 };
-
-template<>
-boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
-    const typename passport::PublicPmid::Name& data_name,
-    const std::chrono::steady_clock::duration& timeout);
 
 
 
 // ==================== Implementation =============================================================
 template<typename Data>
-boost::future<Data> DataGetter::Get(const typename Data::Name& data_name,
-                                    const std::chrono::steady_clock::duration& timeout) {
-  typedef DataGetterService::GetResponse::Contents ResponseContents;
+boost::future<Data> MaidNodeNfs::Get(const typename Data::Name& data_name,
+                                     const std::chrono::steady_clock::duration& timeout) {
+  typedef MaidNodeService::GetResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<Data>>());
   HandleGetResult<Data> response_functor(promise);
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
@@ -119,10 +137,20 @@ boost::future<Data> DataGetter::Get(const typename Data::Name& data_name,
 }
 
 template<typename Data>
-DataGetter::VersionNamesFuture DataGetter::GetVersions(
+void MaidNodeNfs::Put(const Data& data) {
+  dispatcher_.SendPutRequest(data, pmid_node_hint());
+}
+
+template<typename Data>
+void MaidNodeNfs::Delete(const typename Data::Name& data_name) {
+  dispatcher_.SendDeleteRequest(data);
+}
+
+template<typename Data>
+MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
     const typename Data::Name& data_name,
     const std::chrono::steady_clock::duration& timeout) {
-  typedef DataGetterService::GetVersionsResponse::Contents ResponseContents;
+  typedef MaidNodeService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode& result) {
                           HandleGetVersionsOrBranchResult(result, promise);
@@ -140,11 +168,11 @@ DataGetter::VersionNamesFuture DataGetter::GetVersions(
 }
 
 template<typename Data>
-DataGetter::VersionNamesFuture DataGetter::GetBranch(
+MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
     const typename Data::Name& data_name,
     const StructuredDataVersions::VersionName& branch_tip,
     const std::chrono::steady_clock::duration& timeout) {
-  typedef DataGetterService::GetBranchResponse::Contents ResponseContents;
+  typedef MaidNodeService::GetBranchResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode& result) {
                           HandleGetVersionsOrBranchResult(result, promise);
@@ -162,13 +190,13 @@ DataGetter::VersionNamesFuture DataGetter::GetBranch(
 }
 
 template<typename T>
-void DataGetter::HandleMessage(const T& routing_message) {
+void MaidNodeNfs::HandleMessage(const T& routing_message) {
   auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
   const auto& destination_persona(std::get<2>(wrapper_tuple));
   static_assert(std::is_same<decltype(destination_persona),
                              const nfs::detail::DestinationTaggedValue&>::value,
                 "The value retrieved from the tuple isn't the destination type, but should be.");
-  if (destination_persona.data == nfs::Persona::kDataGetter)
+  if (destination_persona.data == nfs::Persona::kMaidNode)
     return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
   LOG(kError) << "Unhandled Persona";
 }
@@ -177,4 +205,4 @@ void DataGetter::HandleMessage(const T& routing_message) {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_CLIENT_DATA_GETTER_H_
+#endif  // MAIDSAFE_NFS_CLIENT_MAID_NODE_NFS_H_
