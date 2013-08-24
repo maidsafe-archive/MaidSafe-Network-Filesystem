@@ -33,6 +33,7 @@ License.
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/service.h"
 #include "maidsafe/nfs/utils.h"
+#include "maidsafe/nfs/client/client_utils.h"
 #include "maidsafe/nfs/client/maid_node_dispatcher.h"
 #include "maidsafe/nfs/client/maid_node_service.h"
 
@@ -143,7 +144,7 @@ void MaidNodeNfs::Put(const Data& data) {
 
 template<typename Data>
 void MaidNodeNfs::Delete(const typename Data::Name& data_name) {
-  dispatcher_.SendDeleteRequest(data);
+  dispatcher_.SendDeleteRequest(data_name);
 }
 
 template<typename Data>
