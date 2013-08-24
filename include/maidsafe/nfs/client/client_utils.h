@@ -52,8 +52,8 @@ void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& res
       if (result.data->name.type != Data::Tag::kValue)
         ThrowError(CommonErrors::invalid_parameter);
 
-      Data data(Data::Name(result.data->name.raw_name),
-                Data::serialised_type(result.data->content));
+      Data data(typename Data::Name(result.data->name.raw_name),
+                typename Data::serialised_type(result.data->content));
       promise->set_value(data);
     } else if (result.data_name_and_return_code) {
       boost::throw_exception(result.data_name_and_return_code->return_code.value);
