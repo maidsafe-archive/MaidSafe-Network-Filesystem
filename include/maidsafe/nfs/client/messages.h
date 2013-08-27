@@ -66,6 +66,7 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataNameAndReturnCode {
   DataNameAndReturnCode();
+  DataNameAndReturnCode(const nfs_vault::DataName& data_name, const ReturnCode& code);
   DataNameAndReturnCode(const DataNameAndReturnCode& other);
   DataNameAndReturnCode(DataNameAndReturnCode&& other);
   DataNameAndReturnCode& operator=(DataNameAndReturnCode other);

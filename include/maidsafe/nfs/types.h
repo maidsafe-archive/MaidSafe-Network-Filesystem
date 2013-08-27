@@ -28,6 +28,7 @@ namespace nfs {
 enum class MessageAction : int32_t {
   kGetRequest,
   kGetResponse,
+  kGetCachedResponse,
   kPutRequest,
   kPutResponse,
   kDeleteRequest,

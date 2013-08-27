@@ -69,6 +69,15 @@ void MaidNodeService::HandleMessage<MaidNodeService::PutResponse>(
   assert(0);
 }
 
+template<>
+void MaidNodeService::HandleMessage<MaidNodeService::GetCachedResponse>(
+    const GetCachedResponse& /*message*/,
+    const typename GetCachedResponse::Sender& /*sender*/,
+    const typename GetCachedResponse::Receiver& /*receiver*/) {
+  assert(0);
+}
+
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

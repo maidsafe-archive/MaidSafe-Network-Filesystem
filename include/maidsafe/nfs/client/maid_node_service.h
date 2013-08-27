@@ -37,6 +37,7 @@ class MaidNodeService {
   typedef nfs::GetVersionsResponseFromVersionManagerToMaidNode GetVersionsResponse;
   typedef nfs::GetBranchResponseFromVersionManagerToMaidNode GetBranchResponse;
   typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
+  typedef nfs::GetCachedResponseFromPmidNodeToMaidNode GetCachedResponse;
 
   MaidNodeService(
       routing::Routing& routing,
@@ -85,6 +86,12 @@ void MaidNodeService::HandleMessage<MaidNodeService::PutResponse>(
     const PutResponse& message,
     const typename PutResponse::Sender& sender,
     const typename PutResponse::Receiver& receiver);
+
+template<>
+void MaidNodeService::HandleMessage<MaidNodeService::GetCachedResponse>(
+    const GetCachedResponse& message,
+    const typename GetCachedResponse::Sender& sender,
+    const typename GetCachedResponse::Receiver& receiver);
 
 }  // namespace nfs_client
 

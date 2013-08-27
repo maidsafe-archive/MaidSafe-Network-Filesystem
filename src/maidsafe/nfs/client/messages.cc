@@ -88,6 +88,11 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT {
 // ==================== DataNameAndReturnCode ======================================================
 DataNameAndReturnCode::DataNameAndReturnCode() : name(), return_code() {}
 
+DataNameAndReturnCode::DataNameAndReturnCode(const nfs_vault::DataName& data_name,
+                                             const ReturnCode& code)
+    : name(data_name),
+      return_code(code) {}
+
 DataNameAndReturnCode::DataNameAndReturnCode(const DataNameAndReturnCode& other)
     : name(other.name),
       return_code(other.return_code) {}
