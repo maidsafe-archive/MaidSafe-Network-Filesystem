@@ -133,7 +133,7 @@ boost::future<Data> MaidNodeNfs::Get(const typename Data::Name& data_name,
       },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
       routing::Parameters::node_group_size * 2));
-  dispatcher_.SendGetRequest(task_id, data_name);
+  dispatcher_.SendGetRequest<Data>(task_id, data_name);
   return promise->get_future();
 }
 
@@ -144,7 +144,7 @@ void MaidNodeNfs::Put(const Data& data) {
 
 template<typename Data>
 void MaidNodeNfs::Delete(const typename Data::Name& data_name) {
-  dispatcher_.SendDeleteRequest(data_name);
+  dispatcher_.SendDeleteRequest<Data>(data_name);
 }
 
 template<typename Data>

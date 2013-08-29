@@ -46,7 +46,7 @@ class MaidNodeDispatcher {
   void SendGetRequest(routing::TaskId task_id, const typename Data::Name& data_name);
 
   template<typename Data>
-  void SendPutRequest(const Data& data, const passport::Pmid::Name& pmid_node_hint);
+  void SendPutRequest(const Data& data, const passport::PublicPmid::Name& pmid_node_hint);
 
   template<typename Data>
   void SendDeleteRequest(const typename Data::Name& data_name);
@@ -114,14 +114,14 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
 
 template<typename Data>
 void MaidNodeDispatcher::SendPutRequest(const Data& data,
-                                        const passport::Pmid::Name& pmid_node_hint) {
+                                        const passport::PublicPmid::Name& pmid_node_hint) {
   typedef nfs::PutRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kPut :
                                                                          routing::Cacheable::kNone);
   NfsMessage::Contents contents;
-  contents.data = data;
+  contents.data = nfs_vault::DataNameAndContent(data);
   contents.pmid_hint = pmid_node_hint.value;
   NfsMessage nfs_message(contents);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_,
