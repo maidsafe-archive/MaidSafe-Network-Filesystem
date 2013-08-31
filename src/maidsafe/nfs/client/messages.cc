@@ -38,6 +38,8 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
     return MakeError(static_cast<NfsErrors>(error_value));
   if (error_category_name == std::string(GetRoutingCategory().name()))
     return MakeError(static_cast<RoutingErrors>(error_value));
+  if (error_category_name == std::string(GetDriveCategory().name()))
+    return MakeError(static_cast<DriveErrors>(error_value));
   if (error_category_name == std::string(GetVaultCategory().name()))
     return MakeError(static_cast<VaultErrors>(error_value));
   if (error_category_name == std::string(GetLifeStuffCategory().name()))
