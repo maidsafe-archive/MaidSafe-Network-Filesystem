@@ -56,7 +56,11 @@ enum class MessageAction : int32_t {
   kGetPmidAccountResponse,
   kStateChange,
   kSynchronise,
-  kAccountTransfer
+  kAccountTransfer,
+  kIncrementSubscribers,
+  kDecrementSubscribers,
+  kSetPmidOnline,
+  kSetPmidOffline
 };
 
 enum class Persona : int32_t {
