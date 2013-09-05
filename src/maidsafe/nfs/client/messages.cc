@@ -78,6 +78,11 @@ std::string ReturnCode::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
+
+bool operator==(const ReturnCode& lhs, const ReturnCode& rhs) {
+  return lhs.value.code() == rhs.value.code();
+}
+
 void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.value, rhs.value);
@@ -121,6 +126,10 @@ std::string DataNameAndReturnCode::Serialise() const {
   proto_copy.set_serialised_name(name.Serialise());
   proto_copy.set_serialised_return_code(return_code.Serialise());
   return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& rhs) {
+  return lhs.name == rhs.name && lhs.return_code == rhs.return_code;
 }
 
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
@@ -167,6 +176,11 @@ std::string DataNameVersionAndReturnCode::Serialise() const {
   proto_copy.set_serialised_data_name_and_version(data_name_and_version.Serialise());
   proto_copy.set_serialised_return_code(return_code.Serialise());
   return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameVersionAndReturnCode& lhs, const DataNameVersionAndReturnCode& rhs) {
+  return lhs.data_name_and_version == rhs.data_name_and_version &&
+         lhs.return_code == rhs.return_code;
 }
 
 void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
@@ -217,6 +231,12 @@ std::string DataNameOldNewVersionAndReturnCode::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
+bool operator==(const DataNameOldNewVersionAndReturnCode& lhs,
+                const DataNameOldNewVersionAndReturnCode& rhs) {
+  return lhs.data_name_old_new_version == rhs.data_name_old_new_version &&
+         lhs.return_code == rhs.return_code;
+}
+
 void swap(DataNameOldNewVersionAndReturnCode& lhs,
           DataNameOldNewVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
@@ -257,6 +277,10 @@ std::string DataAndReturnCode::Serialise() const {
   proto_copy.set_serialised_data_name_and_content(data.Serialise());
   proto_copy.set_serialised_return_code(return_code.Serialise());
   return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataAndReturnCode& lhs, const DataAndReturnCode& rhs) {
+  return lhs.data == rhs.data && lhs.return_code == rhs.return_code;
 }
 
 void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
@@ -327,6 +351,15 @@ std::string DataNameAndContentOrReturnCode::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
+bool operator==(const DataNameAndContentOrReturnCode& lhs,
+                const DataNameAndContentOrReturnCode& rhs) {
+  if (lhs.data)
+    return (*lhs.data) == (*rhs.data);
+  else if (lhs.data_name_and_return_code)
+    return (*lhs.data_name_and_return_code) == (*rhs.data_name_and_return_code);
+  return false;
+}
+
 void swap(DataNameAndContentOrReturnCode& lhs,
           DataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
@@ -391,6 +424,15 @@ std::string StructuredDataNameAndContentOrReturnCode::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
+bool operator==(const StructuredDataNameAndContentOrReturnCode& lhs,
+                const StructuredDataNameAndContentOrReturnCode& rhs) {
+  if (lhs.structured_data)
+    return (*lhs.structured_data) == (*rhs.structured_data);
+  else if (lhs.data_name_and_return_code)
+    return (*lhs.data_name_and_return_code) == (*rhs.data_name_and_return_code);
+  return false;
+}
+
 void swap(StructuredDataNameAndContentOrReturnCode& lhs,
           StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
@@ -431,6 +473,11 @@ std::string DataPmidHintAndReturnCode::Serialise() const {
   proto_copy.set_serialised_data_and_pmid_hint(data_and_pmid_hint.Serialise());
   proto_copy.set_serialised_return_code(return_code.Serialise());
   return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataPmidHintAndReturnCode& lhs, const DataPmidHintAndReturnCode& rhs) {
+  return lhs.data_and_pmid_hint == rhs.data_and_pmid_hint &&
+         lhs.return_code == rhs.return_code;
 }
 
 void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
@@ -476,6 +523,12 @@ std::string PmidRegistrationAndReturnCode::Serialise() const {
   proto_copy.set_serialised_pmid_registration(pmid_registration.Serialise());
   proto_copy.set_serialised_return_code(return_code.Serialise());
   return proto_copy.SerializeAsString();
+}
+
+bool operator==(const PmidRegistrationAndReturnCode& lhs,
+                const PmidRegistrationAndReturnCode& rhs) {
+  return lhs.pmid_registration == rhs.pmid_registration &&
+         lhs.return_code == rhs.return_code;
 }
 
 void swap(PmidRegistrationAndReturnCode& lhs,

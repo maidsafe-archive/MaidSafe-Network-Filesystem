@@ -60,9 +60,8 @@ struct ReturnCode {
   maidsafe_error value;
 };
 
+bool operator==(const ReturnCode& lhs, const ReturnCode& rhs);
 void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
-
 
 struct DataNameAndReturnCode {
   DataNameAndReturnCode();
@@ -78,8 +77,8 @@ struct DataNameAndReturnCode {
   ReturnCode return_code;
 };
 
+bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& rhs);
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataNameVersionAndReturnCode {
@@ -95,8 +94,8 @@ struct DataNameVersionAndReturnCode {
   ReturnCode return_code;
 };
 
+bool operator==(const DataNameVersionAndReturnCode& lhs, const DataNameVersionAndReturnCode& rhs);
 void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataNameOldNewVersionAndReturnCode {
@@ -112,6 +111,8 @@ struct DataNameOldNewVersionAndReturnCode {
   ReturnCode return_code;
 };
 
+bool operator==(const DataNameOldNewVersionAndReturnCode& lhs,
+                const DataNameOldNewVersionAndReturnCode& rhs);
 void swap(DataNameOldNewVersionAndReturnCode& lhs,
           DataNameOldNewVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
@@ -130,8 +131,8 @@ struct DataAndReturnCode {
   ReturnCode return_code;
 };
 
+bool operator==(const DataAndReturnCode& lhs, const DataAndReturnCode& rhs);
 void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataNameAndContentOrReturnCode {
@@ -156,9 +157,10 @@ template<>
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndReturnCode& data_name_and_return_code_in);
 
+bool operator==(const DataNameAndContentOrReturnCode& lhs,
+                const DataNameAndContentOrReturnCode& rhs);
 void swap(DataNameAndContentOrReturnCode& lhs,
           DataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct StructuredDataNameAndContentOrReturnCode {
@@ -175,9 +177,10 @@ struct StructuredDataNameAndContentOrReturnCode {
   boost::optional<DataNameAndReturnCode> data_name_and_return_code;
 };
 
+bool operator==(const StructuredDataNameAndContentOrReturnCode& lhs,
+                const StructuredDataNameAndContentOrReturnCode& rhs);
 void swap(StructuredDataNameAndContentOrReturnCode& lhs,
           StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataPmidHintAndReturnCode {
@@ -193,9 +196,8 @@ struct DataPmidHintAndReturnCode {
   ReturnCode return_code;
 };
 
+bool operator==(const DataPmidHintAndReturnCode& lhs, const DataPmidHintAndReturnCode& rhs);
 void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
-
 
 struct PmidRegistrationAndReturnCode {
   PmidRegistrationAndReturnCode();
@@ -210,6 +212,8 @@ struct PmidRegistrationAndReturnCode {
   ReturnCode return_code;
 };
 
+bool operator==(const PmidRegistrationAndReturnCode& lhs,
+                const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_client

@@ -59,6 +59,11 @@ std::string DataName::Serialise() const {
   return proto_data_name.SerializeAsString();
 }
 
+bool operator==(const DataName& lhs, const DataName& rhs) {
+  return lhs.type == rhs.type &&
+         lhs.raw_name == rhs.raw_name;
+}
+
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.type, rhs.type);
@@ -98,6 +103,11 @@ std::string DataNameAndVersion::Serialise() const {
   proto_copy.set_serialised_data_name(data_name.Serialise());
   proto_copy.set_serialised_version_name(version_name.Serialise());
   return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameAndVersion& lhs, const DataNameAndVersion& rhs) {
+  return lhs.data_name == rhs.data_name &&
+         lhs.version_name == rhs.version_name;
 }
 
 void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT {
@@ -149,6 +159,12 @@ std::string DataNameOldNewVersion::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
+bool operator==(const DataNameOldNewVersion& lhs, const DataNameOldNewVersion& rhs) {
+  return lhs.data_name == rhs.data_name &&
+         lhs.old_version_name == rhs.old_version_name &&
+         lhs.new_version_name == rhs.new_version_name;
+}
+
 void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.data_name, rhs.data_name);
@@ -191,6 +207,11 @@ std::string DataNameAndContent::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
+bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs) {
+  return lhs.name == rhs.name &&
+         lhs.content == rhs.content;
+}
+
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.name, rhs.name);
@@ -230,6 +251,11 @@ std::string DataAndPmidHint::Serialise() const {
   proto_copy.set_serialised_data_name_and_content(data.Serialise());
   proto_copy.set_pmid_hint(pmid_hint.string());
   return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataAndPmidHint& lhs, const DataAndPmidHint& rhs) {
+  return lhs.data == rhs.data &&
+         lhs.pmid_hint == rhs.pmid_hint;
 }
 
 void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT {

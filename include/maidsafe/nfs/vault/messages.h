@@ -37,7 +37,6 @@ struct Empty {
 };
 
 
-
 struct DataName {
   template<typename DataNameType>
   explicit DataName(const DataNameType& data_name)
@@ -58,8 +57,8 @@ struct DataName {
   Identity raw_name;
 };
 
+bool operator==(const DataName& lhs, const DataName& rhs);
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataNameAndVersion {
@@ -75,8 +74,8 @@ struct DataNameAndVersion {
   StructuredDataVersions::VersionName version_name;
 };
 
+bool operator==(const DataNameAndVersion& lhs, const DataNameAndVersion& rhs);
 void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataNameOldNewVersion {
@@ -92,8 +91,8 @@ struct DataNameOldNewVersion {
   StructuredDataVersions::VersionName old_version_name, new_version_name;
 };
 
+bool operator==(const DataNameOldNewVersion& lhs, const DataNameOldNewVersion& rhs);
 void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataNameAndContent {
@@ -118,8 +117,8 @@ struct DataNameAndContent {
   NonEmptyString content;
 };
 
+bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs);
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
-
 
 
 struct DataAndPmidHint {
@@ -135,6 +134,7 @@ struct DataAndPmidHint {
   Identity pmid_hint;
 };
 
+bool operator==(const DataAndPmidHint& lhs, const DataAndPmidHint& rhs);
 void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_vault

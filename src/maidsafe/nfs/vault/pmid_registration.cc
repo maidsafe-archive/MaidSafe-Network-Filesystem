@@ -140,6 +140,14 @@ std::string PmidRegistration::Serialise() const {
   return proto_pmid_registration.SerializeAsString();
 }
 
+bool operator==(const PmidRegistration& lhs, const PmidRegistration& rhs) {
+  return lhs.maid_name_ == rhs.maid_name_ &&
+         lhs.pmid_name_ == rhs.pmid_name_ &&
+         lhs.unregister_ == rhs.unregister_ &&
+         lhs.maid_signature_ == rhs.maid_signature_ &&
+         lhs.pmid_signature_ == rhs.pmid_signature_;}
+
+
 void swap(PmidRegistration& lhs, PmidRegistration& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.maid_name_, rhs.maid_name_);

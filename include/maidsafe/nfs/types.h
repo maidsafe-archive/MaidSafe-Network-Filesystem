@@ -57,6 +57,7 @@ enum class MessageAction : int32_t {
   kStateChange,
   kSynchronise,
   kAccountTransfer,
+  kAddPmid,
   kIncrementSubscribers,
   kDecrementSubscribers,
   kSetPmidOnline,

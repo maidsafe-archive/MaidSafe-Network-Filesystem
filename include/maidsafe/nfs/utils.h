@@ -43,6 +43,10 @@ bool IsSuccess(const MessageContents& response);
 template<typename MessageContents>
 std::error_code ErrorCode(const MessageContents& response);
 
+template<typename MessageContents>
+bool Equals(const MessageContents& lhs, const MessageContents& rhs) {
+  return lhs == rhs;
+}
 
 // If 'responses' contains >= n successsful responses where n is 'successes_required', returns
 // <iterator to nth successful reply, true> otherwise

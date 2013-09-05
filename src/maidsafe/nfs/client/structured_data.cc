@@ -55,6 +55,15 @@ std::string StructuredData::Serialise() const {
   return proto_structured_data.SerializeAsString();
 }
 
+bool operator==(const StructuredData& lhs, const StructuredData& rhs) {
+  if (lhs.versions.size() != rhs.versions.size())
+    return false;
+  for(auto& version : lhs.versions)
+    if (std::find(rhs.versions.begin(), rhs.versions.end(), version) == rhs.versions.end())
+      return false;
+  return true;
+}
+
 void swap(StructuredData& lhs, StructuredData& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.versions, rhs.versions);

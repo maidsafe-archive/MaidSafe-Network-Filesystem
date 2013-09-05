@@ -42,6 +42,7 @@ struct StructuredData {
   std::vector<StructuredDataVersions::VersionName> versions;
 };
 
+bool operator==(const StructuredData& lhs, const StructuredData& rhs);
 void swap(StructuredData& lhs, StructuredData& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_client

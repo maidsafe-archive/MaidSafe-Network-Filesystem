@@ -43,6 +43,7 @@ class PmidRegistration {
   passport::PublicPmid::Name pmid_name() const { return pmid_name_; }
   bool unregister() const { return unregister_; }
 
+  friend bool operator==(const PmidRegistration& lhs, const PmidRegistration& rhs);
   friend void swap(PmidRegistration& lhs, PmidRegistration& rhs) MAIDSAFE_NOEXCEPT;
 
  private:
@@ -52,6 +53,9 @@ class PmidRegistration {
   asymm::Signature maid_signature_;
   asymm::Signature pmid_signature_;
 };
+
+bool operator==(const PmidRegistration& lhs, const PmidRegistration& rhs);
+void swap(PmidRegistration& lhs, PmidRegistration& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_vault
 
