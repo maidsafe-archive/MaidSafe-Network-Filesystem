@@ -40,6 +40,7 @@ void DataGetterService::HandleMessage<DataGetterService::GetResponse>(
     const typename GetResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
+  static_cast<void>(routing_);
   get_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
