@@ -1,5 +1,5 @@
 Action:PutRequest                     Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataAndPmidHint
-Action:PutResponse                    Source:DataManager:Single       Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndContent
+Action:PutResponse                    Source:DataManager:Single       Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndCost
 Action:DeleteRequest                  Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
 Action:PutVersionRequest              Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameOldNewVersion
 Action:DeleteBranchUntilForkRequest   Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndVersion

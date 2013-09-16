@@ -544,26 +544,39 @@ void swap(PmidRegistrationAndReturnCode& lhs,
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
     const DataNameAndContentAndReturnCode& data)
         : name(data.name),
-          content(data.content),
-          code(data.code) {}
+          return_code(data.return_code) {
+  if (data.content)
+    content = *data.content;
+}
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
     const DataTagValue& type_in,
     const Identity& name_in,
-    const NonEmptyString& content_in,
+    const nfs_client::ReturnCode& code_in,
+    const NonEmptyString& content_in)
+        : name(nfs_vault::DataName(type_in, name_in)),
+          return_code(code_in),
+          content(content_in) {}
+
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
+    const DataTagValue& type_in,
+    const Identity& name_in,
     const nfs_client::ReturnCode& code_in)
         : name(nfs_vault::DataName(type_in, name_in)),
-          content(content_in),
-          code(code_in) {}
+          return_code(code_in) {}
+
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode()
-    : name(), content(), code() {}
+    : name(), return_code() {
+}
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
     DataNameAndContentAndReturnCode&& other)
         : name(std::move(other.name)),
-          content(std::move(other.content)),
-          code(std::move(other.code)) {}
+          return_code(std::move(other.return_code)) {
+  if (other.content)
+    content = std::move(*other.content);
+}
 
 DataNameAndContentAndReturnCode& DataNameAndContentAndReturnCode::operator=(
     DataNameAndContentAndReturnCode other) {
@@ -575,9 +588,22 @@ void swap(DataNameAndContentAndReturnCode& lhs,
           DataNameAndContentAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.name, rhs.name);
+  swap(lhs.return_code, rhs.return_code);
   swap(lhs.content, rhs.content);
-  swap(lhs.code, rhs.code);
 }
+
+bool operator==(const DataNameAndContentAndReturnCode& lhs,
+                const DataNameAndContentAndReturnCode& rhs) {
+  if ((!lhs.content && rhs.content) || (lhs.content && !rhs.content))
+    return false;
+  if (!lhs.content)
+    return lhs.name == rhs.name &&
+           lhs.return_code == rhs.return_code;
+  return lhs.name == rhs.name &&
+         lhs.return_code == rhs.return_code &&
+         *lhs.content == *rhs.content;
+}
+
 
 }  // namespace nfs_client
 

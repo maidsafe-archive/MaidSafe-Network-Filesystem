@@ -219,7 +219,10 @@ void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs
 struct DataNameAndContentAndReturnCode {
   DataNameAndContentAndReturnCode(const DataTagValue& type_in,
                                   const Identity& name_in,
-                                  const NonEmptyString& content_in,
+                                  const nfs_client::ReturnCode& code_in,
+                                  const NonEmptyString& content_in);
+  DataNameAndContentAndReturnCode(const DataTagValue& type_in,
+                                  const Identity& name_in,
                                   const nfs_client::ReturnCode& code_in);
   DataNameAndContentAndReturnCode();
   DataNameAndContentAndReturnCode(const DataNameAndContentAndReturnCode& other);
@@ -230,12 +233,14 @@ struct DataNameAndContentAndReturnCode {
   std::string Serialise() const;
 
   nfs_vault::DataName name;
-  NonEmptyString content;
-  nfs_client::ReturnCode code;
+  nfs_client::ReturnCode return_code;
+  boost::optional<NonEmptyString> content;
 };
 
 void swap(DataNameAndContentAndReturnCode& lhs,
           DataNameAndContentAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndContentAndReturnCode& lhs,
+                const DataNameAndContentAndReturnCode& rhs);
 
 
 }  // namespace nfs_client
