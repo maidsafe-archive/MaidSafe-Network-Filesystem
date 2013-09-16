@@ -175,9 +175,11 @@ void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXC
 
 
 // ==================== DataNameAndContent =========================================================
-DataNameAndContent::DataNameAndContent(DataTagValue /*type_in*/,
-                                       const Identity& /*name_in*/,
-                                       const NonEmptyString& /*content_in*/) {}
+DataNameAndContent::DataNameAndContent(DataTagValue type_in,
+                                       const Identity& name_in,
+                                       const NonEmptyString& content_in)
+    : name(type_in, name_in),
+      content(content_in) {}
 
 
 DataNameAndContent::DataNameAndContent() : name(), content() {}
