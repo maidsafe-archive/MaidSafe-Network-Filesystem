@@ -578,6 +578,27 @@ DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
     content = std::move(*other.content);
 }
 
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
+    const std::string& serialised_copy) {
+  protobuf::DataNameAndContentAndReturnCode proto;
+  if (!proto.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+
+  name = nfs_vault::DataName(proto.serialised_name());
+  return_code = nfs_client::ReturnCode(proto.serialised_return_code());
+  if (proto.has_content())
+    content = NonEmptyString(proto.content());
+}
+
+std::string DataNameAndContentAndReturnCode::Serialise() const {
+  protobuf::DataNameAndContentAndReturnCode proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  if (content)
+    proto_copy.set_content(content->string());
+  return proto_copy.SerializeAsString();
+}
+
 DataNameAndContentAndReturnCode& DataNameAndContentAndReturnCode::operator=(
     DataNameAndContentAndReturnCode other) {
   swap(*this, other);
