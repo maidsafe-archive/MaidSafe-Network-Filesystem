@@ -48,8 +48,18 @@ class PersonaDemuxer : public boost::static_visitor<> {
       sender_(sender),
       receiver_(receiver) {}
   template<typename Message>
-  void operator()(const Message& message) const {
+  typename std::enable_if<std::is_same<Sender, typename Message::Sender>::value &&
+                          std::is_same<Receiver, typename Message::Receiver>::value, void>::type
+      operator()(const Message& message) const {
     persona_service_.HandleMessage(message, sender_, receiver_);
+  }
+  template<typename Message>
+  typename std::enable_if<!std::is_same<Sender, typename Message::Sender>::value ||
+                          !std::is_same<Receiver, typename Message::Receiver>::value, void>::type
+      operator()(const Message& /*message*/) const {
+    // Should never come here.  Ideally this specialisation shouldn't exist, but the static visitor
+    // requires all types in the variant to be handled.
+    ThrowError(CommonErrors::invalid_parameter);
   }
 
  private:
