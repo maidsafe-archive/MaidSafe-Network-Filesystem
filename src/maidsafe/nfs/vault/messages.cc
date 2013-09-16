@@ -219,9 +219,60 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
 }
 
 
+// ==================== DataNameAndCost =========================================================
+
+DataNameAndCost::DataNameAndCost() : name(), cost(0) {}
+
+DataNameAndCost::DataNameAndCost(const DataNameAndCost& other)
+    : name(other.name),
+      cost(other.cost) {}
+
+DataNameAndCost::DataNameAndCost(DataNameAndCost&& other)
+    : name(std::move(other.name)),
+      cost(std::move(other.cost)) {}
+
+DataNameAndCost& DataNameAndCost::operator=(DataNameAndCost other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndCost::DataNameAndCost(const std::string& serialised_copy)
+    : name(),
+      cost(0) {
+  protobuf::DataNameAndCost proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  name = DataName(proto_copy.serialised_name());
+  cost = proto_copy.cost();
+}
+
+std::string DataNameAndCost::Serialise() const {
+  protobuf::DataNameAndCost proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_cost(cost);
+  return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameAndCost& lhs, const DataNameAndCost& rhs) {
+  return lhs.name == rhs.name &&
+         lhs.cost== rhs.cost;
+}
+
+void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.cost, rhs.cost);
+}
 
 // ==================== DataAndPmidHint ============================================================
 DataAndPmidHint::DataAndPmidHint() : data(), pmid_hint() {}
+
+DataAndPmidHint::DataAndPmidHint(
+    const DataName& data_name,
+    const NonEmptyString& content,
+    const Identity& pmid_node_hint)
+        : data(data_name.type, data_name.raw_name, content),
+          pmid_hint(pmid_node_hint) {}
 
 DataAndPmidHint::DataAndPmidHint(const DataAndPmidHint& other)
     : data(other.data),

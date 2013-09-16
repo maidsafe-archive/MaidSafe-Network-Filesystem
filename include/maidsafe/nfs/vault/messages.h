@@ -121,8 +121,38 @@ bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs);
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
 
 
+struct DataNameAndCost {
+  template<typename Data>
+  explicit DataNameAndCost(const Data& data)
+      : name(data.name()),
+        cost(data.cost) {}
+
+  DataNameAndCost(DataTagValue type_in,
+                  const Identity& name_in,
+                  const int32_t& cost_in);
+
+  DataNameAndCost();
+  DataNameAndCost(const DataNameAndCost& other);
+  DataNameAndCost(DataNameAndCost&& other);
+  DataNameAndCost& operator=(DataNameAndCost other);
+
+  explicit DataNameAndCost(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName name;
+  int32_t cost;
+};
+
+bool operator==(const DataNameAndCost& lhs, const DataNameAndCost& rhs);
+void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT;
+
+
+
 struct DataAndPmidHint {
   DataAndPmidHint();
+  DataAndPmidHint(const DataName& data_name,
+                  const NonEmptyString& content,
+                  const Identity& pmid_node_hint);
   DataAndPmidHint(const DataAndPmidHint& other);
   DataAndPmidHint(DataAndPmidHint&& other);
   DataAndPmidHint& operator=(DataAndPmidHint other);

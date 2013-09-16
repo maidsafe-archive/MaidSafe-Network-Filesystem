@@ -36,6 +36,11 @@ message DataNameAndContent {
   required bytes content = 2;
 }
 
+message DataNameAndCost {
+  required bytes serialised_name = 1;
+  required int32 cost = 2;
+}
+
 message DataAndPmidHint {
   required bytes serialised_data_name_and_content = 1;
   required bytes pmid_hint = 2;

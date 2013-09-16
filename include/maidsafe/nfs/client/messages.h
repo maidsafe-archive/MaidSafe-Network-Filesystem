@@ -216,6 +216,28 @@ bool operator==(const PmidRegistrationAndReturnCode& lhs,
                 const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
+struct DataNameAndContentAndReturnCode {
+  DataNameAndContentAndReturnCode(const DataTagValue& type_in,
+                                  const Identity& name_in,
+                                  const NonEmptyString& content_in,
+                                  const nfs_client::ReturnCode& code_in);
+  DataNameAndContentAndReturnCode();
+  DataNameAndContentAndReturnCode(const DataNameAndContentAndReturnCode& other);
+  DataNameAndContentAndReturnCode(DataNameAndContentAndReturnCode&& other);
+  DataNameAndContentAndReturnCode& operator=(DataNameAndContentAndReturnCode other);
+
+  explicit DataNameAndContentAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  nfs_vault::DataName name;
+  NonEmptyString content;
+  nfs_client::ReturnCode code;
+};
+
+void swap(DataNameAndContentAndReturnCode& lhs,
+          DataNameAndContentAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+
+
 }  // namespace nfs_client
 
 

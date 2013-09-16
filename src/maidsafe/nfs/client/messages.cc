@@ -538,6 +538,47 @@ void swap(PmidRegistrationAndReturnCode& lhs,
   swap(lhs.return_code, rhs.return_code);
 }
 
+
+// ==================== DataNameAndContentAndReturnCode ============================================
+
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
+    const DataNameAndContentAndReturnCode& data)
+        : name(data.name),
+          content(data.content),
+          code(data.code) {}
+
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
+    const DataTagValue& type_in,
+    const Identity& name_in,
+    const NonEmptyString& content_in,
+    const nfs_client::ReturnCode& code_in)
+        : name(nfs_vault::DataName(type_in, name_in)),
+          content(content_in),
+          code(code_in) {}
+
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode()
+    : name(), content(), code() {}
+
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
+    DataNameAndContentAndReturnCode&& other)
+        : name(std::move(other.name)),
+          content(std::move(other.content)),
+          code(std::move(other.code)) {}
+
+DataNameAndContentAndReturnCode& DataNameAndContentAndReturnCode::operator=(
+    DataNameAndContentAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+void swap(DataNameAndContentAndReturnCode& lhs,
+          DataNameAndContentAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.content, rhs.content);
+  swap(lhs.code, rhs.code);
+}
+
 }  // namespace nfs_client
 
 
