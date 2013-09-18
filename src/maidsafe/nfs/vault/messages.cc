@@ -27,6 +27,10 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
+bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/) {
+  return true;
+}
+
 // ==================== DataName ===================================================================
 DataName::DataName(DataTagValue type_in, const Identity& raw_name_in)
     : type(type_in),

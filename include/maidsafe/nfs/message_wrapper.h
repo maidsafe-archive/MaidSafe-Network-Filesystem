@@ -91,6 +91,32 @@ struct MessageWrapper {
   static const detail::DestinationTaggedValue kDestinationTaggedValue;
 };
 
+template<MessageAction action,
+         typename SourcePersonaType,
+         typename RoutingSenderType,
+         typename DestinationPersonaType,
+         typename RoutingReceiverType,
+         typename ContentsType>
+bool operator==(const MessageWrapper<action,
+                                     SourcePersonaType,
+                                     RoutingSenderType,
+                                     DestinationPersonaType,
+                                     RoutingReceiverType,
+                                     ContentsType>& lhs,
+                const MessageWrapper<action,
+                                     SourcePersonaType,
+                                     RoutingSenderType,
+                                     DestinationPersonaType,
+                                     RoutingReceiverType,
+                                     ContentsType>& rhs) {
+  if (lhs.message_id != rhs.message_id)
+    return false;
+  if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents))
+    return false;
+  if (lhs.contents)
+    return *lhs.contents == *rhs.contents;
+  return true;
+}
 TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper);
 
 
