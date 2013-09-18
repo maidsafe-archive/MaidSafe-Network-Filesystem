@@ -39,6 +39,8 @@ struct Empty {
   std::string Serialise() const { return ""; }
 };
 
+bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/);
+
 
 struct DataName {
   template<typename DataNameType>
