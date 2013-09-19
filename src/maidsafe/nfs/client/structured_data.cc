@@ -61,9 +61,10 @@ std::string StructuredData::Serialise() const {
 bool operator==(const StructuredData& lhs, const StructuredData& rhs) {
   if (lhs.versions.size() != rhs.versions.size())
     return false;
-  for(auto& version : lhs.versions)
+  for (const auto& version : lhs.versions) {
     if (std::find(rhs.versions.begin(), rhs.versions.end(), version) == rhs.versions.end())
       return false;
+  }
   return true;
 }
 

@@ -38,7 +38,7 @@ namespace vault {
 
 template<typename T>
 inline bool GetVariant(const maidsafe::nfs::TypeErasedMessageWrapper& /*message*/, T& /*variant*/) {
-  return true; // TODO(Team): BEFORE_RELEASE
+  return true;  // TODO(Team): BEFORE_RELEASE
 }
 
 }  // namespace vault
