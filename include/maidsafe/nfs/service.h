@@ -25,6 +25,8 @@
 #include "boost/variant/static_visitor.hpp"
 #include "boost/variant/variant.hpp"
 
+#include "maidsafe/routing/api_config.h"
+
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/types.h"
