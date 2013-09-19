@@ -98,10 +98,9 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT {
 // ==================== DataNameAndReturnCode ======================================================
 DataNameAndReturnCode::DataNameAndReturnCode() : name(), return_code() {}
 
-DataNameAndReturnCode::DataNameAndReturnCode(const nfs_vault::DataName& data_name,
-                                             const ReturnCode& code)
-    : name(data_name),
-      return_code(code) {}
+DataNameAndReturnCode::DataNameAndReturnCode(nfs_vault::DataName data_name,
+                                             ReturnCode code)
+    : name(std::move(data_name)), return_code(std::move(code)) {}
 
 DataNameAndReturnCode::DataNameAndReturnCode(const DataNameAndReturnCode& other)
     : name(other.name),
@@ -555,21 +554,17 @@ DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
 }
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
-    const DataTagValue& type_in,
-    const Identity& name_in,
-    const nfs_client::ReturnCode& code_in,
-    const NonEmptyString& content_in)
-        : name(nfs_vault::DataName(type_in, name_in)),
-          return_code(code_in),
-          content(content_in) {}
+    const DataTagValue& type_in, const Identity& name_in,
+    nfs_client::ReturnCode code_in, const NonEmptyString& content_in)
+    : name(nfs_vault::DataName(type_in, name_in)),
+      return_code(std::move(code_in)),
+      content(content_in) {}
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
-    const DataTagValue& type_in,
-    const Identity& name_in,
-    const nfs_client::ReturnCode& code_in)
-        : name(nfs_vault::DataName(type_in, name_in)),
-          return_code(code_in) {}
-
+    const DataTagValue& type_in, const Identity& name_in,
+    nfs_client::ReturnCode code_in)
+    : name(nfs_vault::DataName(type_in, name_in)),
+      return_code(std::move(code_in)) {}
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode()
     : name(), return_code() {

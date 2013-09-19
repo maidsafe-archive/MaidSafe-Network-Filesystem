@@ -48,7 +48,7 @@ struct DataName {
       : type(DataNameType::data_type::Tag::kValue),
         raw_name(data_name.value) {}
 
-  DataName(DataTagValue type_in, const Identity& raw_name_in);
+  DataName(DataTagValue type_in, Identity raw_name_in);
 
   DataName();
   DataName(const DataName& other);
@@ -106,9 +106,8 @@ struct DataNameAndContent {
       : name(data.name()),
         content(data.Serialise().data) {}
 
-  DataNameAndContent(DataTagValue type_in,
-                     const Identity& name_in,
-                     const NonEmptyString& content_in);
+  DataNameAndContent(DataTagValue type_in, const Identity& name_in,
+                     NonEmptyString content_in);
 
   DataNameAndContent();
   DataNameAndContent(const DataNameAndContent& other);
@@ -155,9 +154,8 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataAndPmidHint {
   DataAndPmidHint();
-  DataAndPmidHint(const DataName& data_name,
-                  const NonEmptyString& content,
-                  const Identity& pmid_node_hint);
+  DataAndPmidHint(const DataName& data_name, const NonEmptyString& content,
+                  Identity pmid_node_hint);
   DataAndPmidHint(const DataAndPmidHint& other);
   DataAndPmidHint(DataAndPmidHint&& other);
   DataAndPmidHint& operator=(DataAndPmidHint other);

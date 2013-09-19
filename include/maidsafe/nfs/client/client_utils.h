@@ -37,7 +37,7 @@ namespace nfs_client {
 template<typename Data>
 struct HandleGetResult {
   explicit HandleGetResult(std::shared_ptr<boost::promise<Data>> promise_in)
-      : promise(promise_in) {}
+      : promise(std::move(promise_in)) {}
   void operator()(const DataNameAndContentOrReturnCode& result) const;
   std::shared_ptr<boost::promise<Data>> promise;
 };

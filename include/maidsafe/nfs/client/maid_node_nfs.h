@@ -49,9 +49,8 @@ class MaidNodeNfs {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
 
-  MaidNodeNfs(AsioService& asio_service,
-              routing::Routing& routing,
-              const passport::PublicPmid::Name& pmid_node_hint);
+  MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
+              passport::PublicPmid::Name pmid_node_hint);
 
   passport::PublicPmid::Name pmid_node_hint() const;
   void set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint);

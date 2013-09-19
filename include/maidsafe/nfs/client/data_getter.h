@@ -49,9 +49,8 @@ class DataGetter {
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
 
   // all_pmids_from_file should only be non-empty if TESTING is defined
-  DataGetter(AsioService& asio_service,
-             routing::Routing& routing,
-             const std::vector<passport::PublicPmid>& public_pmids_from_file =
+  DataGetter(AsioService& asio_service, routing::Routing& routing,
+             std::vector<passport::PublicPmid> public_pmids_from_file =
                  std::vector<passport::PublicPmid>());
 
   template<typename Data>

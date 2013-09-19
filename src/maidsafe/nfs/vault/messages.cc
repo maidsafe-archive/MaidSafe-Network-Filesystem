@@ -32,9 +32,8 @@ bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/) {
 }
 
 // ==================== DataName ===================================================================
-DataName::DataName(DataTagValue type_in, const Identity& raw_name_in)
-    : type(type_in),
-      raw_name(raw_name_in) {}
+DataName::DataName(DataTagValue type_in, Identity raw_name_in)
+    : type(type_in), raw_name(std::move(raw_name_in)) {}
 
 DataName::DataName() : type(DataTagValue::kAnmidValue), raw_name() {}
 
@@ -184,10 +183,8 @@ void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXC
 // ==================== DataNameAndContent =========================================================
 DataNameAndContent::DataNameAndContent(DataTagValue type_in,
                                        const Identity& name_in,
-                                       const NonEmptyString& content_in)
-    : name(type_in, name_in),
-      content(content_in) {}
-
+                                       NonEmptyString content_in)
+    : name(type_in, name_in), content(std::move(content_in)) {}
 
 DataNameAndContent::DataNameAndContent() : name(), content() {}
 
@@ -281,12 +278,11 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
 // ==================== DataAndPmidHint ============================================================
 DataAndPmidHint::DataAndPmidHint() : data(), pmid_hint() {}
 
-DataAndPmidHint::DataAndPmidHint(
-    const DataName& data_name,
-    const NonEmptyString& content,
-    const Identity& pmid_node_hint)
-        : data(data_name.type, data_name.raw_name, content),
-          pmid_hint(pmid_node_hint) {}
+DataAndPmidHint::DataAndPmidHint(const DataName& data_name,
+                                 const NonEmptyString& content,
+                                 Identity pmid_node_hint)
+    : data(data_name.type, data_name.raw_name, content),
+      pmid_hint(std::move(pmid_node_hint)) {}
 
 DataAndPmidHint::DataAndPmidHint(const DataAndPmidHint& other)
     : data(other.data),

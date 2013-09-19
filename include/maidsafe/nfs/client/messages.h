@@ -68,7 +68,7 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataNameAndReturnCode {
   DataNameAndReturnCode();
-  DataNameAndReturnCode(const nfs_vault::DataName& data_name, const ReturnCode& code);
+  DataNameAndReturnCode(nfs_vault::DataName data_name, ReturnCode code);
   DataNameAndReturnCode(const DataNameAndReturnCode& other);
   DataNameAndReturnCode(DataNameAndReturnCode&& other);
   DataNameAndReturnCode& operator=(DataNameAndReturnCode other);
@@ -222,11 +222,11 @@ void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs
 struct DataNameAndContentAndReturnCode {
   DataNameAndContentAndReturnCode(const DataTagValue& type_in,
                                   const Identity& name_in,
-                                  const nfs_client::ReturnCode& code_in,
+                                  nfs_client::ReturnCode code_in,
                                   const NonEmptyString& content_in);
   DataNameAndContentAndReturnCode(const DataTagValue& type_in,
                                   const Identity& name_in,
-                                  const nfs_client::ReturnCode& code_in);
+                                  nfs_client::ReturnCode code_in);
   DataNameAndContentAndReturnCode();
   DataNameAndContentAndReturnCode(const DataNameAndContentAndReturnCode& other);
   DataNameAndContentAndReturnCode(DataNameAndContentAndReturnCode&& other);

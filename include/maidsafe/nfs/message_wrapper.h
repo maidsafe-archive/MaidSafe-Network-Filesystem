@@ -188,20 +188,14 @@ MessageWrapper<action,
     : message_id(detail::GetNewMessageId()),
       contents(std::make_shared<ContentsType>(contents_in)) {}
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-MessageWrapper<action,
-               SourcePersonaType,
-               RoutingSenderType,
-               DestinationPersonaType,
-               RoutingReceiverType,
+template <MessageAction action, typename SourcePersonaType,
+          typename RoutingSenderType, typename DestinationPersonaType,
+          typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType,
+               DestinationPersonaType, RoutingReceiverType,
                ContentsType>::MessageWrapper(MessageId message_id_in,
                                              const ContentsType& contents_in)
-    : message_id(message_id_in),
+    : message_id(std::move(message_id_in)),
       contents(std::make_shared<ContentsType>(contents_in)) {}
 
 template<MessageAction action,
