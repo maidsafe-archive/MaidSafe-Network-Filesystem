@@ -29,8 +29,9 @@ namespace maidsafe {
 
 namespace nfs_client {
 
-StructuredData::StructuredData(const std::vector<StructuredDataVersions::VersionName>& versions_in)
-    : versions(versions_in) {}
+StructuredData::StructuredData(
+    std::vector<StructuredDataVersions::VersionName> versions_in)
+    : versions(std::move(versions_in)) {}
 
 StructuredData::StructuredData() : versions() {}
 

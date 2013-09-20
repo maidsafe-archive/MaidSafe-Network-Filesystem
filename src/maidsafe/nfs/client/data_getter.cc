@@ -26,20 +26,21 @@ namespace maidsafe {
 
 namespace nfs_client {
 
-DataGetter::DataGetter(AsioService& asio_service,
-                       routing::Routing& routing,
-                       const std::vector<passport::PublicPmid>& public_pmids_from_file)
+DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
+                       std::vector<passport::PublicPmid> public_pmids_from_file)
     : get_timer_(asio_service),
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       dispatcher_(routing),
-      service_([&]()->std::unique_ptr<DataGetterService>&& {
-          std::unique_ptr<DataGetterService> service(
-              new DataGetterService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
-          return std::move(service);
-      }())
+      service_([&]()->std::unique_ptr<DataGetterService> &&
+{
+  std::unique_ptr<DataGetterService> service(new DataGetterService(
+      routing, get_timer_, get_versions_timer_, get_branch_timer_));
+  return std::move(service);
+}())
 #ifdef TESTING
-      , kAllPmids_(public_pmids_from_file)
+      ,
+      kAllPmids_(std::move(public_pmids_from_file))
 #endif
 {
 #ifndef TESTING
