@@ -1,5 +1,5 @@
 Action:PutRequest                     Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataAndPmidHint
-Action:PutResponse                    Source:DataManager:Single       Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndCost
+Action:PutResponse                    Source:DataManager:Group        Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndCost
 Action:DeleteRequest                  Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
 Action:PutVersionRequest              Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameOldNewVersion
 Action:DeleteBranchUntilForkRequest   Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndVersion
@@ -8,3 +8,4 @@ Action:RemoveAccountRequest           Source:MaidNode:Single          Destinatio
 Action:RegisterPmidRequest            Source:MaidNode:Single          Destination:MaidManager:Group     Contents:class:maidsafe::nfs_vault::PmidRegistration
 Action:UnregisterPmidRequest          Source:MaidNode:Single          Destination:MaidManager:Group     Contents:class:maidsafe::nfs_vault::PmidRegistration
 Action:GetPmidHealthRequest           Source:MaidNode:Single          Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
+Action:Synchronise                    Source:MaidManager:Group        Destination:MaidManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndContent
