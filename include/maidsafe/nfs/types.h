@@ -34,6 +34,7 @@ enum class MessageAction : int32_t {
   kGetCachedResponse,
   kPutRequest,
   kPutResponse,
+  kPutFailure,
   kDeleteRequest,
   kGetVersionsRequest,
   kGetVersionsResponse,
