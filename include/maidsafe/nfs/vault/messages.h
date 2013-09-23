@@ -125,6 +125,31 @@ bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs);
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
 
 
+struct DataNameAndRandomString {
+  template<typename Data>
+  explicit DataNameAndRandomString(const Data& data)
+      : name(data.name()),
+        random_string(data.Serialise().data) {}
+
+  DataNameAndRandomString(DataTagValue type_in, const Identity& name_in,
+                     NonEmptyString random_string_in);
+
+  DataNameAndRandomString();
+  DataNameAndRandomString(const DataNameAndRandomString& other);
+  DataNameAndRandomString(DataNameAndRandomString&& other);
+  DataNameAndRandomString& operator=(DataNameAndRandomString other);
+
+  explicit DataNameAndRandomString(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName name;
+  NonEmptyString random_string;
+};
+
+bool operator==(const DataNameAndRandomString& lhs, const DataNameAndRandomString& rhs);
+void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_NOEXCEPT;
+
+
 struct DataNameAndCost {
   template<typename Data>
   explicit DataNameAndCost(const Data& data)

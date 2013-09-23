@@ -179,7 +179,6 @@ void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXC
 }
 
 
-
 // ==================== DataNameAndContent =========================================================
 DataNameAndContent::DataNameAndContent(DataTagValue type_in,
                                        const Identity& name_in,
@@ -229,6 +228,55 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.content, rhs.content);
 }
 
+// ==================== DataNameAndRandomString =====================================================
+
+DataNameAndRandomString::DataNameAndRandomString(DataTagValue type_in,
+                                       const Identity& name_in,
+                                       NonEmptyString random_string_in)
+    : name(type_in, name_in), random_string(std::move(random_string_in)) {}
+
+DataNameAndRandomString::DataNameAndRandomString() : name(), random_string() {}
+
+DataNameAndRandomString::DataNameAndRandomString(const DataNameAndRandomString& other)
+    : name(other.name),
+      random_string(other.random_string) {}
+
+DataNameAndRandomString::DataNameAndRandomString(DataNameAndRandomString&& other)
+    : name(std::move(other.name)),
+      random_string(std::move(other.random_string)) {}
+
+DataNameAndRandomString& DataNameAndRandomString::operator=(DataNameAndRandomString other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndRandomString::DataNameAndRandomString(const std::string& serialised_copy)
+    : name(),
+      random_string() {
+  protobuf::DataNameAndRandomString proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  name = DataName(proto_copy.serialised_name());
+  random_string = NonEmptyString(proto_copy.random_string());
+}
+
+std::string DataNameAndRandomString::Serialise() const {
+  protobuf::DataNameAndRandomString proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_random_string(random_string.string());
+  return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameAndRandomString& lhs, const DataNameAndRandomString& rhs) {
+  return lhs.name == rhs.name &&
+         lhs.random_string == rhs.random_string;
+}
+
+void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.random_string, rhs.random_string);
+}
 
 // ==================== DataNameAndCost =========================================================
 

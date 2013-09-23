@@ -65,7 +65,8 @@ enum class MessageAction : int32_t {
   kIncrementSubscribers,
   kDecrementSubscribers,
   kSetPmidOnline,
-  kSetPmidOffline
+  kSetPmidOffline,
+  kIntegrityCheckRequest
 };
 
 enum class Persona : int32_t {
