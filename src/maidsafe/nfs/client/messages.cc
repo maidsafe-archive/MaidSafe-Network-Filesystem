@@ -625,6 +625,89 @@ bool operator==(const DataNameAndContentAndReturnCode& lhs,
          *lhs.content == *rhs.content;
 }
 
+// ==================== DataNameAndSignatureAndReturnCode =========================================
+
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
+    const DataNameAndSignatureAndReturnCode& data)
+        : name(data.name),
+          return_code(data.return_code) {
+  if (data.signature)
+    signature = *data.signature;
+}
+
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
+    const DataTagValue& type_in, const Identity& name_in,
+    nfs_client::ReturnCode code_in, const NonEmptyString& signature_in)
+    : name(nfs_vault::DataName(type_in, name_in)),
+      return_code(std::move(code_in)),
+      signature(signature_in) {}
+
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
+    const DataTagValue& type_in, const Identity& name_in,
+    nfs_client::ReturnCode code_in)
+    : name(nfs_vault::DataName(type_in, name_in)),
+      return_code(std::move(code_in)) {}
+
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode()
+    : name(), return_code() {
+}
+
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
+    DataNameAndSignatureAndReturnCode&& other)
+        : name(std::move(other.name)),
+          return_code(std::move(other.return_code)) {
+  if (other.signature)
+    signature = std::move(*other.signature);
+}
+
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
+    const std::string& serialised_copy) {
+  protobuf::DataNameAndSignatureAndReturnCode proto;
+  if (!proto.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+
+  name = nfs_vault::DataName(proto.serialised_name());
+  return_code = nfs_client::ReturnCode(proto.serialised_return_code());
+  if (proto.has_signature())
+    signature = NonEmptyString(proto.signature());
+}
+
+std::string DataNameAndSignatureAndReturnCode::Serialise() const {
+  protobuf::DataNameAndSignatureAndReturnCode proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  if (signature)
+    proto_copy.set_signature(signature->string());
+  return proto_copy.SerializeAsString();
+}
+
+DataNameAndSignatureAndReturnCode& DataNameAndSignatureAndReturnCode::operator=(
+    DataNameAndSignatureAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+void swap(DataNameAndSignatureAndReturnCode& lhs,
+          DataNameAndSignatureAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.return_code, rhs.return_code);
+  swap(lhs.signature, rhs.signature);
+}
+
+bool operator==(const DataNameAndSignatureAndReturnCode& lhs,
+                const DataNameAndSignatureAndReturnCode& rhs) {
+  if ((!lhs.signature && rhs.signature) || (lhs.signature && !rhs.signature))
+    return false;
+  if (!lhs.signature)
+    return lhs.name == rhs.name &&
+           lhs.return_code == rhs.return_code;
+  return lhs.name == rhs.name &&
+         lhs.return_code == rhs.return_code &&
+         *lhs.signature == *rhs.signature;
+}
+
+
 
 }  // namespace nfs_client
 

@@ -219,6 +219,8 @@ bool operator==(const PmidRegistrationAndReturnCode& lhs,
                 const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== DataNameAndContentAndReturnCode ====================================
+
 struct DataNameAndContentAndReturnCode {
   DataNameAndContentAndReturnCode(const DataTagValue& type_in,
                                   const Identity& name_in,
@@ -244,6 +246,34 @@ void swap(DataNameAndContentAndReturnCode& lhs,
           DataNameAndContentAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 bool operator==(const DataNameAndContentAndReturnCode& lhs,
                 const DataNameAndContentAndReturnCode& rhs);
+
+// ========================== DataNameAndSignatureAndReturnCode ====================================
+
+struct DataNameAndSignatureAndReturnCode {
+  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in,
+                                  const Identity& name_in,
+                                  nfs_client::ReturnCode code_in,
+                                  const NonEmptyString& signature_in);
+  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in,
+                                  const Identity& name_in,
+                                  nfs_client::ReturnCode code_in);
+  DataNameAndSignatureAndReturnCode();
+  DataNameAndSignatureAndReturnCode(const DataNameAndSignatureAndReturnCode& other);
+  DataNameAndSignatureAndReturnCode(DataNameAndSignatureAndReturnCode&& other);
+  DataNameAndSignatureAndReturnCode& operator=(DataNameAndSignatureAndReturnCode other);
+
+  explicit DataNameAndSignatureAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  nfs_vault::DataName name;
+  nfs_client::ReturnCode return_code;
+  boost::optional<NonEmptyString> signature;
+};
+
+void swap(DataNameAndSignatureAndReturnCode& lhs,
+          DataNameAndSignatureAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndSignatureAndReturnCode& lhs,
+                const DataNameAndSignatureAndReturnCode& rhs);
 
 
 }  // namespace nfs_client

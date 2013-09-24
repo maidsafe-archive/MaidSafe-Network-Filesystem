@@ -7,3 +7,4 @@ Action:StateChange                    Source:PmidManager:Group        Destinatio
 Action:GetRequest                     Source:PmidNode:Single          Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataName
 Action:GetResponse                    Source:PmidNode:Single          Destination:DataManager:Group     Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode
 Action:Synchronise                    Source:DataManager:Group        Destination:DataManager:Group     Contents:struct:maidsafe::nfs_vault::DataNameAndContent
+Action:IntegrityCheckResponse         Source:PmidNode:Single          Destination:DataManager:Single    Contents:struct:maidsafe::nfs_client::DataNameAndSignatureAndReturnCode
