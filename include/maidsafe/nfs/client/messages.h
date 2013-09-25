@@ -276,6 +276,33 @@ bool operator==(const DataNameAndSignatureAndReturnCode& lhs,
                 const DataNameAndSignatureAndReturnCode& rhs);
 
 
+// ========================== DataNameAndSpaceAndReturnCode ====================================
+
+struct DataNameAndSpaceAndReturnCode {
+  DataNameAndSpaceAndReturnCode(const DataTagValue& type_in,
+                                const Identity& name_in,
+                                const int64_t& available_space_in,
+                                const nfs_client::ReturnCode& code_in);
+  DataNameAndSpaceAndReturnCode();
+  DataNameAndSpaceAndReturnCode(const DataNameAndSpaceAndReturnCode& other);
+  DataNameAndSpaceAndReturnCode(DataNameAndSpaceAndReturnCode&& other);
+  DataNameAndSpaceAndReturnCode& operator=(DataNameAndSpaceAndReturnCode other);
+
+  explicit DataNameAndSpaceAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  nfs_vault::DataName name;
+  int64_t available_space;
+  nfs_client::ReturnCode return_code;
+};
+
+void swap(DataNameAndSpaceAndReturnCode& lhs,
+          DataNameAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
+                const DataNameAndSpaceAndReturnCode& rhs);
+
+
+
 }  // namespace nfs_client
 
 
