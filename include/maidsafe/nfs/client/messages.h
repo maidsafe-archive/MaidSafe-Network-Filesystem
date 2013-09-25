@@ -35,19 +35,18 @@
 #include "maidsafe/nfs/vault/messages.h"
 #include "maidsafe/nfs/utils.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
 
 struct ReturnCode {
   // This c'tor designed to be used with maidsafe-specific error enums (e.g. CommonErrors::success)
-  template<typename ErrorCode>
+  template <typename ErrorCode>
   explicit ReturnCode(ErrorCode error_code,
                       typename std::enable_if<std::is_error_code_enum<ErrorCode>::value>::type* = 0)
       : value(MakeError(error_code)) {}
 
-  template<typename Error>
+  template <typename Error>
   explicit ReturnCode(Error error,
                       typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
       : value(error) {}
@@ -83,7 +82,6 @@ struct DataNameAndReturnCode {
 bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& rhs);
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-
 struct DataNameVersionAndReturnCode {
   DataNameVersionAndReturnCode();
   DataNameVersionAndReturnCode(const DataNameVersionAndReturnCode& other);
@@ -99,7 +97,6 @@ struct DataNameVersionAndReturnCode {
 
 bool operator==(const DataNameVersionAndReturnCode& lhs, const DataNameVersionAndReturnCode& rhs);
 void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 struct DataNameOldNewVersionAndReturnCode {
   DataNameOldNewVersionAndReturnCode();
@@ -119,8 +116,6 @@ bool operator==(const DataNameOldNewVersionAndReturnCode& lhs,
 void swap(DataNameOldNewVersionAndReturnCode& lhs,
           DataNameOldNewVersionAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-
-
 struct DataAndReturnCode {
   DataAndReturnCode();
   DataAndReturnCode(const DataAndReturnCode& other);
@@ -137,12 +132,10 @@ struct DataAndReturnCode {
 bool operator==(const DataAndReturnCode& lhs, const DataAndReturnCode& rhs);
 void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-
 struct DataNameAndContentOrReturnCode {
-  template<typename Data>
+  template <typename Data>
   explicit DataNameAndContentOrReturnCode(const Data& data_in)
-      : data(nfs_vault::DataNameAndContent(data_in)),
-        data_name_and_return_code() {}
+      : data(nfs_vault::DataNameAndContent(data_in)), data_name_and_return_code() {}
 
   DataNameAndContentOrReturnCode();
   DataNameAndContentOrReturnCode(const DataNameAndContentOrReturnCode& other);
@@ -156,7 +149,7 @@ struct DataNameAndContentOrReturnCode {
   boost::optional<DataNameAndReturnCode> data_name_and_return_code;
 };
 
-template<>
+template <>
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndReturnCode& data_name_and_return_code_in);
 
@@ -164,7 +157,6 @@ bool operator==(const DataNameAndContentOrReturnCode& lhs,
                 const DataNameAndContentOrReturnCode& rhs);
 void swap(DataNameAndContentOrReturnCode& lhs,
           DataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 struct StructuredDataNameAndContentOrReturnCode {
   StructuredDataNameAndContentOrReturnCode();
@@ -184,7 +176,6 @@ bool operator==(const StructuredDataNameAndContentOrReturnCode& lhs,
                 const StructuredDataNameAndContentOrReturnCode& rhs);
 void swap(StructuredDataNameAndContentOrReturnCode& lhs,
           StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 struct DataPmidHintAndReturnCode {
   DataPmidHintAndReturnCode();
@@ -215,19 +206,15 @@ struct PmidRegistrationAndReturnCode {
   ReturnCode return_code;
 };
 
-bool operator==(const PmidRegistrationAndReturnCode& lhs,
-                const PmidRegistrationAndReturnCode& rhs);
+bool operator==(const PmidRegistrationAndReturnCode& lhs, const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 // ========================== DataNameAndContentAndReturnCode ====================================
 
 struct DataNameAndContentAndReturnCode {
-  DataNameAndContentAndReturnCode(const DataTagValue& type_in,
-                                  const Identity& name_in,
-                                  nfs_client::ReturnCode code_in,
-                                  const NonEmptyString& content_in);
-  DataNameAndContentAndReturnCode(const DataTagValue& type_in,
-                                  const Identity& name_in,
+  DataNameAndContentAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
+                                  nfs_client::ReturnCode code_in, const NonEmptyString& content_in);
+  DataNameAndContentAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
                                   nfs_client::ReturnCode code_in);
   DataNameAndContentAndReturnCode();
   DataNameAndContentAndReturnCode(const DataNameAndContentAndReturnCode& other);
@@ -250,13 +237,11 @@ bool operator==(const DataNameAndContentAndReturnCode& lhs,
 // ========================== DataNameAndSignatureAndReturnCode ====================================
 
 struct DataNameAndSignatureAndReturnCode {
-  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in,
-                                  const Identity& name_in,
-                                  nfs_client::ReturnCode code_in,
-                                  const NonEmptyString& signature_in);
-  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in,
-                                  const Identity& name_in,
-                                  nfs_client::ReturnCode code_in);
+  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
+                                    nfs_client::ReturnCode code_in,
+                                    const NonEmptyString& signature_in);
+  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
+                                    nfs_client::ReturnCode code_in);
   DataNameAndSignatureAndReturnCode();
   DataNameAndSignatureAndReturnCode(const DataNameAndSignatureAndReturnCode& other);
   DataNameAndSignatureAndReturnCode(DataNameAndSignatureAndReturnCode&& other);
@@ -275,12 +260,10 @@ void swap(DataNameAndSignatureAndReturnCode& lhs,
 bool operator==(const DataNameAndSignatureAndReturnCode& lhs,
                 const DataNameAndSignatureAndReturnCode& rhs);
 
-
 // ========================== DataNameAndSpaceAndReturnCode ====================================
 
 struct DataNameAndSpaceAndReturnCode {
-  DataNameAndSpaceAndReturnCode(const DataTagValue& type_in,
-                                const Identity& name_in,
+  DataNameAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
                                 const int64_t& available_space_in,
                                 const nfs_client::ReturnCode& code_in);
   DataNameAndSpaceAndReturnCode();
@@ -296,32 +279,26 @@ struct DataNameAndSpaceAndReturnCode {
   nfs_client::ReturnCode return_code;
 };
 
-void swap(DataNameAndSpaceAndReturnCode& lhs,
-          DataNameAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
-                const DataNameAndSpaceAndReturnCode& rhs);
-
-
+void swap(DataNameAndSpaceAndReturnCode& lhs, DataNameAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndSpaceAndReturnCode& lhs, const DataNameAndSpaceAndReturnCode& rhs);
 
 }  // namespace nfs_client
 
-
-
 namespace nfs {
 
-template<>
+template <>
 bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response);
 
-template<>
+template <>
 std::error_code ErrorCode<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response);
 
-template<>
+template <>
 bool IsSuccess<nfs_client::StructuredDataNameAndContentOrReturnCode>(
     const nfs_client::StructuredDataNameAndContentOrReturnCode& response);
 
-template<>
+template <>
 std::error_code ErrorCode<nfs_client::StructuredDataNameAndContentOrReturnCode>(
     const nfs_client::StructuredDataNameAndContentOrReturnCode& response);
 

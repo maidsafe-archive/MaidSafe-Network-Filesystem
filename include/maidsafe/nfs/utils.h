@@ -30,23 +30,22 @@
 #include "maidsafe/common/error.h"
 #include "maidsafe/routing/parameters.h"
 
-
 namespace maidsafe {
 
 namespace nfs {
 
-template<typename A, typename B>
+template <typename A, typename B>
 bool CheckMutuallyExclusive(const A& a, const B& b) {
   return (!a != !b);
 }
 
-template<typename MessageContents>
+template <typename MessageContents>
 bool IsSuccess(const MessageContents& response);
 
-template<typename MessageContents>
+template <typename MessageContents>
 std::error_code ErrorCode(const MessageContents& response);
 
-template<typename MessageContents>
+template <typename MessageContents>
 bool Equals(const MessageContents& lhs, const MessageContents& rhs) {
   return lhs == rhs;
 }
@@ -56,12 +55,12 @@ bool Equals(const MessageContents& lhs, const MessageContents& rhs) {
 // <iterator to most frequent failed reply, false>.  If there is more than one most frequent type,
 // (e.g. 2 'no_such_element' and 2 'invalid_parameter') the iterator points to the first which
 // reaches the frequency.
-template<typename MessageContents>
+template <typename MessageContents>
 std::pair<typename std::vector<MessageContents>::const_iterator, bool>
     GetSuccessOrMostFrequentResponse(const std::vector<MessageContents>& responses,
                                      int successes_required);
 
-template<typename MessageContents>
+template <typename MessageContents>
 class OpData {
  public:
   OpData(int successes_required, std::function<void(MessageContents)> callback);
@@ -79,13 +78,11 @@ class OpData {
   bool callback_executed_;
 };
 
-
-
 // ==================== Implementation =============================================================
-template<typename MessageContents>
+template <typename MessageContents>
 std::pair<typename std::vector<MessageContents>::const_iterator, bool>
-    GetSuccessOrMostFrequentResponse(const std::vector<MessageContents>& responses,
-                                     int successes_required) {
+GetSuccessOrMostFrequentResponse(const std::vector<MessageContents>& responses,
+                                 int successes_required) {
   auto most_frequent_itr(std::end(responses));
   int successes(0), most_frequent(0);
   typedef std::map<std::error_code, int> Count;
@@ -103,7 +100,7 @@ std::pair<typename std::vector<MessageContents>::const_iterator, bool>
   return std::make_pair(most_frequent_itr, false);
 }
 
-template<typename MessageContents>
+template <typename MessageContents>
 OpData<MessageContents>::OpData(int successes_required,
                                 std::function<void(MessageContents)> callback)
     : mutex_(),
@@ -115,7 +112,7 @@ OpData<MessageContents>::OpData(int successes_required,
     ThrowError(CommonErrors::invalid_parameter);
 }
 
-template<typename MessageContents>
+template <typename MessageContents>
 void OpData<MessageContents>::HandleResponseContents(MessageContents&& response_contents) {
   std::function<void(MessageContents)> callback;
   std::unique_ptr<MessageContents> result_ptr;

@@ -31,12 +31,11 @@
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/types.h"
 
-
 namespace maidsafe {
 
 namespace vault {
 
-template<typename T>
+template <typename T>
 inline bool GetVariant(const maidsafe::nfs::TypeErasedMessageWrapper& /*message*/, T& /*variant*/) {
   return true;  // TODO(Team): BEFORE_RELEASE
 }
@@ -47,23 +46,22 @@ namespace nfs {
 
 namespace detail {
 
-template<typename PersonaService, typename Sender, typename Receiver>
+template <typename PersonaService, typename Sender, typename Receiver>
 class PersonaDemuxer : public boost::static_visitor<> {
  public:
   PersonaDemuxer(PersonaService& persona_service, const Sender& sender, const Receiver& receiver)
-    : persona_service_(persona_service),
-      sender_(sender),
-      receiver_(receiver) {}
-  template<typename Message>
-  typename std::enable_if<std::is_same<Sender, typename Message::Sender>::value &&
-                          std::is_same<Receiver, typename Message::Receiver>::value, void>::type
-      operator()(const Message& message) const {
+      : persona_service_(persona_service), sender_(sender), receiver_(receiver) {}
+  template <typename Message>
+  typename std::enable_if<std::is_same<Sender, typename Message::Sender>::value&&
+                              std::is_same<Receiver, typename Message::Receiver>::value,
+                          void>::type
+  operator()(const Message& message) const {
     persona_service_.HandleMessage(message, sender_, receiver_);
   }
-  template<typename Message>
+  template <typename Message>
   typename std::enable_if<!std::is_same<Sender, typename Message::Sender>::value ||
-                          !std::is_same<Receiver, typename Message::Receiver>::value, void>::type
-      operator()(const Message& /*message*/) const {
+                              !std::is_same<Receiver, typename Message::Receiver>::value,
+                          void>::type operator()(const Message& /*message*/) const {
     // Should never come here.  Ideally this specialisation shouldn't exist, but the static visitor
     // requires all types in the variant to be handled.
     ThrowError(CommonErrors::invalid_parameter);
@@ -77,9 +75,7 @@ class PersonaDemuxer : public boost::static_visitor<> {
 
 }  // namespace detail
 
-
-
-template<typename PersonaService>
+template <typename PersonaService>
 class Service {
  public:
   typedef typename PersonaService::PublicMessages PublicMessages;
@@ -88,13 +84,12 @@ class Service {
   explicit Service(std::unique_ptr<PersonaService>&& impl) : impl_(std::move(impl)) {
     static_assert(!std::is_void<PublicMessages>::value || !std::is_void<VaultMessages>::value,
                   "Both Message types cannot be 'void'.");
-//    static_assert(!std::is_same<PublicMessages, VaultMessages>::value,
-//                  "Both Message types cannot be the same.");  // TODO(Team): BEFORE_RELEASE
+    //    static_assert(!std::is_same<PublicMessages, VaultMessages>::value,
+    //                  "Both Message types cannot be the same.");  // TODO(Team): BEFORE_RELEASE
   }
 
-  template<typename Sender, typename Receiver>
-  void HandleMessage(const nfs::TypeErasedMessageWrapper& message,
-                     const Sender& sender,
+  template <typename Sender, typename Receiver>
+  void HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Sender& sender,
                      const Receiver& receiver) {
     const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(*impl_, sender,
                                                                            receiver);
@@ -112,7 +107,7 @@ class Service {
   typedef std::true_type IsVoid;
   typedef std::false_type IsNotVoid;
 
-  template<typename Demuxer>
+  template <typename Demuxer>
   bool HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer) {
     PublicMessages public_variant_message;
     if (!nfs::GetVariant(message, public_variant_message))
@@ -121,7 +116,7 @@ class Service {
     return true;
   }
 
-  template<typename Demuxer>
+  template <typename Demuxer>
   bool HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer) {
     VaultMessages vault_variant_message;
     if (vault::GetVariant(message, vault_variant_message))
@@ -131,29 +126,23 @@ class Service {
   }
 
   // Public messages only are non-void.
-  template<typename Demuxer>
-  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message,
-                     const Demuxer& demuxer,
-                     IsNotVoid,
-                     IsVoid) {
+  template <typename Demuxer>
+  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer,
+                     IsNotVoid, IsVoid) {
     return HandlePublicMessage(message, demuxer);
   }
 
   // Vault messages only are non-void.
-  template<typename Demuxer>
-  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message,
-                     const Demuxer& demuxer,
-                     IsVoid,
+  template <typename Demuxer>
+  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer, IsVoid,
                      IsNotVoid) {
     return HandleVaultMessage(message, demuxer);
   }
 
   // Both types of message are non-void.
-  template<typename Demuxer>
-  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message,
-                     const Demuxer& demuxer,
-                     IsNotVoid,
-                     IsNotVoid) {
+  template <typename Demuxer>
+  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer,
+                     IsNotVoid, IsNotVoid) {
     return HandlePublicMessage(message, demuxer) && HandleVaultMessage(message, demuxer);
   }
 

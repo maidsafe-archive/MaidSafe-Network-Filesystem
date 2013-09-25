@@ -23,7 +23,6 @@
 
 #include "maidsafe/nfs/vault/pmid_registration.pb.h"
 
-
 namespace maidsafe {
 
 namespace nfs_vault {
@@ -51,14 +50,9 @@ asymm::PlainText GetSerialisedSignedDetails(const asymm::PlainText& serialised_d
 }  //  unnamed namespace
 
 PmidRegistration::PmidRegistration()
-    : maid_name_(),
-      pmid_name_(),
-      unregister_(false),
-      maid_signature_(),
-      pmid_signature_() {}
+    : maid_name_(), pmid_name_(), unregister_(false), maid_signature_(), pmid_signature_() {}
 
-PmidRegistration::PmidRegistration(const passport::Maid& maid,
-                                   const passport::Pmid& pmid,
+PmidRegistration::PmidRegistration(const passport::Maid& maid, const passport::Pmid& pmid,
                                    bool unregister)
     : maid_name_(maid.name()),
       pmid_name_(pmid.name()),
@@ -73,11 +67,7 @@ PmidRegistration::PmidRegistration(const passport::Maid& maid,
 }
 
 PmidRegistration::PmidRegistration(const std::string& serialised_copy)
-    : maid_name_(),
-      pmid_name_(),
-      unregister_(),
-      maid_signature_(),
-      pmid_signature_() {
+    : maid_name_(), pmid_name_(), unregister_(), maid_signature_(), pmid_signature_() {
   auto fail([]() {
     LOG(kError) << "Failed to parse pmid_registration.";
     ThrowError(CommonErrors::parsing_error);
@@ -136,20 +126,17 @@ bool PmidRegistration::Validate(const passport::PublicMaid& public_maid,
 
 std::string PmidRegistration::Serialise() const {
   protobuf::PmidRegistration proto_pmid_registration;
-  proto_pmid_registration.set_serialised_signed_details(
-      GetSerialisedSignedDetails(GetSerialisedDetails(maid_name_, pmid_name_, unregister_),
-                                 pmid_signature_).string());
+  proto_pmid_registration.set_serialised_signed_details(GetSerialisedSignedDetails(
+      GetSerialisedDetails(maid_name_, pmid_name_, unregister_), pmid_signature_).string());
   proto_pmid_registration.set_maid_signature(maid_signature_.string());
   return proto_pmid_registration.SerializeAsString();
 }
 
 bool operator==(const PmidRegistration& lhs, const PmidRegistration& rhs) {
-  return lhs.maid_name_ == rhs.maid_name_ &&
-         lhs.pmid_name_ == rhs.pmid_name_ &&
-         lhs.unregister_ == rhs.unregister_ &&
-         lhs.maid_signature_ == rhs.maid_signature_ &&
-         lhs.pmid_signature_ == rhs.pmid_signature_;}
-
+  return lhs.maid_name_ == rhs.maid_name_ && lhs.pmid_name_ == rhs.pmid_name_ &&
+         lhs.unregister_ == rhs.unregister_ && lhs.maid_signature_ == rhs.maid_signature_ &&
+         lhs.pmid_signature_ == rhs.pmid_signature_;
+}
 
 void swap(PmidRegistration& lhs, PmidRegistration& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;

@@ -22,14 +22,11 @@
 
 #include "maidsafe/nfs/vault/messages.pb.h"
 
-
 namespace maidsafe {
 
 namespace nfs_vault {
 
-bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/) {
-  return true;
-}
+bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/) { return true; }
 
 // ==================== DataName ===================================================================
 DataName::DataName(DataTagValue type_in, Identity raw_name_in)
@@ -40,8 +37,7 @@ DataName::DataName() : type(DataTagValue::kAnmidValue), raw_name() {}
 DataName::DataName(const DataName& other) : type(other.type), raw_name(other.raw_name) {}
 
 DataName::DataName(DataName&& other)
-    : type(std::move(other.type)),
-      raw_name(std::move(other.raw_name)) {}
+    : type(std::move(other.type)), raw_name(std::move(other.raw_name)) {}
 
 DataName& DataName::operator=(DataName other) {
   swap(*this, other);
@@ -49,8 +45,7 @@ DataName& DataName::operator=(DataName other) {
 }
 
 DataName::DataName(const std::string& serialised_copy)
-    : type(DataTagValue::kAnmidValue),
-      raw_name() {
+    : type(DataTagValue::kAnmidValue), raw_name() {
   protobuf::DataName proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -66,8 +61,7 @@ std::string DataName::Serialise() const {
 }
 
 bool operator==(const DataName& lhs, const DataName& rhs) {
-  return lhs.type == rhs.type &&
-         lhs.raw_name == rhs.raw_name;
+  return lhs.type == rhs.type && lhs.raw_name == rhs.raw_name;
 }
 
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
@@ -76,18 +70,14 @@ void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.raw_name, rhs.raw_name);
 }
 
-
-
 // ==================== DataNameAndVersion =========================================================
 DataNameAndVersion::DataNameAndVersion() : data_name(), version_name() {}
 
 DataNameAndVersion::DataNameAndVersion(const DataNameAndVersion& other)
-    : data_name(other.data_name),
-      version_name(other.version_name) {}
+    : data_name(other.data_name), version_name(other.version_name) {}
 
 DataNameAndVersion::DataNameAndVersion(DataNameAndVersion&& other)
-    : data_name(std::move(other.data_name)),
-      version_name(std::move(other.version_name)) {}
+    : data_name(std::move(other.data_name)), version_name(std::move(other.version_name)) {}
 
 DataNameAndVersion& DataNameAndVersion::operator=(DataNameAndVersion other) {
   swap(*this, other);
@@ -95,8 +85,7 @@ DataNameAndVersion& DataNameAndVersion::operator=(DataNameAndVersion other) {
 }
 
 DataNameAndVersion::DataNameAndVersion(const std::string& serialised_copy)
-    : data_name(),
-      version_name() {
+    : data_name(), version_name() {
   protobuf::DataNameAndVersion proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -112,8 +101,7 @@ std::string DataNameAndVersion::Serialise() const {
 }
 
 bool operator==(const DataNameAndVersion& lhs, const DataNameAndVersion& rhs) {
-  return lhs.data_name == rhs.data_name &&
-         lhs.version_name == rhs.version_name;
+  return lhs.data_name == rhs.data_name && lhs.version_name == rhs.version_name;
 }
 
 void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT {
@@ -122,13 +110,9 @@ void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.version_name, rhs.version_name);
 }
 
-
-
 // ==================== DataNameOldNewVersion ======================================================
 DataNameOldNewVersion::DataNameOldNewVersion()
-    : data_name(),
-      old_version_name(),
-      new_version_name() {}
+    : data_name(), old_version_name(), new_version_name() {}
 
 DataNameOldNewVersion::DataNameOldNewVersion(const DataNameOldNewVersion& other)
     : data_name(other.data_name),
@@ -146,9 +130,7 @@ DataNameOldNewVersion& DataNameOldNewVersion::operator=(DataNameOldNewVersion ot
 }
 
 DataNameOldNewVersion::DataNameOldNewVersion(const std::string& serialised_copy)
-    : data_name(),
-      old_version_name(),
-      new_version_name() {
+    : data_name(), old_version_name(), new_version_name() {
   protobuf::DataNameOldNewVersion proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -166,8 +148,7 @@ std::string DataNameOldNewVersion::Serialise() const {
 }
 
 bool operator==(const DataNameOldNewVersion& lhs, const DataNameOldNewVersion& rhs) {
-  return lhs.data_name == rhs.data_name &&
-         lhs.old_version_name == rhs.old_version_name &&
+  return lhs.data_name == rhs.data_name && lhs.old_version_name == rhs.old_version_name &&
          lhs.new_version_name == rhs.new_version_name;
 }
 
@@ -178,31 +159,25 @@ void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXC
   swap(lhs.new_version_name, rhs.new_version_name);
 }
 
-
 // ==================== DataNameAndContent =========================================================
-DataNameAndContent::DataNameAndContent(DataTagValue type_in,
-                                       const Identity& name_in,
+DataNameAndContent::DataNameAndContent(DataTagValue type_in, const Identity& name_in,
                                        NonEmptyString content_in)
     : name(type_in, name_in), content(std::move(content_in)) {}
 
 DataNameAndContent::DataNameAndContent() : name(), content() {}
 
 DataNameAndContent::DataNameAndContent(const DataNameAndContent& other)
-    : name(other.name),
-      content(other.content) {}
+    : name(other.name), content(other.content) {}
 
 DataNameAndContent::DataNameAndContent(DataNameAndContent&& other)
-    : name(std::move(other.name)),
-      content(std::move(other.content)) {}
+    : name(std::move(other.name)), content(std::move(other.content)) {}
 
 DataNameAndContent& DataNameAndContent::operator=(DataNameAndContent other) {
   swap(*this, other);
   return *this;
 }
 
-DataNameAndContent::DataNameAndContent(const std::string& serialised_copy)
-    : name(),
-      content() {
+DataNameAndContent::DataNameAndContent(const std::string& serialised_copy) : name(), content() {
   protobuf::DataNameAndContent proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -218,8 +193,7 @@ std::string DataNameAndContent::Serialise() const {
 }
 
 bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs) {
-  return lhs.name == rhs.name &&
-         lhs.content == rhs.content;
+  return lhs.name == rhs.name && lhs.content == rhs.content;
 }
 
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
@@ -228,22 +202,20 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.content, rhs.content);
 }
 
-// ==================== DataNameAndRandomString =====================================================
+// ==================== DataNameAndRandomString
+// =====================================================
 
-DataNameAndRandomString::DataNameAndRandomString(DataTagValue type_in,
-                                       const Identity& name_in,
-                                       NonEmptyString random_string_in)
+DataNameAndRandomString::DataNameAndRandomString(DataTagValue type_in, const Identity& name_in,
+                                                 NonEmptyString random_string_in)
     : name(type_in, name_in), random_string(std::move(random_string_in)) {}
 
 DataNameAndRandomString::DataNameAndRandomString() : name(), random_string() {}
 
 DataNameAndRandomString::DataNameAndRandomString(const DataNameAndRandomString& other)
-    : name(other.name),
-      random_string(other.random_string) {}
+    : name(other.name), random_string(other.random_string) {}
 
 DataNameAndRandomString::DataNameAndRandomString(DataNameAndRandomString&& other)
-    : name(std::move(other.name)),
-      random_string(std::move(other.random_string)) {}
+    : name(std::move(other.name)), random_string(std::move(other.random_string)) {}
 
 DataNameAndRandomString& DataNameAndRandomString::operator=(DataNameAndRandomString other) {
   swap(*this, other);
@@ -251,8 +223,7 @@ DataNameAndRandomString& DataNameAndRandomString::operator=(DataNameAndRandomStr
 }
 
 DataNameAndRandomString::DataNameAndRandomString(const std::string& serialised_copy)
-    : name(),
-      random_string() {
+    : name(), random_string() {
   protobuf::DataNameAndRandomString proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -268,8 +239,7 @@ std::string DataNameAndRandomString::Serialise() const {
 }
 
 bool operator==(const DataNameAndRandomString& lhs, const DataNameAndRandomString& rhs) {
-  return lhs.name == rhs.name &&
-         lhs.random_string == rhs.random_string;
+  return lhs.name == rhs.name && lhs.random_string == rhs.random_string;
 }
 
 void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_NOEXCEPT {
@@ -283,21 +253,17 @@ void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_N
 DataNameAndCost::DataNameAndCost() : name(), cost(0) {}
 
 DataNameAndCost::DataNameAndCost(const DataNameAndCost& other)
-    : name(other.name),
-      cost(other.cost) {}
+    : name(other.name), cost(other.cost) {}
 
 DataNameAndCost::DataNameAndCost(DataNameAndCost&& other)
-    : name(std::move(other.name)),
-      cost(std::move(other.cost)) {}
+    : name(std::move(other.name)), cost(std::move(other.cost)) {}
 
 DataNameAndCost& DataNameAndCost::operator=(DataNameAndCost other) {
   swap(*this, other);
   return *this;
 }
 
-DataNameAndCost::DataNameAndCost(const std::string& serialised_copy)
-    : name(),
-      cost(0) {
+DataNameAndCost::DataNameAndCost(const std::string& serialised_copy) : name(), cost(0) {
   protobuf::DataNameAndCost proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -313,8 +279,7 @@ std::string DataNameAndCost::Serialise() const {
 }
 
 bool operator==(const DataNameAndCost& lhs, const DataNameAndCost& rhs) {
-  return lhs.name == rhs.name &&
-         lhs.cost== rhs.cost;
+  return lhs.name == rhs.name && lhs.cost == rhs.cost;
 }
 
 void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
@@ -326,28 +291,22 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
 // ==================== DataAndPmidHint ============================================================
 DataAndPmidHint::DataAndPmidHint() : data(), pmid_hint() {}
 
-DataAndPmidHint::DataAndPmidHint(const DataName& data_name,
-                                 const NonEmptyString& content,
+DataAndPmidHint::DataAndPmidHint(const DataName& data_name, const NonEmptyString& content,
                                  Identity pmid_node_hint)
-    : data(data_name.type, data_name.raw_name, content),
-      pmid_hint(std::move(pmid_node_hint)) {}
+    : data(data_name.type, data_name.raw_name, content), pmid_hint(std::move(pmid_node_hint)) {}
 
 DataAndPmidHint::DataAndPmidHint(const DataAndPmidHint& other)
-    : data(other.data),
-      pmid_hint(other.pmid_hint) {}
+    : data(other.data), pmid_hint(other.pmid_hint) {}
 
 DataAndPmidHint::DataAndPmidHint(DataAndPmidHint&& other)
-    : data(std::move(other.data)),
-      pmid_hint(std::move(other.pmid_hint)) {}
+    : data(std::move(other.data)), pmid_hint(std::move(other.pmid_hint)) {}
 
 DataAndPmidHint& DataAndPmidHint::operator=(DataAndPmidHint other) {
   swap(*this, other);
   return *this;
 }
 
-DataAndPmidHint::DataAndPmidHint(const std::string& serialised_copy)
-    : data(),
-      pmid_hint() {
+DataAndPmidHint::DataAndPmidHint(const std::string& serialised_copy) : data(), pmid_hint() {
   protobuf::DataAndPmidHint proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -363,8 +322,7 @@ std::string DataAndPmidHint::Serialise() const {
 }
 
 bool operator==(const DataAndPmidHint& lhs, const DataAndPmidHint& rhs) {
-  return lhs.data == rhs.data &&
-         lhs.pmid_hint == rhs.pmid_hint;
+  return lhs.data == rhs.data && lhs.pmid_hint == rhs.pmid_hint;
 }
 
 void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT {

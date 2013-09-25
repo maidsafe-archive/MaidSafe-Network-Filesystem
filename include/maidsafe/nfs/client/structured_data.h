@@ -25,15 +25,13 @@
 #include "maidsafe/common/config.h"
 #include "maidsafe/data_types/structured_data_versions.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
 
 struct StructuredData {
  public:
-  explicit StructuredData(
-      std::vector<StructuredDataVersions::VersionName> versions);
+  explicit StructuredData(std::vector<StructuredDataVersions::VersionName> versions);
 
   StructuredData();
   StructuredData(const StructuredData& other);

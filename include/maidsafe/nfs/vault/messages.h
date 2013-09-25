@@ -28,7 +28,6 @@
 
 #include "maidsafe/nfs/vault/pmid_registration.h"
 
-
 namespace maidsafe {
 
 namespace nfs_vault {
@@ -41,12 +40,10 @@ struct Empty {
 
 bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/);
 
-
 struct DataName {
-  template<typename DataNameType>
+  template <typename DataNameType>
   explicit DataName(const DataNameType& data_name)
-      : type(DataNameType::data_type::Tag::kValue),
-        raw_name(data_name.value) {}
+      : type(DataNameType::data_type::Tag::kValue), raw_name(data_name.value) {}
 
   DataName(DataTagValue type_in, Identity raw_name_in);
 
@@ -65,7 +62,6 @@ struct DataName {
 bool operator==(const DataName& lhs, const DataName& rhs);
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT;
 
-
 struct DataNameAndVersion {
   DataNameAndVersion();
   DataNameAndVersion(const DataNameAndVersion& other);
@@ -81,7 +77,6 @@ struct DataNameAndVersion {
 
 bool operator==(const DataNameAndVersion& lhs, const DataNameAndVersion& rhs);
 void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT;
-
 
 struct DataNameOldNewVersion {
   DataNameOldNewVersion();
@@ -99,15 +94,12 @@ struct DataNameOldNewVersion {
 bool operator==(const DataNameOldNewVersion& lhs, const DataNameOldNewVersion& rhs);
 void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXCEPT;
 
-
 struct DataNameAndContent {
-  template<typename Data>
+  template <typename Data>
   explicit DataNameAndContent(const Data& data)
-      : name(data.name()),
-        content(data.Serialise().data) {}
+      : name(data.name()), content(data.Serialise().data) {}
 
-  DataNameAndContent(DataTagValue type_in, const Identity& name_in,
-                     NonEmptyString content_in);
+  DataNameAndContent(DataTagValue type_in, const Identity& name_in, NonEmptyString content_in);
 
   DataNameAndContent();
   DataNameAndContent(const DataNameAndContent& other);
@@ -124,15 +116,13 @@ struct DataNameAndContent {
 bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs);
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
 
-
 struct DataNameAndRandomString {
-  template<typename Data>
+  template <typename Data>
   explicit DataNameAndRandomString(const Data& data)
-      : name(data.name()),
-        random_string(data.Serialise().data) {}
+      : name(data.name()), random_string(data.Serialise().data) {}
 
   DataNameAndRandomString(DataTagValue type_in, const Identity& name_in,
-                     NonEmptyString random_string_in);
+                          NonEmptyString random_string_in);
 
   DataNameAndRandomString();
   DataNameAndRandomString(const DataNameAndRandomString& other);
@@ -149,16 +139,12 @@ struct DataNameAndRandomString {
 bool operator==(const DataNameAndRandomString& lhs, const DataNameAndRandomString& rhs);
 void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_NOEXCEPT;
 
-
 struct DataNameAndCost {
-  template<typename Data>
+  template <typename Data>
   explicit DataNameAndCost(const Data& data)
-      : name(data.name()),
-        cost(data.cost) {}
+      : name(data.name()), cost(data.cost) {}
 
-  DataNameAndCost(DataTagValue type_in,
-                  const Identity& name_in,
-                  const int32_t& cost_in);
+  DataNameAndCost(DataTagValue type_in, const Identity& name_in, const int32_t& cost_in);
 
   DataNameAndCost();
   DataNameAndCost(const DataNameAndCost& other);
@@ -174,8 +160,6 @@ struct DataNameAndCost {
 
 bool operator==(const DataNameAndCost& lhs, const DataNameAndCost& rhs);
 void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT;
-
-
 
 struct DataAndPmidHint {
   DataAndPmidHint();

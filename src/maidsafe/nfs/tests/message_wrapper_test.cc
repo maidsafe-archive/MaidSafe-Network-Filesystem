@@ -32,7 +32,6 @@
 #include "maidsafe/nfs/vault/messages.h"
 #include "maidsafe/nfs/types.h"
 
-
 namespace maidsafe {
 
 namespace nfs {
@@ -47,19 +46,20 @@ typedef DeleteRequestFromMaidNodeToMaidManager DeleteRequest;
 
 }  // unnamed namespace
 
-template<typename ServiceImpl>
+template <typename ServiceImpl>
 class PersonaDemuxer : public boost::static_visitor<std::string> {
  public:
   explicit PersonaDemuxer(ServiceImpl& service_impl) : service_impl_(service_impl) {}
-  template<typename Message>
+  template <typename Message>
   std::string operator()(const Message& message) const {
     return service_impl_.Handle(message);
   }
+
  private:
   ServiceImpl& service_impl_;
 };
 
-template<typename ServiceImpl>
+template <typename ServiceImpl>
 class Service {
  public:
   typedef typename ServiceImpl::Messages Messages;
@@ -77,51 +77,45 @@ class Service {
   PersonaDemuxer<ServiceImpl> demuxer_;
 };
 
-
-
 class MaidManagerServiceImpl {
  public:
   typedef MaidManagerServiceMessages Messages;
 
-  template<typename T>
+  template <typename T>
   std::string Handle(const T& /*message*/) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
 };
 
-template<>
+template <>
 std::string MaidManagerServiceImpl::Handle(const PutRequest& message) {
   LOG(kInfo) << "MaidManager handling Put";
   return message.contents->data.name.raw_name.string();
 }
 
-template<>
+template <>
 std::string MaidManagerServiceImpl::Handle(const DeleteRequestFromMaidNodeToMaidManager& message) {
   LOG(kInfo) << "MaidManager handling Delete";
   return message.contents->raw_name.string();
 }
 
-
-
 class DataManagerServiceImpl {
  public:
   typedef DataManagerServiceMessages Messages;
 
-  template<typename T>
+  template <typename T>
   std::string Handle(const T& /*message*/) {
     ThrowError(CommonErrors::invalid_parameter);
     return "";
   }
 };
 
-template<>
+template <>
 std::string DataManagerServiceImpl::Handle(const GetRequest& message) {
   LOG(kInfo) << "DataManager handling Get";
   return message.contents->raw_name.string();
 }
-
-
 
 TEST(MessageWrapperTest, BEH_CheckVariant) {
   ImmutableData data1(NonEmptyString("data 1"));
@@ -156,7 +150,7 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
   EXPECT_THROW(data_manager_service.HandleMessage(tuple_del), maidsafe_error);
 }
 
-//TEST_F(MessageWrapperTest, BEH_SerialiseThenParse) {
+// TEST_F(MessageWrapperTest, BEH_SerialiseThenParse) {
 //  auto serialised_message(message_.Serialise());
 //  Message recovered_message(serialised_message);
 //
@@ -170,7 +164,7 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 //  EXPECT_EQ(pmid_node_, recovered_message.pmid_node());
 //}
 //
-//TEST_F(MessageWrapperTest, BEH_SerialiseParseReserialiseReparse) {
+// TEST_F(MessageWrapperTest, BEH_SerialiseParseReserialiseReparse) {
 //  auto serialised_message(message_.Serialise());
 //  Message recovered_message(serialised_message);
 //
@@ -188,7 +182,7 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 //  EXPECT_EQ(pmid_node_, recovered_message2.pmid_node());
 //}
 //
-//TEST_F(MessageWrapperTest, BEH_AssignMessage) {
+// TEST_F(MessageWrapperTest, BEH_AssignMessage) {
 //  Message message2 = message_;
 //
 //  EXPECT_EQ(action_, message2.data().action);
@@ -234,7 +228,7 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 //  EXPECT_EQ(pmid_node_, message5.pmid_node());
 //}
 //
-//TEST_F(MessageWrapperTest, BEH_DefaultValues) {
+// TEST_F(MessageWrapperTest, BEH_DefaultValues) {
 //  Message message(destination_persona_, source_, message_.data());
 //  EXPECT_EQ(action_, message.data().action);
 //  EXPECT_EQ(destination_persona_, message.destination_persona());
@@ -246,20 +240,20 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 //  EXPECT_FALSE(message.HasDataHolder());
 //}
 //
-//TEST_F(MessageWrapperTest, BEH_InvalidSource) {
+// TEST_F(MessageWrapperTest, BEH_InvalidSource) {
 //  PersonaId bad_source(GenerateSource());
 //  bad_source.node_id = NodeId();
 //  EXPECT_THROW(Message(destination_persona_, bad_source, message_.data()),
 //               common_error);
 //}
 //
-//TEST_F(MessageWrapperTest, BEH_InvalidName) {
+// TEST_F(MessageWrapperTest, BEH_InvalidName) {
 //  EXPECT_THROW(Message(destination_persona_, source_,
 //                           Message::Data(data_type_, Identity(), content_, action_)),
 //               common_error);
 //}
 //
-//TEST_F(MessageWrapperTest, BEH_SignData) {
+// TEST_F(MessageWrapperTest, BEH_SignData) {
 //  EXPECT_FALSE(message_.client_validation().name.IsInitialised());
 //  EXPECT_FALSE(message_.client_validation().data_signature.IsInitialised());
 //  EXPECT_FALSE(message_.HasClientValidation());
@@ -284,7 +278,7 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 //  EXPECT_TRUE(message_.HasClientValidation());
 //}
 //
-//TEST_F(MessageWrapperTest, BEH_SerialiseAndSignThenValidate) {
+// TEST_F(MessageWrapperTest, BEH_SerialiseAndSignThenValidate) {
 //  Message::serialised_type serialised_message(message_.Serialise());
 //  asymm::Keys keys(asymm::GenerateKeyPair());
 //  auto result(message_.SerialiseAndSign(keys.private_key));

@@ -23,7 +23,6 @@
 
 #include "maidsafe/common/tagged_value.h"
 
-
 namespace maidsafe {
 
 namespace nfs {
@@ -82,26 +81,28 @@ enum class Persona : int32_t {
   kVersionManager
 };
 
-template<Persona PersonaType>
+template <Persona PersonaType>
 struct DestinationPersona {
   static const Persona value = PersonaType;
 };
 
-template<Persona PersonaType>
+template <Persona PersonaType>
 const Persona DestinationPersona<PersonaType>::value;
 
-template<Persona PersonaType>
+template <Persona PersonaType>
 struct SourcePersona {
   static const Persona value = PersonaType;
 };
 
-template<Persona PersonaType>
+template <Persona PersonaType>
 const Persona SourcePersona<PersonaType>::value;
 
-template<Persona PersonaType>
+template <Persona PersonaType>
 struct PersonaTypes;
 
-namespace detail { struct MessageIdTag; }
+namespace detail {
+struct MessageIdTag;
+}
 typedef TaggedValue<int32_t, detail::MessageIdTag> MessageId;
 
 }  // namespace nfs

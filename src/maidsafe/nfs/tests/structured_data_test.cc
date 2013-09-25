@@ -39,8 +39,8 @@ class StructuredDataTest : public testing::Test {
 
 TEST_F(StructuredDataTest, BEH_Constructor) {
   std::vector<StructuredDataVersions::VersionName> versions;
-  StructuredDataVersions::VersionName version_name(
-      RandomUint32(), ImmutableData::Name(Identity(RandomString(64))));
+  StructuredDataVersions::VersionName version_name(RandomUint32(),
+                                                   ImmutableData::Name(Identity(RandomString(64))));
   versions.push_back(version_name);
 
   nfs_client::StructuredData structured_data_ori(versions);
@@ -68,7 +68,7 @@ TEST_F(StructuredDataTest, BEH_Serialise) {
     try {
       nfs_client::StructuredData structured_data(RandomString(64));
     }
-    catch(...) {
+    catch (...) {
       expect_exception = true;
     }
     EXPECT_TRUE(expect_exception);

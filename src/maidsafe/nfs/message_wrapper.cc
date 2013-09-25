@@ -23,7 +23,6 @@
 
 #include "maidsafe/nfs/message_wrapper.pb.h"
 
-
 namespace maidsafe {
 
 namespace nfs {
@@ -48,8 +47,6 @@ std::string SerialiseMessageWrapper(const TypeErasedMessageWrapper& message_tupl
 
 }  // namespace detail
 
-
-
 TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper) {
   protobuf::MessageWrapper proto_message_wrapper;
   if (!proto_message_wrapper.ParseFromString(serialised_message_wrapper))
@@ -60,8 +57,7 @@ TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_messa
       detail::SourceTaggedValue(static_cast<Persona>(proto_message_wrapper.source_persona())),
       detail::DestinationTaggedValue(
           static_cast<Persona>(proto_message_wrapper.destination_persona())),
-      MessageId(proto_message_wrapper.message_id()),
-      proto_message_wrapper.serialised_contents());
+      MessageId(proto_message_wrapper.message_id()), proto_message_wrapper.serialised_contents());
 }
 
 }  // namespace nfs

@@ -35,7 +35,6 @@
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
 
-
 namespace maidsafe {
 
 namespace nfs {
@@ -48,14 +47,13 @@ TEST(MaidNodeService, BEH_All) {
   routing::Routing routing(maid);
   AsioService asio_service(2);
   routing::Timer<nfs_client::MaidNodeService::GetResponse::Contents> get_timer(asio_service);
-  routing::Timer<nfs_client::MaidNodeService::GetVersionsResponse::Contents>
-      get_versions_timer(asio_service);
-  routing::Timer<nfs_client::MaidNodeService::GetBranchResponse::Contents>
-      get_branch_timer(asio_service);
+  routing::Timer<nfs_client::MaidNodeService::GetVersionsResponse::Contents> get_versions_timer(
+      asio_service);
+  routing::Timer<nfs_client::MaidNodeService::GetBranchResponse::Contents> get_branch_timer(
+      asio_service);
   maidsafe::nfs::Service<nfs_client::MaidNodeService> service(
-      std::move(std::unique_ptr<nfs_client::MaidNodeService>(
-          new nfs_client::MaidNodeService(routing, get_timer, get_versions_timer,
-                                            get_branch_timer))));
+      std::move(std::unique_ptr<nfs_client::MaidNodeService>(new nfs_client::MaidNodeService(
+          routing, get_timer, get_versions_timer, get_branch_timer))));
 
   ImmutableData immutable_data(NonEmptyString(RandomString(10)));
   nfs_client::DataNameAndContentOrReturnCode contents(immutable_data);
@@ -82,14 +80,13 @@ TEST(DataGetterService, BEH_All) {
   routing::Routing routing(maid);
   AsioService asio_service(2);
   routing::Timer<nfs_client::DataGetterService::GetResponse::Contents> get_timer(asio_service);
-  routing::Timer<nfs_client::DataGetterService::GetVersionsResponse::Contents>
-      get_versions_timer(asio_service);
-  routing::Timer<nfs_client::DataGetterService::GetBranchResponse::Contents>
-      get_branch_timer(asio_service);
+  routing::Timer<nfs_client::DataGetterService::GetVersionsResponse::Contents> get_versions_timer(
+      asio_service);
+  routing::Timer<nfs_client::DataGetterService::GetBranchResponse::Contents> get_branch_timer(
+      asio_service);
   maidsafe::nfs::Service<nfs_client::DataGetterService> service(
-      std::move(std::unique_ptr<nfs_client::DataGetterService>(
-          new nfs_client::DataGetterService(routing, get_timer, get_versions_timer,
-                                            get_branch_timer))));
+      std::move(std::unique_ptr<nfs_client::DataGetterService>(new nfs_client::DataGetterService(
+          routing, get_timer, get_versions_timer, get_branch_timer))));
 
   ImmutableData immutable_data(NonEmptyString(RandomString(10)));
   nfs_client::DataNameAndContentOrReturnCode contents(immutable_data);

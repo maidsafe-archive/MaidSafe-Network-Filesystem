@@ -39,7 +39,6 @@
 #include "maidsafe/nfs/client/data_getter_dispatcher.h"
 #include "maidsafe/nfs/client/data_getter_service.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
@@ -53,25 +52,25 @@ class DataGetter {
              std::vector<passport::PublicPmid> public_pmids_from_file =
                  std::vector<passport::PublicPmid>());
 
-  template<typename Data>
-  boost::future<Data> Get(
-      const typename Data::Name& data_name,
-      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
+  template <typename Data>
+  boost::future<Data> Get(const typename Data::Name& data_name,
+                          const std::chrono::steady_clock::duration& timeout =
+                              std::chrono::seconds(10));
 
-  template<typename Data>
-  VersionNamesFuture GetVersions(
-      const typename Data::Name& data_name,
-      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
+  template <typename Data>
+  VersionNamesFuture GetVersions(const typename Data::Name& data_name,
+                                 const std::chrono::steady_clock::duration& timeout =
+                                     std::chrono::seconds(10));
 
-  template<typename Data>
-  VersionNamesFuture GetBranch(
-      const typename Data::Name& data_name,
-      const StructuredDataVersions::VersionName& branch_tip,
-      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
+  template <typename Data>
+  VersionNamesFuture GetBranch(const typename Data::Name& data_name,
+                               const StructuredDataVersions::VersionName& branch_tip,
+                               const std::chrono::steady_clock::duration& timeout =
+                                   std::chrono::seconds(10));
 
   // This should be the function used in the GroupToSingle (and maybe also SingleToSingle) functors
   // passed to 'routing.Join'.
-  template<typename T>
+  template <typename T>
   void HandleMessage(const T& routing_message);
 
  private:
@@ -94,76 +93,67 @@ class DataGetter {
 #endif
 };
 
-template<>
+template <>
 boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
     const typename passport::PublicPmid::Name& data_name,
     const std::chrono::steady_clock::duration& timeout);
 
-
-
 // ==================== Implementation =============================================================
-template<typename Data>
+template <typename Data>
 boost::future<Data> DataGetter::Get(const typename Data::Name& data_name,
                                     const std::chrono::steady_clock::duration& timeout) {
   typedef DataGetterService::GetResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<Data>>());
   HandleGetResult<Data> response_functor(promise);
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_timer_.AddTask(
-      timeout,
-      [op_data](ResponseContents get_response) {
-          op_data->HandleResponseContents(std::move(get_response));
-      },
-      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2));
+  auto task_id(get_timer_.AddTask(timeout,
+                                  [op_data](ResponseContents get_response) {
+                                    op_data->HandleResponseContents(std::move(get_response));
+                                  },
+                                  // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+                                  routing::Parameters::node_group_size * 2));
   dispatcher_.SendGetRequest(task_id, data_name);
   return promise->get_future();
 }
 
-template<typename Data>
+template <typename Data>
 DataGetter::VersionNamesFuture DataGetter::GetVersions(
-    const typename Data::Name& data_name,
-    const std::chrono::steady_clock::duration& timeout) {
+    const typename Data::Name& data_name, const std::chrono::steady_clock::duration& timeout) {
   typedef DataGetterService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
-  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode& result) {
-                          HandleGetVersionsOrBranchResult(result, promise);
-                        });
+  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
+                                  result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
   auto task_id(get_versions_timer_.AddTask(
-      timeout,
-      [op_data](ResponseContents get_versions_response) {
-          op_data->HandleResponseContents(std::move(get_versions_response));
-      },
+      timeout, [op_data](ResponseContents get_versions_response) {
+                 op_data->HandleResponseContents(std::move(get_versions_response));
+               },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
       routing::Parameters::node_group_size * 2));
   dispatcher_.SendGetVersionsRequest(task_id, data_name);
   return promise->get_future();
 }
 
-template<typename Data>
+template <typename Data>
 DataGetter::VersionNamesFuture DataGetter::GetBranch(
-    const typename Data::Name& data_name,
-    const StructuredDataVersions::VersionName& branch_tip,
+    const typename Data::Name& data_name, const StructuredDataVersions::VersionName& branch_tip,
     const std::chrono::steady_clock::duration& timeout) {
   typedef DataGetterService::GetBranchResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
-  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode& result) {
-                          HandleGetVersionsOrBranchResult(result, promise);
-                        });
+  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
+                                  result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_branch_timer_.AddTask(
-      timeout,
-      [op_data](ResponseContents get_branch_response) {
-          op_data->HandleResponseContents(std::move(get_branch_response));
-      },
-      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2));
+  auto task_id(get_branch_timer_.AddTask(timeout, [op_data](ResponseContents get_branch_response) {
+                                                    op_data->HandleResponseContents(
+                                                        std::move(get_branch_response));
+                                                  },
+                                         // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+                                         routing::Parameters::node_group_size * 2));
   dispatcher_.SendGetBranchRequest(task_id, data_name, branch_tip);
   return promise->get_future();
 }
 
-template<typename T>
+template <typename T>
 void DataGetter::HandleMessage(const T& routing_message) {
   auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
   const auto& destination_persona(std::get<2>(wrapper_tuple));

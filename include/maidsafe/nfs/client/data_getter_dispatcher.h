@@ -31,7 +31,6 @@
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
@@ -40,15 +39,14 @@ class DataGetterDispatcher {
  public:
   explicit DataGetterDispatcher(routing::Routing& routing);
 
-  template<typename Data>
+  template <typename Data>
   void SendGetRequest(routing::TaskId task_id, const typename Data::Name& data_name);
 
-  template<typename Data>
+  template <typename Data>
   void SendGetVersionsRequest(routing::TaskId task_id, const typename Data::Name& data_name);
 
-  template<typename Data>
-  void SendGetBranchRequest(routing::TaskId task_id,
-                            const typename Data::Name& data_name,
+  template <typename Data>
+  void SendGetBranchRequest(routing::TaskId task_id, const typename Data::Name& data_name,
                             const StructuredDataVersions::VersionName& branch_tip);
 
  private:
@@ -57,31 +55,29 @@ class DataGetterDispatcher {
   DataGetterDispatcher(DataGetterDispatcher&&);
   DataGetterDispatcher& operator=(DataGetterDispatcher);
 
-  template<typename Message>
+  template <typename Message>
   void CheckSourcePersonaType() const;
 
   routing::Routing& routing_;
   const routing::SingleSource kThisNodeAsSender_;
 };
 
-
-
 // ==================== Implementation =============================================================
-template<typename Data>
+template <typename Data>
 void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id,
                                           const typename Data::Name& data_name) {
   typedef nfs::GetRequestFromDataGetterToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
-                                                                         routing::Cacheable::kNone);
+  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet
+                                                                       : routing::Cacheable::kNone);
   NfsMessage nfs_message((nfs::MessageId(task_id), NfsMessage::Contents(data_name)));
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
   routing_.Send(routing_message);
 }
 
-template<typename Data>
+template <typename Data>
 void DataGetterDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
                                                   const typename Data::Name& data_name) {
   typedef nfs::GetVersionsRequestFromDataGetterToVersionManager NfsMessage;
@@ -93,10 +89,9 @@ void DataGetterDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
-template<typename Data>
+template <typename Data>
 void DataGetterDispatcher::SendGetBranchRequest(
-    routing::TaskId task_id,
-    const typename Data::Name& data_name,
+    routing::TaskId task_id, const typename Data::Name& data_name,
     const StructuredDataVersions::VersionName& branch_tip) {
   typedef nfs::GetBranchRequestFromDataGetterToVersionManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
@@ -110,7 +105,7 @@ void DataGetterDispatcher::SendGetBranchRequest(
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
-template<typename Message>
+template <typename Message>
 void DataGetterDispatcher::CheckSourcePersonaType() const {
   static_assert(Message::SourcePersona::value == nfs::Persona::kDataGetter,
                 "The source Persona must be kDataGetter.");
