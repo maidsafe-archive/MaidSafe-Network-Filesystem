@@ -266,12 +266,11 @@ struct DataNameAndSpaceAndReturnCode {
   DataNameAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
                                 const int64_t& available_space_in,
                                 const nfs_client::ReturnCode& code_in);
+  explicit DataNameAndSpaceAndReturnCode(const std::string& serialised_copy);
   DataNameAndSpaceAndReturnCode();
   DataNameAndSpaceAndReturnCode(const DataNameAndSpaceAndReturnCode& other);
   DataNameAndSpaceAndReturnCode(DataNameAndSpaceAndReturnCode&& other);
   DataNameAndSpaceAndReturnCode& operator=(DataNameAndSpaceAndReturnCode other);
-
-  explicit DataNameAndSpaceAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
   nfs_vault::DataName name;
