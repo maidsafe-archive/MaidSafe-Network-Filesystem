@@ -51,6 +51,9 @@ void MaidNodeNfs::set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node
   pmid_node_hint_ = pmid_node_hint;
 }
 
+void MaidNodeNfs::RegisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/) {}
+
+void MaidNodeNfs::UnregisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/){}
 }  // namespace nfs_client
 
 }  // namespace maidsafe
