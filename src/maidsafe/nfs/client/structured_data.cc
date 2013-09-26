@@ -24,13 +24,11 @@
 
 #include "maidsafe/nfs/client/structured_data.pb.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
 
-StructuredData::StructuredData(
-    std::vector<StructuredDataVersions::VersionName> versions_in)
+StructuredData::StructuredData(std::vector<StructuredDataVersions::VersionName> versions_in)
     : versions(std::move(versions_in)) {}
 
 StructuredData::StructuredData() : versions() {}

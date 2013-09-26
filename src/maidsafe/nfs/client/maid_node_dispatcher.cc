@@ -18,7 +18,6 @@
 
 #include "maidsafe/nfs/client/maid_node_dispatcher.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
@@ -45,8 +44,7 @@ void MaidNodeDispatcher::SendRemoveAccountRequest(routing::TaskId task_id) {
 }
 
 void MaidNodeDispatcher::SendRegisterPmidRequest(
-    routing::TaskId task_id,
-    const nfs_vault::PmidRegistration& pmid_registration) {
+    routing::TaskId task_id, const nfs_vault::PmidRegistration& pmid_registration) {
   typedef nfs::RegisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   assert(!pmid_registration.unregister());
@@ -56,8 +54,7 @@ void MaidNodeDispatcher::SendRegisterPmidRequest(
 }
 
 void MaidNodeDispatcher::SendUnregisterPmidRequest(
-    routing::TaskId task_id,
-    const nfs_vault::PmidRegistration& pmid_registration) {
+    routing::TaskId task_id, const nfs_vault::PmidRegistration& pmid_registration) {
   typedef nfs::UnregisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   assert(pmid_registration.unregister());

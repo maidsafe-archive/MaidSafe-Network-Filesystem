@@ -28,7 +28,6 @@
 
 #include "maidsafe/nfs/types.h"
 
-
 namespace maidsafe {
 
 namespace nfs {
@@ -42,17 +41,11 @@ typedef TaggedValue<Persona, struct detail::DestinationTag> DestinationTaggedVal
 
 }  // namespace detail
 
-
-
 typedef std::tuple<MessageAction, detail::SourceTaggedValue, detail::DestinationTaggedValue,
                    MessageId, std::string> TypeErasedMessageWrapper;
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
 struct MessageWrapper {
   typedef SourcePersonaType SourcePersona;
   typedef RoutingSenderType Sender;
@@ -66,7 +59,7 @@ struct MessageWrapper {
   explicit MessageWrapper(const ContentsType& contents_in);
 
   // For use with new messages.
-  MessageWrapper(MessageId message_id_in, const ContentsType& contents_in);
+  MessageWrapper(MessageId message_id_in, ContentsType contents_in);
 
   // For use when handling incoming messages where the sender has already set the message_id.
   explicit MessageWrapper(const TypeErasedMessageWrapper& parsed_message_wrapper);
@@ -91,24 +84,13 @@ struct MessageWrapper {
   static const detail::DestinationTaggedValue kDestinationTaggedValue;
 };
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-bool operator==(const MessageWrapper<action,
-                                     SourcePersonaType,
-                                     RoutingSenderType,
-                                     DestinationPersonaType,
-                                     RoutingReceiverType,
-                                     ContentsType>& lhs,
-                const MessageWrapper<action,
-                                     SourcePersonaType,
-                                     RoutingSenderType,
-                                     DestinationPersonaType,
-                                     RoutingReceiverType,
-                                     ContentsType>& rhs) {
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+bool operator==(
+    const MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+                         RoutingReceiverType, ContentsType>& lhs,
+    const MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+                         RoutingReceiverType, ContentsType>& rhs) {
   if (lhs.message_id != rhs.message_id)
     return false;
   if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents))
@@ -119,8 +101,6 @@ bool operator==(const MessageWrapper<action,
 }
 TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper);
 
-
-
 // ==================== Implementation =============================================================
 namespace detail {
 
@@ -130,154 +110,76 @@ std::string SerialiseMessageWrapper(const TypeErasedMessageWrapper& message_tupl
 
 }  // namespace detail
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-const detail::SourceTaggedValue MessageWrapper<action,
-                                               SourcePersonaType,
-                                               RoutingSenderType,
-                                               DestinationPersonaType,
-                                               RoutingReceiverType,
-                                               ContentsType>::kSourceTaggedValue =
-    detail::SourceTaggedValue(SourcePersonaType::value);
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+const detail::SourceTaggedValue MessageWrapper<
+    action, SourcePersonaType, RoutingSenderType, DestinationPersonaType, RoutingReceiverType,
+    ContentsType>::kSourceTaggedValue = detail::SourceTaggedValue(SourcePersonaType::value);
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-const detail::DestinationTaggedValue MessageWrapper<action,
-                                                    SourcePersonaType,
-                                                    RoutingSenderType,
-                                                    DestinationPersonaType,
-                                                    RoutingReceiverType,
-                                                    ContentsType>::kDestinationTaggedValue =
-    detail::DestinationTaggedValue(DestinationPersonaType::value);
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+const detail::DestinationTaggedValue
+    MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+                   RoutingReceiverType, ContentsType>::kDestinationTaggedValue =
+        detail::DestinationTaggedValue(DestinationPersonaType::value);
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-MessageWrapper<action,
-               SourcePersonaType,
-               RoutingSenderType,
-               DestinationPersonaType,
-               RoutingReceiverType,
-               ContentsType>::MessageWrapper()
-    : message_id(detail::GetNewMessageId()),
-      contents() {}
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+               RoutingReceiverType, ContentsType>::MessageWrapper()
+    : message_id(detail::GetNewMessageId()), contents() {}
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-MessageWrapper<action,
-               SourcePersonaType,
-               RoutingSenderType,
-               DestinationPersonaType,
-               RoutingReceiverType,
-               ContentsType>::MessageWrapper(const ContentsType& contents_in)
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+               RoutingReceiverType, ContentsType>::MessageWrapper(const ContentsType& contents_in)
     : message_id(detail::GetNewMessageId()),
       contents(std::make_shared<ContentsType>(contents_in)) {}
 
-template <MessageAction action, typename SourcePersonaType,
-          typename RoutingSenderType, typename DestinationPersonaType,
-          typename RoutingReceiverType, typename ContentsType>
-MessageWrapper<action, SourcePersonaType, RoutingSenderType,
-               DestinationPersonaType, RoutingReceiverType,
-               ContentsType>::MessageWrapper(MessageId message_id_in,
-                                             const ContentsType& contents_in)
-    : message_id(std::move(message_id_in)),
-      contents(std::make_shared<ContentsType>(contents_in)) {}
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+               RoutingReceiverType, ContentsType>::MessageWrapper(MessageId message_id_in,
+                                                                  ContentsType contents_in)
+    : message_id(std::move(message_id_in)), contents(std::make_shared<ContentsType>(contents_in)) {}
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-MessageWrapper<action,
-               SourcePersonaType,
-               RoutingSenderType,
-               DestinationPersonaType,
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                RoutingReceiverType,
                ContentsType>::MessageWrapper(const TypeErasedMessageWrapper& parsed_message_wrapper)
     : message_id(std::get<3>(parsed_message_wrapper)),
       contents(std::make_shared<ContentsType>(std::get<4>(parsed_message_wrapper))) {}
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-MessageWrapper<action,
-               SourcePersonaType,
-               RoutingSenderType,
-               DestinationPersonaType,
-               RoutingReceiverType,
-               ContentsType>::MessageWrapper(const MessageWrapper& other)
-    : message_id(other.message_id),
-      contents(other.contents) {}
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+               RoutingReceiverType, ContentsType>::MessageWrapper(const MessageWrapper& other)
+    : message_id(other.message_id), contents(other.contents) {}
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-MessageWrapper<action,
-               SourcePersonaType,
-               RoutingSenderType,
-               DestinationPersonaType,
-               RoutingReceiverType,
-               ContentsType>::MessageWrapper(MessageWrapper&& other)
-    : message_id(std::move(other.message_id)),
-      contents(std::move(other.contents)) {}
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+               RoutingReceiverType, ContentsType>::MessageWrapper(MessageWrapper&& other)
+    : message_id(std::move(other.message_id)), contents(std::move(other.contents)) {}
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-MessageWrapper<action,
-               SourcePersonaType,
-               RoutingSenderType,
-               DestinationPersonaType,
-               RoutingReceiverType,
-               ContentsType>& MessageWrapper<action,
-                                             SourcePersonaType,
-                                             RoutingSenderType,
-                                             DestinationPersonaType,
-                                             RoutingReceiverType,
-                                             ContentsType>::operator=(MessageWrapper other) {
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+               RoutingReceiverType, ContentsType>&
+MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+               RoutingReceiverType, ContentsType>::
+operator=(MessageWrapper other) {
   swap(*this, other);
   return *this;
 }
 
-template<MessageAction action,
-         typename SourcePersonaType,
-         typename RoutingSenderType,
-         typename DestinationPersonaType,
-         typename RoutingReceiverType,
-         typename ContentsType>
-std::string MessageWrapper<action,
-                           SourcePersonaType,
-                           RoutingSenderType,
-                           DestinationPersonaType,
-                           RoutingReceiverType,
-                           ContentsType>::Serialise() const {
-  return detail::SerialiseMessageWrapper(std::make_tuple(action, kSourceTaggedValue,
-      kDestinationTaggedValue, message_id, contents->Serialise()));
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+std::string MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+                           RoutingReceiverType, ContentsType>::Serialise() const {
+  return detail::SerialiseMessageWrapper(std::make_tuple(
+      action, kSourceTaggedValue, kDestinationTaggedValue, message_id, contents->Serialise()));
 }
 
 }  // namespace nfs

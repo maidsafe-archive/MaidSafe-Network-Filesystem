@@ -21,7 +21,6 @@
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
@@ -32,10 +31,9 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       dispatcher_(routing),
-      service_([&]()->std::unique_ptr<DataGetterService> &&
-{
-  std::unique_ptr<DataGetterService> service(new DataGetterService(
-      routing, get_timer_, get_versions_timer_, get_branch_timer_));
+      service_([&]()->std::unique_ptr<DataGetterService>&& {
+  std::unique_ptr<DataGetterService> service(
+      new DataGetterService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
   return std::move(service);
 }())
 #ifdef TESTING
@@ -51,7 +49,7 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
 #endif
 }
 
-template<>
+template <>
 boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
     const typename passport::PublicPmid::Name& data_name,
     const std::chrono::steady_clock::duration& timeout) {
@@ -62,26 +60,26 @@ boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
     auto promise(std::make_shared<boost::promise<passport::PublicPmid>>());
     HandleGetResult<passport::PublicPmid> response_functor(promise);
     auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-    auto task_id(get_timer_.AddTask(
-        timeout,
-        [op_data](ResponseContents get_response) {
-            op_data->HandleResponseContents(std::move(get_response));
-        },
-        // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-        routing::Parameters::node_group_size * 2));
+    auto task_id(get_timer_.AddTask(timeout,
+                                    [op_data](ResponseContents get_response) {
+                                      op_data->HandleResponseContents(std::move(get_response));
+                                    },
+                                    // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+                                    routing::Parameters::node_group_size * 2));
     dispatcher_.SendGetRequest<passport::PublicPmid>(task_id, data_name);
     return promise->get_future();
 #ifdef TESTING
   } else {
     boost::promise<passport::PublicPmid> promise;
     try {
-      auto itr(std::find_if(std::begin(kAllPmids_), std::end(kAllPmids_),
-          [&data_name](const passport::PublicPmid& pmid) { return pmid.name() == data_name; }));
+      auto itr(std::find_if(
+          std::begin(kAllPmids_), std::end(kAllPmids_),
+          [&data_name](const passport::PublicPmid & pmid) { return pmid.name() == data_name; }));
       if (itr == kAllPmids_.end())
         ThrowError(NfsErrors::failed_to_get_data);
       promise.set_value(*itr);
     }
-    catch(...) {
+    catch (...) {
       promise.set_exception(boost::current_exception());
     }
     return promise.get_future();

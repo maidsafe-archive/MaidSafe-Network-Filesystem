@@ -18,12 +18,12 @@
 
 #include "maidsafe/nfs/client/client_utils.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
 
-void HandleGetVersionsOrBranchResult(const StructuredDataNameAndContentOrReturnCode& result,
+void HandleGetVersionsOrBranchResult(
+    const StructuredDataNameAndContentOrReturnCode& result,
     std::shared_ptr<boost::promise<std::vector<StructuredDataVersions::VersionName>>> promise) {
   try {
     if (result.structured_data) {
@@ -34,7 +34,7 @@ void HandleGetVersionsOrBranchResult(const StructuredDataNameAndContentOrReturnC
       ThrowError(CommonErrors::uninitialised);
     }
   }
-  catch(...) {
+  catch (...) {
     promise->set_exception(boost::current_exception());
   }
 }

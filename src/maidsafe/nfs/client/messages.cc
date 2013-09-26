@@ -23,7 +23,6 @@
 #include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/client/messages.pb.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
@@ -54,8 +53,6 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
 
 }  // unnamed namespace
 
-
-
 // ==================== ReturnCode =================================================================
 ReturnCode::ReturnCode() : value(CommonErrors::success) {}
 
@@ -70,11 +67,11 @@ ReturnCode& ReturnCode::operator=(ReturnCode other) {
 
 ReturnCode::ReturnCode(const std::string& serialised_copy)
     : value([&serialised_copy] {
-          protobuf::ReturnCode proto_copy;
-          if (!proto_copy.ParseFromString(serialised_copy))
-            ThrowError(CommonErrors::parsing_error);
-          return GetError(proto_copy.error_value(), proto_copy.error_category_name());
-        }()) {}
+        protobuf::ReturnCode proto_copy;
+        if (!proto_copy.ParseFromString(serialised_copy))
+          ThrowError(CommonErrors::parsing_error);
+        return GetError(proto_copy.error_value(), proto_copy.error_category_name());
+      }()) {}
 
 std::string ReturnCode::Serialise() const {
   protobuf::ReturnCode proto_copy;
@@ -82,7 +79,6 @@ std::string ReturnCode::Serialise() const {
   proto_copy.set_error_category_name(value.code().category().name());
   return proto_copy.SerializeAsString();
 }
-
 
 bool operator==(const ReturnCode& lhs, const ReturnCode& rhs) {
   return lhs.value.code() == rhs.value.code();
@@ -93,22 +89,17 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.value, rhs.value);
 }
 
-
-
 // ==================== DataNameAndReturnCode ======================================================
 DataNameAndReturnCode::DataNameAndReturnCode() : name(), return_code() {}
 
-DataNameAndReturnCode::DataNameAndReturnCode(nfs_vault::DataName data_name,
-                                             ReturnCode code)
+DataNameAndReturnCode::DataNameAndReturnCode(nfs_vault::DataName data_name, ReturnCode code)
     : name(std::move(data_name)), return_code(std::move(code)) {}
 
 DataNameAndReturnCode::DataNameAndReturnCode(const DataNameAndReturnCode& other)
-    : name(other.name),
-      return_code(other.return_code) {}
+    : name(other.name), return_code(other.return_code) {}
 
 DataNameAndReturnCode::DataNameAndReturnCode(DataNameAndReturnCode&& other)
-    : name(std::move(other.name)),
-      return_code(std::move(other.return_code)) {}
+    : name(std::move(other.name)), return_code(std::move(other.return_code)) {}
 
 DataNameAndReturnCode& DataNameAndReturnCode::operator=(DataNameAndReturnCode other) {
   swap(*this, other);
@@ -116,8 +107,7 @@ DataNameAndReturnCode& DataNameAndReturnCode::operator=(DataNameAndReturnCode ot
 }
 
 DataNameAndReturnCode::DataNameAndReturnCode(const std::string& serialised_copy)
-    : name(),
-      return_code() {
+    : name(), return_code() {
   protobuf::DataNameAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -142,17 +132,13 @@ void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXC
   swap(lhs.return_code, rhs.return_code);
 }
 
-
-
 // ==================== DataNameVersionAndReturnCode ===============================================
 DataNameVersionAndReturnCode::DataNameVersionAndReturnCode()
-    : data_name_and_version(),
-      return_code() {}
+    : data_name_and_version(), return_code() {}
 
 DataNameVersionAndReturnCode::DataNameVersionAndReturnCode(
     const DataNameVersionAndReturnCode& other)
-        : data_name_and_version(other.data_name_and_version),
-          return_code(other.return_code) {}
+    : data_name_and_version(other.data_name_and_version), return_code(other.return_code) {}
 
 DataNameVersionAndReturnCode::DataNameVersionAndReturnCode(DataNameVersionAndReturnCode&& other)
     : data_name_and_version(std::move(other.data_name_and_version)),
@@ -165,8 +151,7 @@ DataNameVersionAndReturnCode& DataNameVersionAndReturnCode::operator=(
 }
 
 DataNameVersionAndReturnCode::DataNameVersionAndReturnCode(const std::string& serialised_copy)
-    : data_name_and_version(),
-      return_code() {
+    : data_name_and_version(), return_code() {
   protobuf::DataNameVersionAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -193,22 +178,18 @@ void swap(DataNameVersionAndReturnCode& lhs, DataNameVersionAndReturnCode& rhs) 
   swap(lhs.return_code, rhs.return_code);
 }
 
-
-
 // ==================== DataNameOldNewVersionAndReturnCode =========================================
 DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode()
-    : data_name_old_new_version(),
-      return_code() {}
+    : data_name_old_new_version(), return_code() {}
 
 DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode(
     const DataNameOldNewVersionAndReturnCode& other)
-        : data_name_old_new_version(other.data_name_old_new_version),
-          return_code(other.return_code) {}
+    : data_name_old_new_version(other.data_name_old_new_version), return_code(other.return_code) {}
 
 DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode(
     DataNameOldNewVersionAndReturnCode&& other)
-        : data_name_old_new_version(std::move(other.data_name_old_new_version)),
-          return_code(std::move(other.return_code)) {}
+    : data_name_old_new_version(std::move(other.data_name_old_new_version)),
+      return_code(std::move(other.return_code)) {}
 
 DataNameOldNewVersionAndReturnCode& DataNameOldNewVersionAndReturnCode::operator=(
     DataNameOldNewVersionAndReturnCode other) {
@@ -218,8 +199,7 @@ DataNameOldNewVersionAndReturnCode& DataNameOldNewVersionAndReturnCode::operator
 
 DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode(
     const std::string& serialised_copy)
-        : data_name_old_new_version(),
-          return_code() {
+    : data_name_old_new_version(), return_code() {
   protobuf::DataNameOldNewVersionAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -248,27 +228,21 @@ void swap(DataNameOldNewVersionAndReturnCode& lhs,
   swap(lhs.return_code, rhs.return_code);
 }
 
-
-
 // ==================== DataAndReturnCode ==========================================================
 DataAndReturnCode::DataAndReturnCode() : data(), return_code() {}
 
 DataAndReturnCode::DataAndReturnCode(const DataAndReturnCode& other)
-    : data(other.data),
-      return_code(other.return_code) {}
+    : data(other.data), return_code(other.return_code) {}
 
 DataAndReturnCode::DataAndReturnCode(DataAndReturnCode&& other)
-    : data(std::move(other.data)),
-      return_code(std::move(other.return_code)) {}
+    : data(std::move(other.data)), return_code(std::move(other.return_code)) {}
 
 DataAndReturnCode& DataAndReturnCode::operator=(DataAndReturnCode other) {
   swap(*this, other);
   return *this;
 }
 
-DataAndReturnCode::DataAndReturnCode(const std::string& serialised_copy)
-    : data(),
-      return_code() {
+DataAndReturnCode::DataAndReturnCode(const std::string& serialised_copy) : data(), return_code() {
   protobuf::DataAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -293,28 +267,23 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.return_code, rhs.return_code);
 }
 
-
-
 // ==================== DataNameAndContentOrReturnCode =============================================
-template<>
+template <>
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndReturnCode& data_name_and_return_code_in)
-        : data(),
-          data_name_and_return_code(data_name_and_return_code_in) {}
+    : data(), data_name_and_return_code(data_name_and_return_code_in) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode()
-    : data(),
-      data_name_and_return_code() {}
+    : data(), data_name_and_return_code() {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndContentOrReturnCode& other)
-        : data(other.data),
-          data_name_and_return_code(other.data_name_and_return_code) {}
+    : data(other.data), data_name_and_return_code(other.data_name_and_return_code) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     DataNameAndContentOrReturnCode&& other)
-        : data(std::move(other.data)),
-          data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
+    : data(std::move(other.data)),
+      data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
 
 DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
     DataNameAndContentOrReturnCode other) {
@@ -323,8 +292,7 @@ DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
 }
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(const std::string& serialised_copy)
-    : data(),
-      data_name_and_return_code() {
+    : data(), data_name_and_return_code() {
   protobuf::DataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -371,22 +339,19 @@ void swap(DataNameAndContentOrReturnCode& lhs,
   swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
 }
 
-
-
 // ==================== StructuredDataNameAndContentOrReturnCode ===================================
 StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode()
-    : structured_data(),
-      data_name_and_return_code() {}
+    : structured_data(), data_name_and_return_code() {}
 
 StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode(
     const StructuredDataNameAndContentOrReturnCode& other)
-        : structured_data(other.structured_data),
-          data_name_and_return_code(other.data_name_and_return_code) {}
+    : structured_data(other.structured_data),
+      data_name_and_return_code(other.data_name_and_return_code) {}
 
 StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode(
     StructuredDataNameAndContentOrReturnCode&& other)
-        : structured_data(std::move(other.structured_data)),
-          data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
+    : structured_data(std::move(other.structured_data)),
+      data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
 
 StructuredDataNameAndContentOrReturnCode& StructuredDataNameAndContentOrReturnCode::operator=(
     StructuredDataNameAndContentOrReturnCode other) {
@@ -396,8 +361,7 @@ StructuredDataNameAndContentOrReturnCode& StructuredDataNameAndContentOrReturnCo
 
 StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCode(
     const std::string& serialised_copy)
-        : structured_data(),
-          data_name_and_return_code() {
+    : structured_data(), data_name_and_return_code() {
   protobuf::StructuredDataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -444,14 +408,11 @@ void swap(StructuredDataNameAndContentOrReturnCode& lhs,
   swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
 }
 
-
-
 // ==================== DataPmidHintAndReturnCode ==================================================
 DataPmidHintAndReturnCode::DataPmidHintAndReturnCode() : data_and_pmid_hint(), return_code() {}
 
 DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(const DataPmidHintAndReturnCode& other)
-    : data_and_pmid_hint(other.data_and_pmid_hint),
-      return_code(other.return_code) {}
+    : data_and_pmid_hint(other.data_and_pmid_hint), return_code(other.return_code) {}
 
 DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(DataPmidHintAndReturnCode&& other)
     : data_and_pmid_hint(std::move(other.data_and_pmid_hint)),
@@ -463,8 +424,7 @@ DataPmidHintAndReturnCode& DataPmidHintAndReturnCode::operator=(DataPmidHintAndR
 }
 
 DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(const std::string& serialised_copy)
-    : data_and_pmid_hint(),
-      return_code() {
+    : data_and_pmid_hint(), return_code() {
   protobuf::DataPmidHintAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -480,8 +440,7 @@ std::string DataPmidHintAndReturnCode::Serialise() const {
 }
 
 bool operator==(const DataPmidHintAndReturnCode& lhs, const DataPmidHintAndReturnCode& rhs) {
-  return lhs.data_and_pmid_hint == rhs.data_and_pmid_hint &&
-         lhs.return_code == rhs.return_code;
+  return lhs.data_and_pmid_hint == rhs.data_and_pmid_hint && lhs.return_code == rhs.return_code;
 }
 
 void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
@@ -490,17 +449,13 @@ void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSA
   swap(lhs.return_code, rhs.return_code);
 }
 
-
-
 // ==================== PmidRegistrationAndReturnCode ==============================================
 PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode()
-    : pmid_registration(),
-      return_code() {}
+    : pmid_registration(), return_code() {}
 
 PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(
     const PmidRegistrationAndReturnCode& other)
-        : pmid_registration(other.pmid_registration),
-          return_code(other.return_code) {}
+    : pmid_registration(other.pmid_registration), return_code(other.return_code) {}
 
 PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(PmidRegistrationAndReturnCode&& other)
     : pmid_registration(std::move(other.pmid_registration)),
@@ -513,8 +468,7 @@ PmidRegistrationAndReturnCode& PmidRegistrationAndReturnCode::operator=(
 }
 
 PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(const std::string& serialised_copy)
-    : pmid_registration(),
-      return_code() {
+    : pmid_registration(), return_code() {
   protobuf::PmidRegistrationAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -531,8 +485,7 @@ std::string PmidRegistrationAndReturnCode::Serialise() const {
 
 bool operator==(const PmidRegistrationAndReturnCode& lhs,
                 const PmidRegistrationAndReturnCode& rhs) {
-  return lhs.pmid_registration == rhs.pmid_registration &&
-         lhs.return_code == rhs.return_code;
+  return lhs.pmid_registration == rhs.pmid_registration && lhs.return_code == rhs.return_code;
 }
 
 void swap(PmidRegistrationAndReturnCode& lhs,
@@ -542,38 +495,33 @@ void swap(PmidRegistrationAndReturnCode& lhs,
   swap(lhs.return_code, rhs.return_code);
 }
 
-
 // ==================== DataNameAndContentAndReturnCode ============================================
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
     const DataNameAndContentAndReturnCode& data)
-        : name(data.name),
-          return_code(data.return_code) {
+    : name(data.name), return_code(data.return_code) {
   if (data.content)
     content = *data.content;
 }
 
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
-    const DataTagValue& type_in, const Identity& name_in,
-    nfs_client::ReturnCode code_in, const NonEmptyString& content_in)
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(const DataTagValue& type_in,
+                                                                 const Identity& name_in,
+                                                                 nfs_client::ReturnCode code_in,
+                                                                 const NonEmptyString& content_in)
     : name(nfs_vault::DataName(type_in, name_in)),
       return_code(std::move(code_in)),
       content(content_in) {}
 
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
-    const DataTagValue& type_in, const Identity& name_in,
-    nfs_client::ReturnCode code_in)
-    : name(nfs_vault::DataName(type_in, name_in)),
-      return_code(std::move(code_in)) {}
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(const DataTagValue& type_in,
+                                                                 const Identity& name_in,
+                                                                 nfs_client::ReturnCode code_in)
+    : name(nfs_vault::DataName(type_in, name_in)), return_code(std::move(code_in)) {}
 
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode()
-    : name(), return_code() {
-}
+DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode() : name(), return_code() {}
 
 DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
     DataNameAndContentAndReturnCode&& other)
-        : name(std::move(other.name)),
-          return_code(std::move(other.return_code)) {
+    : name(std::move(other.name)), return_code(std::move(other.return_code)) {
   if (other.content)
     content = std::move(*other.content);
 }
@@ -618,44 +566,36 @@ bool operator==(const DataNameAndContentAndReturnCode& lhs,
   if ((!lhs.content && rhs.content) || (lhs.content && !rhs.content))
     return false;
   if (!lhs.content)
-    return lhs.name == rhs.name &&
-           lhs.return_code == rhs.return_code;
-  return lhs.name == rhs.name &&
-         lhs.return_code == rhs.return_code &&
-         *lhs.content == *rhs.content;
+    return lhs.name == rhs.name && lhs.return_code == rhs.return_code;
+  return lhs.name == rhs.name && lhs.return_code == rhs.return_code && *lhs.content == *rhs.content;
 }
 
 // ==================== DataNameAndSignatureAndReturnCode =========================================
 
 DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
     const DataNameAndSignatureAndReturnCode& data)
-        : name(data.name),
-          return_code(data.return_code) {
+    : name(data.name), return_code(data.return_code) {
   if (data.signature)
     signature = *data.signature;
 }
 
 DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
-    const DataTagValue& type_in, const Identity& name_in,
-    nfs_client::ReturnCode code_in, const NonEmptyString& signature_in)
+    const DataTagValue& type_in, const Identity& name_in, nfs_client::ReturnCode code_in,
+    const NonEmptyString& signature_in)
     : name(nfs_vault::DataName(type_in, name_in)),
       return_code(std::move(code_in)),
       signature(signature_in) {}
 
-DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
-    const DataTagValue& type_in, const Identity& name_in,
-    nfs_client::ReturnCode code_in)
-    : name(nfs_vault::DataName(type_in, name_in)),
-      return_code(std::move(code_in)) {}
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(const DataTagValue& type_in,
+                                                                     const Identity& name_in,
+                                                                     nfs_client::ReturnCode code_in)
+    : name(nfs_vault::DataName(type_in, name_in)), return_code(std::move(code_in)) {}
 
-DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode()
-    : name(), return_code() {
-}
+DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode() : name(), return_code() {}
 
 DataNameAndSignatureAndReturnCode::DataNameAndSignatureAndReturnCode(
     DataNameAndSignatureAndReturnCode&& other)
-        : name(std::move(other.name)),
-          return_code(std::move(other.return_code)) {
+    : name(std::move(other.name)), return_code(std::move(other.return_code)) {
   if (other.signature)
     signature = std::move(*other.signature);
 }
@@ -700,21 +640,16 @@ bool operator==(const DataNameAndSignatureAndReturnCode& lhs,
   if ((!lhs.signature && rhs.signature) || (lhs.signature && !rhs.signature))
     return false;
   if (!lhs.signature)
-    return lhs.name == rhs.name &&
-           lhs.return_code == rhs.return_code;
-  return lhs.name == rhs.name &&
-         lhs.return_code == rhs.return_code &&
+    return lhs.name == rhs.name && lhs.return_code == rhs.return_code;
+  return lhs.name == rhs.name && lhs.return_code == rhs.return_code &&
          *lhs.signature == *rhs.signature;
 }
-
 
 // ======================== DataNameAndSpaceAndReturnCode =========================================
 
 DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(
     const DataNameAndSpaceAndReturnCode& data)
-        : name(data.name),
-          available_space(data.available_space),
-          return_code(data.return_code) {}
+    : name(data.name), available_space(data.available_space), return_code(data.return_code) {}
 
 DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode()
     : name(), available_space(), return_code() {}
@@ -727,14 +662,12 @@ DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(const DataTagValue&
       available_space(available_space_in),
       return_code(std::move(code_in)) {}
 
-DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(
-    DataNameAndSpaceAndReturnCode&& other)
-        : name(std::move(other.name)),
-          available_space(std::move(other.available_space)),
-          return_code(std::move(other.return_code)) {}
+DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(DataNameAndSpaceAndReturnCode&& other)
+    : name(std::move(other.name)),
+      available_space(std::move(other.available_space)),
+      return_code(std::move(other.return_code)) {}
 
-DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(
-    const std::string& serialised_copy) {
+DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(const std::string& serialised_copy) {
   protobuf::DataNameAndSpaceAndReturnCode proto;
   if (!proto.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
@@ -768,26 +701,21 @@ void swap(DataNameAndSpaceAndReturnCode& lhs,
 
 bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
                 const DataNameAndSpaceAndReturnCode& rhs) {
-  return lhs.name == rhs.name &&
-         lhs.available_space == rhs.available_space &&
+  return lhs.name == rhs.name && lhs.available_space == rhs.available_space &&
          lhs.return_code == rhs.return_code;
 }
 
-
-
 }  // namespace nfs_client
-
-
 
 namespace nfs {
 
-template<>
+template <>
 bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response) {
   return response.data;
 }
 
-template<>
+template <>
 std::error_code ErrorCode<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response) {
   if (response.data_name_and_return_code)
@@ -798,13 +726,13 @@ std::error_code ErrorCode<nfs_client::DataNameAndContentOrReturnCode>(
     return std::error_code(NfsErrors::timed_out);
 }
 
-template<>
+template <>
 bool IsSuccess<nfs_client::StructuredDataNameAndContentOrReturnCode>(
     const nfs_client::StructuredDataNameAndContentOrReturnCode& response) {
   return response.structured_data;
 }
 
-template<>
+template <>
 std::error_code ErrorCode<nfs_client::StructuredDataNameAndContentOrReturnCode>(
     const nfs_client::StructuredDataNameAndContentOrReturnCode& response) {
   if (response.data_name_and_return_code)

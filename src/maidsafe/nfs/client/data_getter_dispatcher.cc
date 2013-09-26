@@ -18,14 +18,12 @@
 
 #include "maidsafe/nfs/client/data_getter_dispatcher.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
 
 DataGetterDispatcher::DataGetterDispatcher(routing::Routing& routing)
-    : routing_(routing),
-      kThisNodeAsSender_(routing_.kNodeId()) {}
+    : routing_(routing), kThisNodeAsSender_(routing_.kNodeId()) {}
 
 }  // namespace nfs_client
 

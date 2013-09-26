@@ -36,7 +36,6 @@
 #include "maidsafe/nfs/vault/pmid_registration.h"
 #include "maidsafe/nfs/vault/messages.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
@@ -45,30 +44,28 @@ class MaidNodeDispatcher {
  public:
   explicit MaidNodeDispatcher(routing::Routing& routing);
 
-  template<typename Data>
+  template <typename Data>
   void SendGetRequest(routing::TaskId task_id, const typename Data::Name& data_name);
 
-  template<typename Data>
+  template <typename Data>
   void SendPutRequest(const Data& data, const passport::PublicPmid::Name& pmid_node_hint);
 
-  template<typename Data>
+  template <typename Data>
   void SendDeleteRequest(const typename Data::Name& data_name);
 
-  template<typename Data>
+  template <typename Data>
   void SendGetVersionsRequest(routing::TaskId task_id, const typename Data::Name& data_name);
 
-  template<typename Data>
-  void SendGetBranchRequest(routing::TaskId task_id,
-                            const typename Data::Name& data_name,
+  template <typename Data>
+  void SendGetBranchRequest(routing::TaskId task_id, const typename Data::Name& data_name,
                             const StructuredDataVersions::VersionName& branch_tip);
 
-  template<typename Data>
-  void SendPutVersionRequest(routing::TaskId task_id,
-                             const typename Data::Name& data_name,
+  template <typename Data>
+  void SendPutVersionRequest(routing::TaskId task_id, const typename Data::Name& data_name,
                              const StructuredDataVersions::VersionName& old_version_name,
                              const StructuredDataVersions::VersionName& new_version_name);
 
-  template<typename Data>
+  template <typename Data>
   void SendDeleteBranchUntilForkRequest(const typename Data::Name& data_name,
                                         const StructuredDataVersions::VersionName& branch_tip);
 
@@ -90,7 +87,7 @@ class MaidNodeDispatcher {
   MaidNodeDispatcher(MaidNodeDispatcher&&);
   MaidNodeDispatcher& operator=(MaidNodeDispatcher);
 
-  template<typename Message>
+  template <typename Message>
   void CheckSourcePersonaType() const;
 
   routing::Routing& routing_;
@@ -98,31 +95,29 @@ class MaidNodeDispatcher {
   const routing::GroupId kMaidManagerReceiver_;
 };
 
-
-
 // ==================== Implementation =============================================================
-template<typename Data>
+template <typename Data>
 void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id,
                                         const typename Data::Name& data_name) {
   typedef nfs::GetRequestFromMaidNodeToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet :
-                                                                         routing::Cacheable::kNone);
+  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet
+                                                                       : routing::Cacheable::kNone);
   NfsMessage nfs_message((nfs::MessageId(task_id), NfsMessage::Contents(data_name)));
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
   routing_.Send(routing_message);
 }
 
-template<typename Data>
+template <typename Data>
 void MaidNodeDispatcher::SendPutRequest(const Data& data,
                                         const passport::PublicPmid::Name& pmid_node_hint) {
   typedef nfs::PutRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kPut :
-                                                                         routing::Cacheable::kNone);
+  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kPut
+                                                                       : routing::Cacheable::kNone);
   NfsMessage::Contents contents;
   contents.data = nfs_vault::DataNameAndContent(data);
   contents.pmid_hint = pmid_node_hint.value;
@@ -131,7 +126,7 @@ void MaidNodeDispatcher::SendPutRequest(const Data& data,
                                kCacheable));
 }
 
-template<typename Data>
+template <typename Data>
 void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& data_name) {
   typedef nfs::DeleteRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
@@ -141,7 +136,7 @@ void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& data_name)
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-template<typename Data>
+template <typename Data>
 void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
                                                 const typename Data::Name& data_name) {
   typedef nfs::GetVersionsRequestFromMaidNodeToVersionManager NfsMessage;
@@ -153,10 +148,9 @@ void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
-template<typename Data>
+template <typename Data>
 void MaidNodeDispatcher::SendGetBranchRequest(
-    routing::TaskId task_id,
-    const typename Data::Name& data_name,
+    routing::TaskId task_id, const typename Data::Name& data_name,
     const StructuredDataVersions::VersionName& branch_tip) {
   typedef nfs::GetBranchRequestFromMaidNodeToVersionManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
@@ -170,10 +164,9 @@ void MaidNodeDispatcher::SendGetBranchRequest(
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
-template<typename Data>
+template <typename Data>
 void MaidNodeDispatcher::SendPutVersionRequest(
-    routing::TaskId task_id,
-    const typename Data::Name& data_name,
+    routing::TaskId task_id, const typename Data::Name& data_name,
     const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name) {
   typedef nfs::PutVersionRequestFromMaidNodeToMaidManager NfsMessage;
@@ -188,10 +181,9 @@ void MaidNodeDispatcher::SendPutVersionRequest(
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-template<typename Data>
+template <typename Data>
 void MaidNodeDispatcher::SendDeleteBranchUntilForkRequest(
-    const typename Data::Name& data_name,
-    const StructuredDataVersions::VersionName& branch_tip) {
+    const typename Data::Name& data_name, const StructuredDataVersions::VersionName& branch_tip) {
   typedef nfs::DeleteBranchUntilForkRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
@@ -203,7 +195,7 @@ void MaidNodeDispatcher::SendDeleteBranchUntilForkRequest(
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-template<typename Message>
+template <typename Message>
 void MaidNodeDispatcher::CheckSourcePersonaType() const {
   static_assert(Message::SourcePersona::value == nfs::Persona::kMaidNode,
                 "The source Persona must be kMaidNode.");

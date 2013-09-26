@@ -26,7 +26,6 @@
 
 #include "maidsafe/passport/types.h"
 
-
 namespace maidsafe {
 
 namespace nfs_vault {

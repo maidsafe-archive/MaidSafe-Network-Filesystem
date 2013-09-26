@@ -29,12 +29,11 @@
 
 #include "maidsafe/nfs/client/messages.h"
 
-
 namespace maidsafe {
 
 namespace nfs_client {
 
-template<typename Data>
+template <typename Data>
 struct HandleGetResult {
   explicit HandleGetResult(std::shared_ptr<boost::promise<Data>> promise_in)
       : promise(std::move(promise_in)) {}
@@ -42,13 +41,12 @@ struct HandleGetResult {
   std::shared_ptr<boost::promise<Data>> promise;
 };
 
-void HandleGetVersionsOrBranchResult(const StructuredDataNameAndContentOrReturnCode& result,
+void HandleGetVersionsOrBranchResult(
+    const StructuredDataNameAndContentOrReturnCode& result,
     std::shared_ptr<boost::promise<std::vector<StructuredDataVersions::VersionName>>> promise);
 
-
-
 // ==================== Implementation =============================================================
-template<typename Data>
+template <typename Data>
 void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& result) const {
   try {
     if (result.data) {
@@ -64,7 +62,7 @@ void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& res
       ThrowError(CommonErrors::uninitialised);
     }
   }
-  catch(...) {
+  catch (...) {
     promise->set_exception(boost::current_exception());
   }
 }
