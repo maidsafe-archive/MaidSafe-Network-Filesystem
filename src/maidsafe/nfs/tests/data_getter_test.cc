@@ -117,7 +117,7 @@ class PublicKeyGetterTest : public testing::Test {
   std::unique_ptr<PublicKeyGetter> public_key_getter_;
 };
 
-TEST_F(PublicKeyGetterTest, BEH_GetPublicPmidKeys) {
+TEST_F(PublicKeyGetterTest, DISABLED_BEH_GetPublicPmidKeys) {
   PublicPmidVector public_pmids(GeneratePublicPmids());
   public_key_getter_.reset(new PublicKeyGetter(routing_, public_pmids));
   PublicKeyVector public_keys(FillPublicKeyVector(public_pmids));

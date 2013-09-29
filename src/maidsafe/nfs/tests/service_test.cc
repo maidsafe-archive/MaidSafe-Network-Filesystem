@@ -40,8 +40,8 @@ namespace maidsafe {
 namespace nfs {
 
 namespace test {
-
-TEST(MaidNodeService, BEH_All) {
+/*
+TEST(MaidNodeService, DISABLED_BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
@@ -74,7 +74,7 @@ TEST(MaidNodeService, BEH_All) {
   service.HandleMessage(response_tuple, sender, receiver);
 }
 
-TEST(DataGetterService, BEH_All) {
+TEST(DataGetterService, DISABLED_BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
@@ -106,7 +106,7 @@ TEST(DataGetterService, BEH_All) {
 
   service.HandleMessage(response_tuple, sender, receiver);
 }
-
+*/
 }  // namespace test
 
 }  // namespace nfs
