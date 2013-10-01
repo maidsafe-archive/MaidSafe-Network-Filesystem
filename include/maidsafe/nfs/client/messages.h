@@ -237,6 +237,12 @@ bool operator==(const DataNameAndContentAndReturnCode& lhs,
 // ========================== DataNameAndSignatureAndReturnCode ====================================
 
 struct DataNameAndSignatureAndReturnCode {
+  template <typename Data>
+  DataNameAndSignatureAndReturnCode(const typename Data::Name& name_in,
+                                    nfs_client::ReturnCode code_in,
+                                    const NonEmptyString& signature_in)
+      : name(name_in), return_code(code_in), signature(signature_in) {}
+
   DataNameAndSignatureAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
                                     nfs_client::ReturnCode code_in,
                                     const NonEmptyString& signature_in);
@@ -263,6 +269,12 @@ bool operator==(const DataNameAndSignatureAndReturnCode& lhs,
 // ========================== DataNameAndSpaceAndReturnCode ====================================
 
 struct DataNameAndSpaceAndReturnCode {
+  template <typename Data>
+  DataNameAndSpaceAndReturnCode(const typename Data::Name& name_in,
+                                const int64_t& available_space_in,
+                                const nfs_client::ReturnCode& code_in)
+      : name(name_in), available_space(available_space_in), return_code(code_in) {}
+
   DataNameAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
                                 const int64_t& available_space_in,
                                 const nfs_client::ReturnCode& code_in);

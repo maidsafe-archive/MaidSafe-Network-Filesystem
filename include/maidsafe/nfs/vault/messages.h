@@ -118,8 +118,8 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataNameAndRandomString {
   template <typename Data>
-  explicit DataNameAndRandomString(const Data& data)
-      : name(data.name()), random_string(data.Serialise().data) {}
+  DataNameAndRandomString(typename Data::Name name, NonEmptyString& random_string_in)
+      : name(std::move(name)), random_string(std::move(random_string_in)) {}
 
   DataNameAndRandomString(DataTagValue type_in, const Identity& name_in,
                           NonEmptyString random_string_in);
@@ -141,8 +141,8 @@ void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_N
 
 struct DataNameAndCost {
   template <typename Data>
-  explicit DataNameAndCost(const Data& data)
-      : name(data.name()), cost(data.cost) {}
+  explicit DataNameAndCost(const Data& data, int32_t cost_in)
+      : name(data.name()), cost(cost_in) {}
 
   DataNameAndCost(DataTagValue type_in, const Identity& name_in, const int32_t& cost_in);
 
