@@ -3,4 +3,3 @@ Action:GetCachedResponse              Source:PmidNode:Single          Destinatio
 Action:PutResponse                    Source:MaidManager:Group        Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::DataPmidHintAndReturnCode
 Action:GetVersionsResponse            Source:VersionManager:Group     Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
 Action:GetBranchResponse              Source:VersionManager:Group     Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
-

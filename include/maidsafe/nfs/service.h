@@ -36,9 +36,7 @@ namespace maidsafe {
 namespace vault {
 
 template <typename T>
-inline bool GetVariant(const maidsafe::nfs::TypeErasedMessageWrapper& /*message*/, T& /*variant*/) {
-  return true;  // TODO(Team): BEFORE_RELEASE
-}
+inline bool GetVariant(const maidsafe::nfs::TypeErasedMessageWrapper& message, T& variant);
 
 }  // namespace vault
 
@@ -82,10 +80,8 @@ class Service {
   typedef typename PersonaService::VaultMessages VaultMessages;
 
   explicit Service(std::unique_ptr<PersonaService>&& impl) : impl_(std::move(impl)) {
-    static_assert(!std::is_void<PublicMessages>::value || !std::is_void<VaultMessages>::value,
-                  "Both Message types cannot be 'void'.");
-    //    static_assert(!std::is_same<PublicMessages, VaultMessages>::value,
-    //                  "Both Message types cannot be the same.");  // TODO(Team): BEFORE_RELEASE
+    static_assert(!std::is_same<PublicMessages, VaultMessages>::value,
+                  "Both Message types cannot be the same.");
   }
 
   template <typename Sender, typename Receiver>
