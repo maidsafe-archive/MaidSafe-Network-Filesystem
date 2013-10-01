@@ -141,8 +141,7 @@ void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_N
 
 struct DataNameAndCost {
   template <typename Data>
-  explicit DataNameAndCost(const Data& data, int32_t cost_in)
-      : name(data.name()), cost(cost_in) {}
+  DataNameAndCost(const Data& data, int32_t cost_in) : name(data.name()), cost(cost_in) {}
 
   DataNameAndCost(DataTagValue type_in, const Identity& name_in, const int32_t& cost_in);
 
@@ -160,6 +159,25 @@ struct DataNameAndCost {
 
 bool operator==(const DataNameAndCost& lhs, const DataNameAndCost& rhs);
 void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT;
+
+struct DataNameAndSize {
+  template <typename Data>
+  DataNameAndSize(const Data& data, int32_t size_in) : name(data.name()), size(size_in) {}
+  DataNameAndSize(DataTagValue type_in, const Identity& name_in, const int32_t& cost_in);
+  DataNameAndSize();
+  DataNameAndSize(const DataNameAndSize& other);
+  DataNameAndSize(DataNameAndSize&& other);
+  DataNameAndSize& operator=(DataNameAndSize other);
+
+  explicit DataNameAndSize(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName name;
+  int32_t size;
+};
+
+bool operator==(const DataNameAndSize& lhs, const DataNameAndSize& rhs);
+void swap(DataNameAndSize& lhs, DataNameAndSize& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataAndPmidHint {
   DataAndPmidHint();

@@ -288,6 +288,46 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.cost, rhs.cost);
 }
 
+// ==================== DataNameAndSize =========================================================
+
+DataNameAndSize::DataNameAndSize() : name(), size(0) {}
+
+DataNameAndSize::DataNameAndSize(const DataNameAndSize& other)
+    : name(other.name), size(other.size) {}
+
+DataNameAndSize::DataNameAndSize(DataNameAndSize&& other)
+    : name(std::move(other.name)), size(std::move(other.size)) {}
+
+DataNameAndSize& DataNameAndSize::operator=(DataNameAndSize other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndSize::DataNameAndSize(const std::string& serialised_copy) : name(), size(0) {
+  protobuf::DataNameAndSize proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  name = DataName(proto_copy.serialised_name());
+  size = proto_copy.size();
+}
+
+std::string DataNameAndSize::Serialise() const {
+  protobuf::DataNameAndSize proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_size(size);
+  return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameAndSize& lhs, const DataNameAndSize& rhs) {
+  return lhs.name == rhs.name && lhs.size == rhs.size;
+}
+
+void swap(DataNameAndSize& lhs, DataNameAndSize& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.size, rhs.size);
+}
+
 // ==================== DataAndPmidHint ============================================================
 DataAndPmidHint::DataAndPmidHint() : data(), pmid_hint() {}
 
