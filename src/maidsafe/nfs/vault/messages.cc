@@ -257,6 +257,9 @@ void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_N
 
 DataNameAndCost::DataNameAndCost() : name(), cost(0) {}
 
+DataNameAndCost::DataNameAndCost(DataTagValue type_in, const Identity& name_in, int32_t cost_in)
+    : name(type_in, name_in), cost(cost_in) {}
+
 DataNameAndCost::DataNameAndCost(const DataNameAndCost& other)
     : name(other.name), cost(other.cost) {}
 
@@ -296,6 +299,9 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
 // ==================== DataNameAndSize ============================================================
 
 DataNameAndSize::DataNameAndSize() : name(), size(0) {}
+
+DataNameAndSize::DataNameAndSize(DataTagValue type_in, const Identity& name_in,
+    int32_t size_in) : name(type_in, name_in), size(size_in) {}
 
 DataNameAndSize::DataNameAndSize(const DataNameAndSize& other)
     : name(other.name), size(other.size) {}

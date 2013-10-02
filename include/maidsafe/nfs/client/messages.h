@@ -237,9 +237,8 @@ bool operator==(const DataNameAndContentAndReturnCode& lhs,
 // ========================== DataNameAndSpaceAndReturnCode ====================================
 
 struct DataNameAndSpaceAndReturnCode {
-  template <typename Data>
-  DataNameAndSpaceAndReturnCode(const typename Data::Name& name_in,
-                                const int64_t& available_space_in,
+  template <typename DataNameType>
+  DataNameAndSpaceAndReturnCode(const DataNameType& name_in, const int64_t& available_space_in,
                                 const nfs_client::ReturnCode& code_in)
       : name(name_in), available_space(available_space_in), return_code(code_in) {}
 

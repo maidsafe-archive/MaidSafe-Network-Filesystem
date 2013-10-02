@@ -129,8 +129,8 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
 // ========================== DataNameAndRandomString ==============================================
 
 struct DataNameAndRandomString {
-  template <typename Data>
-  DataNameAndRandomString(typename Data::Name name, NonEmptyString& random_string_in)
+  template <typename DataNameType>
+  DataNameAndRandomString(DataNameType name, NonEmptyString random_string_in)
       : name(std::move(name)), random_string(std::move(random_string_in)) {}
 
   DataNameAndRandomString(DataTagValue type_in, const Identity& name_in,
@@ -154,10 +154,10 @@ void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_N
 // ========================== DataNameAndCost ======================================================
 
 struct DataNameAndCost {
-  template <typename Data>
-  DataNameAndCost(const Data& data, int32_t cost_in) : name(data.name()), cost(cost_in) {}
-
-  DataNameAndCost(DataTagValue type_in, const Identity& name_in, const int32_t& cost_in);
+  template <typename DataNameType>
+  DataNameAndCost(const DataNameType& data_name, int32_t cost_in)
+      : name(data_name), cost(cost_in) {}
+  DataNameAndCost(DataTagValue type_in, const Identity& name_in, int32_t cost_in);
 
   DataNameAndCost();
   DataNameAndCost(const DataNameAndCost& other);
@@ -177,9 +177,10 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT;
 // ========================== DataNameAndSize ======================================================
 
 struct DataNameAndSize {
-  template <typename Data>
-  DataNameAndSize(const Data& data, int32_t size_in) : name(data.name()), size(size_in) {}
-  DataNameAndSize(DataTagValue type_in, const Identity& name_in, const int32_t& cost_in);
+  template <typename DataNameType>
+  DataNameAndSize(const DataNameType& data_name, int32_t size_in)
+      : name(data_name), size(size_in) {}
+  DataNameAndSize(DataTagValue type_in, const Identity& name_in, int32_t size_in);
   DataNameAndSize();
   DataNameAndSize(const DataNameAndSize& other);
   DataNameAndSize(DataNameAndSize&& other);
@@ -220,14 +221,12 @@ void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT;
 struct DataNameAndContentOrCheckResult {
   typedef TaggedValue<NonEmptyString, struct CheckResultTag> CheckResult;
 
-  template <typename Data>
-  DataNameAndContentOrCheckResult(const typename Data::Name& name_in,
-                                  const NonEmptyString& content_in)
+  template <typename DataNameType>
+  DataNameAndContentOrCheckResult(const DataNameType& name_in, const NonEmptyString& content_in)
       : name(name_in), content(content_in), check_result() {}
 
-  template <typename Data>
-  DataNameAndContentOrCheckResult(const typename Data::Name& name_in,
-                                  const CheckResult& check_result_in)
+  template <typename DataNameType>
+  DataNameAndContentOrCheckResult(const DataNameType& name_in, const CheckResult& check_result_in)
       : name(name_in), content(), check_result(check_result_in) {}
 
   DataNameAndContentOrCheckResult(const DataTagValue& type_in, const Identity& name_in,
