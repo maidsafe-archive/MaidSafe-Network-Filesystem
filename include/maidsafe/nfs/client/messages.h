@@ -234,38 +234,6 @@ void swap(DataNameAndContentAndReturnCode& lhs,
 bool operator==(const DataNameAndContentAndReturnCode& lhs,
                 const DataNameAndContentAndReturnCode& rhs);
 
-// ========================== DataNameAndSignatureAndReturnCode ====================================
-
-struct DataNameAndSignatureAndReturnCode {
-  template <typename Data>
-  DataNameAndSignatureAndReturnCode(const typename Data::Name& name_in,
-                                    nfs_client::ReturnCode code_in,
-                                    const NonEmptyString& signature_in)
-      : name(name_in), return_code(code_in), signature(signature_in) {}
-
-  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
-                                    nfs_client::ReturnCode code_in,
-                                    const NonEmptyString& signature_in);
-  DataNameAndSignatureAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
-                                    nfs_client::ReturnCode code_in);
-  DataNameAndSignatureAndReturnCode();
-  DataNameAndSignatureAndReturnCode(const DataNameAndSignatureAndReturnCode& other);
-  DataNameAndSignatureAndReturnCode(DataNameAndSignatureAndReturnCode&& other);
-  DataNameAndSignatureAndReturnCode& operator=(DataNameAndSignatureAndReturnCode other);
-
-  explicit DataNameAndSignatureAndReturnCode(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  nfs_vault::DataName name;
-  nfs_client::ReturnCode return_code;
-  boost::optional<NonEmptyString> signature;
-};
-
-void swap(DataNameAndSignatureAndReturnCode& lhs,
-          DataNameAndSignatureAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-bool operator==(const DataNameAndSignatureAndReturnCode& lhs,
-                const DataNameAndSignatureAndReturnCode& rhs);
-
 // ========================== DataNameAndSpaceAndReturnCode ====================================
 
 struct DataNameAndSpaceAndReturnCode {

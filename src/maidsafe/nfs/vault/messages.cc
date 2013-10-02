@@ -20,11 +20,14 @@
 
 #include <cstdint>
 
+#include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/vault/messages.pb.h"
 
 namespace maidsafe {
 
 namespace nfs_vault {
+
+// ========================== Empty ================================================================
 
 bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/) { return true; }
 
@@ -71,6 +74,7 @@ void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
 }
 
 // ==================== DataNameAndVersion =========================================================
+
 DataNameAndVersion::DataNameAndVersion() : data_name(), version_name() {}
 
 DataNameAndVersion::DataNameAndVersion(const DataNameAndVersion& other)
@@ -111,6 +115,7 @@ void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT {
 }
 
 // ==================== DataNameOldNewVersion ======================================================
+
 DataNameOldNewVersion::DataNameOldNewVersion()
     : data_name(), old_version_name(), new_version_name() {}
 
@@ -160,6 +165,7 @@ void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXC
 }
 
 // ==================== DataNameAndContent =========================================================
+
 DataNameAndContent::DataNameAndContent(DataTagValue type_in, const Identity& name_in,
                                        NonEmptyString content_in)
     : name(type_in, name_in), content(std::move(content_in)) {}
@@ -202,8 +208,7 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.content, rhs.content);
 }
 
-// ==================== DataNameAndRandomString
-// =====================================================
+// ==================== DataNameAndRandomString ====================================================
 
 DataNameAndRandomString::DataNameAndRandomString(DataTagValue type_in, const Identity& name_in,
                                                  NonEmptyString random_string_in)
@@ -248,7 +253,7 @@ void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_N
   swap(lhs.random_string, rhs.random_string);
 }
 
-// ==================== DataNameAndCost =========================================================
+// ==================== DataNameAndCost ============================================================
 
 DataNameAndCost::DataNameAndCost() : name(), cost(0) {}
 
@@ -288,7 +293,7 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.cost, rhs.cost);
 }
 
-// ==================== DataNameAndSize =========================================================
+// ==================== DataNameAndSize ============================================================
 
 DataNameAndSize::DataNameAndSize() : name(), size(0) {}
 
@@ -329,6 +334,7 @@ void swap(DataNameAndSize& lhs, DataNameAndSize& rhs) MAIDSAFE_NOEXCEPT {
 }
 
 // ==================== DataAndPmidHint ============================================================
+
 DataAndPmidHint::DataAndPmidHint() : data(), pmid_hint() {}
 
 DataAndPmidHint::DataAndPmidHint(const DataName& data_name, const NonEmptyString& content,
@@ -369,6 +375,95 @@ void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.data, rhs.data);
   swap(lhs.pmid_hint, rhs.pmid_hint);
+}
+
+// ========================== DataNameAndContentOrCheckResult ======================================
+
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
+    const DataTagValue& type_in, const Identity& name_in, const NonEmptyString& content_in)
+        : name(type_in, name_in), content(content_in), check_result() {}
+
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
+    const DataTagValue& type_in, const Identity& name_in, const CheckResult& check_result_in)
+        : name(type_in, name_in), content(), check_result(check_result_in) {}
+
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult()
+    : name(), content(), check_result() {}
+
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
+    DataNameAndContentOrCheckResult&& other)
+        : name(std::move(other.name)),
+          content(std::move(other.content)),
+          check_result(std::move(other.check_result)) {}
+
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
+    const DataNameAndContentOrCheckResult& other)
+        : name(other.name),
+          content(other.content),
+          check_result(other.check_result) {}
+
+DataNameAndContentOrCheckResult& DataNameAndContentOrCheckResult::operator=(
+    DataNameAndContentOrCheckResult other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
+    const std::string& serialised_copy) {
+  protobuf::DataNameAndContentOrCheckResult proto;
+  if (!proto.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+
+  name = DataName(proto.serialised_name());
+  if (proto.has_content())
+    content.reset(NonEmptyString(proto.content()));
+  if (proto.has_check_result())
+    check_result.reset(CheckResult(NonEmptyString(proto.check_result())));
+
+  if (!nfs::CheckMutuallyExclusive(content, check_result)) {
+    assert(false);
+    ThrowError(CommonErrors::parsing_error);
+  }
+}
+
+std::string DataNameAndContentOrCheckResult::Serialise() const {
+  protobuf::DataNameAndContentOrCheckResult proto;
+  proto.set_serialised_name(name.Serialise());
+  if (content)
+    proto.set_content(content->string());
+  if (check_result)
+    proto.set_check_result(check_result->string());
+
+  if (!nfs::CheckMutuallyExclusive(content, check_result)) {
+    assert(false);
+    ThrowError(CommonErrors::serialisation_error);
+  }
+
+  return proto.SerializeAsString();
+}
+
+void swap(DataNameAndContentOrCheckResult& lhs,
+          DataNameAndContentOrCheckResult& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.content, rhs.content);
+  swap(lhs.check_result, rhs.check_result);
+}
+
+bool operator==(const DataNameAndContentOrCheckResult& lhs,
+                const DataNameAndContentOrCheckResult& rhs) {
+  if (!(lhs.name == rhs.name))
+    return false;
+
+  if ((!lhs.content && rhs.content) || (lhs.content && !rhs.content) ||
+      (lhs.content && (*lhs.content != *rhs.content)))
+    return false;
+
+  if ((!lhs.check_result && rhs.check_result) || (lhs.check_result && !rhs.check_result) ||
+      (lhs.check_result && (*lhs.check_result != *rhs.check_result)))
+    return false;
+
+  return true;
 }
 
 }  // namespace nfs_vault

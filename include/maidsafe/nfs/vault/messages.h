@@ -32,6 +32,8 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
+// ========================== Empty ================================================================
+
 struct Empty {
   Empty() {}
   explicit Empty(const std::string&) {}
@@ -39,6 +41,8 @@ struct Empty {
 };
 
 bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/);
+
+// ========================== DataName =============================================================
 
 struct DataName {
   template <typename DataNameType>
@@ -62,6 +66,8 @@ struct DataName {
 bool operator==(const DataName& lhs, const DataName& rhs);
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== DataNameAndVersion ===================================================
+
 struct DataNameAndVersion {
   DataNameAndVersion();
   DataNameAndVersion(const DataNameAndVersion& other);
@@ -78,6 +84,8 @@ struct DataNameAndVersion {
 bool operator==(const DataNameAndVersion& lhs, const DataNameAndVersion& rhs);
 void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== DataNameOldNewVersion ================================================
+
 struct DataNameOldNewVersion {
   DataNameOldNewVersion();
   DataNameOldNewVersion(const DataNameOldNewVersion& other);
@@ -93,6 +101,8 @@ struct DataNameOldNewVersion {
 
 bool operator==(const DataNameOldNewVersion& lhs, const DataNameOldNewVersion& rhs);
 void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXCEPT;
+
+// ========================== DataNameAndContent ===================================================
 
 struct DataNameAndContent {
   template <typename Data>
@@ -115,6 +125,8 @@ struct DataNameAndContent {
 
 bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs);
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
+
+// ========================== DataNameAndRandomString ==============================================
 
 struct DataNameAndRandomString {
   template <typename Data>
@@ -139,6 +151,8 @@ struct DataNameAndRandomString {
 bool operator==(const DataNameAndRandomString& lhs, const DataNameAndRandomString& rhs);
 void swap(DataNameAndRandomString& lhs, DataNameAndRandomString& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== DataNameAndCost ======================================================
+
 struct DataNameAndCost {
   template <typename Data>
   DataNameAndCost(const Data& data, int32_t cost_in) : name(data.name()), cost(cost_in) {}
@@ -160,6 +174,8 @@ struct DataNameAndCost {
 bool operator==(const DataNameAndCost& lhs, const DataNameAndCost& rhs);
 void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== DataNameAndSize ======================================================
+
 struct DataNameAndSize {
   template <typename Data>
   DataNameAndSize(const Data& data, int32_t size_in) : name(data.name()), size(size_in) {}
@@ -179,6 +195,8 @@ struct DataNameAndSize {
 bool operator==(const DataNameAndSize& lhs, const DataNameAndSize& rhs);
 void swap(DataNameAndSize& lhs, DataNameAndSize& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== DataAndPmidHint ======================================================
+
 struct DataAndPmidHint {
   DataAndPmidHint();
   DataAndPmidHint(const DataName& data_name, const NonEmptyString& content,
@@ -196,6 +214,43 @@ struct DataAndPmidHint {
 
 bool operator==(const DataAndPmidHint& lhs, const DataAndPmidHint& rhs);
 void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT;
+
+// ========================== DataNameAndContentOrCheckResult ======================================
+
+struct DataNameAndContentOrCheckResult {
+  typedef TaggedValue<NonEmptyString, struct CheckResultTag> CheckResult;
+
+  template <typename Data>
+  DataNameAndContentOrCheckResult(const typename Data::Name& name_in,
+                                  const NonEmptyString& content_in)
+      : name(name_in), content(content_in), check_result() {}
+
+  template <typename Data>
+  DataNameAndContentOrCheckResult(const typename Data::Name& name_in,
+                                  const CheckResult& check_result_in)
+      : name(name_in), content(), check_result(check_result_in) {}
+
+  DataNameAndContentOrCheckResult(const DataTagValue& type_in, const Identity& name_in,
+                                  const NonEmptyString& content_in);
+  DataNameAndContentOrCheckResult(const DataTagValue& type_in, const Identity& name_in,
+                                  const CheckResult& check_result_in);
+  DataNameAndContentOrCheckResult();
+  DataNameAndContentOrCheckResult(const DataNameAndContentOrCheckResult& other);
+  DataNameAndContentOrCheckResult(DataNameAndContentOrCheckResult&& other);
+  DataNameAndContentOrCheckResult& operator=(DataNameAndContentOrCheckResult other);
+
+  explicit DataNameAndContentOrCheckResult(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName name;
+  boost::optional<NonEmptyString> content;
+  boost::optional<NonEmptyString> check_result;
+};
+
+void swap(DataNameAndContentOrCheckResult& lhs,
+          DataNameAndContentOrCheckResult& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndContentOrCheckResult& lhs,
+                const DataNameAndContentOrCheckResult& rhs);
 
 }  // namespace nfs_vault
 
