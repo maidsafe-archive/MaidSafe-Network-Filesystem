@@ -66,6 +66,9 @@ bool operator==(const ReturnCode& lhs, const ReturnCode& rhs);
 void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataNameAndReturnCode {
+  template<typename DataNameType>
+  DataNameAndReturnCode(const DataNameType& data_name, const ReturnCode& return_code_in)
+      : name(data_name), return_code(return_code_in) {}
   DataNameAndReturnCode();
   DataNameAndReturnCode(nfs_vault::DataName data_name, ReturnCode code);
   DataNameAndReturnCode(const DataNameAndReturnCode& other);
