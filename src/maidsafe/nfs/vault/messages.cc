@@ -424,7 +424,7 @@ DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
   if (proto.has_content())
     content.reset(NonEmptyString(proto.content()));
   if (proto.has_check_result())
-    check_result.reset(CheckResult(NonEmptyString(proto.check_result())));
+    check_result.reset(CheckResult(proto.check_result()));
 
   if (!nfs::CheckMutuallyExclusive(content, check_result)) {
     assert(false);

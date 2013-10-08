@@ -22,6 +22,7 @@
 #include <string>
 
 #include "maidsafe/common/config.h"
+#include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/data_types/data_type_values.h"
 #include "maidsafe/data_types/structured_data_versions.h"
@@ -219,7 +220,7 @@ void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT;
 // ========================== DataNameAndContentOrCheckResult ======================================
 
 struct DataNameAndContentOrCheckResult {
-  typedef TaggedValue<NonEmptyString, struct CheckResultTag> CheckResult;
+  typedef crypto::SHA512Hash CheckResult;
 
   template <typename DataNameType>
   DataNameAndContentOrCheckResult(const DataNameType& name_in, const NonEmptyString& content_in)
@@ -243,7 +244,7 @@ struct DataNameAndContentOrCheckResult {
 
   DataName name;
   boost::optional<NonEmptyString> content;
-  boost::optional<NonEmptyString> check_result;
+  boost::optional<CheckResult> check_result;
 };
 
 void swap(DataNameAndContentOrCheckResult& lhs,
