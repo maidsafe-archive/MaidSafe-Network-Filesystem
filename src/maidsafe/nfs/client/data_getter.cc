@@ -31,7 +31,7 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       dispatcher_(routing),
-      service_([&]()->std::unique_ptr<DataGetterService>&& {
+      service_([&]()->std::unique_ptr<DataGetterService> {
   std::unique_ptr<DataGetterService> service(
       new DataGetterService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
   return std::move(service);
