@@ -85,6 +85,33 @@ struct DataNameAndReturnCode {
 bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& rhs);
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
+struct DataNamesAndReturnCode {
+  DataNamesAndReturnCode(const ReturnCode& code);
+  DataNamesAndReturnCode(const std::vector<nfs_vault::DataName>& data_names,
+                         const ReturnCode& code);
+  DataNamesAndReturnCode(const DataNamesAndReturnCode &other);
+  DataNamesAndReturnCode(DataNamesAndReturnCode& other);
+  DataNamesAndReturnCode(DataNamesAndReturnCode&& other);
+  DataNamesAndReturnCode& operator=(DataNamesAndReturnCode other);
+
+  template<typename DataNameType>
+  void AddDataName(const DataNameType& data_name) {
+    names.push_back(nfs_vault::DataName(data_name));
+  }
+
+  void AddDataName(const DataTagValue& tag_value, const Identity& identity);
+
+  explicit DataNamesAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  std::vector<nfs_vault::DataName> names;
+  ReturnCode return_code;
+};
+
+bool operator==(const DataNamesAndReturnCode& lhs, const DataNamesAndReturnCode& rhs);
+void swap(DataNamesAndReturnCode& lhs, DataNamesAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+
+
 struct DataNameVersionAndReturnCode {
   DataNameVersionAndReturnCode();
   DataNameVersionAndReturnCode(const DataNameVersionAndReturnCode& other);

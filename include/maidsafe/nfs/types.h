@@ -78,7 +78,8 @@ enum class Persona : int32_t {
   kPmidManager,
   kPmidNode,
   kMpidManager,
-  kVersionManager
+  kVersionManager,
+  kCacheHandler
 };
 
 template <Persona PersonaType>

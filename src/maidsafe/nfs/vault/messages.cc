@@ -31,6 +31,46 @@ namespace nfs_vault {
 
 bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/) { return true; }
 
+// ================================= AvailableSize =================================================
+
+// AvailableSize::AvailableSize() : available_size(0) {}
+
+AvailableSize::AvailableSize(const u_int64_t size) : available_size(size) {}
+
+AvailableSize::AvailableSize(const AvailableSize& other) : available_size(other.available_size) {}
+
+AvailableSize::AvailableSize(AvailableSize&& other)
+    : available_size(std::move(other.available_size)) {}
+
+AvailableSize& AvailableSize::operator=(AvailableSize other) {
+  available_size = other.available_size;
+  return *this;
+}
+
+AvailableSize::AvailableSize(const std::string& serialised_copy)
+    : available_size([&serialised_copy]() {
+                       protobuf::AvailableSize proto_size;
+                       if (!proto_size.ParseFromString(serialised_copy))
+                         ThrowError(CommonErrors::parsing_error);
+                       return proto_size.size();
+                     }()) {}
+
+std::string AvailableSize::Serialise() const {
+  protobuf::AvailableSize proto_size;
+  proto_size.set_size(available_size);
+  return proto_size.SerializeAsString();
+}
+
+bool operator==(const AvailableSize& lhs, const AvailableSize& rhs) {
+  return lhs.available_size == rhs.available_size;
+}
+
+void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.available_size, rhs.available_size);
+}
+
+
 // ==================== DataName ===================================================================
 DataName::DataName(DataTagValue type_in, Identity raw_name_in)
     : type(type_in), raw_name(std::move(raw_name_in)) {}

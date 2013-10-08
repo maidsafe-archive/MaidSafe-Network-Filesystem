@@ -132,6 +132,46 @@ void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXC
   swap(lhs.return_code, rhs.return_code);
 }
 
+// ==================== DataNameAndReturnCode =====================================================
+
+DataNamesAndReturnCode::DataNamesAndReturnCode(const ReturnCode& code)
+    : names(), return_code(code) {}
+
+DataNamesAndReturnCode::DataNamesAndReturnCode(const std::vector<nfs_vault::DataName>& data_names,
+                                               const ReturnCode& code)
+    : names(data_names), return_code(code) {}
+
+DataNamesAndReturnCode::DataNamesAndReturnCode(const DataNamesAndReturnCode& other)
+    : names(other.names), return_code(other.return_code) {}
+
+DataNamesAndReturnCode::DataNamesAndReturnCode(DataNamesAndReturnCode&& other)
+    : names(std::move(other.names)), return_code(std::move(other.return_code)) {}
+
+DataNamesAndReturnCode& DataNamesAndReturnCode::operator=(DataNamesAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+void DataNamesAndReturnCode::AddDataName(const DataTagValue& tag_value, const Identity& identity) {
+  names.push_back(nfs_vault::DataName(tag_value, identity));
+}
+
+DataNamesAndReturnCode::DataNamesAndReturnCode(const std::string& /*serialised_copy*/) {
+}
+
+std::string DataNamesAndReturnCode::Serialise() const {
+  return std::string(); // TODO(Mahmoud): Fix it
+}
+
+bool operator==(const DataNamesAndReturnCode& /*lhs*/, const DataNamesAndReturnCode& /*rhs*/) {
+  return true;  // TODO(Mahmoud): Fix it
+}
+
+void swap(DataNamesAndReturnCode& /*lhs*/, DataNamesAndReturnCode& /*rhs*/) MAIDSAFE_NOEXCEPT {
+}
+
+
+
 // ==================== DataNameVersionAndReturnCode ===============================================
 DataNameVersionAndReturnCode::DataNameVersionAndReturnCode()
     : data_name_and_version(), return_code() {}
