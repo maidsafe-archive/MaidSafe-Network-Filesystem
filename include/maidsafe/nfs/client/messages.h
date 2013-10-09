@@ -105,8 +105,7 @@ struct DataNamesAndReturnCode {
   explicit DataNamesAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  std::set<nfs_vault::DataName, std::function<bool(const nfs_vault::DataName& lhs,
-                                                   const nfs_vault::DataName& rhs)>> names;
+  std::set<nfs_vault::DataName> names;
   ReturnCode return_code;
 };
 

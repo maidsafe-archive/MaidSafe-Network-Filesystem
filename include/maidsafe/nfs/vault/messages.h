@@ -84,6 +84,7 @@ struct DataName {
 };
 
 bool operator==(const DataName& lhs, const DataName& rhs);
+bool operator<(const DataName& lhs, const DataName& rhs);
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT;
 
 // ========================== DataNameAndVersion ===================================================

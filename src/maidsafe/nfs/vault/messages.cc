@@ -106,6 +106,10 @@ bool operator==(const DataName& lhs, const DataName& rhs) {
   return lhs.type == rhs.type && lhs.raw_name == rhs.raw_name;
 }
 
+bool operator<(const DataName& lhs, const DataName& rhs) {
+  return lhs.raw_name.string() < rhs.raw_name.string();
+}
+
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.type, rhs.type);
