@@ -18,6 +18,10 @@
 
 package maidsafe.nfs_vault.protobuf;
 
+message AvailableSize {
+  required uint64 size = 1;
+}
+
 message DataName {
   required uint32 type = 1;
   required bytes raw_name = 2;

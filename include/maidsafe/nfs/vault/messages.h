@@ -43,6 +43,24 @@ struct Empty {
 
 bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/);
 
+// ========================== AvailableSize =======================================================
+
+struct AvailableSize {
+//  AvailableSize();
+  explicit AvailableSize(const u_int64_t size);
+  AvailableSize(const AvailableSize& other);
+  AvailableSize(AvailableSize&& other);
+  AvailableSize& operator=(AvailableSize other);
+
+  explicit AvailableSize(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  u_int64_t available_size;
+};
+
+bool operator==(const AvailableSize& lhs, const AvailableSize& rhs);
+void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT;
+
 // ========================== DataName =============================================================
 
 struct DataName {
