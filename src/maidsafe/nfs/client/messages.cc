@@ -132,8 +132,7 @@ void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXC
   swap(lhs.return_code, rhs.return_code);
 }
 
-// ==================== DataNameAndReturnCode =====================================================
-
+// ==================== DataNamesAndReturnCode =====================================================
 DataNamesAndReturnCode::DataNamesAndReturnCode(const ReturnCode& code)
     : names(), return_code(code) {}
 
@@ -160,7 +159,7 @@ DataNamesAndReturnCode::DataNamesAndReturnCode(const std::string& /*serialised_c
 }
 
 std::string DataNamesAndReturnCode::Serialise() const {
-  return std::string(); // TODO(Mahmoud): Fix it
+  return std::string();  // TODO(Mahmoud): Fix it
 }
 
 bool operator==(const DataNamesAndReturnCode& /*lhs*/, const DataNamesAndReturnCode& /*rhs*/) {
@@ -169,8 +168,6 @@ bool operator==(const DataNamesAndReturnCode& /*lhs*/, const DataNamesAndReturnC
 
 void swap(DataNamesAndReturnCode& /*lhs*/, DataNamesAndReturnCode& /*rhs*/) MAIDSAFE_NOEXCEPT {
 }
-
-
 
 // ==================== DataNameVersionAndReturnCode ===============================================
 DataNameVersionAndReturnCode::DataNameVersionAndReturnCode()

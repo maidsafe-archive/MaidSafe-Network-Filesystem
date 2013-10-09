@@ -23,6 +23,7 @@
 #include <system_error>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include "boost/optional.hpp"
 
@@ -86,11 +87,10 @@ bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& r
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataNamesAndReturnCode {
-  DataNamesAndReturnCode(const ReturnCode& code);
+  explicit DataNamesAndReturnCode(const ReturnCode& code);
   DataNamesAndReturnCode(const std::vector<nfs_vault::DataName>& data_names,
                          const ReturnCode& code);
   DataNamesAndReturnCode(const DataNamesAndReturnCode &other);
-  DataNamesAndReturnCode(DataNamesAndReturnCode& other);
   DataNamesAndReturnCode(DataNamesAndReturnCode&& other);
   DataNamesAndReturnCode& operator=(DataNamesAndReturnCode other);
 
@@ -110,7 +110,6 @@ struct DataNamesAndReturnCode {
 
 bool operator==(const DataNamesAndReturnCode& lhs, const DataNamesAndReturnCode& rhs);
 void swap(DataNamesAndReturnCode& lhs, DataNamesAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 
 struct DataNameVersionAndReturnCode {
   DataNameVersionAndReturnCode();

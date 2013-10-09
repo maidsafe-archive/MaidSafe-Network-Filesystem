@@ -19,6 +19,7 @@
 #ifndef MAIDSAFE_NFS_VAULT_MESSAGES_H_
 #define MAIDSAFE_NFS_VAULT_MESSAGES_H_
 
+#include <cstdint>
 #include <string>
 
 #include "maidsafe/common/config.h"
@@ -47,7 +48,7 @@ bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/);
 
 struct AvailableSize {
 //  AvailableSize();
-  explicit AvailableSize(const u_int64_t size);
+  explicit AvailableSize(uint64_t size);
   AvailableSize(const AvailableSize& other);
   AvailableSize(AvailableSize&& other);
   AvailableSize& operator=(AvailableSize other);
@@ -55,7 +56,7 @@ struct AvailableSize {
   explicit AvailableSize(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  u_int64_t available_size;
+  uint64_t available_size;
 };
 
 bool operator==(const AvailableSize& lhs, const AvailableSize& rhs);

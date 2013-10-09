@@ -35,7 +35,7 @@ bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/) { return true; }
 
 // AvailableSize::AvailableSize() : available_size(0) {}
 
-AvailableSize::AvailableSize(const u_int64_t size) : available_size(size) {}
+AvailableSize::AvailableSize(uint64_t size) : available_size(size) {}
 
 AvailableSize::AvailableSize(const AvailableSize& other) : available_size(other.available_size) {}
 
@@ -43,7 +43,7 @@ AvailableSize::AvailableSize(AvailableSize&& other)
     : available_size(std::move(other.available_size)) {}
 
 AvailableSize& AvailableSize::operator=(AvailableSize other) {
-  available_size = other.available_size;
+  swap(*this, other);
   return *this;
 }
 
@@ -69,7 +69,6 @@ void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.available_size, rhs.available_size);
 }
-
 
 // ==================== DataName ===================================================================
 DataName::DataName(DataTagValue type_in, Identity raw_name_in)
