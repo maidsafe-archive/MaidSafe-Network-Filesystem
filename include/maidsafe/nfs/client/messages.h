@@ -96,7 +96,7 @@ struct DataNamesAndReturnCode {
 
   template<typename DataNameType>
   void AddDataName(const DataNameType& data_name) {
-    names.push_back(nfs_vault::DataName(data_name));
+    names.insert(nfs_vault::DataName(data_name));
   }
 
   void AddDataName(const DataTagValue& tag_value, const Identity& identity);
@@ -104,7 +104,8 @@ struct DataNamesAndReturnCode {
   explicit DataNamesAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  std::vector<nfs_vault::DataName> names;
+  std::set<nfs_vault::DataName, std::function<bool(const nfs_vault::DataName& lhs,
+                                                   const nfs_vault::DataName& rhs)>> names;
   ReturnCode return_code;
 };
 
