@@ -134,11 +134,20 @@ void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXC
 
 // ==================== DataNamesAndReturnCode =====================================================
 DataNamesAndReturnCode::DataNamesAndReturnCode(const ReturnCode& code)
-    : names(), return_code(code) {}
+    : names([](const nfs_vault::DataName& lhs, const nfs_vault::DataName& rhs)->bool {
+              return lhs.raw_name.string() < rhs.raw_name.string();
+            }),
+      return_code(code) {}
 
 DataNamesAndReturnCode::DataNamesAndReturnCode(const std::vector<nfs_vault::DataName>& data_names,
                                                const ReturnCode& code)
-    : names(data_names), return_code(code) {}
+    : names([](const nfs_vault::DataName& lhs, const nfs_vault::DataName& rhs)->bool {
+              return lhs.raw_name.string() < rhs.raw_name.string();
+            }),
+      return_code(code) {
+  for (auto data_name : data_names)
+    names.insert(data_name);
+}
 
 DataNamesAndReturnCode::DataNamesAndReturnCode(const DataNamesAndReturnCode& other)
     : names(other.names), return_code(other.return_code) {}
@@ -152,21 +161,44 @@ DataNamesAndReturnCode& DataNamesAndReturnCode::operator=(DataNamesAndReturnCode
 }
 
 void DataNamesAndReturnCode::AddDataName(const DataTagValue& tag_value, const Identity& identity) {
-  names.push_back(nfs_vault::DataName(tag_value, identity));
+  names.insert(nfs_vault::DataName(tag_value, identity));
 }
 
-DataNamesAndReturnCode::DataNamesAndReturnCode(const std::string& /*serialised_copy*/) {
+DataNamesAndReturnCode::DataNamesAndReturnCode(const std::string& serialised_copy)
+    : names([](const nfs_vault::DataName& lhs, const nfs_vault::DataName& rhs)->bool {
+              return lhs.raw_name.string() < rhs.raw_name.string();
+            }),
+      return_code() {
+  protobuf::DataNamesAndReturnCode names_proto;
+  if (!names_proto.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+   for (auto index(0); index < names_proto.serialised_name_size(); ++index)
+     names.insert(nfs_vault::DataName(std::string(names_proto.serialised_name(index))));
+   return_code = nfs_client::ReturnCode(names_proto.serialised_return_code());
 }
 
 std::string DataNamesAndReturnCode::Serialise() const {
-  return std::string();  // TODO(Mahmoud): Fix it
+  protobuf::DataNamesAndReturnCode names_proto;
+  names_proto.set_serialised_return_code(return_code.Serialise());
+  for (auto name : names) {
+    auto name_proto(names_proto.add_serialised_name());
+    *name_proto = name.Serialise();
+  }
+  return names_proto.SerializeAsString();
 }
 
-bool operator==(const DataNamesAndReturnCode& /*lhs*/, const DataNamesAndReturnCode& /*rhs*/) {
-  return true;  // TODO(Mahmoud): Fix it
+bool operator==(const DataNamesAndReturnCode& lhs, const DataNamesAndReturnCode& rhs) {
+  if (lhs.names.size() != rhs.names.size())
+    return false;
+  if (!(lhs.return_code == rhs.return_code))
+    return false;
+  return std::equal(std::begin(lhs.names), std::end(lhs.names), std::begin(rhs.names));
 }
 
-void swap(DataNamesAndReturnCode& /*lhs*/, DataNamesAndReturnCode& /*rhs*/) MAIDSAFE_NOEXCEPT {
+void swap(DataNamesAndReturnCode& lhs, DataNamesAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.return_code, rhs.return_code);
+  swap(lhs.names, rhs.names);
 }
 
 // ==================== DataNameVersionAndReturnCode ===============================================
