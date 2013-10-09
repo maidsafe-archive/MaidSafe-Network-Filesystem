@@ -19,6 +19,7 @@
 #ifndef MAIDSAFE_NFS_CLIENT_MESSAGES_H_
 #define MAIDSAFE_NFS_CLIENT_MESSAGES_H_
 
+#include <set>
 #include <string>
 #include <system_error>
 #include <type_traits>

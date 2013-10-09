@@ -172,15 +172,15 @@ DataNamesAndReturnCode::DataNamesAndReturnCode(const std::string& serialised_cop
   protobuf::DataNamesAndReturnCode names_proto;
   if (!names_proto.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
-   for (auto index(0); index < names_proto.serialised_name_size(); ++index)
-     names.insert(nfs_vault::DataName(std::string(names_proto.serialised_name(index))));
-   return_code = nfs_client::ReturnCode(names_proto.serialised_return_code());
+  for (auto index(0); index < names_proto.serialised_name_size(); ++index)
+    names.insert(nfs_vault::DataName(std::string(names_proto.serialised_name(index))));
+  return_code = nfs_client::ReturnCode(names_proto.serialised_return_code());
 }
 
 std::string DataNamesAndReturnCode::Serialise() const {
   protobuf::DataNamesAndReturnCode names_proto;
   names_proto.set_serialised_return_code(return_code.Serialise());
-  for (auto name : names) {
+  for (const auto& name : names) {
     auto name_proto(names_proto.add_serialised_name());
     *name_proto = name.Serialise();
   }
@@ -188,11 +188,7 @@ std::string DataNamesAndReturnCode::Serialise() const {
 }
 
 bool operator==(const DataNamesAndReturnCode& lhs, const DataNamesAndReturnCode& rhs) {
-  if (lhs.names.size() != rhs.names.size())
-    return false;
-  if (!(lhs.return_code == rhs.return_code))
-    return false;
-  return std::equal(std::begin(lhs.names), std::end(lhs.names), std::begin(rhs.names));
+  return lhs.names == rhs.names && lhs.return_code == rhs.return_code;
 }
 
 void swap(DataNamesAndReturnCode& lhs, DataNamesAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
