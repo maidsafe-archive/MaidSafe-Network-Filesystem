@@ -268,12 +268,12 @@ bool operator==(const DataNameAndContentAndReturnCode& lhs,
 
 struct DataNameAndSpaceAndReturnCode {
   template <typename DataNameType>
-  DataNameAndSpaceAndReturnCode(const DataNameType& name_in, const int64_t& available_space_in,
+  DataNameAndSpaceAndReturnCode(const DataNameType& name_in, int64_t available_space_in,
                                 const nfs_client::ReturnCode& code_in)
       : name(name_in), available_space(available_space_in), return_code(code_in) {}
 
   DataNameAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
-                                const int64_t& available_space_in,
+                                int64_t available_space_in,
                                 const nfs_client::ReturnCode& code_in);
   explicit DataNameAndSpaceAndReturnCode(const std::string& serialised_copy);
   DataNameAndSpaceAndReturnCode();

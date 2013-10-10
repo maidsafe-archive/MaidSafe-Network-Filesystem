@@ -640,7 +640,7 @@ DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode()
 
 DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(const DataTagValue& type_in,
                                                              const Identity& name_in,
-                                                             const int64_t& available_space_in,
+                                                             int64_t available_space_in,
                                                              const nfs_client::ReturnCode& code_in)
     : name(nfs_vault::DataName(type_in, name_in)),
       available_space(available_space_in),
