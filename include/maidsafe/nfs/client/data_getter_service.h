@@ -36,8 +36,8 @@ class DataGetterService {
   typedef void VaultMessages;
 
   typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
-  typedef nfs::GetVersionsResponseFromVersionManagerToDataGetter GetVersionsResponse;
-  typedef nfs::GetBranchResponseFromVersionManagerToDataGetter GetBranchResponse;
+  typedef nfs::GetVersionsResponseFromVersionHandlerToDataGetter GetVersionsResponse;
+  typedef nfs::GetBranchResponseFromVersionHandlerToDataGetter GetBranchResponse;
 
   DataGetterService(
       routing::Routing& routing,

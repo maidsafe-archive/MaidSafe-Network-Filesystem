@@ -36,8 +36,8 @@ class MaidNodeService {
   typedef void VaultMessages;
 
   typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
-  typedef nfs::GetVersionsResponseFromVersionManagerToMaidNode GetVersionsResponse;
-  typedef nfs::GetBranchResponseFromVersionManagerToMaidNode GetBranchResponse;
+  typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
+  typedef nfs::GetBranchResponseFromVersionHandlerToMaidNode GetBranchResponse;
   typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
   typedef nfs::GetCachedResponseFromPmidNodeToMaidNode GetCachedResponse;
 

@@ -1,0 +1,4 @@
+Action:GetVersionsRequest             Source:MaidNode:Single          Destination:VersionHandler:Group  Contents:struct:maidsafe::nfs_vault::DataName
+Action:GetBranchRequest               Source:MaidNode:Single          Destination:VersionHandler:Group  Contents:struct:maidsafe::nfs_vault::DataNameAndVersion
+Action:GetVersionsRequest             Source:DataGetter:Single        Destination:VersionHandler:Group  Contents:struct:maidsafe::nfs_vault::DataName
+Action:GetBranchRequest               Source:DataGetter:Single        Destination:VersionHandler:Group  Contents:struct:maidsafe::nfs_vault::DataNameAndVersion

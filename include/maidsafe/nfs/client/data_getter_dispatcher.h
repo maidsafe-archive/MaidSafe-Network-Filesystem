@@ -80,7 +80,7 @@ void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id,
 template <typename Data>
 void DataGetterDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
                                                   const typename Data::Name& data_name) {
-  typedef nfs::GetVersionsRequestFromDataGetterToVersionManager NfsMessage;
+  typedef nfs::GetVersionsRequestFromDataGetterToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
@@ -93,7 +93,7 @@ template <typename Data>
 void DataGetterDispatcher::SendGetBranchRequest(
     routing::TaskId task_id, const typename Data::Name& data_name,
     const StructuredDataVersions::VersionName& branch_tip) {
-  typedef nfs::GetBranchRequestFromDataGetterToVersionManager NfsMessage;
+  typedef nfs::GetBranchRequestFromDataGetterToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 

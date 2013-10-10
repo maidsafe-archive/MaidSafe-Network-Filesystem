@@ -139,7 +139,7 @@ void MaidNodeDispatcher::SendDeleteRequest(const typename Data::Name& data_name)
 template <typename Data>
 void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
                                                 const typename Data::Name& data_name) {
-  typedef nfs::GetVersionsRequestFromMaidNodeToVersionManager NfsMessage;
+  typedef nfs::GetVersionsRequestFromMaidNodeToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
@@ -152,7 +152,7 @@ template <typename Data>
 void MaidNodeDispatcher::SendGetBranchRequest(
     routing::TaskId task_id, const typename Data::Name& data_name,
     const StructuredDataVersions::VersionName& branch_tip) {
-  typedef nfs::GetBranchRequestFromMaidNodeToVersionManager NfsMessage;
+  typedef nfs::GetBranchRequestFromMaidNodeToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 

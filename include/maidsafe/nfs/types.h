@@ -78,7 +78,7 @@ enum class Persona : int32_t {
   kPmidManager,
   kPmidNode,
   kMpidManager,
-  kVersionManager,
+  kVersionHandler,
   kCacheHandler
 };
 
