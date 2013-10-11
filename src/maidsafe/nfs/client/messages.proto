@@ -23,6 +23,11 @@ message ReturnCode {
   required bytes error_category_name = 2;
 }
 
+message AvailableSizeAndReturnCode {
+  required bytes serialised_available_size = 1;
+  required bytes serialised_return_code = 2;
+}
+
 message DataNameAndReturnCode {
   required bytes serialised_name = 1;
   required bytes serialised_return_code = 2;

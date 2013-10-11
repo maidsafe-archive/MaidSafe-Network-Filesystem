@@ -89,6 +89,49 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.value, rhs.value);
 }
 
+// ========================== AvailableSizeAndReturnCode ==========================================
+AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(uint64_t size,
+                                                       const ReturnCode& return_code_in)
+    : available_size(size), return_code(return_code_in) {}
+
+AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(const AvailableSizeAndReturnCode& other)
+    : available_size(other.available_size), return_code(other.return_code) {}
+
+AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(AvailableSizeAndReturnCode&& other)
+    : available_size(std::move(other.available_size)), return_code(std::move(other.return_code)) {}
+
+AvailableSizeAndReturnCode& AvailableSizeAndReturnCode::operator=(
+    AvailableSizeAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(const std::string& serialised_copy)
+    : available_size(0), return_code() {
+  protobuf::AvailableSizeAndReturnCode proto_copy;
+  if (proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  available_size = nfs_vault::AvailableSize(proto_copy.serialised_available_size());
+  return_code = ReturnCode(proto_copy.serialised_return_code());
+}
+
+std::string AvailableSizeAndReturnCode::Serialise() const {
+  protobuf::AvailableSizeAndReturnCode proto_copy;
+  proto_copy.set_serialised_available_size(available_size.Serialise());
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+bool operator==(const AvailableSizeAndReturnCode& lhs, const AvailableSizeAndReturnCode& rhs) {
+  return lhs.available_size == rhs.available_size &&
+         lhs.return_code == rhs.return_code;
+}
+
+void swap(AvailableSizeAndReturnCode& lhs, AvailableSizeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  swap(lhs.available_size, rhs.available_size);
+  swap(lhs.return_code, rhs.return_code);
+}
+
 // ==================== DataNameAndReturnCode ======================================================
 DataNameAndReturnCode::DataNameAndReturnCode() : name(), return_code() {}
 

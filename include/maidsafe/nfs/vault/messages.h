@@ -47,7 +47,6 @@ bool operator==(const Empty& /*lhs*/, const Empty& /*rhs*/);
 // ========================== AvailableSize =======================================================
 
 struct AvailableSize {
-//  AvailableSize();
   explicit AvailableSize(uint64_t size);
   AvailableSize(const AvailableSize& other);
   AvailableSize(AvailableSize&& other);

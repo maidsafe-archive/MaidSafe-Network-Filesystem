@@ -67,6 +67,24 @@ struct ReturnCode {
 bool operator==(const ReturnCode& lhs, const ReturnCode& rhs);
 void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== AvailableSizeAndReturnCode ==========================================
+struct AvailableSizeAndReturnCode {
+  AvailableSizeAndReturnCode(uint64_t size, const ReturnCode& return_code);
+  AvailableSizeAndReturnCode(const AvailableSizeAndReturnCode& other);
+  AvailableSizeAndReturnCode(AvailableSizeAndReturnCode&& other);
+  AvailableSizeAndReturnCode& operator=(AvailableSizeAndReturnCode other);
+
+  explicit AvailableSizeAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  nfs_vault::AvailableSize available_size;
+  ReturnCode return_code;
+};
+
+bool operator==(const AvailableSizeAndReturnCode& lhs, const AvailableSizeAndReturnCode& rhs);
+void swap(AvailableSizeAndReturnCode& lhs, AvailableSizeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+
+// ============================== DataNameAndReturnCode ============================================
 struct DataNameAndReturnCode {
   template<typename DataNameType>
   DataNameAndReturnCode(const DataNameType& data_name, const ReturnCode& return_code_in)
