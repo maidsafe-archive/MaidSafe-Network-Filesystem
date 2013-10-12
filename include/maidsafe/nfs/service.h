@@ -54,6 +54,8 @@ class PersonaDemuxer : public boost::static_visitor<> {
                               std::is_same<Receiver, typename Message::Receiver>::value,
                           void>::type
   operator()(const Message& message) const {
+    // If you have a compiler error leading here, you probably haven't implemented HandleMessage for
+    // *every* type of message in the PublicMessages and VaultMessages variants of PersonaService.
     persona_service_.HandleMessage(message, sender_, receiver_);
   }
   template <typename Message>
