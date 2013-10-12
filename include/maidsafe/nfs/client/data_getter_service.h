@@ -45,11 +45,14 @@ class DataGetterService {
       routing::Timer<DataGetterService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer);
 
-  template <typename T>
-  void HandleMessage(const T& /*message*/, const typename T::Sender& /*sender*/,
-                     const typename T::Receiver& /*receiver*/) {
-    T::invalid_message_type_passed::should_be_one_of_the_specialisations_defined_below;
-  }
+  void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
+                     const GetResponse::Receiver& receiver);
+
+  void HandleMessage(const GetVersionsResponse& message, const GetVersionsResponse::Sender& sender,
+                     const GetVersionsResponse::Receiver& receiver);
+
+  void HandleMessage(const GetBranchResponse& message, const GetBranchResponse::Sender& sender,
+                     const GetBranchResponse::Receiver& receiver);
 
  private:
   routing::Routing& routing_;
@@ -58,20 +61,6 @@ class DataGetterService {
   routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer_;
 };
 
-template <>
-void DataGetterService::HandleMessage<DataGetterService::GetResponse>(
-    const GetResponse& message, const typename GetResponse::Sender& sender,
-    const typename GetResponse::Receiver& receiver);
-
-template <>
-void DataGetterService::HandleMessage<DataGetterService::GetVersionsResponse>(
-    const GetVersionsResponse& message, const typename GetVersionsResponse::Sender& sender,
-    const typename GetVersionsResponse::Receiver& receiver);
-
-template <>
-void DataGetterService::HandleMessage<DataGetterService::GetBranchResponse>(
-    const GetBranchResponse& message, const typename GetBranchResponse::Sender& sender,
-    const typename GetBranchResponse::Receiver& receiver);
 
 }  // namespace nfs_client
 

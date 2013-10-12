@@ -64,40 +64,7 @@ TEST(MaidNodeService, DISABLED_BEH_All) {
 
   NodeId sender_node_id(NodeId::kRandomId);
   NodeId sender_group_id(NodeId::kRandomId);
-  NodeId receiver_node_id(NodeId::kRandomId);
-  GetResponse::Sender sender((routing::GroupId(sender_node_id)),
-                             (routing::SingleId(sender_group_id)));
-  GetResponse::Receiver receiver(receiver_node_id);
-
-  auto response_tuple(ParseMessageWrapper(serialised_get_response));
-
-  service.HandleMessage(response_tuple, sender, receiver);
-}
-
-TEST(DataGetterService, DISABLED_BEH_All) {
-  passport::Anmaid anmaid;
-  passport::Maid maid(anmaid);
-  routing::Routing routing(maid);
-  AsioService asio_service(2);
-  routing::Timer<nfs_client::DataGetterService::GetResponse::Contents> get_timer(asio_service);
-  routing::Timer<nfs_client::DataGetterService::GetVersionsResponse::Contents> get_versions_timer(
-      asio_service);
-  routing::Timer<nfs_client::DataGetterService::GetBranchResponse::Contents> get_branch_timer(
-      asio_service);
-  maidsafe::nfs::Service<nfs_client::DataGetterService> service(
-      std::move(std::unique_ptr<nfs_client::DataGetterService>(new nfs_client::DataGetterService(
-          routing, get_timer, get_versions_timer, get_branch_timer))));
-
-  ImmutableData immutable_data(NonEmptyString(RandomString(10)));
-  nfs_client::DataNameAndContentOrReturnCode contents(immutable_data);
-
-  typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
-  GetResponse get_response(contents);
-  auto serialised_get_response(get_response.Serialise());
-
-  NodeId sender_node_id(NodeId::kRandomId);
-  NodeId sender_group_id(NodeId::kRandomId);
-  NodeId receiver_node_id(NodeId::kRandomId);
+  NodeId receiver_node_id(routing.kNodeId());
   GetResponse::Sender sender((routing::GroupId(sender_node_id)),
                              (routing::SingleId(sender_group_id)));
   GetResponse::Receiver receiver(receiver_node_id);
@@ -107,6 +74,53 @@ TEST(DataGetterService, DISABLED_BEH_All) {
   service.HandleMessage(response_tuple, sender, receiver);
 }
 */
+
+TEST(MaidNodeServiceTest, BEH_All) {
+  passport::Anmaid anmaid;
+  passport::Maid maid(anmaid);
+  routing::Routing routing(maid);
+  AsioService asio_service(2);
+  asio_service.Start();
+  typedef nfs_client::MaidNodeService::GetResponse GetResponse;
+  routing::Timer<GetResponse::Contents> get_timer(asio_service);
+  routing::Timer<nfs_client::MaidNodeService::GetVersionsResponse::Contents> get_versions_timer(
+      asio_service);
+  routing::Timer<nfs_client::MaidNodeService::GetBranchResponse::Contents> get_branch_timer(
+      asio_service);
+  Service<nfs_client::MaidNodeService> service(
+      std::move(std::unique_ptr<nfs_client::MaidNodeService>(new nfs_client::MaidNodeService(
+          routing, get_timer, get_versions_timer, get_branch_timer))));
+
+  ImmutableData immutable_data(NonEmptyString(RandomString(10)));
+
+  // Set timer callback
+  auto task_id(get_timer.NewTaskId());
+  auto callback([immutable_data](GetResponse::Contents returned_contents) {
+      ImmutableData retrieved(ImmutableData::Name(returned_contents.data->name.raw_name),
+                              ImmutableData::serialised_type(returned_contents.data->content));
+      EXPECT_EQ(immutable_data.name(), retrieved.name())
+          << "\nOriginal name:  " << Base64Substr(immutable_data.name()->string())
+          << "\nRetrieved name: " << Base64Substr(retrieved.name()->string());
+      EXPECT_EQ(immutable_data.data(), retrieved.data());
+  });
+  get_timer.AddTask(std::chrono::milliseconds(500), callback, 1, task_id);
+
+  GetResponse::Contents contents(immutable_data);
+  GetResponse get_response(MessageId(task_id), contents);
+  auto serialised_get_response(get_response.Serialise());
+
+  NodeId sender_node_id(NodeId::kRandomId);
+  NodeId sender_group_id(NodeId::kRandomId);
+  NodeId receiver_node_id(routing.kNodeId());
+  GetResponse::Sender sender((routing::GroupId(sender_node_id)),
+                             (routing::SingleId(sender_group_id)));
+  GetResponse::Receiver receiver(receiver_node_id);
+
+  auto response_tuple(ParseMessageWrapper(serialised_get_response));
+
+  service.HandleMessage(response_tuple, sender, receiver);
+}
+
 }  // namespace test
 
 }  // namespace nfs

@@ -26,34 +26,31 @@ DataGetterService::DataGetterService(
     routing::Routing& routing, routing::Timer<DataGetterService::GetResponse::Contents>& get_timer,
     routing::Timer<DataGetterService::GetVersionsResponse::Contents>& get_versions_timer,
     routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer)
-    : routing_(routing),
-      get_timer_(get_timer),
-      get_versions_timer_(get_versions_timer),
-      get_branch_timer_(get_branch_timer) {}
+        : routing_(routing),
+          get_timer_(get_timer),
+          get_versions_timer_(get_versions_timer),
+          get_branch_timer_(get_branch_timer) {}
 
-template <>
-void DataGetterService::HandleMessage<DataGetterService::GetResponse>(
-    const GetResponse& message, const typename GetResponse::Sender& /*sender*/,
-    const typename GetResponse::Receiver& receiver) {
+void DataGetterService::HandleMessage(const GetResponse& message,
+                                      const GetResponse::Sender& /*sender*/,
+                                      const GetResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   static_cast<void>(routing_);
   get_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
-template <>
-void DataGetterService::HandleMessage<DataGetterService::GetVersionsResponse>(
-    const GetVersionsResponse& message, const typename GetVersionsResponse::Sender& /*sender*/,
-    const typename GetVersionsResponse::Receiver& receiver) {
+void DataGetterService::HandleMessage(const GetVersionsResponse& message,
+                                      const GetVersionsResponse::Sender& /*sender*/,
+                                      const GetVersionsResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   get_versions_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
-template <>
-void DataGetterService::HandleMessage<DataGetterService::GetBranchResponse>(
-    const GetBranchResponse& message, const typename GetBranchResponse::Sender& /*sender*/,
-    const typename GetBranchResponse::Receiver& receiver) {
+void DataGetterService::HandleMessage(const GetBranchResponse& message,
+                                      const GetBranchResponse::Sender& /*sender*/,
+                                      const GetBranchResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   get_branch_timer_.AddResponse(message.message_id.data, *message.contents);

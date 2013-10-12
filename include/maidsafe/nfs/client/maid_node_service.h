@@ -36,21 +36,34 @@ class MaidNodeService {
   typedef void VaultMessages;
 
   typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
+  typedef nfs::GetCachedResponseFromPmidNodeToMaidNode GetCachedResponse;
+  typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
+  typedef nfs::PutFailureFromMaidManagerToMaidNode PutFailure;
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
   typedef nfs::GetBranchResponseFromVersionHandlerToMaidNode GetBranchResponse;
-  typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
-  typedef nfs::GetCachedResponseFromPmidNodeToMaidNode GetCachedResponse;
 
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
       routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer);
 
-  template <typename T>
-  void HandleMessage(const T& /*message*/, const typename T::Sender& /*sender*/,
-                     const typename T::Receiver& /*receiver*/) {
-    T::invalid_message_type_passed::should_be_one_of_the_specialisations_defined_below;
-  }
+  void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
+                     const GetResponse::Receiver& receiver);
+
+  void HandleMessage(const GetCachedResponse& message, const GetCachedResponse::Sender& sender,
+                     const GetCachedResponse::Receiver& receiver);
+
+  void HandleMessage(const PutResponse& message, const PutResponse::Sender& sender,
+                     const PutResponse::Receiver& receiver);
+
+  void HandleMessage(const PutFailure& message, const PutFailure::Sender& sender,
+                     const PutFailure::Receiver& receiver);
+
+  void HandleMessage(const GetVersionsResponse& message, const GetVersionsResponse::Sender& sender,
+                     const GetVersionsResponse::Receiver& receiver);
+
+  void HandleMessage(const GetBranchResponse& message, const GetBranchResponse::Sender& sender,
+                     const GetBranchResponse::Receiver& receiver);
 
  private:
   template <typename Data>
@@ -62,31 +75,6 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer_;
   routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer_;
 };
-
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetResponse>(
-    const GetResponse& message, const typename GetResponse::Sender& sender,
-    const typename GetResponse::Receiver& receiver);
-
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetVersionsResponse>(
-    const GetVersionsResponse& message, const typename GetVersionsResponse::Sender& sender,
-    const typename GetVersionsResponse::Receiver& receiver);
-
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetBranchResponse>(
-    const GetBranchResponse& message, const typename GetBranchResponse::Sender& sender,
-    const typename GetBranchResponse::Receiver& receiver);
-
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::PutResponse>(
-    const PutResponse& message, const typename PutResponse::Sender& sender,
-    const typename PutResponse::Receiver& receiver);
-
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetCachedResponse>(
-    const GetCachedResponse& message, const typename GetCachedResponse::Sender& sender,
-    const typename GetCachedResponse::Receiver& receiver);
 
 }  // namespace nfs_client
 

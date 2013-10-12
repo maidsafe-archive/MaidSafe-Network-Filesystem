@@ -26,51 +26,53 @@ MaidNodeService::MaidNodeService(
     routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
     routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
     routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer)
-    : routing_(routing),
-      get_timer_(get_timer),
-      get_versions_timer_(get_versions_timer),
-      get_branch_timer_(get_branch_timer) {}
+        : routing_(routing),
+          get_timer_(get_timer),
+          get_versions_timer_(get_versions_timer),
+          get_branch_timer_(get_branch_timer) {}
 
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetResponse>(
-    const GetResponse& message, const typename GetResponse::Sender& /*sender*/,
-    const typename GetResponse::Receiver& receiver) {
+void MaidNodeService::HandleMessage(const GetResponse& message,
+                                    const GetResponse::Sender& /*sender*/,
+                                    const GetResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   get_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetVersionsResponse>(
-    const GetVersionsResponse& message, const typename GetVersionsResponse::Sender& /*sender*/,
-    const typename GetVersionsResponse::Receiver& receiver) {
+void MaidNodeService::HandleMessage(const GetCachedResponse& /*message*/,
+                                    const GetCachedResponse::Sender& /*sender*/,
+                                    const GetCachedResponse::Receiver& /*receiver*/) {
+  assert(0);
+}
+
+void MaidNodeService::HandleMessage(const PutResponse& /*message*/,
+                                    const PutResponse::Sender& /*sender*/,
+                                    const PutResponse::Receiver& /*receiver*/) {
+  // TODO(Fraser#5#): 2013-08-24 - Decide on how this is to be handled, and implement.
+  assert(0);
+}
+
+void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
+                                    const PutFailure::Sender& /*sender*/,
+                                    const PutFailure::Receiver& /*receiver*/) {
+  // TODO(Fraser#5#): 2013-08-24 - Decide on how this is to be handled, and implement.
+  assert(0);
+}
+
+void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
+                                    const GetVersionsResponse::Sender& /*sender*/,
+                                    const GetVersionsResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   get_versions_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetBranchResponse>(
-    const GetBranchResponse& message, const typename GetBranchResponse::Sender& /*sender*/,
-    const typename GetBranchResponse::Receiver& receiver) {
+void MaidNodeService::HandleMessage(const GetBranchResponse& message,
+                                    const GetBranchResponse::Sender& /*sender*/,
+                                    const GetBranchResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   get_branch_timer_.AddResponse(message.message_id.data, *message.contents);
-}
-
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::PutResponse>(
-    const PutResponse& /*message*/, const typename PutResponse::Sender& /*sender*/,
-    const typename PutResponse::Receiver& /*receiver*/) {
-  // TODO(Fraser#5#): 2013-08-24 - Decide on how this is to be handled, and implement.
-  assert(0);
-}
-
-template <>
-void MaidNodeService::HandleMessage<MaidNodeService::GetCachedResponse>(
-    const GetCachedResponse& /*message*/, const typename GetCachedResponse::Sender& /*sender*/,
-    const typename GetCachedResponse::Receiver& /*receiver*/) {
-  assert(0);
 }
 
 }  // namespace nfs_client
