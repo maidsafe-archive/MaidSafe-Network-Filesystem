@@ -1,0 +1,3 @@
+
+Action:PmidHealthRequest            Source:MaidNode:Single          Destination:PmidManager:Group     Contents:class:maidsafe::nfs_vault::Empty
+
