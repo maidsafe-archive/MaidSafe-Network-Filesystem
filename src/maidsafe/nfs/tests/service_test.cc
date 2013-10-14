@@ -48,7 +48,7 @@ class ServiceTest : public ::testing::Test {
 typedef ::testing::Types<nfs_client::MaidNodeService, nfs_client::DataGetterService> ServiceTypes;
 TYPED_TEST_CASE(ServiceTest, ServiceTypes);
 
-TYPED_TEST(ServiceTest, MaidNodeServiceTest_BEH_All) {
+TYPED_TEST(ServiceTest, BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
