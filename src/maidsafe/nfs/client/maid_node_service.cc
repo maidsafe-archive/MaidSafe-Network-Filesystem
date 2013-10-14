@@ -75,6 +75,12 @@ void MaidNodeService::HandleMessage(const GetBranchResponse& message,
   get_branch_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
+void MaidNodeService::HandleMessage(const PmidHealthResponse& /*message*/,
+                                    const PmidHealthResponse::Sender& /*sender*/,
+                                    const PmidHealthResponse::Receiver& /*receiver*/) {
+  // TODO(Mahmoud): not sure about implementation
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe
