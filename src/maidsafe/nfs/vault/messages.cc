@@ -515,6 +515,39 @@ bool operator==(const DataNameAndContentOrCheckResult& lhs,
   return true;
 }
 
+// ================================= PmidHealth ===================================================
+
+PmidHealth::PmidHealth() : serialised_pmid_health() {}
+
+PmidHealth::PmidHealth(const std::string& serialised_copy)
+    : serialised_pmid_health(serialised_copy) {}
+
+PmidHealth::PmidHealth(const PmidHealth& other)
+    : serialised_pmid_health(other.serialised_pmid_health) {}
+
+PmidHealth::PmidHealth(PmidHealth&& other)
+    : serialised_pmid_health(std::move(other.serialised_pmid_health)) {}
+
+PmidHealth& PmidHealth::operator=(PmidHealth other) {
+  swap(*this, other);
+  return *this;
+}
+
+std::string PmidHealth::Serialise() const {
+  protobuf::PmidHealth pmid_health_proto;
+  pmid_health_proto.set_serialised_pmid_health(serialised_pmid_health);
+  return pmid_health_proto.SerializeAsString();
+}
+
+bool operator==(const PmidHealth& lhs, const PmidHealth& rhs) {
+  return lhs.serialised_pmid_health == rhs.serialised_pmid_health;
+}
+
+void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT {
+  using namespace std;
+  swap(lhs.serialised_pmid_health, rhs.serialised_pmid_health);
+}
+
 }  // namespace nfs_vault
 
 }  // namespace maidsafe

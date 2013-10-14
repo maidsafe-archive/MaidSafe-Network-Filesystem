@@ -556,6 +556,10 @@ PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode()
     : pmid_registration(), return_code() {}
 
 PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(
+    nfs_vault::PmidRegistration pmid_health, ReturnCode return_code_in)
+        : pmid_registration(std::move(pmid_health)), return_code(std::move(return_code_in)) {}
+
+PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(
     const PmidRegistrationAndReturnCode& other)
     : pmid_registration(other.pmid_registration), return_code(other.return_code) {}
 
@@ -729,6 +733,49 @@ void swap(DataNameAndSpaceAndReturnCode& lhs,
 bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
                 const DataNameAndSpaceAndReturnCode& rhs) {
   return lhs.name == rhs.name && lhs.available_space == rhs.available_space &&
+         lhs.return_code == rhs.return_code;
+}
+
+// ================================= PmidHealthAndReturnCode ======================================
+
+PmidHealthAndReturnCode::PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
+                                                 const nfs_client::ReturnCode& code_in)
+      : pmid_health(pmid_health_in), return_code(code_in) {}
+
+PmidHealthAndReturnCode::PmidHealthAndReturnCode(const std::string& serialised_copy) {
+  protobuf::PmidHealthAndReturnCode pmid_health_proto;
+  if (!pmid_health_proto.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+  pmid_health = nfs_vault::PmidHealth(pmid_health_proto.serialised_pmid_health());
+  return_code = ReturnCode(pmid_health_proto.serialised_return_code());
+}
+
+PmidHealthAndReturnCode::PmidHealthAndReturnCode(const PmidHealthAndReturnCode& other)
+    : pmid_health(other.pmid_health),
+      return_code(other.return_code) {}
+
+PmidHealthAndReturnCode::PmidHealthAndReturnCode(PmidHealthAndReturnCode&& other)
+    : pmid_health(std::move(other.pmid_health)),
+      return_code(std::move(other.return_code)) {}
+
+PmidHealthAndReturnCode& PmidHealthAndReturnCode::operator=(PmidHealthAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+std::string PmidHealthAndReturnCode::Serialise() const {
+  protobuf::PmidHealthAndReturnCode pmid_health_proto;
+  pmid_health_proto.set_serialised_pmid_health(pmid_health.Serialise());
+  pmid_health_proto.set_serialised_return_code(return_code.Serialise());
+  return pmid_health_proto.SerializeAsString();
+}
+
+void swap(PmidHealthAndReturnCode& lhs, PmidHealthAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.pmid_health, rhs.pmid_health);
+  swap(lhs.return_code, rhs.return_code);
+}
+bool operator==(const PmidHealthAndReturnCode& lhs, const PmidHealthAndReturnCode& rhs) {
+  return lhs.pmid_health == rhs.pmid_health &&
          lhs.return_code == rhs.return_code;
 }
 

@@ -68,3 +68,8 @@ message DataNameAndContentOrCheckResult {
   optional bytes content = 2;
   optional bytes check_result = 3;
 }
+
+message PmidHealth {
+  required bytes serialised_pmid_health = 1;
+}
+

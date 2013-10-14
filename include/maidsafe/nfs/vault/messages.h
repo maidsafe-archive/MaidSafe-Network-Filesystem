@@ -271,6 +271,23 @@ void swap(DataNameAndContentOrCheckResult& lhs,
 bool operator==(const DataNameAndContentOrCheckResult& lhs,
                 const DataNameAndContentOrCheckResult& rhs);
 
+// ================================= PmidHealth ===================================================
+
+struct PmidHealth {
+  PmidHealth();
+  explicit PmidHealth(const std::string& serialised_copy);
+  PmidHealth(const PmidHealth& other);
+  PmidHealth(PmidHealth&& other);
+  PmidHealth& operator=(PmidHealth other);
+
+  std::string Serialise() const;
+
+  std::string serialised_pmid_health;
+};
+
+bool operator==(const PmidHealth& lhs, const PmidHealth& rhs);
+void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT;
+
 }  // namespace nfs_vault
 
 }  // namespace maidsafe

@@ -4,3 +4,4 @@ Action:PutResponse                    Source:MaidManager:Group        Destinatio
 Action:PutFailure                     Source:MaidManager:Group        Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::DataNameAndReturnCode
 Action:GetVersionsResponse            Source:VersionHandler:Group     Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
 Action:GetBranchResponse              Source:VersionHandler:Group     Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
+Action:PmidHealthResponse             Source:MaidManager:Group        Destination:MaidNode:Single       Contents:struct:maidsafe::nfs_client::AvailableSizeAndReturnCode
