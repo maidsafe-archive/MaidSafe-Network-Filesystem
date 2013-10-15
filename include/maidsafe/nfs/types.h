@@ -66,7 +66,9 @@ enum class MessageAction : int32_t {
   kSetPmidOnline,
   kSetPmidOffline,
   kIntegrityCheckRequest,
-  kIntegrityCheckResponse
+  kIntegrityCheckResponse,
+  kPutToCache,
+  kGetFromCache
 };
 
 enum class Persona : int32_t {
