@@ -544,7 +544,7 @@ bool operator==(const PmidHealth& lhs, const PmidHealth& rhs) {
 }
 
 void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT {
-  using namespace std;
+  using std::swap;
   swap(lhs.serialised_pmid_health, rhs.serialised_pmid_health);
 }
 

@@ -36,6 +36,7 @@ class DataGetterService {
   typedef void VaultMessages;
 
   typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
+  typedef nfs::GetCachedResponseFromCacheHandlerToDataGetter GetCachedResponse;
   typedef nfs::GetVersionsResponseFromVersionHandlerToDataGetter GetVersionsResponse;
   typedef nfs::GetBranchResponseFromVersionHandlerToDataGetter GetBranchResponse;
 
@@ -47,6 +48,9 @@ class DataGetterService {
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
+
+  void HandleMessage(const GetCachedResponse& message, const GetCachedResponse::Sender& sender,
+                     const GetCachedResponse::Receiver& receiver);
 
   void HandleMessage(const GetVersionsResponse& message, const GetVersionsResponse::Sender& sender,
                      const GetVersionsResponse::Receiver& receiver);

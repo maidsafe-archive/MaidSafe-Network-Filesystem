@@ -40,6 +40,15 @@ void DataGetterService::HandleMessage(const GetResponse& message,
   get_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
+void DataGetterService::HandleMessage(const GetCachedResponse& message,
+                                      const GetCachedResponse::Sender& /*sender*/,
+                                      const GetCachedResponse::Receiver& receiver) {
+  assert(receiver.data == routing_.kNodeId());
+  static_cast<void>(receiver);
+  static_cast<void>(routing_);
+  get_timer_.AddResponse(message.message_id.data, *message.contents);
+}
+
 void DataGetterService::HandleMessage(const GetVersionsResponse& message,
                                       const GetVersionsResponse::Sender& /*sender*/,
                                       const GetVersionsResponse::Receiver& receiver) {

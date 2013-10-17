@@ -39,10 +39,12 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
   get_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
-void MaidNodeService::HandleMessage(const GetCachedResponse& /*message*/,
+void MaidNodeService::HandleMessage(const GetCachedResponse& message,
                                     const GetCachedResponse::Sender& /*sender*/,
-                                    const GetCachedResponse::Receiver& /*receiver*/) {
-  assert(0);
+                                    const GetCachedResponse::Receiver& receiver) {
+  assert(receiver.data == routing_.kNodeId());
+  static_cast<void>(receiver);
+  get_timer_.AddResponse(message.message_id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const PutResponse& /*message*/,
