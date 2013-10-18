@@ -34,6 +34,7 @@ class DataGetterService {
  public:
   typedef nfs::DataGetterServiceMessages PublicMessages;
   typedef void VaultMessages;
+  typedef void HandleMessageReturnType;
 
   typedef nfs::GetResponseFromDataManagerToDataGetter GetResponse;
   typedef nfs::GetCachedResponseFromCacheHandlerToDataGetter GetCachedResponse;

@@ -45,26 +45,29 @@ namespace nfs {
 namespace detail {
 
 template <typename PersonaService, typename Sender, typename Receiver>
-class PersonaDemuxer : public boost::static_visitor<> {
+class PersonaDemuxer : public boost::static_visitor<
+                           typename PersonaService::HandleMessageReturnType> {
  public:
   PersonaDemuxer(PersonaService& persona_service, const Sender& sender, const Receiver& receiver)
       : persona_service_(persona_service), sender_(sender), receiver_(receiver) {}
   template <typename Message>
   typename std::enable_if<std::is_same<Sender, typename Message::Sender>::value&&
                               std::is_same<Receiver, typename Message::Receiver>::value,
-                          void>::type
+                          typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& message) const {
     // If you have a compiler error leading here, you probably haven't implemented HandleMessage for
     // *every* type of message in the PublicMessages and VaultMessages variants of PersonaService.
-    persona_service_.HandleMessage(message, sender_, receiver_);
+    return persona_service_.HandleMessage(message, sender_, receiver_);
   }
   template <typename Message>
   typename std::enable_if<!std::is_same<Sender, typename Message::Sender>::value ||
                               !std::is_same<Receiver, typename Message::Receiver>::value,
-                          void>::type operator()(const Message& /*message*/) const {
+                          typename PersonaService::HandleMessageReturnType>::type
+  operator()(const Message& /*message*/) const {
     // Should never come here.  Ideally this specialisation shouldn't exist, but the static visitor
     // requires all types in the variant to be handled.
     ThrowError(CommonErrors::invalid_parameter);
+    return typename PersonaService::HandleMessageReturnType();
   }
 
  private:
@@ -80,6 +83,7 @@ class Service {
  public:
   typedef typename PersonaService::PublicMessages PublicMessages;
   typedef typename PersonaService::VaultMessages VaultMessages;
+  typedef typename PersonaService::HandleMessageReturnType ReturnType;
 
   explicit Service(std::unique_ptr<PersonaService>&& impl) : impl_(std::move(impl)) {
     static_assert(!std::is_same<PublicMessages, VaultMessages>::value,
@@ -87,17 +91,23 @@ class Service {
   }
 
   template <typename Sender, typename Receiver>
-  void HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Sender& sender,
-                     const Receiver& receiver) {
+  ReturnType  HandleMessage(
+      const nfs::TypeErasedMessageWrapper& message, const Sender& sender,
+      const Receiver& receiver) {
     const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(*impl_, sender,
                                                                            receiver);
     static std::is_void<PublicMessages> public_messages_void_state;
     static std::is_void<VaultMessages> vault_messages_void_state;
-    if (!HandleMessage(message, demuxer, public_messages_void_state, vault_messages_void_state)) {
+    try {
+      return HandleMessage(message, demuxer, public_messages_void_state, vault_messages_void_state);
+    }
+    catch (const maidsafe_error& /*error*/) {
       LOG(kError) << "Invalid request.";
       ThrowError(CommonErrors::invalid_parameter);
+      return ReturnType();
     }
   }
+
 
   void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> /*matrix_change*/) {}
 
@@ -106,42 +116,46 @@ class Service {
   typedef std::false_type IsNotVoid;
 
   template <typename Demuxer>
-  bool HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer) {
+  ReturnType HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message,
+                                 const Demuxer& demuxer) {
     PublicMessages public_variant_message;
     if (!nfs::GetVariant(message, public_variant_message))
-      return false;
-    boost::apply_visitor(demuxer, public_variant_message);
-    return true;
+      ThrowError(CommonErrors::invalid_parameter);
+    return boost::apply_visitor(demuxer, public_variant_message);
   }
-
   template <typename Demuxer>
-  bool HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer) {
+  ReturnType HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message,
+                                const Demuxer& demuxer) {
     VaultMessages vault_variant_message;
-    if (vault::GetVariant(message, vault_variant_message))
-      return false;
-    boost::apply_visitor(demuxer, vault_variant_message);
-    return true;
+    if (!vault::GetVariant(message, vault_variant_message))
+      ThrowError(CommonErrors::invalid_parameter);
+    return boost::apply_visitor(demuxer, vault_variant_message);
   }
 
   // Public messages only are non-void.
   template <typename Demuxer>
-  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer,
-                     IsNotVoid, IsVoid) {
+  ReturnType HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer,
+                           IsNotVoid, IsVoid) {
     return HandlePublicMessage(message, demuxer);
   }
 
   // Vault messages only are non-void.
   template <typename Demuxer>
-  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer, IsVoid,
-                     IsNotVoid) {
+  ReturnType HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer,
+                           IsVoid, IsNotVoid) {
     return HandleVaultMessage(message, demuxer);
   }
 
   // Both types of message are non-void.
   template <typename Demuxer>
-  bool HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer,
-                     IsNotVoid, IsNotVoid) {
-    return HandlePublicMessage(message, demuxer) && HandleVaultMessage(message, demuxer);
+  ReturnType HandleMessage(const nfs::TypeErasedMessageWrapper& message, const Demuxer& demuxer,
+                           IsNotVoid, IsNotVoid) {
+    try {
+      return HandlePublicMessage(message, demuxer);
+    }
+    catch (const maidsafe_error& /*error*/) {
+      return HandleVaultMessage(message, demuxer);
+    }
   }
 
   std::unique_ptr<PersonaService> impl_;
