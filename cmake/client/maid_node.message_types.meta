@@ -1,5 +1,5 @@
-Action:GetResponse            Source:DataManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode            PutCacheable
-Action:GetCachedResponse      Source:CacheHandler:Single    Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode            PutCacheable
+Action:GetResponse            Source:DataManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode            Cacheable
+Action:GetCachedResponse      Source:CacheHandler:Single    Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode            Cacheable
 Action:PutResponse            Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataPmidHintAndReturnCode
 Action:PutFailure             Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndReturnCode
 Action:GetVersionsResponse    Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
