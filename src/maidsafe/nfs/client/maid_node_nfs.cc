@@ -31,13 +31,13 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       dispatcher_(routing),
-      service_([&]()->std::unique_ptr<MaidNodeService>&& {
+      service_([&]()->std::unique_ptr<MaidNodeService> {
   std::unique_ptr<MaidNodeService> service(
       new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
   return std::move(service);
 }()),
       pmid_node_hint_mutex_(),
-      pmid_node_hint_(std::move(pmid_node_hint)) {}
+      pmid_node_hint_(pmid_node_hint) {}
 
 passport::PublicPmid::Name MaidNodeNfs::pmid_node_hint() const {
   std::lock_guard<std::mutex> lock(pmid_node_hint_mutex_);
