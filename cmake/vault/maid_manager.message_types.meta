@@ -2,7 +2,7 @@ Action:PutRequest                       Source:MaidNode:Single        Destinatio
 Action:DeleteRequest                    Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::DataName
 Action:PutVersionRequest                Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::DataNameOldNewVersion
 Action:DeleteBranchUntilForkRequest     Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::DataNameAndVersion
-Action:CreateAccountRequest             Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::Empty
+Action:CreateAccountRequest             Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::AccountCreation
 Action:RemoveAccountRequest             Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::Empty
 Action:RegisterPmidRequest              Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::PmidRegistration
 Action:UnregisterPmidRequest            Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::PmidRegistration

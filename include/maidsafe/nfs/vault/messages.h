@@ -28,7 +28,9 @@
 #include "maidsafe/data_types/data_type_values.h"
 #include "maidsafe/data_types/structured_data_versions.h"
 
+#include "maidsafe/nfs/vault/account_creation.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
+
 
 namespace maidsafe {
 
