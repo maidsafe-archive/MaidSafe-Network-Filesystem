@@ -50,7 +50,7 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
 }
 
 template <>
-boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
+boost::future<passport::PublicPmid> DataGetter::Get(
     const typename passport::PublicPmid::Name& data_name,
     const std::chrono::steady_clock::duration& timeout) {
 #ifdef TESTING
@@ -67,7 +67,7 @@ boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
                        },
                        // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
                        routing::Parameters::node_group_size * 2, task_id);
-    dispatcher_.SendGetRequest<passport::PublicPmid>(task_id, data_name);
+    dispatcher_.SendGetRequest(task_id, data_name);
     return promise->get_future();
 #ifdef TESTING
   } else {

@@ -42,6 +42,13 @@
 
 namespace maidsafe {
 
+namespace nfs_vault {
+
+struct AccountCreation;
+class PmidRegistration;
+
+}  // namespace nfs_vault
+
 namespace nfs_client {
 
 class MaidNodeNfs {
@@ -54,16 +61,16 @@ class MaidNodeNfs {
   passport::PublicPmid::Name pmid_node_hint() const;
   void set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint);
 
-  template <typename Data>
-  boost::future<Data> Get(const typename Data::Name& data_name,
-                          const std::chrono::steady_clock::duration& timeout =
-                              std::chrono::seconds(10));
+  template <typename DataName>
+  boost::future<typename DataName::data_type> Get(
+      const DataName& data_name,
+      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
 
   template <typename Data>
   void Put(const Data& data);
 
-  template <typename Data>
-  void Delete(const typename Data::Name& data_name);
+  template <typename DataName>
+  void Delete(const DataName& data_name);
 
   template <typename Data>
   VersionNamesFuture GetVersions(const typename Data::Name& data_name,
@@ -85,7 +92,7 @@ class MaidNodeNfs {
   void DeleteBranchUntilFork(const typename Data::Name& data_name,
                              const StructuredDataVersions::VersionName& branch_tip);
 
-  void CreateAccount();
+  void CreateAccount(const nfs_vault::AccountCreation& account_creation);
   void RemoveAccount();
 
   void RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
@@ -118,12 +125,13 @@ class MaidNodeNfs {
 };
 
 // ==================== Implementation =============================================================
-template <typename Data>
-boost::future<Data> MaidNodeNfs::Get(const typename Data::Name& data_name,
-                                     const std::chrono::steady_clock::duration& timeout) {
+template <typename DataName>
+boost::future<typename DataName::data_type> MaidNodeNfs::Get(
+    const DataName& data_name,
+    const std::chrono::steady_clock::duration& timeout) {
   typedef MaidNodeService::GetResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<Data>>());
-  HandleGetResult<Data> response_functor(promise);
+  auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
+  HandleGetResult<typename DataName::data_type> response_functor(promise);
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
   auto task_id(get_timer_.NewTaskId());
   get_timer_.AddTask(timeout,
@@ -132,7 +140,7 @@ boost::future<Data> MaidNodeNfs::Get(const typename Data::Name& data_name,
                      },
                      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
                      routing::Parameters::node_group_size * 2, task_id);
-  dispatcher_.SendGetRequest<Data>(task_id, data_name);
+  dispatcher_.SendGetRequest(task_id, data_name);
   return promise->get_future();
 }
 
@@ -141,9 +149,9 @@ void MaidNodeNfs::Put(const Data& data) {
   dispatcher_.SendPutRequest(data, pmid_node_hint());
 }
 
-template <typename Data>
-void MaidNodeNfs::Delete(const typename Data::Name& data_name) {
-  dispatcher_.SendDeleteRequest<Data>(data_name);
+template <typename DataName>
+void MaidNodeNfs::Delete(const DataName& data_name) {
+  dispatcher_.SendDeleteRequest(data_name);
 }
 
 template <typename Data>
@@ -182,6 +190,20 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
   dispatcher_.SendGetBranchRequest(task_id, data_name, branch_tip);
   return promise->get_future();
 }
+
+template <typename Data>
+void MaidNodeNfs::PutVersion(const typename Data::Name& /*data_name*/,
+                             const StructuredDataVersions::VersionName& /*old_version_name*/,
+                             const StructuredDataVersions::VersionName& /*new_version_name*/) {
+  assert(0);
+}
+
+template <typename Data>
+void MaidNodeNfs::DeleteBranchUntilFork(const typename Data::Name& /*data_name*/,
+                                        const StructuredDataVersions::VersionName& /*branch_tip*/) {
+  assert(0);
+}
+
 
 template <typename T>
 void MaidNodeNfs::HandleMessage(const T& routing_message) {

@@ -52,10 +52,10 @@ class DataGetter {
              std::vector<passport::PublicPmid> public_pmids_from_file =
                  std::vector<passport::PublicPmid>());
 
-  template <typename Data>
-  boost::future<Data> Get(const typename Data::Name& data_name,
-                          const std::chrono::steady_clock::duration& timeout =
-                              std::chrono::seconds(10));
+  template <typename DataName>
+  boost::future<typename DataName::data_type> Get(
+      const DataName& data_name,
+      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
 
   template <typename Data>
   VersionNamesFuture GetVersions(const typename Data::Name& data_name,
@@ -94,17 +94,18 @@ class DataGetter {
 };
 
 template <>
-boost::future<passport::PublicPmid> DataGetter::Get<passport::PublicPmid>(
+boost::future<passport::PublicPmid::Name::data_type> DataGetter::Get<passport::PublicPmid::Name>(
     const typename passport::PublicPmid::Name& data_name,
     const std::chrono::steady_clock::duration& timeout);
 
 // ==================== Implementation =============================================================
-template <typename Data>
-boost::future<Data> DataGetter::Get(const typename Data::Name& data_name,
-                                    const std::chrono::steady_clock::duration& timeout) {
+template <typename DataName>
+boost::future<typename DataName::data_type> DataGetter::Get(
+    const DataName& data_name,
+    const std::chrono::steady_clock::duration& timeout) {
   typedef DataGetterService::GetResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<Data>>());
-  HandleGetResult<Data> response_functor(promise);
+  auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
+  HandleGetResult<typename DataName::data_type> response_functor(promise);
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
   auto task_id(get_timer_.NewTaskId());
   get_timer_.AddTask(timeout,
@@ -113,7 +114,7 @@ boost::future<Data> DataGetter::Get(const typename Data::Name& data_name,
                      },
                       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
                       routing::Parameters::node_group_size * 2, task_id);
-  dispatcher_.SendGetRequest<Data>(task_id, data_name);
+  dispatcher_.SendGetRequest(task_id, data_name);
   return promise->get_future();
 }
 

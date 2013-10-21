@@ -21,6 +21,9 @@
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
 
+#include "maidsafe/nfs/vault/account_creation.h"
+#include "maidsafe/nfs/vault/pmid_registration.h"
+
 namespace maidsafe {
 
 namespace nfs_client {
@@ -32,10 +35,10 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
       get_branch_timer_(asio_service),
       dispatcher_(routing),
       service_([&]()->std::unique_ptr<MaidNodeService> {
-  std::unique_ptr<MaidNodeService> service(
-      new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
-  return std::move(service);
-}()),
+        std::unique_ptr<MaidNodeService> service(
+            new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
+        return std::move(service);
+      }()),
       pmid_node_hint_mutex_(),
       pmid_node_hint_(pmid_node_hint) {}
 
@@ -49,9 +52,26 @@ void MaidNodeNfs::set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node
   pmid_node_hint_ = pmid_node_hint;
 }
 
-void MaidNodeNfs::RegisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/) {}
+void MaidNodeNfs::CreateAccount(const nfs_vault::AccountCreation& /*account_creation*/) {
+  assert(0);
+}
 
-void MaidNodeNfs::UnregisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/) {}
+void MaidNodeNfs::RemoveAccount() {
+  assert(0);
+}
+
+void MaidNodeNfs::RegisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/) {
+  assert(0);
+}
+
+void MaidNodeNfs::UnregisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/) {
+  assert(0);
+}
+
+void MaidNodeNfs::GetPmidHealth(const passport::Pmid& /*pmid*/) {
+  assert(0);
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

@@ -27,11 +27,13 @@ MaidNodeDispatcher::MaidNodeDispatcher(routing::Routing& routing)
       kThisNodeAsSender_(routing_.kNodeId()),
       kMaidManagerReceiver_(routing_.kNodeId()) {}
 
-void MaidNodeDispatcher::SendCreateAccountRequest(routing::TaskId task_id) {
+void MaidNodeDispatcher::SendCreateAccountRequest(
+    routing::TaskId task_id,
+    const nfs_vault::AccountCreation& account_creation) {
   typedef nfs::CreateAccountRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(nfs::MessageId(task_id), (NfsMessage::Contents()));
+  NfsMessage nfs_message(nfs::MessageId(task_id), account_creation);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 

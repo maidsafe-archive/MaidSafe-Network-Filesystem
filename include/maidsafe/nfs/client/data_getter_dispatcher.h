@@ -39,8 +39,8 @@ class DataGetterDispatcher {
  public:
   explicit DataGetterDispatcher(routing::Routing& routing);
 
-  template <typename Data>
-  void SendGetRequest(routing::TaskId task_id, const typename Data::Name& data_name);
+  template <typename DataName>
+  void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
 
   template <typename Data>
   void SendGetVersionsRequest(routing::TaskId task_id, const typename Data::Name& data_name);
@@ -63,14 +63,13 @@ class DataGetterDispatcher {
 };
 
 // ==================== Implementation =============================================================
-template <typename Data>
-void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id,
-                                          const typename Data::Name& data_name) {
+template <typename DataName>
+void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id, const DataName& data_name) {
   typedef nfs::GetRequestFromDataGetterToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kGet
-                                                                       : routing::Cacheable::kNone);
+  static const routing::Cacheable kCacheable(is_cacheable<typename DataName::data_type>::value ?
+      routing::Cacheable::kGet : routing::Cacheable::kNone);
   NfsMessage nfs_message((nfs::MessageId(task_id), NfsMessage::Contents(data_name)));
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);

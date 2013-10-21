@@ -83,12 +83,18 @@ std::string AccountCreation::Serialise() const {
 }
 
 bool operator==(const AccountCreation& lhs, const AccountCreation& rhs) {
-    return ((lhs.public_maid_ptr->name() == rhs.public_maid_ptr->name()) &&
-            (lhs.public_anmaid_ptr->name() == rhs.public_anmaid_ptr->name()) &&
-            (lhs.public_maid_ptr->validation_token() == rhs.public_maid_ptr->validation_token()) &&
-            (lhs.public_anmaid_ptr->validation_token() == rhs.public_anmaid_ptr->validation_token()) &&
-             rsa::MatchingKeys(lhs.public_maid_ptr->public_key(), rhs.public_maid_ptr->public_key()) &&
-             rsa::MatchingKeys(lhs.public_anmaid_ptr->public_key(), rhs.public_anmaid_ptr->public_key()));
+  bool result(
+      lhs.public_maid_ptr->name() == rhs.public_maid_ptr->name() &&
+      lhs.public_anmaid_ptr->name() == rhs.public_anmaid_ptr->name() &&
+      lhs.public_maid_ptr->validation_token() == rhs.public_maid_ptr->validation_token() &&
+      lhs.public_anmaid_ptr->validation_token() == rhs.public_anmaid_ptr->validation_token());
+  // If result is true, the public keys should also be equal, since the names are derived from the
+  // public keys.
+  assert(!result || (rsa::MatchingKeys(lhs.public_maid_ptr->public_key(),
+                                       rhs.public_maid_ptr->public_key()) &&
+                     rsa::MatchingKeys(lhs.public_anmaid_ptr->public_key(),
+                                       rhs.public_anmaid_ptr->public_key())));
+  return result;
 }
 
 void swap(AccountCreation& lhs, AccountCreation& rhs) MAIDSAFE_NOEXCEPT {
