@@ -43,6 +43,7 @@ class MaidNodeService {
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
   typedef nfs::GetBranchResponseFromVersionHandlerToMaidNode GetBranchResponse;
   typedef nfs::PmidHealthResponseFromMaidManagerToMaidNode PmidHealthResponse;
+  typedef nfs::CreateAccountResponseFromMaidManagerToMaidNode CreateAccountResponse;
 
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
@@ -70,7 +71,9 @@ class MaidNodeService {
   void HandleMessage(const PmidHealthResponse& message, const PmidHealthResponse::Sender& sender,
                      const PmidHealthResponse::Receiver& receiver);
 
-
+  void HandleMessage(const CreateAccountResponse& message,
+                     const CreateAccountResponse::Sender& sender,
+                     const CreateAccountResponse::Receiver& receiver);
  private:
   template <typename Data>
   void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,

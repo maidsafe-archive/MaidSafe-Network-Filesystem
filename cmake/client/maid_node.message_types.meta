@@ -5,3 +5,4 @@ Action:PutFailure             Source:MaidManager:Group      Destination:MaidNode
 Action:GetVersionsResponse    Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
 Action:GetBranchResponse      Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
 Action:PmidHealthResponse     Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::AvailableSizeAndReturnCode
+Action:CreateAccountResponse  Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode

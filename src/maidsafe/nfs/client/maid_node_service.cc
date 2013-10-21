@@ -81,6 +81,13 @@ void MaidNodeService::HandleMessage(const PmidHealthResponse& /*message*/,
                                     const PmidHealthResponse::Sender& /*sender*/,
                                     const PmidHealthResponse::Receiver& /*receiver*/) {
   // TODO(Mahmoud): not sure about implementation
+  assert(false && "Fraser Implement me please");
+}
+
+void MaidNodeService::HandleMessage(const CreateAccountResponse& /*message*/,
+                                    const CreateAccountResponse::Sender& /*sender*/,
+                                    const CreateAccountResponse::Receiver& /*receiver*/) {
+  assert(false && "Fraser Implement me please");
 }
 
 }  // namespace nfs_client
