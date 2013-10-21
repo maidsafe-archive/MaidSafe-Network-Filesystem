@@ -33,6 +33,7 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
     : get_timer_(asio_service),
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
+      create_account_timer_(asio_service),
       dispatcher_(routing),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
@@ -52,8 +53,25 @@ void MaidNodeNfs::set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node
   pmid_node_hint_ = pmid_node_hint;
 }
 
-void MaidNodeNfs::CreateAccount(const nfs_vault::AccountCreation& /*account_creation*/) {
-  assert(0);
+boost::future<void> MaidNodeNfs::CreateAccount(
+    const nfs_vault::AccountCreation& account_creation,
+    const std::chrono::steady_clock::duration& timeout) {
+  typedef MaidNodeService::CreateAccountResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<void>>());
+  auto response_functor([promise](const ReturnCode &result) {
+      HandleCreateAccountResult(result, promise); }
+  );
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
+      routing::Parameters::node_group_size - 1, response_functor));
+  auto task_id(get_timer_.NewTaskId());
+  create_account_timer_.AddTask(
+      timeout, [op_data](ResponseContents create_account_response) {
+                 op_data->HandleResponseContents(std::move(create_account_response));
+               },
+      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+      routing::Parameters::node_group_size * 2, task_id);
+  dispatcher_.SendCreateAccountRequest(task_id, account_creation);
+  return promise->get_future();
 }
 
 void MaidNodeNfs::RemoveAccount() {

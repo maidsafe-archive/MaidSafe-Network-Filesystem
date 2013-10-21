@@ -39,6 +39,20 @@ void HandleGetVersionsOrBranchResult(
   }
 }
 
+void HandleCreateAccountResult(const ReturnCode& result,
+                               std::shared_ptr<boost::promise<void>> promise) {
+  try {
+    if (nfs::IsSuccess(result)) {
+      promise->set_value();
+    } else {
+      boost::throw_exception(result.value);
+    }
+  }
+  catch (...) {
+    promise->set_exception(boost::current_exception());
+  }
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

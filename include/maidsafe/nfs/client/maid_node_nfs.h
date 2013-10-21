@@ -92,7 +92,9 @@ class MaidNodeNfs {
   void DeleteBranchUntilFork(const typename Data::Name& data_name,
                              const StructuredDataVersions::VersionName& branch_tip);
 
-  void CreateAccount(const nfs_vault::AccountCreation& account_creation);
+  boost::future<void> CreateAccount(const nfs_vault::AccountCreation& account_creation,
+                                    const std::chrono::steady_clock::duration& timeout =
+                                        std::chrono::seconds(10));
   void RemoveAccount();
 
   void RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
@@ -118,6 +120,7 @@ class MaidNodeNfs {
   routing::Timer<MaidNodeService::GetResponse::Contents> get_timer_;
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents> get_versions_timer_;
   routing::Timer<MaidNodeService::GetBranchResponse::Contents> get_branch_timer_;
+  routing::Timer<MaidNodeService::CreateAccountResponse::Contents> create_account_timer_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
   mutable std::mutex pmid_node_hint_mutex_;
@@ -162,12 +165,13 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
                                   result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_versions_timer_.AddTask(
+  auto task_id(get_timer_.NewTaskId());
+  get_versions_timer_.AddTask(
       timeout, [op_data](ResponseContents get_versions_response) {
                  op_data->HandleResponseContents(std::move(get_versions_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2));
+      routing::Parameters::node_group_size * 2, task_id);
   dispatcher_.SendGetVersionsRequest(task_id, data_name);
   return promise->get_future();
 }

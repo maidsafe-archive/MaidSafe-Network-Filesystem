@@ -784,6 +784,16 @@ bool operator==(const PmidHealthAndReturnCode& lhs, const PmidHealthAndReturnCod
 namespace nfs {
 
 template <>
+bool IsSuccess<nfs_client::ReturnCode>(const nfs_client::ReturnCode& response) {
+  return response.value.code().value() == static_cast<int>(CommonErrors::success);
+}
+
+template <>
+std::error_code ErrorCode<nfs_client::ReturnCode>(const nfs_client::ReturnCode& response) {
+  return response.value.code();
+}
+
+template <>
 bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response) {
   return response.data;

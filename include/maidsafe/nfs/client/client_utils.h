@@ -45,6 +45,9 @@ void HandleGetVersionsOrBranchResult(
     const StructuredDataNameAndContentOrReturnCode& result,
     std::shared_ptr<boost::promise<std::vector<StructuredDataVersions::VersionName>>> promise);
 
+void HandleCreateAccountResult(const ReturnCode& result,
+                               std::shared_ptr<boost::promise<void>> promise);
+
 // ==================== Implementation =============================================================
 template <typename Data>
 void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& result) const {
