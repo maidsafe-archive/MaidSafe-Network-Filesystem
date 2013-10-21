@@ -148,6 +148,22 @@ struct DataNameAndContent {
 bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs);
 void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== Content ==============================================================
+
+struct Content {
+  explicit Content(const std::string& data);
+  Content();
+  Content(const Content& other);
+  Content(Content&& other);
+  Content& operator=(Content other);
+  std::string Serialise() const;
+
+  std::string data;
+};
+
+bool operator==(const Content& lhs, const Content& rhs);
+void swap(Content& lhs, Content& rhs) MAIDSAFE_NOEXCEPT;
+
 // ========================== DataNameAndRandomString ==============================================
 
 struct DataNameAndRandomString {

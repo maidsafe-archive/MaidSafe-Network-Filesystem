@@ -250,6 +250,28 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.name, rhs.name);
   swap(lhs.content, rhs.content);
 }
+// ========================== Content ==============================================================
+
+Content::Content(const std::string &data_in) : data(data_in) {}
+
+Content::Content() : data() {}
+
+Content::Content(const Content& other) : data(other.data) {}
+
+Content::Content(Content&& other) : data(std::move(other.data)) {}
+
+std::string Content::Serialise() const {
+  return data;
+}
+
+bool operator==(const Content& lhs, const Content& rhs) {
+  return lhs.data == rhs.data;
+}
+
+void swap(Content& lhs, Content& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.data, rhs.data);
+}
 
 // ==================== DataNameAndRandomString ====================================================
 
