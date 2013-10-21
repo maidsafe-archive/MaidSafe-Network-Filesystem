@@ -44,11 +44,12 @@ AccountCreation::AccountCreation(const std::string& serialised_copy)
     ThrowError(CommonErrors::parsing_error);
   }
 
-  public_maid_ptr.reset(new passport::PublicMaid(passport::PublicMaid::Name(),  // FIXME
+  public_maid_ptr.reset(new passport::PublicMaid(
+      passport::PublicMaid::Name(Identity(proto_account_creation.public_maid_name())),
       passport::PublicMaid::serialised_type(NonEmptyString(proto_account_creation.public_maid()))));
-  public_anmaid_ptr.reset(new passport::PublicAnmaid(passport::PublicAnmaid::Name(),  // FIXME
-      passport::PublicAnmaid::serialised_type(NonEmptyString(
-                                                  proto_account_creation.public_anmaid()))));
+  public_anmaid_ptr.reset(new passport::PublicAnmaid(
+      passport::PublicAnmaid::Name(Identity(proto_account_creation.public_anmaid_name())),
+      passport::PublicAnmaid::serialised_type(NonEmptyString(proto_account_creation.public_anmaid()))));
 }
 
 AccountCreation::AccountCreation(const AccountCreation& other)
@@ -74,7 +75,9 @@ passport::PublicAnmaid AccountCreation::public_anmaid() {
 
 std::string AccountCreation::Serialise() const {
   protobuf::AccountCreation proto_account_creation;
+  proto_account_creation.set_public_maid_name(public_maid_ptr->name().value.string());
   proto_account_creation.set_public_maid(public_maid_ptr->Serialise()->string());
+  proto_account_creation.set_public_anmaid_name(public_anmaid_ptr->name().value.string());
   proto_account_creation.set_public_anmaid(public_anmaid_ptr->Serialise()->string());
   return proto_account_creation.SerializeAsString();
 }

@@ -19,6 +19,8 @@
 package maidsafe.nfs_vault.protobuf;
 
 message AccountCreation {
-  required bytes public_maid = 1;
-  required bytes public_anmaid = 2;
+  required bytes public_maid_name = 1;
+  required bytes public_maid = 2;
+  required bytes public_anmaid_name = 3;
+  required bytes public_anmaid = 4;
 }
