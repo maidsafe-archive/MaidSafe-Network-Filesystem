@@ -84,7 +84,7 @@ bool operator==(const AccountCreation& lhs, const AccountCreation& rhs) {
             (lhs.public_anmaid_ptr->name() == rhs.public_anmaid_ptr->name()) &&
             (lhs.public_maid_ptr->validation_token() == rhs.public_maid_ptr->validation_token()) &&
             (lhs.public_anmaid_ptr->validation_token() == rhs.public_anmaid_ptr->validation_token()) &&
-             rsa::MatchingKeys(lhs.public_maid_ptr->public_key(), rhs.public_maid_ptr->public_key()),
+             rsa::MatchingKeys(lhs.public_maid_ptr->public_key(), rhs.public_maid_ptr->public_key()) &&
              rsa::MatchingKeys(lhs.public_anmaid_ptr->public_key(), rhs.public_anmaid_ptr->public_key()));
 }
 
