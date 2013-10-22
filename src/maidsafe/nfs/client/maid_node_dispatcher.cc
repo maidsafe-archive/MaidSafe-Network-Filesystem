@@ -37,43 +37,44 @@ void MaidNodeDispatcher::SendCreateAccountRequest(
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-void MaidNodeDispatcher::SendRemoveAccountRequest(routing::TaskId task_id) {
+void MaidNodeDispatcher::SendRemoveAccountRequest(
+    const nfs_vault::AccountRemoval& account_removal) {
   typedef nfs::RemoveAccountRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(nfs::MessageId(task_id), (NfsMessage::Contents()));
+  NfsMessage nfs_message(account_removal);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 void MaidNodeDispatcher::SendRegisterPmidRequest(
-    routing::TaskId task_id, const nfs_vault::PmidRegistration& pmid_registration) {
+    const nfs_vault::PmidRegistration& pmid_registration) {
   typedef nfs::RegisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   assert(!pmid_registration.unregister());
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(nfs::MessageId(task_id), pmid_registration);
+  NfsMessage nfs_message(pmid_registration);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 void MaidNodeDispatcher::SendUnregisterPmidRequest(
-    routing::TaskId task_id, const nfs_vault::PmidRegistration& pmid_registration) {
+    const nfs_vault::PmidRegistration& pmid_registration) {
   typedef nfs::UnregisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   assert(pmid_registration.unregister());
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(nfs::MessageId(task_id), pmid_registration);
+  NfsMessage nfs_message(pmid_registration);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 void MaidNodeDispatcher::SendPmidHealthRequest(routing::TaskId task_id,
-                                               const passport::Pmid& pmid) {
+                                               const passport::PublicPmid::Name& pmid_name) {
   typedef nfs::PmidHealthRequestFromMaidNodeToPmidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage nfs_message;
   nfs_message.message_id = nfs::MessageId(task_id);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_,
-                               NfsMessage::Receiver(NodeId(pmid.name().value.string()))));
+                               NfsMessage::Receiver(NodeId(pmid_name->string()))));
 }
 
 }  // namespace nfs_client

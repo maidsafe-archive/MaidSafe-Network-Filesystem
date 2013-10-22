@@ -53,6 +53,19 @@ void HandleCreateAccountResult(const ReturnCode& result,
   }
 }
 
+void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
+                            std::shared_ptr<boost::promise<uint64_t>> promise) {
+  try {
+    if (nfs::IsSuccess(result))
+      promise->set_value(result.available_size.available_size);
+    else
+      boost::throw_exception(result.return_code.value);
+  }
+  catch (...) {
+    promise->set_exception(boost::current_exception());
+  }
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

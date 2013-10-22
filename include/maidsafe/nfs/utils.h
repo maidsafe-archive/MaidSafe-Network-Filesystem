@@ -40,14 +40,13 @@ bool CheckMutuallyExclusive(const A& a, const B& b) {
 }
 
 template <typename MessageContents>
-bool IsSuccess(const MessageContents& response);
+bool IsSuccess(const MessageContents& response) {
+  return response.return_code.value.code().value() == static_cast<int>(CommonErrors::success);
+}
 
 template <typename MessageContents>
-std::error_code ErrorCode(const MessageContents& response);
-
-template <typename MessageContents>
-bool Equals(const MessageContents& lhs, const MessageContents& rhs) {
-  return lhs == rhs;
+std::error_code ErrorCode(const MessageContents& response) {
+  return response.return_code.value.code();
 }
 
 // If 'responses' contains >= n successsful responses where n is 'successes_required', returns

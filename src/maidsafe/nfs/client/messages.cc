@@ -89,7 +89,9 @@ void swap(ReturnCode& lhs, ReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.value, rhs.value);
 }
 
-// ========================== AvailableSizeAndReturnCode ==========================================
+// ==================== AvailableSizeAndReturnCode =================================================
+AvailableSizeAndReturnCode::AvailableSizeAndReturnCode() : available_size(0), return_code() {}
+
 AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(uint64_t size,
                                                        const ReturnCode& return_code_in)
     : available_size(size), return_code(return_code_in) {}
@@ -601,83 +603,7 @@ void swap(PmidRegistrationAndReturnCode& lhs,
   swap(lhs.return_code, rhs.return_code);
 }
 
-// ==================== DataNameAndContentAndReturnCode ============================================
-
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
-    const DataNameAndContentAndReturnCode& data)
-    : name(data.name), return_code(data.return_code) {
-  if (data.content)
-    content = *data.content;
-}
-
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(const DataTagValue& type_in,
-                                                                 const Identity& name_in,
-                                                                 nfs_client::ReturnCode code_in,
-                                                                 const NonEmptyString& content_in)
-    : name(nfs_vault::DataName(type_in, name_in)),
-      return_code(std::move(code_in)),
-      content(content_in) {}
-
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(const DataTagValue& type_in,
-                                                                 const Identity& name_in,
-                                                                 nfs_client::ReturnCode code_in)
-    : name(nfs_vault::DataName(type_in, name_in)), return_code(std::move(code_in)) {}
-
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode() : name(), return_code() {}
-
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
-    DataNameAndContentAndReturnCode&& other)
-    : name(std::move(other.name)), return_code(std::move(other.return_code)) {
-  if (other.content)
-    content = std::move(*other.content);
-}
-
-DataNameAndContentAndReturnCode::DataNameAndContentAndReturnCode(
-    const std::string& serialised_copy) {
-  protobuf::DataNameAndContentAndReturnCode proto;
-  if (!proto.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
-
-  name = nfs_vault::DataName(proto.serialised_name());
-  return_code = nfs_client::ReturnCode(proto.serialised_return_code());
-  if (proto.has_content())
-    content = NonEmptyString(proto.content());
-}
-
-std::string DataNameAndContentAndReturnCode::Serialise() const {
-  protobuf::DataNameAndContentAndReturnCode proto_copy;
-  proto_copy.set_serialised_name(name.Serialise());
-  proto_copy.set_serialised_return_code(return_code.Serialise());
-  if (content)
-    proto_copy.set_content(content->string());
-  return proto_copy.SerializeAsString();
-}
-
-DataNameAndContentAndReturnCode& DataNameAndContentAndReturnCode::operator=(
-    DataNameAndContentAndReturnCode other) {
-  swap(*this, other);
-  return *this;
-}
-
-void swap(DataNameAndContentAndReturnCode& lhs,
-          DataNameAndContentAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
-  using std::swap;
-  swap(lhs.name, rhs.name);
-  swap(lhs.return_code, rhs.return_code);
-  swap(lhs.content, rhs.content);
-}
-
-bool operator==(const DataNameAndContentAndReturnCode& lhs,
-                const DataNameAndContentAndReturnCode& rhs) {
-  if ((!lhs.content && rhs.content) || (lhs.content && !rhs.content))
-    return false;
-  if (!lhs.content)
-    return lhs.name == rhs.name && lhs.return_code == rhs.return_code;
-  return lhs.name == rhs.name && lhs.return_code == rhs.return_code && *lhs.content == *rhs.content;
-}
-
-// ======================== DataNameAndSpaceAndReturnCode =========================================
-
+// ==================== DataNameAndSpaceAndReturnCode ==============================================
 DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(
     const DataNameAndSpaceAndReturnCode& data)
     : name(data.name), available_space(data.available_space), return_code(data.return_code) {}
@@ -736,8 +662,7 @@ bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
          lhs.return_code == rhs.return_code;
 }
 
-// ================================= PmidHealthAndReturnCode ======================================
-
+// ==================== PmidHealthAndReturnCode ====================================================
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
                                                  const nfs_client::ReturnCode& code_in)
       : pmid_health(pmid_health_in), return_code(code_in) {}

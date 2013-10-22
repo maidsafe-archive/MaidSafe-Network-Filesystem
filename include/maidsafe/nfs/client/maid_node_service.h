@@ -74,6 +74,7 @@ class MaidNodeService {
   void HandleMessage(const CreateAccountResponse& message,
                      const CreateAccountResponse::Sender& sender,
                      const CreateAccountResponse::Receiver& receiver);
+
  private:
   template <typename Data>
   void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,

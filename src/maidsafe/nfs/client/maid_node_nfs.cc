@@ -22,6 +22,7 @@
 #include "maidsafe/common/log.h"
 
 #include "maidsafe/nfs/vault/account_creation.h"
+#include "maidsafe/nfs/vault/account_removal.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
 
 namespace maidsafe {
@@ -34,6 +35,7 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       create_account_timer_(asio_service),
+      pmid_health_timer_(asio_service),
       dispatcher_(routing),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
@@ -58,9 +60,9 @@ boost::future<void> MaidNodeNfs::CreateAccount(
     const std::chrono::steady_clock::duration& timeout) {
   typedef MaidNodeService::CreateAccountResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
-  auto response_functor([promise](const ReturnCode &result) {
-      HandleCreateAccountResult(result, promise); }
-  );
+  auto response_functor([promise](const ResponseContents &result) {
+      HandleCreateAccountResult(result, promise);
+  });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
       routing::Parameters::node_group_size - 1, response_functor));
   auto task_id(get_timer_.NewTaskId());
@@ -74,20 +76,37 @@ boost::future<void> MaidNodeNfs::CreateAccount(
   return promise->get_future();
 }
 
-void MaidNodeNfs::RemoveAccount() {
-  assert(0);
+void MaidNodeNfs::RemoveAccount(const nfs_vault::AccountRemoval& account_removal) {
+  dispatcher_.SendRemoveAccountRequest(account_removal);
 }
 
-void MaidNodeNfs::RegisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/) {
-  assert(0);
+void MaidNodeNfs::RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration) {
+  dispatcher_.SendRegisterPmidRequest(pmid_registration);
 }
 
-void MaidNodeNfs::UnregisterPmid(const nfs_vault::PmidRegistration& /*pmid_registration*/) {
-  assert(0);
+void MaidNodeNfs::UnregisterPmid(const nfs_vault::PmidRegistration& pmid_registration) {
+  dispatcher_.SendUnregisterPmidRequest(pmid_registration);
 }
 
-void MaidNodeNfs::GetPmidHealth(const passport::Pmid& /*pmid*/) {
-  assert(0);
+MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(
+    const passport::PublicPmid::Name& pmid_name,
+    const std::chrono::steady_clock::duration& timeout) {
+  typedef MaidNodeService::PmidHealthResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<uint64_t>>());
+  auto response_functor([promise](const ResponseContents& result) {
+      HandlePmidHealthResult(result, promise);
+  });
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
+      routing::Parameters::node_group_size - 1, response_functor));
+  auto task_id(get_timer_.NewTaskId());
+  pmid_health_timer_.AddTask(
+      timeout, [op_data](ResponseContents pmid_health_response) {
+                 op_data->HandleResponseContents(std::move(pmid_health_response));
+               },
+      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+      routing::Parameters::node_group_size * 2, task_id);
+  dispatcher_.SendPmidHealthRequest(task_id, pmid_name);
+  return promise->get_future();
 }
 
 }  // namespace nfs_client

@@ -29,6 +29,7 @@
 #include "maidsafe/data_types/structured_data_versions.h"
 
 #include "maidsafe/nfs/vault/account_creation.h"
+#include "maidsafe/nfs/vault/account_removal.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
 
 

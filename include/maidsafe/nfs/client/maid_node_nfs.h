@@ -42,18 +42,12 @@
 
 namespace maidsafe {
 
-namespace nfs_vault {
-
-struct AccountCreation;
-class PmidRegistration;
-
-}  // namespace nfs_vault
-
 namespace nfs_client {
 
 class MaidNodeNfs {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
+  typedef boost::future<uint64_t> PmidHealthFuture;
 
   MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
               passport::PublicPmid::Name pmid_node_hint);
@@ -95,12 +89,16 @@ class MaidNodeNfs {
   boost::future<void> CreateAccount(const nfs_vault::AccountCreation& account_creation,
                                     const std::chrono::steady_clock::duration& timeout =
                                         std::chrono::seconds(10));
-  void RemoveAccount();
+
+  void RemoveAccount(const nfs_vault::AccountRemoval& account_removal);
 
   void RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
+
   void UnregisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
 
-  void GetPmidHealth(const passport::Pmid& pmid);
+  PmidHealthFuture GetPmidHealth(const passport::PublicPmid::Name& pmid_name,
+                                 const std::chrono::steady_clock::duration& timeout =
+                                     std::chrono::seconds(10));
 
   // This should be the function used in the GroupToSingle (and maybe also SingleToSingle) functors
   // passed to 'routing.Join'.
@@ -112,6 +110,7 @@ class MaidNodeNfs {
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetVersionsFunctor;
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetBranchFunctor;
   typedef boost::promise<std::vector<StructuredDataVersions::VersionName>> VersionNamesPromise;
+  typedef std::function<void(const AvailableSizeAndReturnCode&)> PmidHealthFunctor;
 
   MaidNodeNfs(const MaidNodeNfs&);
   MaidNodeNfs(MaidNodeNfs&&);
@@ -121,6 +120,7 @@ class MaidNodeNfs {
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents> get_versions_timer_;
   routing::Timer<MaidNodeService::GetBranchResponse::Contents> get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents> create_account_timer_;
+  routing::Timer<MaidNodeService::PmidHealthResponse::Contents> pmid_health_timer_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
   mutable std::mutex pmid_node_hint_mutex_;
@@ -196,18 +196,17 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
 }
 
 template <typename Data>
-void MaidNodeNfs::PutVersion(const typename Data::Name& /*data_name*/,
-                             const StructuredDataVersions::VersionName& /*old_version_name*/,
-                             const StructuredDataVersions::VersionName& /*new_version_name*/) {
-  assert(0);
+void MaidNodeNfs::PutVersion(const typename Data::Name& data_name,
+                             const StructuredDataVersions::VersionName& old_version_name,
+                             const StructuredDataVersions::VersionName& new_version_name) {
+  dispatcher_.SendPutVersionRequest(data_name, old_version_name, new_version_name);
 }
 
 template <typename Data>
-void MaidNodeNfs::DeleteBranchUntilFork(const typename Data::Name& /*data_name*/,
-                                        const StructuredDataVersions::VersionName& /*branch_tip*/) {
-  assert(0);
+void MaidNodeNfs::DeleteBranchUntilFork(const typename Data::Name& data_name,
+                                        const StructuredDataVersions::VersionName& branch_tip) {
+  dispatcher_.SendDeleteBranchUntilForkRequest(data_name, branch_tip);
 }
-
 
 template <typename T>
 void MaidNodeNfs::HandleMessage(const T& routing_message) {

@@ -16,13 +16,13 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#ifndef MAIDSAFE_NFS_VAULT_ACCOUNT_CREATION_H_
-#define MAIDSAFE_NFS_VAULT_ACCOUNT_CREATION_H_
+#ifndef MAIDSAFE_NFS_VAULT_ACCOUNT_REMOVAL_H_
+#define MAIDSAFE_NFS_VAULT_ACCOUNT_REMOVAL_H_
 
-#include <memory>
 #include <string>
 
 #include "maidsafe/common/config.h"
+#include "maidsafe/common/rsa.h"
 #include "maidsafe/common/types.h"
 
 #include "maidsafe/passport/types.h"
@@ -31,30 +31,31 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
-struct AccountCreation {
-  AccountCreation();
-  AccountCreation(const passport::PublicMaid& public_maid,
-                  const passport::PublicAnmaid& public_anmaid);
-  explicit AccountCreation(const std::string& serialised_copy);
-  AccountCreation(const AccountCreation& other);
-  AccountCreation(AccountCreation&& other);
+class AccountRemoval {
+ public:
+  AccountRemoval();
+  explicit AccountRemoval(const passport::Anmaid& anmaid);
+  explicit AccountRemoval(const std::string& serialised_copy);
+  AccountRemoval(const AccountRemoval& other);
+  AccountRemoval(AccountRemoval&& other);
 
-  passport::PublicMaid public_maid() const { return *public_maid_ptr; }
-  passport::PublicAnmaid public_anmaid() const { return *public_anmaid_ptr; }
-
-  AccountCreation& operator=(AccountCreation other);
+  AccountRemoval& operator=(AccountRemoval other);
   std::string Serialise() const;
 
-  friend bool operator==(const AccountCreation& lhs, const AccountCreation& rhs);
-  friend void swap(AccountCreation& lhs, AccountCreation& rhs) MAIDSAFE_NOEXCEPT;
+  passport::PublicAnmaid::Name public_anmaid_name() const { return public_anmaid_name_; }
+  bool Validate(const passport::PublicAnmaid& public_anmaid) const;
+
+  friend bool operator==(const AccountRemoval& lhs, const AccountRemoval& rhs);
+  friend void swap(AccountRemoval& lhs, AccountRemoval& rhs) MAIDSAFE_NOEXCEPT;
 
  private:
-  std::unique_ptr<passport::PublicMaid> public_maid_ptr;
-  std::unique_ptr<passport::PublicAnmaid> public_anmaid_ptr;
+  NonEmptyString random_data_;
+  passport::PublicAnmaid::Name public_anmaid_name_;
+  asymm::Signature signature_;
 };
 
 }  // namespace nfs_vault
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_VAULT_ACCOUNT_CREATION_H_
+#endif  // MAIDSAFE_NFS_VAULT_ACCOUNT_REMOVAL_H_

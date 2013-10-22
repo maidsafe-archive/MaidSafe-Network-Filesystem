@@ -1,4 +1,4 @@
-/*  Copyright 2012 MaidSafe.net limited
+/*  Copyright 2013 MaidSafe.net limited
 
     This MaidSafe Software is licensed to you under (1) the MaidSafe.net Commercial License,
     version 1.0 or later, or (2) The General Public License (GPL), version 3, depending on which
@@ -18,6 +18,10 @@
 
 #include "maidsafe/nfs/vault/account_creation.h"
 
+#include <utility>
+
+#include "maidsafe/common/error.h"
+#include "maidsafe/common/log.h"
 #include "maidsafe/common/utils.h"
 
 #include "maidsafe/nfs/vault/account_creation.pb.h"
@@ -26,9 +30,7 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
-
-AccountCreation::AccountCreation()
-    : public_maid_ptr(), public_anmaid_ptr() {}
+AccountCreation::AccountCreation() : public_maid_ptr(), public_anmaid_ptr() {}
 
 AccountCreation::AccountCreation(const passport::PublicMaid& public_maid,
                                  const passport::PublicAnmaid& public_anmaid)
@@ -36,8 +38,7 @@ AccountCreation::AccountCreation(const passport::PublicMaid& public_maid,
       public_anmaid_ptr(new passport::PublicAnmaid(public_anmaid)) {}
 
 AccountCreation::AccountCreation(const std::string& serialised_copy)
-    : public_maid_ptr(),
-      public_anmaid_ptr() {
+    : public_maid_ptr(), public_anmaid_ptr() {
   protobuf::AccountCreation proto_account_creation;
   if (!proto_account_creation.ParseFromString(serialised_copy)) {
     LOG(kError) << "Failed to parse account_creation.";
@@ -49,7 +50,8 @@ AccountCreation::AccountCreation(const std::string& serialised_copy)
       passport::PublicMaid::serialised_type(NonEmptyString(proto_account_creation.public_maid()))));
   public_anmaid_ptr.reset(new passport::PublicAnmaid(
       passport::PublicAnmaid::Name(Identity(proto_account_creation.public_anmaid_name())),
-      passport::PublicAnmaid::serialised_type(NonEmptyString(proto_account_creation.public_anmaid()))));
+      passport::PublicAnmaid::serialised_type(
+          NonEmptyString(proto_account_creation.public_anmaid()))));
 }
 
 AccountCreation::AccountCreation(const AccountCreation& other)
@@ -63,14 +65,6 @@ AccountCreation::AccountCreation(AccountCreation&& other)
 AccountCreation& AccountCreation::operator=(AccountCreation other) {
   swap(*this, other);
   return *this;
-}
-
-passport::PublicMaid AccountCreation::public_maid() {
-  return *public_maid_ptr;
-}
-
-passport::PublicAnmaid AccountCreation::public_anmaid() {
-  return *public_anmaid_ptr;
 }
 
 std::string AccountCreation::Serialise() const {

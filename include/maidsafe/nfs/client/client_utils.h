@@ -48,6 +48,9 @@ void HandleGetVersionsOrBranchResult(
 void HandleCreateAccountResult(const ReturnCode& result,
                                std::shared_ptr<boost::promise<void>> promise);
 
+void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
+                            std::shared_ptr<boost::promise<uint64_t>> promise);
+
 // ==================== Implementation =============================================================
 template <typename Data>
 void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& result) const {
