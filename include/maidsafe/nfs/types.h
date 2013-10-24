@@ -57,7 +57,6 @@ enum class MessageAction : int32_t {
   kGetPmidTotalsResponse,
   kGetPmidAccountRequest,
   kGetPmidAccountResponse,
-  kStateChange,
   kSynchronise,
   kAccountTransfer,
   kAddPmid,
