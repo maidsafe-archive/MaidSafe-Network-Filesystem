@@ -28,42 +28,42 @@ namespace maidsafe {
 namespace nfs {
 
 enum class MessageAction : int32_t {
-  kGetRequest,
+  kGetRequest,                                          // 0
   kGetResponse,
   kGetCachedResponse,
   kPutRequest,
   kPutResponse,
-  kPutFailure,
+  kPutFailure,                                          // 5
   kDeleteRequest,
   kGetVersionsRequest,
   kGetVersionsResponse,
   kGetBranchRequest,
-  kGetBranchResponse,
+  kGetBranchResponse,                                   // 10
   kPutVersionRequest,
   kPutVersionResponse,
   kDeleteBranchUntilForkRequest,
   kDeleteBranchUntilForkResponse,
-  kCreateAccountRequest,
+  kCreateAccountRequest,                                // 15
   kCreateAccountResponse,
   kRemoveAccountRequest,
   kRemoveAccountResponse,
   kRegisterPmidRequest,
-  kRegisterPmidResponse,
+  kRegisterPmidResponse,                                // 20
   kUnregisterPmidRequest,
   kUnregisterPmidResponse,
   kPmidHealthRequest,
   kPmidHealthResponse,
-  kGetPmidTotalsRequest,
+  kGetPmidTotalsRequest,                                // 25
   kGetPmidTotalsResponse,
   kGetPmidAccountRequest,
   kGetPmidAccountResponse,
   kSynchronise,
-  kAccountTransfer,
+  kAccountTransfer,                                     // 30
   kAddPmid,
   kIncrementSubscribers,
   kDecrementSubscribers,
   kSetPmidOnline,
-  kSetPmidOffline,
+  kSetPmidOffline,                                      // 35
   kIntegrityCheckRequest,
   kIntegrityCheckResponse,
   kPutToCache,
@@ -71,12 +71,12 @@ enum class MessageAction : int32_t {
 };
 
 enum class Persona : int32_t {
-  kMaidNode,
+  kMaidNode,                                            // 0
   kMpidNode,
   kDataGetter,
   kMaidManager,
   kDataManager,
-  kPmidManager,
+  kPmidManager,                                         // 5
   kPmidNode,
   kMpidManager,
   kVersionHandler,
