@@ -36,7 +36,7 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
                                     const GetResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_timer_.AddResponse(message.message_id.data, *message.contents);
+  get_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const GetCachedResponse& message,
@@ -44,7 +44,7 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
                                     const GetCachedResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_timer_.AddResponse(message.message_id.data, *message.contents);
+  get_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const PutResponse& /*message*/,
@@ -66,7 +66,7 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
                                     const GetVersionsResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_versions_timer_.AddResponse(message.message_id.data, *message.contents);
+  get_versions_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const GetBranchResponse& message,
@@ -74,7 +74,7 @@ void MaidNodeService::HandleMessage(const GetBranchResponse& message,
                                     const GetBranchResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_branch_timer_.AddResponse(message.message_id.data, *message.contents);
+  get_branch_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const PmidHealthResponse& /*message*/,
