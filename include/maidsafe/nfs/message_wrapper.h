@@ -24,6 +24,7 @@
 #include <tuple>
 #include <utility>
 
+#include "maidsafe/common/utils.h"
 #include "maidsafe/common/tagged_value.h"
 
 #include "maidsafe/nfs/types.h"
@@ -55,13 +56,13 @@ struct MessageWrapper {
 
   MessageWrapper();
 
-  // For use with new messages (a new id is automatically applied).
+  // For use with new messages (a new message id is automatically applied).
   explicit MessageWrapper(const ContentsType& contents_in);
 
   // For use with new messages.
   MessageWrapper(MessageId message_id, ContentsType contents_in);
 
-  // For use when handling incoming messages where the sender has already set the id.
+  // For use when handling incoming messages where the sender has already set the message id.
   explicit MessageWrapper(const TypeErasedMessageWrapper& parsed_message_wrapper);
 
   MessageWrapper(const MessageWrapper& other);
@@ -91,10 +92,16 @@ bool operator==(
                          RoutingReceiverType, ContentsType>& lhs,
     const MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                          RoutingReceiverType, ContentsType>& rhs) {
-  if (lhs.id != rhs.id)
+  LOG(kVerbose) << "comparing two messages : lhs message id -- " << lhs.id.data
+                << " rhs message id -- " << rhs.id.data;
+  if (lhs.id != rhs.id) {
+    LOG(kInfo) << "message id mismatch";
     return false;
-  if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents))
+  }
+  if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents)) {
+    LOG(kInfo) << "one of the message having empty content";
     return false;
+  }
   if (lhs.contents)
     return *lhs.contents == *rhs.contents;
   return true;
