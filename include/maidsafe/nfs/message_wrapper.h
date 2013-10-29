@@ -24,6 +24,7 @@
 #include <tuple>
 #include <utility>
 
+#include "maidsafe/common/utils.h"
 #include "maidsafe/common/tagged_value.h"
 
 #include "maidsafe/nfs/types.h"
@@ -91,10 +92,16 @@ bool operator==(
                          RoutingReceiverType, ContentsType>& lhs,
     const MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                          RoutingReceiverType, ContentsType>& rhs) {
-  if (lhs.message_id != rhs.message_id)
+  LOG(kVerbose) << "comparing two messages : lhs message_id -- " << lhs.message_id.data
+                << " rhs message_id -- " << rhs.message_id.data;
+  if (lhs.message_id != rhs.message_id) {
+    LOG(kInfo) << "message_id mismatch";
     return false;
-  if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents))
+  }
+  if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents)) {
+    LOG(kInfo) << "one of the message having empty content";
     return false;
+  }
   if (lhs.contents)
     return *lhs.contents == *rhs.contents;
   return true;
