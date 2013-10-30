@@ -28,62 +28,9 @@ namespace maidsafe {
 
 namespace nfs {
 
-//  enum class MessageAction : int32_t {
-//    kGetRequest,
-//    kGetResponse,
-//    kGetCachedResponse,
-//    kPutRequest,
-//    kPutResponse,
-//    kPutFailure,
-//    kDeleteRequest,
-//    kGetVersionsRequest,
-//    kGetVersionsResponse,
-//    kGetBranchRequest,
-//    kGetBranchResponse,
-//    kPutVersionRequest,
-//    kPutVersionResponse,
-//    kDeleteBranchUntilForkRequest,
-//    kDeleteBranchUntilForkResponse,
-//    kCreateAccountRequest,
-//    kCreateAccountResponse,
-//    kRemoveAccountRequest,
-//    kRemoveAccountResponse,
-//    kRegisterPmidRequest,
-//    kRegisterPmidResponse,
-//    kUnregisterPmidRequest,
-//    kUnregisterPmidResponse,
-//    kPmidHealthRequest,
-//    kPmidHealthResponse,
-//    kGetPmidTotalsRequest,
-//    kGetPmidTotalsResponse,
-//    kGetPmidAccountRequest,
-//    kGetPmidAccountResponse,
-//    kSynchronise,
-//    kAccountTransfer,
-//    kAddPmid,
-//    kIncrementSubscribers,
-//    kDecrementSubscribers,
-//    kSetPmidOnline,
-//    kSetPmidOffline,
-//    kIntegrityCheckRequest,
-//    kIntegrityCheckResponse,
-//    kPutToCache,
-//    kGetFromCache
-//  };
-//
-//  enum class Persona : int32_t {
-//    kMaidNode,
-//    kMpidNode,
-//    kDataGetter,
-//    kMaidManager,
-//    kDataManager,
-//    kPmidManager,
-//    kPmidNode,
-//    kMpidManager,
-//    kVersionHandler,
-//    kCacheHandler
-//  };
-
+// Defines:
+//     enum class MessageAction : int32_t { kGetRequest, kGetResponse, ... };
+// Also defines a std::ostream operator<< for the MessageAction.
 DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (GetRequest)
     (GetResponse)
@@ -126,6 +73,9 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (PutToCache)
     (GetFromCache))
 
+// Defines:
+//     enum class Persona : int32_t { kMaidNode, kMpidNode, ... };
+// Also defines a std::ostream operator<< for the Persona.
 DEFINE_OSTREAMABLE_ENUM_VALUES(Persona, int32_t,
     (MaidNode)
     (MpidNode)
