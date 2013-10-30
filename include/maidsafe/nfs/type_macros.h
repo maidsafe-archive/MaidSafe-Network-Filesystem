@@ -25,15 +25,10 @@
 #include "boost/preprocessor/cat.hpp"
 #include "boost/preprocessor/comparison/not_equal.hpp"
 #include "boost/preprocessor/punctuation/comma_if.hpp"
-#include "boost/preprocessor/punctuation/paren.hpp"
-#include "boost/preprocessor/seq/enum.hpp"
 #include "boost/preprocessor/seq/for_each.hpp"
 #include "boost/preprocessor/seq/for_each_i.hpp"
-#include "boost/preprocessor/seq/push_back.hpp"
-#include "boost/preprocessor/seq/seq.hpp"
 #include "boost/preprocessor/seq/size.hpp"
 #include "boost/preprocessor/stringize.hpp"
-#include "boost/preprocessor/tuple/elem.hpp"
 
 
 #define GET_OSTREAMABLE_ENUM_VALUE(value) BOOST_PP_CAT(k, value)
