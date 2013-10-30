@@ -64,6 +64,7 @@ class PersonaDemuxer : public boost::static_visitor<
                               !std::is_same<Receiver, typename Message::Receiver>::value,
                           typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& /*message*/) const {
+    LOG(kError) << "invalid function call because of un-specialise templated method";
     // Should never come here.  Ideally this specialisation shouldn't exist, but the static visitor
     // requires all types in the variant to be handled.
     ThrowError(CommonErrors::invalid_parameter);
@@ -119,16 +120,20 @@ class Service {
   ReturnType HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message,
                                  const Demuxer& demuxer) {
     PublicMessages public_variant_message;
-    if (!nfs::GetVariant(message, public_variant_message))
+    if (!nfs::GetVariant(message, public_variant_message)) {
+      LOG(kError) << "Not a valid public message";
       ThrowError(CommonErrors::invalid_parameter);
+    }
     return boost::apply_visitor(demuxer, public_variant_message);
   }
   template <typename Demuxer>
   ReturnType HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message,
                                 const Demuxer& demuxer) {
     VaultMessages vault_variant_message;
-    if (!vault::GetVariant(message, vault_variant_message))
+    if (!vault::GetVariant(message, vault_variant_message)) {
+      LOG(kError) << "Not a valid vault message";
       ThrowError(CommonErrors::invalid_parameter);
+    }
     return boost::apply_visitor(demuxer, vault_variant_message);
   }
 

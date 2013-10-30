@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "maidsafe/common/error.h"
+#include "maidsafe/common/utils.h"
 #include "maidsafe/routing/parameters.h"
 
 namespace maidsafe {
@@ -107,8 +108,10 @@ OpData<MessageContents>::OpData(int successes_required,
       callback_(callback),
       responses_(),
       callback_executed_(!callback) {
-  if (!callback || successes_required <= 0)
+  if (!callback || successes_required <= 0) {
+    LOG(kError) << "invalid parameters for OpData constructor";
     ThrowError(CommonErrors::invalid_parameter);
+  }
 }
 
 template <typename MessageContents>
