@@ -22,66 +22,121 @@
 #include <cstdint>
 
 #include "maidsafe/common/tagged_value.h"
+#include "maidsafe/nfs/type_macros.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
-enum class MessageAction : int32_t {
-  kGetRequest,
-  kGetResponse,
-  kGetCachedResponse,
-  kPutRequest,
-  kPutResponse,
-  kPutFailure,
-  kDeleteRequest,
-  kGetVersionsRequest,
-  kGetVersionsResponse,
-  kGetBranchRequest,
-  kGetBranchResponse,
-  kPutVersionRequest,
-  kPutVersionResponse,
-  kDeleteBranchUntilForkRequest,
-  kDeleteBranchUntilForkResponse,
-  kCreateAccountRequest,
-  kCreateAccountResponse,
-  kRemoveAccountRequest,
-  kRemoveAccountResponse,
-  kRegisterPmidRequest,
-  kRegisterPmidResponse,
-  kUnregisterPmidRequest,
-  kUnregisterPmidResponse,
-  kPmidHealthRequest,
-  kPmidHealthResponse,
-  kGetPmidTotalsRequest,
-  kGetPmidTotalsResponse,
-  kGetPmidAccountRequest,
-  kGetPmidAccountResponse,
-  kSynchronise,
-  kAccountTransfer,
-  kAddPmid,
-  kIncrementSubscribers,
-  kDecrementSubscribers,
-  kSetPmidOnline,
-  kSetPmidOffline,
-  kIntegrityCheckRequest,
-  kIntegrityCheckResponse,
-  kPutToCache,
-  kGetFromCache
-};
+//  enum class MessageAction : int32_t {
+//    kGetRequest,
+//    kGetResponse,
+//    kGetCachedResponse,
+//    kPutRequest,
+//    kPutResponse,
+//    kPutFailure,
+//    kDeleteRequest,
+//    kGetVersionsRequest,
+//    kGetVersionsResponse,
+//    kGetBranchRequest,
+//    kGetBranchResponse,
+//    kPutVersionRequest,
+//    kPutVersionResponse,
+//    kDeleteBranchUntilForkRequest,
+//    kDeleteBranchUntilForkResponse,
+//    kCreateAccountRequest,
+//    kCreateAccountResponse,
+//    kRemoveAccountRequest,
+//    kRemoveAccountResponse,
+//    kRegisterPmidRequest,
+//    kRegisterPmidResponse,
+//    kUnregisterPmidRequest,
+//    kUnregisterPmidResponse,
+//    kPmidHealthRequest,
+//    kPmidHealthResponse,
+//    kGetPmidTotalsRequest,
+//    kGetPmidTotalsResponse,
+//    kGetPmidAccountRequest,
+//    kGetPmidAccountResponse,
+//    kSynchronise,
+//    kAccountTransfer,
+//    kAddPmid,
+//    kIncrementSubscribers,
+//    kDecrementSubscribers,
+//    kSetPmidOnline,
+//    kSetPmidOffline,
+//    kIntegrityCheckRequest,
+//    kIntegrityCheckResponse,
+//    kPutToCache,
+//    kGetFromCache
+//  };
+//
+//  enum class Persona : int32_t {
+//    kMaidNode,
+//    kMpidNode,
+//    kDataGetter,
+//    kMaidManager,
+//    kDataManager,
+//    kPmidManager,
+//    kPmidNode,
+//    kMpidManager,
+//    kVersionHandler,
+//    kCacheHandler
+//  };
 
-enum class Persona : int32_t {
-  kMaidNode,
-  kMpidNode,
-  kDataGetter,
-  kMaidManager,
-  kDataManager,
-  kPmidManager,
-  kPmidNode,
-  kMpidManager,
-  kVersionHandler,
-  kCacheHandler
-};
+DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
+    (GetRequest)
+    (GetResponse)
+    (GetCachedResponse)
+    (PutRequest)
+    (PutResponse)
+    (PutFailure)
+    (DeleteRequest)
+    (GetVersionsRequest)
+    (GetVersionsResponse)
+    (GetBranchRequest)
+    (GetBranchResponse)
+    (PutVersionRequest)
+    (PutVersionResponse)
+    (DeleteBranchUntilForkRequest)
+    (DeleteBranchUntilForkResponse)
+    (CreateAccountRequest)
+    (CreateAccountResponse)
+    (RemoveAccountRequest)
+    (RemoveAccountResponse)
+    (RegisterPmidRequest)
+    (RegisterPmidResponse)
+    (UnregisterPmidRequest)
+    (UnregisterPmidResponse)
+    (PmidHealthRequest)
+    (PmidHealthResponse)
+    (GetPmidTotalsRequest)
+    (GetPmidTotalsResponse)
+    (GetPmidAccountRequest)
+    (GetPmidAccountResponse)
+    (Synchronise)
+    (AccountTransfer)
+    (AddPmid)
+    (IncrementSubscribers)
+    (DecrementSubscribers)
+    (SetPmidOnline)
+    (SetPmidOffline)
+    (IntegrityCheckRequest)
+    (IntegrityCheckResponse)
+    (PutToCache)
+    (GetFromCache))
+
+DEFINE_OSTREAMABLE_ENUM_VALUES(Persona, int32_t,
+    (MaidNode)
+    (MpidNode)
+    (DataGetter)
+    (MaidManager)
+    (DataManager)
+    (PmidManager)
+    (PmidNode)
+    (MpidManager)
+    (VersionHandler)
+    (CacheHandler))
 
 template <Persona PersonaType>
 struct DestinationPersona {
