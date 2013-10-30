@@ -69,6 +69,14 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
   get_versions_timer_.AddResponse(message.id.data, *message.contents);
 }
 
+void MaidNodeService::HandleMessage(const PutVersionsResponse& /*message*/,
+                                    const PutVersionsResponse::Sender& /*sender*/,
+                                    const PutVersionsResponse::Receiver& /*receiver*/) {
+  // TODO(Mahmoud): Implement this.
+  assert(0);
+}
+
+
 void MaidNodeService::HandleMessage(const GetBranchResponse& message,
                                     const GetBranchResponse::Sender& /*sender*/,
                                     const GetBranchResponse::Receiver& receiver) {
