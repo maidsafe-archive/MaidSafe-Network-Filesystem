@@ -22,66 +22,71 @@
 #include <cstdint>
 
 #include "maidsafe/common/tagged_value.h"
+#include "maidsafe/nfs/type_macros.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
-enum class MessageAction : int32_t {
-  kGetRequest,                                          // 0
-  kGetResponse,
-  kGetCachedResponse,
-  kPutRequest,
-  kPutResponse,
-  kPutFailure,                                          // 5
-  kDeleteRequest,
-  kGetVersionsRequest,
-  kGetVersionsResponse,
-  kGetBranchRequest,
-  kGetBranchResponse,                                   // 10
-  kPutVersionRequest,
-  kPutVersionResponse,
-  kDeleteBranchUntilForkRequest,
-  kDeleteBranchUntilForkResponse,
-  kCreateAccountRequest,                                // 15
-  kCreateAccountResponse,
-  kRemoveAccountRequest,
-  kRemoveAccountResponse,
-  kRegisterPmidRequest,
-  kRegisterPmidResponse,                                // 20
-  kUnregisterPmidRequest,
-  kUnregisterPmidResponse,
-  kPmidHealthRequest,
-  kPmidHealthResponse,
-  kGetPmidTotalsRequest,                                // 25
-  kGetPmidTotalsResponse,
-  kGetPmidAccountRequest,
-  kGetPmidAccountResponse,
-  kSynchronise,
-  kAccountTransfer,                                     // 30
-  kAddPmid,
-  kIncrementSubscribers,
-  kDecrementSubscribers,
-  kSetPmidOnline,
-  kSetPmidOffline,                                      // 35
-  kIntegrityCheckRequest,
-  kIntegrityCheckResponse,
-  kPutToCache,
-  kGetFromCache
-};
+// Defines:
+//     enum class MessageAction : int32_t { kGetRequest, kGetResponse, ... };
+// Also defines a std::ostream operator<< for the MessageAction.
+DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
+    (GetRequest)
+    (GetResponse)
+    (GetCachedResponse)
+    (PutRequest)
+    (PutResponse)
+    (PutFailure)
+    (DeleteRequest)
+    (GetVersionsRequest)
+    (GetVersionsResponse)
+    (GetBranchRequest)
+    (GetBranchResponse)
+    (PutVersionRequest)
+    (PutVersionResponse)
+    (DeleteBranchUntilForkRequest)
+    (DeleteBranchUntilForkResponse)
+    (CreateAccountRequest)
+    (CreateAccountResponse)
+    (RemoveAccountRequest)
+    (RemoveAccountResponse)
+    (RegisterPmidRequest)
+    (RegisterPmidResponse)
+    (UnregisterPmidRequest)
+    (UnregisterPmidResponse)
+    (PmidHealthRequest)
+    (PmidHealthResponse)
+    (GetPmidTotalsRequest)
+    (GetPmidTotalsResponse)
+    (GetPmidAccountRequest)
+    (GetPmidAccountResponse)
+    (Synchronise)
+    (AccountTransfer)
+    (AddPmid)
+    (IncrementSubscribers)
+    (DecrementSubscribers)
+    (SetPmidOnline)
+    (SetPmidOffline)
+    (IntegrityCheckRequest)
+    (IntegrityCheckResponse)
+    (PutToCache)
+    (GetFromCache))
 
-enum class Persona : int32_t {
-  kMaidNode,                                            // 0
-  kMpidNode,
-  kDataGetter,
-  kMaidManager,
-  kDataManager,
-  kPmidManager,                                         // 5
-  kPmidNode,
-  kMpidManager,
-  kVersionHandler,
-  kCacheHandler
-};
+// Defines:
+//     enum class Persona : int32_t { kMaidNode, kMpidNode, ... };
+// Also defines a std::ostream operator<< for the Persona.
+DEFINE_OSTREAMABLE_ENUM_VALUES(Persona, int32_t,
+    (MaidNode)
+    (MpidNode)
+    (DataGetter)
+    (MaidManager)
+    (DataManager)
+    (PmidManager)
+    (PmidNode)
+    (MpidManager)
+    (VersionHandler)
+    (CacheHandler))
 
 template <Persona PersonaType>
 struct DestinationPersona {
