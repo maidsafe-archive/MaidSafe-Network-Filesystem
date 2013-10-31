@@ -118,6 +118,18 @@ std::string DataManagerServiceImpl::Handle(const GetRequest& message) {
 }
 
 TEST(MessageWrapperTest, BEH_CheckVariant) {
+  LOG(kInfo) << Persona::kMaidNode;
+  LOG(kInfo) << Persona::kMpidNode;
+  LOG(kInfo) << Persona::kDataGetter;
+  LOG(kInfo) << Persona::kMaidManager;
+  LOG(kInfo) << Persona::kDataManager;
+  LOG(kInfo) << Persona::kPmidManager;
+  LOG(kInfo) << Persona::kPmidNode;
+  LOG(kInfo) << Persona::kMpidManager;
+  LOG(kInfo) << Persona::kVersionHandler;
+  LOG(kInfo) << Persona::kCacheHandler;
+  LOG(kInfo) << static_cast<Persona>(-9);
+
   ImmutableData data1(NonEmptyString("data 1"));
   ImmutableData data2(NonEmptyString("data 2"));
   ImmutableData data3(NonEmptyString("data 3"));
