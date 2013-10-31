@@ -55,6 +55,7 @@ class PersonaDemuxer : public boost::static_visitor<
                               std::is_same<Receiver, typename Message::Receiver>::value,
                           typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& message) const {
+    LOG(kVerbose) << "PersonaDemuxer calling persona_service HandleMessage";
     // If you have a compiler error leading here, you probably haven't implemented HandleMessage for
     // *every* type of message in the PublicMessages and VaultMessages variants of PersonaService.
     return persona_service_.HandleMessage(message, sender_, receiver_);
@@ -64,7 +65,7 @@ class PersonaDemuxer : public boost::static_visitor<
                               !std::is_same<Receiver, typename Message::Receiver>::value,
                           typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& /*message*/) const {
-    LOG(kError) << "invalid function call because of un-specialise templated method";
+    LOG(kError) << "invalid function call because of un-specialised templated method";
     // Should never come here.  Ideally this specialisation shouldn't exist, but the static visitor
     // requires all types in the variant to be handled.
     ThrowError(CommonErrors::invalid_parameter);

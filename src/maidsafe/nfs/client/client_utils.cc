@@ -51,6 +51,7 @@ void HandleCreateAccountResult(const ReturnCode& result,
   LOG(kVerbose) << "nfs_client::HandleCreateAccountResult";
   try {
     if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Create Account succeeded";
       promise->set_value();
     } else {
       LOG(kInfo) << "nfs_client::HandleCreateAccountResult error during create account";
@@ -68,6 +69,8 @@ void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
   LOG(kVerbose) << "nfs_client::HandlePmidHealthResult";
   try {
     if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Get PmidHealth succeeded, returned available_size : "
+                 << result.available_size.available_size;
       promise->set_value(result.available_size.available_size);
     } else {
       LOG(kInfo) << "nfs_client::HandlePmidHealthResult error during getPmidHealth";
