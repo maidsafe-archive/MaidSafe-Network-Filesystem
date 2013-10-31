@@ -561,9 +561,7 @@ PmidHealth& PmidHealth::operator=(PmidHealth other) {
 }
 
 std::string PmidHealth::Serialise() const {
-  protobuf::PmidHealth pmid_health_proto;
-  pmid_health_proto.set_serialised_pmid_health(serialised_pmid_health);
-  return pmid_health_proto.SerializeAsString();
+  return serialised_pmid_health;
 }
 
 bool operator==(const PmidHealth& lhs, const PmidHealth& rhs) {
