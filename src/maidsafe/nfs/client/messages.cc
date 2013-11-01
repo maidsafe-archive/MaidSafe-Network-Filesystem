@@ -748,14 +748,25 @@ bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
 // ==================== PmidHealthAndReturnCode ====================================================
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
                                                  const nfs_client::ReturnCode& code_in)
-      : pmid_health(pmid_health_in), return_code(code_in) {}
+      : pmid_health(pmid_health_in), return_code(code_in) {
+  LOG(kVerbose) << "PmidHealthAndReturnCode pmid_health.serialised_pmid_health : "
+                << HexSubstr(pmid_health.serialised_pmid_health)
+                << " pmid_health.Serialise() " << HexSubstr(pmid_health.Serialise())
+                << " return_code : " << return_code.value.what();
+}
 
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const std::string& serialised_copy) {
   protobuf::PmidHealthAndReturnCode pmid_health_proto;
-  if (!pmid_health_proto.ParseFromString(serialised_copy))
+  if (!pmid_health_proto.ParseFromString(serialised_copy)) {
+    LOG(kError) << "PmidHealthAndReturnCode can't parse from string " << HexSubstr(serialised_copy);
     ThrowError(CommonErrors::parsing_error);
+  }
   pmid_health = nfs_vault::PmidHealth(pmid_health_proto.serialised_pmid_health());
   return_code = ReturnCode(pmid_health_proto.serialised_return_code());
+  LOG(kVerbose) << "PmidHealthAndReturnCode from string, pmid_health.serialised_pmid_health : "
+                << HexSubstr(pmid_health.serialised_pmid_health)
+                << " pmid_health.Serialise() " << HexSubstr(pmid_health.Serialise())
+                << " return_code : " << return_code.value.what();
 }
 
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const PmidHealthAndReturnCode& other)
@@ -774,7 +785,9 @@ std::string PmidHealthAndReturnCode::Serialise() const {
   protobuf::PmidHealthAndReturnCode pmid_health_proto;
   pmid_health_proto.set_serialised_pmid_health(pmid_health.Serialise());
   pmid_health_proto.set_serialised_return_code(return_code.Serialise());
-  return pmid_health_proto.SerializeAsString();
+  std::string serialised_copy(pmid_health_proto.SerializeAsString());
+  LOG(kVerbose) << "PmidHealthAndReturnCode serialised as " << HexSubstr(serialised_copy);
+  return serialised_copy;
 }
 
 void swap(PmidHealthAndReturnCode& lhs, PmidHealthAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
