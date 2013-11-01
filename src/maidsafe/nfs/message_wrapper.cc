@@ -45,8 +45,10 @@ std::string SerialiseMessageWrapper(const TypeErasedMessageWrapper& message_tupl
   auto message_id(std::get<3>(message_tuple));
   proto_message_wrapper.set_message_id(message_id);
   proto_message_wrapper.set_serialised_contents(std::get<4>(message_tuple));
-  LOG(kVerbose) << "Message Wrapper created for message from persona " << source_persona
-                << " to persona " << destination_persona << " for action " << action
+  LOG(kVerbose) << "Message Wrapper created for message from persona "
+                << std::get<1>(message_tuple).data
+                << " to persona " << std::get<2>(message_tuple).data
+                << " for action " << std::get<0>(message_tuple)
                 << " with id " << message_id.data;
   return proto_message_wrapper.SerializeAsString();
 }
