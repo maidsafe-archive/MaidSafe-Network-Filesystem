@@ -103,8 +103,8 @@ class Service {
     try {
       return HandleMessage(message, demuxer, public_messages_void_state, vault_messages_void_state);
     }
-    catch (const maidsafe_error& /*error*/) {
-      LOG(kError) << "Invalid request.";
+    catch (const maidsafe_error& error) {
+      LOG(kError) << "Invalid request. " << error.what();
       ThrowError(CommonErrors::invalid_parameter);
       return ReturnType();
     }
@@ -120,6 +120,7 @@ class Service {
   template <typename Demuxer>
   ReturnType HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message,
                                  const Demuxer& demuxer) {
+    LOG(kVerbose) << "nfs HandlePublicMessage";
     PublicMessages public_variant_message;
     if (!nfs::GetVariant(message, public_variant_message)) {
       LOG(kError) << "Not a valid public message";
@@ -130,6 +131,7 @@ class Service {
   template <typename Demuxer>
   ReturnType HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message,
                                 const Demuxer& demuxer) {
+    LOG(kVerbose) << "nfs HandleVaultMessage";
     VaultMessages vault_variant_message;
     if (!vault::GetVariant(message, vault_variant_message)) {
       LOG(kError) << "Not a valid vault message";

@@ -65,6 +65,8 @@ class DataGetterDispatcher {
 // ==================== Implementation =============================================================
 template <typename DataName>
 void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id, const DataName& data_name) {
+  LOG(kVerbose) << "DataGetterDispatcher::SendGetRequest " << HexSubstr(data_name.value)
+                << " with task_id : " << task_id;
   typedef nfs::GetRequestFromDataGetterToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
@@ -74,6 +76,8 @@ void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id, const DataNam
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
   routing_.Send(routing_message);
+  LOG(kVerbose) << "DataGetterDispatcher::SendGetRequest " << HexSubstr(data_name.value)
+                << " routing message sent";
 }
 
 template <typename Data>
