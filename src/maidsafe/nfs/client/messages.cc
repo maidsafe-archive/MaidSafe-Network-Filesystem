@@ -68,8 +68,10 @@ ReturnCode& ReturnCode::operator=(ReturnCode other) {
 ReturnCode::ReturnCode(const std::string& serialised_copy)
     : value([&serialised_copy] {
         protobuf::ReturnCode proto_copy;
-        if (!proto_copy.ParseFromString(serialised_copy))
+        if (!proto_copy.ParseFromString(serialised_copy)) {
+          LOG(kError) << "ReturnCode parsing error";
           ThrowError(CommonErrors::parsing_error);
+        }
         return GetError(proto_copy.error_value(), proto_copy.error_category_name());
       }()) {}
 
@@ -111,8 +113,10 @@ AvailableSizeAndReturnCode& AvailableSizeAndReturnCode::operator=(
 AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(const std::string& serialised_copy)
     : available_size(0), return_code() {
   protobuf::AvailableSizeAndReturnCode proto_copy;
-  if (proto_copy.ParseFromString(serialised_copy))
+  if (!proto_copy.ParseFromString(serialised_copy)) {
+    LOG(kError) << "can't parse AvailableSizeAndReturnCode from incoming string";
     ThrowError(CommonErrors::parsing_error);
+  }
   available_size = nfs_vault::AvailableSize(proto_copy.serialised_available_size());
   return_code = ReturnCode(proto_copy.serialised_return_code());
 }
