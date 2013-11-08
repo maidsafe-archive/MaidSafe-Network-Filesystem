@@ -111,7 +111,10 @@ class Service {
   }
 
 
-  void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> /*matrix_change*/) {}
+  void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> matrix_change) {
+    LOG(kVerbose) << "NFS service calling persona_service HandleChurnEvent";
+    return impl_->HandleChurnEvent(matrix_change);
+  }
 
  private:
   typedef std::true_type IsVoid;
