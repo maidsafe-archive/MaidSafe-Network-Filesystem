@@ -25,43 +25,60 @@ namespace nfs_client {
 void HandleGetVersionsOrBranchResult(
     const StructuredDataNameAndContentOrReturnCode& result,
     std::shared_ptr<boost::promise<std::vector<StructuredDataVersions::VersionName>>> promise) {
+  LOG(kVerbose) << "nfs_client::HandleGetVersionsOrBranchResult";
   try {
     if (result.structured_data) {
       promise->set_value(result.structured_data->versions);
     } else if (result.data_name_and_return_code) {
+      LOG(kInfo) << "nfs_client::HandleGetVersionsOrBranchResult"
+                 << " error during get version or branch";
       boost::throw_exception(result.data_name_and_return_code->return_code.value);
     } else {
+      LOG(kInfo) << "nfs_client::HandleGetVersionsOrBranchResult"
+                 << " uninitialised during get version or branch";
       ThrowError(CommonErrors::uninitialised);
     }
   }
   catch (...) {
+    LOG(kError) << "nfs_client::HandleGetVersionsOrBranchResult"
+                << " exception during get version or branch";
     promise->set_exception(boost::current_exception());
   }
 }
 
 void HandleCreateAccountResult(const ReturnCode& result,
                                std::shared_ptr<boost::promise<void>> promise) {
+  LOG(kVerbose) << "nfs_client::HandleCreateAccountResult";
   try {
     if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Create Account succeeded";
       promise->set_value();
     } else {
+      LOG(kInfo) << "nfs_client::HandleCreateAccountResult error during create account";
       boost::throw_exception(result.value);
     }
   }
   catch (...) {
+    LOG(kError) << "nfs_client::HandleCreateAccountResult exception during create account";
     promise->set_exception(boost::current_exception());
   }
 }
 
 void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
                             std::shared_ptr<boost::promise<uint64_t>> promise) {
+  LOG(kVerbose) << "nfs_client::HandlePmidHealthResult";
   try {
-    if (nfs::IsSuccess(result))
+    if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Get PmidHealth succeeded, returned available_size : "
+                 << result.available_size.available_size;
       promise->set_value(result.available_size.available_size);
-    else
+    } else {
+      LOG(kInfo) << "nfs_client::HandlePmidHealthResult error during getPmidHealth";
       boost::throw_exception(result.return_code.value);
+    }
   }
   catch (...) {
+    LOG(kError) << "nfs_client::HandlePmidHealthResult exception during getPmidHealth";
     promise->set_exception(boost::current_exception());
   }
 }

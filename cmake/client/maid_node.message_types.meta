@@ -1,8 +1,8 @@
 Action:GetResponse            Source:DataManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode            Cacheable
 Action:GetCachedResponse      Source:CacheHandler:Single    Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode            Cacheable
-Action:PutResponse            Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataPmidHintAndReturnCode
 Action:PutFailure             Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndReturnCode
 Action:GetVersionsResponse    Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
 Action:GetBranchResponse      Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
 Action:PmidHealthResponse     Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::AvailableSizeAndReturnCode
 Action:CreateAccountResponse  Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode
+Action:PutVersionResponse     Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndTipOfTreeOrReturnCode

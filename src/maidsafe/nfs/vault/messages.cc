@@ -242,6 +242,11 @@ std::string DataNameAndContent::Serialise() const {
 }
 
 bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs) {
+  LOG(kVerbose) << "DataNameAndContent comparation : "
+                << "lhs.name : " << HexSubstr(lhs.name.Serialise())
+                << " ; rhs.name : " << HexSubstr(rhs.name.Serialise())
+                << " ; lhs.content : " << HexSubstr(lhs.content.string())
+                << " ; rhs.content : " << HexSubstr(rhs.content.string());
   return lhs.name == rhs.name && lhs.content == rhs.content;
 }
 
@@ -556,9 +561,7 @@ PmidHealth& PmidHealth::operator=(PmidHealth other) {
 }
 
 std::string PmidHealth::Serialise() const {
-  protobuf::PmidHealth pmid_health_proto;
-  pmid_health_proto.set_serialised_pmid_health(serialised_pmid_health);
-  return pmid_health_proto.SerializeAsString();
+  return serialised_pmid_health;
 }
 
 bool operator==(const PmidHealth& lhs, const PmidHealth& rhs) {

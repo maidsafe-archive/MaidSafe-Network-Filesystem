@@ -36,7 +36,7 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
                                     const GetResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_timer_.AddResponse(message.message_id.data, *message.contents);
+  get_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const GetCachedResponse& message,
@@ -44,14 +44,7 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
                                     const GetCachedResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_timer_.AddResponse(message.message_id.data, *message.contents);
-}
-
-void MaidNodeService::HandleMessage(const PutResponse& /*message*/,
-                                    const PutResponse::Sender& /*sender*/,
-                                    const PutResponse::Receiver& /*receiver*/) {
-  // TODO(Fraser#5#): 2013-08-24 - Decide on how this is to be handled, and implement.
-  assert(0);
+  get_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
@@ -66,15 +59,23 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
                                     const GetVersionsResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_versions_timer_.AddResponse(message.message_id.data, *message.contents);
+  get_versions_timer_.AddResponse(message.id.data, *message.contents);
 }
+
+void MaidNodeService::HandleMessage(const PutVersionsResponse& /*message*/,
+                                    const PutVersionsResponse::Sender& /*sender*/,
+                                    const PutVersionsResponse::Receiver& /*receiver*/) {
+  // TODO(Mahmoud): Implement this.
+  assert(0);
+}
+
 
 void MaidNodeService::HandleMessage(const GetBranchResponse& message,
                                     const GetBranchResponse::Sender& /*sender*/,
                                     const GetBranchResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_branch_timer_.AddResponse(message.message_id.data, *message.contents);
+  get_branch_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 void MaidNodeService::HandleMessage(const PmidHealthResponse& /*message*/,

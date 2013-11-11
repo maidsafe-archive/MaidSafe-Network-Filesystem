@@ -53,14 +53,17 @@ template <>
 boost::future<passport::PublicPmid> DataGetter::Get(
     const typename passport::PublicPmid::Name& data_name,
     const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "DataGetter Get PublicPmid " << HexSubstr(data_name.value);
 #ifdef TESTING
   if (kAllPmids_.empty()) {
+    LOG(kVerbose) << "DataGetter Get PublicPmid Testing, fectch from network";
 #endif
     typedef DataGetterService::GetResponse::Contents ResponseContents;
     auto promise(std::make_shared<boost::promise<passport::PublicPmid>>());
     HandleGetResult<passport::PublicPmid> response_functor(promise);
     auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
     auto task_id(get_timer_.NewTaskId());
+    LOG(kVerbose) << "DataGetter Add Get PublicPmid " << HexSubstr(data_name.value) << " into task";
     get_timer_.AddTask(timeout,
                        [op_data](ResponseContents get_response) {
                          op_data->HandleResponseContents(std::move(get_response));
@@ -68,21 +71,32 @@ boost::future<passport::PublicPmid> DataGetter::Get(
                        // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
                        routing::Parameters::node_group_size * 2, task_id);
     dispatcher_.SendGetRequest(task_id, data_name);
+    LOG(kVerbose) << "DataGetter Add Get PublicPmid "
+                  << HexSubstr(data_name.value) << " return future";
     return promise->get_future();
 #ifdef TESTING
   } else {
+    LOG(kVerbose) << "DataGetter Get PublicPmid Testing, fetch from local list containing "
+                  << kAllPmids_.size() << " pmids";
     boost::promise<passport::PublicPmid> promise;
     try {
       auto itr(std::find_if(
           std::begin(kAllPmids_), std::end(kAllPmids_),
           [&data_name](const passport::PublicPmid & pmid) { return pmid.name() == data_name; }));
-      if (itr == kAllPmids_.end())
+      if (itr == kAllPmids_.end()) {
+        LOG(kWarning) << "DataGetter can't Get PublicPmid " << HexSubstr(data_name.value)
+                      << " from local";
         ThrowError(NfsErrors::failed_to_get_data);
+      }
       promise.set_value(*itr);
     }
     catch (...) {
+      LOG(kError) << "Having problem in DataGetter when tring to Get PublicPmid "
+                  << HexSubstr(data_name.value) << " from local";
       promise.set_exception(boost::current_exception());
     }
+    LOG(kVerbose) << "DataGetter Get PublicPmid "
+                  << HexSubstr(data_name.value) << " return future";
     return promise.get_future();
   }
 #endif

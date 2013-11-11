@@ -24,6 +24,7 @@
 #include <tuple>
 #include <utility>
 
+#include "maidsafe/common/utils.h"
 #include "maidsafe/common/tagged_value.h"
 
 #include "maidsafe/nfs/types.h"
@@ -55,13 +56,13 @@ struct MessageWrapper {
 
   MessageWrapper();
 
-  // For use with new messages (a new message_id is automatically applied).
+  // For use with new messages (a new message id is automatically applied).
   explicit MessageWrapper(const ContentsType& contents_in);
 
   // For use with new messages.
-  MessageWrapper(MessageId message_id_in, ContentsType contents_in);
+  MessageWrapper(MessageId message_id, ContentsType contents_in);
 
-  // For use when handling incoming messages where the sender has already set the message_id.
+  // For use when handling incoming messages where the sender has already set the message id.
   explicit MessageWrapper(const TypeErasedMessageWrapper& parsed_message_wrapper);
 
   MessageWrapper(const MessageWrapper& other);
@@ -72,11 +73,11 @@ struct MessageWrapper {
 
   friend void swap(MessageWrapper& lhs, MessageWrapper& rhs) {
     using std::swap;
-    swap(lhs.message_id, rhs.message_id);
+    swap(lhs.id, rhs.id);
     swap(lhs.contents, rhs.contents);
   }
 
-  MessageId message_id;
+  MessageId id;
   std::shared_ptr<ContentsType> contents;
 
  private:
@@ -91,10 +92,16 @@ bool operator==(
                          RoutingReceiverType, ContentsType>& lhs,
     const MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                          RoutingReceiverType, ContentsType>& rhs) {
-  if (lhs.message_id != rhs.message_id)
+  LOG(kVerbose) << "comparing two messages : lhs message id -- " << lhs.id.data
+                << " rhs message id -- " << rhs.id.data;
+  if (lhs.id != rhs.id) {
+    LOG(kInfo) << "message id mismatch";
     return false;
-  if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents))
+  }
+  if ((!lhs.contents && rhs.contents) || (lhs.contents && !rhs.contents)) {
+    LOG(kInfo) << "one of the message having empty content";
     return false;
+  }
   if (lhs.contents)
     return *lhs.contents == *rhs.contents;
   return true;
@@ -127,41 +134,40 @@ template <MessageAction action, typename SourcePersonaType, typename RoutingSend
           typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
 MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                RoutingReceiverType, ContentsType>::MessageWrapper()
-    : message_id(detail::GetNewMessageId()), contents() {}
+    : id(detail::GetNewMessageId()), contents() {}
 
 template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
           typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
 MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                RoutingReceiverType, ContentsType>::MessageWrapper(const ContentsType& contents_in)
-    : message_id(detail::GetNewMessageId()),
-      contents(std::make_shared<ContentsType>(contents_in)) {}
+    : id(detail::GetNewMessageId()), contents(std::make_shared<ContentsType>(contents_in)) {}
 
 template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
           typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
 MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
-               RoutingReceiverType, ContentsType>::MessageWrapper(MessageId message_id_in,
+               RoutingReceiverType, ContentsType>::MessageWrapper(MessageId message_id,
                                                                   ContentsType contents_in)
-    : message_id(std::move(message_id_in)), contents(std::make_shared<ContentsType>(contents_in)) {}
+    : id(std::move(message_id)), contents(std::make_shared<ContentsType>(contents_in)) {}
 
 template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
           typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
 MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                RoutingReceiverType,
                ContentsType>::MessageWrapper(const TypeErasedMessageWrapper& parsed_message_wrapper)
-    : message_id(std::get<3>(parsed_message_wrapper)),
+    : id(std::get<3>(parsed_message_wrapper)),
       contents(std::make_shared<ContentsType>(std::get<4>(parsed_message_wrapper))) {}
 
 template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
           typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
 MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                RoutingReceiverType, ContentsType>::MessageWrapper(const MessageWrapper& other)
-    : message_id(other.message_id), contents(other.contents) {}
+    : id(other.id), contents(other.contents) {}
 
 template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
           typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
 MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                RoutingReceiverType, ContentsType>::MessageWrapper(MessageWrapper&& other)
-    : message_id(std::move(other.message_id)), contents(std::move(other.contents)) {}
+    : id(std::move(other.id)), contents(std::move(other.contents)) {}
 
 template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
           typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
@@ -179,7 +185,7 @@ template <MessageAction action, typename SourcePersonaType, typename RoutingSend
 std::string MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                            RoutingReceiverType, ContentsType>::Serialise() const {
   return detail::SerialiseMessageWrapper(std::make_tuple(
-      action, kSourceTaggedValue, kDestinationTaggedValue, message_id, contents->Serialise()));
+      action, kSourceTaggedValue, kDestinationTaggedValue, id, contents->Serialise()));
 }
 
 }  // namespace nfs

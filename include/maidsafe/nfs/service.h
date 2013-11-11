@@ -55,6 +55,7 @@ class PersonaDemuxer : public boost::static_visitor<
                               std::is_same<Receiver, typename Message::Receiver>::value,
                           typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& message) const {
+    LOG(kVerbose) << "PersonaDemuxer calling persona_service HandleMessage";
     // If you have a compiler error leading here, you probably haven't implemented HandleMessage for
     // *every* type of message in the PublicMessages and VaultMessages variants of PersonaService.
     return persona_service_.HandleMessage(message, sender_, receiver_);
@@ -64,6 +65,7 @@ class PersonaDemuxer : public boost::static_visitor<
                               !std::is_same<Receiver, typename Message::Receiver>::value,
                           typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& /*message*/) const {
+    LOG(kError) << "invalid function call because of un-specialised templated method";
     // Should never come here.  Ideally this specialisation shouldn't exist, but the static visitor
     // requires all types in the variant to be handled.
     ThrowError(CommonErrors::invalid_parameter);
@@ -101,15 +103,18 @@ class Service {
     try {
       return HandleMessage(message, demuxer, public_messages_void_state, vault_messages_void_state);
     }
-    catch (const maidsafe_error& /*error*/) {
-      LOG(kError) << "Invalid request.";
+    catch (const maidsafe_error& error) {
+      LOG(kError) << "Invalid request. " << error.what();
       ThrowError(CommonErrors::invalid_parameter);
       return ReturnType();
     }
   }
 
 
-  void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> /*matrix_change*/) {}
+  void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> matrix_change) {
+    LOG(kVerbose) << "NFS service calling persona_service HandleChurnEvent";
+    return impl_->HandleChurnEvent(matrix_change);
+  }
 
  private:
   typedef std::true_type IsVoid;
@@ -118,17 +123,23 @@ class Service {
   template <typename Demuxer>
   ReturnType HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message,
                                  const Demuxer& demuxer) {
+    LOG(kVerbose) << "nfs HandlePublicMessage";
     PublicMessages public_variant_message;
-    if (!nfs::GetVariant(message, public_variant_message))
+    if (!nfs::GetVariant(message, public_variant_message)) {
+      LOG(kError) << "Not a valid public message";
       ThrowError(CommonErrors::invalid_parameter);
+    }
     return boost::apply_visitor(demuxer, public_variant_message);
   }
   template <typename Demuxer>
   ReturnType HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message,
                                 const Demuxer& demuxer) {
+    LOG(kVerbose) << "nfs HandleVaultMessage";
     VaultMessages vault_variant_message;
-    if (!vault::GetVariant(message, vault_variant_message))
+    if (!vault::GetVariant(message, vault_variant_message)) {
+      LOG(kError) << "Not a valid vault message";
       ThrowError(CommonErrors::invalid_parameter);
+    }
     return boost::apply_visitor(demuxer, vault_variant_message);
   }
 

@@ -31,7 +31,7 @@ namespace nfs_client {
 
 struct StructuredData {
  public:
-  explicit StructuredData(std::vector<StructuredDataVersions::VersionName> versions);
+  explicit StructuredData(std::vector<StructuredDataVersions::VersionName> versions_in);
 
   StructuredData();
   StructuredData(const StructuredData& other);

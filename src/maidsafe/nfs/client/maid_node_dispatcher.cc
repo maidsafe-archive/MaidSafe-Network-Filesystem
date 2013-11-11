@@ -72,7 +72,7 @@ void MaidNodeDispatcher::SendPmidHealthRequest(routing::TaskId task_id,
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage nfs_message;
-  nfs_message.message_id = nfs::MessageId(task_id);
+  nfs_message.id = nfs::MessageId(task_id);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_,
                                NfsMessage::Receiver(NodeId(pmid_name->string()))));
 }

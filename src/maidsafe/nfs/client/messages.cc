@@ -68,8 +68,10 @@ ReturnCode& ReturnCode::operator=(ReturnCode other) {
 ReturnCode::ReturnCode(const std::string& serialised_copy)
     : value([&serialised_copy] {
         protobuf::ReturnCode proto_copy;
-        if (!proto_copy.ParseFromString(serialised_copy))
+        if (!proto_copy.ParseFromString(serialised_copy)) {
+          LOG(kError) << "ReturnCode parsing error";
           ThrowError(CommonErrors::parsing_error);
+        }
         return GetError(proto_copy.error_value(), proto_copy.error_category_name());
       }()) {}
 
@@ -111,8 +113,10 @@ AvailableSizeAndReturnCode& AvailableSizeAndReturnCode::operator=(
 AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(const std::string& serialised_copy)
     : available_size(0), return_code() {
   protobuf::AvailableSizeAndReturnCode proto_copy;
-  if (proto_copy.ParseFromString(serialised_copy))
+  if (!proto_copy.ParseFromString(serialised_copy)) {
+    LOG(kError) << "can't parse AvailableSizeAndReturnCode from incoming string";
     ThrowError(CommonErrors::parsing_error);
+  }
   available_size = nfs_vault::AvailableSize(proto_copy.serialised_available_size());
   return_code = ReturnCode(proto_copy.serialised_return_code());
 }
@@ -512,6 +516,89 @@ void swap(StructuredDataNameAndContentOrReturnCode& lhs,
   swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
 }
 
+// ========================== DataNameAndTipOfTreeOrReturnCode ===================================
+DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode()
+    : data_name(), tip_of_tree(), return_code() {}
+
+DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
+    const DataNameAndTipOfTreeOrReturnCode& other)
+        : data_name(other.data_name), tip_of_tree(other.tip_of_tree),
+          return_code(other.return_code) {}
+
+DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
+    DataNameAndTipOfTreeOrReturnCode&& other)
+        : data_name(std::move(other.data_name)), tip_of_tree(std::move(other.tip_of_tree)),
+          return_code(std::move(other.return_code)) {}
+
+DataNameAndTipOfTreeOrReturnCode& DataNameAndTipOfTreeOrReturnCode::operator=(
+    DataNameAndTipOfTreeOrReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
+    const std::string& serialised_copy) {
+  protobuf::DataNameAndTipOfTreeOrReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    ThrowError(CommonErrors::parsing_error);
+
+  data_name = nfs_vault::DataName(proto_copy.serialised_name());
+  if (proto_copy.has_serialised_tip_of_tree()) {
+    tip_of_tree.reset(StructuredDataVersions::VersionName(
+                          proto_copy.serialised_tip_of_tree()));
+  }
+
+  if (proto_copy.has_serialised_return_code()) {
+    return_code.reset(ReturnCode(proto_copy.serialised_return_code()));
+  }
+
+  if (!nfs::CheckMutuallyExclusive(tip_of_tree, return_code)) {
+    assert(false);
+    ThrowError(CommonErrors::parsing_error);
+  }
+}
+
+std::string DataNameAndTipOfTreeOrReturnCode::Serialise() const {
+  if (!nfs::CheckMutuallyExclusive(tip_of_tree, return_code)) {
+    assert(false);
+    ThrowError(CommonErrors::serialisation_error);
+  }
+  protobuf::DataNameAndTipOfTreeOrReturnCode proto_copy;
+
+  proto_copy.set_serialised_name(data_name.Serialise());
+
+  if (tip_of_tree)
+    proto_copy.set_serialised_tip_of_tree(tip_of_tree->Serialise());
+  else
+    proto_copy.set_serialised_return_code(return_code->Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameAndTipOfTreeOrReturnCode& lhs,
+                const DataNameAndTipOfTreeOrReturnCode& rhs) {
+  if (!(lhs.data_name == rhs.data_name))
+    return false;
+
+  if ((lhs.tip_of_tree && !rhs.tip_of_tree) || (!lhs.tip_of_tree && rhs.tip_of_tree))
+    return false;
+
+  if (lhs.tip_of_tree)
+    return *lhs.tip_of_tree == rhs.tip_of_tree;
+
+  if ((lhs.return_code && !rhs.return_code) || (!lhs.return_code && rhs.return_code))
+    return false;
+
+  return *lhs.return_code == *rhs.return_code;
+}
+
+void swap(DataNameAndTipOfTreeOrReturnCode& lhs,
+          DataNameAndTipOfTreeOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.data_name, rhs.data_name);
+  swap(lhs.tip_of_tree, rhs.tip_of_tree);
+  swap(lhs.return_code, rhs.return_code);
+}
+
 // ==================== DataPmidHintAndReturnCode ==================================================
 DataPmidHintAndReturnCode::DataPmidHintAndReturnCode() : data_and_pmid_hint(), return_code() {}
 
@@ -665,14 +752,25 @@ bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
 // ==================== PmidHealthAndReturnCode ====================================================
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
                                                  const nfs_client::ReturnCode& code_in)
-      : pmid_health(pmid_health_in), return_code(code_in) {}
+      : pmid_health(pmid_health_in), return_code(code_in) {
+  LOG(kVerbose) << "PmidHealthAndReturnCode pmid_health.serialised_pmid_health : "
+                << HexSubstr(pmid_health.serialised_pmid_health)
+                << " pmid_health.Serialise() " << HexSubstr(pmid_health.Serialise())
+                << " return_code : " << return_code.value.what();
+}
 
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const std::string& serialised_copy) {
   protobuf::PmidHealthAndReturnCode pmid_health_proto;
-  if (!pmid_health_proto.ParseFromString(serialised_copy))
+  if (!pmid_health_proto.ParseFromString(serialised_copy)) {
+    LOG(kError) << "PmidHealthAndReturnCode can't parse from string " << HexSubstr(serialised_copy);
     ThrowError(CommonErrors::parsing_error);
+  }
   pmid_health = nfs_vault::PmidHealth(pmid_health_proto.serialised_pmid_health());
   return_code = ReturnCode(pmid_health_proto.serialised_return_code());
+  LOG(kVerbose) << "PmidHealthAndReturnCode from string, pmid_health.serialised_pmid_health : "
+                << HexSubstr(pmid_health.serialised_pmid_health)
+                << " pmid_health.Serialise() " << HexSubstr(pmid_health.Serialise())
+                << " return_code : " << return_code.value.what();
 }
 
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const PmidHealthAndReturnCode& other)
@@ -691,7 +789,9 @@ std::string PmidHealthAndReturnCode::Serialise() const {
   protobuf::PmidHealthAndReturnCode pmid_health_proto;
   pmid_health_proto.set_serialised_pmid_health(pmid_health.Serialise());
   pmid_health_proto.set_serialised_return_code(return_code.Serialise());
-  return pmid_health_proto.SerializeAsString();
+  std::string serialised_copy(pmid_health_proto.SerializeAsString());
+  LOG(kVerbose) << "PmidHealthAndReturnCode serialised as " << HexSubstr(serialised_copy);
+  return serialised_copy;
 }
 
 void swap(PmidHealthAndReturnCode& lhs, PmidHealthAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {

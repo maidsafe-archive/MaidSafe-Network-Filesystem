@@ -210,6 +210,7 @@ void MaidNodeNfs::DeleteBranchUntilFork(const typename Data::Name& data_name,
 
 template <typename T>
 void MaidNodeNfs::HandleMessage(const T& routing_message) {
+  LOG(kVerbose) << "MaidNodeNfs::HandleMessage";
   auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
   const auto& destination_persona(std::get<2>(wrapper_tuple));
   static_assert(std::is_same<decltype(destination_persona),

@@ -36,12 +36,20 @@ MessageId GetNewMessageId() {
 
 std::string SerialiseMessageWrapper(const TypeErasedMessageWrapper& message_tuple) {
   protobuf::MessageWrapper proto_message_wrapper;
-  proto_message_wrapper.set_action(static_cast<int32_t>(std::get<0>(message_tuple)));
-  proto_message_wrapper.set_source_persona(static_cast<int32_t>(std::get<1>(message_tuple).data));
-  proto_message_wrapper.set_destination_persona(
-      static_cast<int32_t>(std::get<2>(message_tuple).data));
-  proto_message_wrapper.set_message_id(std::get<3>(message_tuple));
+  auto action(static_cast<int32_t>(std::get<0>(message_tuple)));
+  proto_message_wrapper.set_action(action);
+  auto source_persona(static_cast<int32_t>(std::get<1>(message_tuple).data));
+  proto_message_wrapper.set_source_persona(source_persona);
+  auto destination_persona(static_cast<int32_t>(std::get<2>(message_tuple).data));
+  proto_message_wrapper.set_destination_persona(destination_persona);
+  auto message_id(std::get<3>(message_tuple));
+  proto_message_wrapper.set_message_id(message_id);
   proto_message_wrapper.set_serialised_contents(std::get<4>(message_tuple));
+  LOG(kVerbose) << "Message Wrapper created for message from persona "
+                << std::get<1>(message_tuple).data
+                << " to persona " << std::get<2>(message_tuple).data
+                << " for action " << std::get<0>(message_tuple)
+                << " with id " << message_id.data;
   return proto_message_wrapper.SerializeAsString();
 }
 
