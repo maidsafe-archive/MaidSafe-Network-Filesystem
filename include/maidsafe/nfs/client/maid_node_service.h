@@ -38,7 +38,6 @@ class MaidNodeService {
 
   typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
   typedef nfs::GetCachedResponseFromCacheHandlerToMaidNode GetCachedResponse;
-  typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
   typedef nfs::PutFailureFromMaidManagerToMaidNode PutFailure;
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
   typedef nfs::PutVersionResponseFromVersionHandlerToMaidNode  PutVersionsResponse;
@@ -56,9 +55,6 @@ class MaidNodeService {
 
   void HandleMessage(const GetCachedResponse& message, const GetCachedResponse::Sender& sender,
                      const GetCachedResponse::Receiver& receiver);
-
-  void HandleMessage(const PutResponse& message, const PutResponse::Sender& sender,
-                     const PutResponse::Receiver& receiver);
 
   void HandleMessage(const PutFailure& message, const PutFailure::Sender& sender,
                      const PutFailure::Receiver& receiver);

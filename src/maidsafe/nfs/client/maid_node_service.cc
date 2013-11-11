@@ -47,13 +47,6 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
   get_timer_.AddResponse(message.id.data, *message.contents);
 }
 
-void MaidNodeService::HandleMessage(const PutResponse& /*message*/,
-                                    const PutResponse::Sender& /*sender*/,
-                                    const PutResponse::Receiver& /*receiver*/) {
-  // TODO(Fraser#5#): 2013-08-24 - Decide on how this is to be handled, and implement.
-  assert(0);
-}
-
 void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
                                     const PutFailure::Sender& /*sender*/,
                                     const PutFailure::Receiver& /*receiver*/) {
