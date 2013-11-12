@@ -28,12 +28,6 @@ project(nfs)
 
 include(../../cmake_modules/standard_setup.cmake)
 
-include_directories(${common_SOURCE_DIR}/include)
-include_directories(${passport_SOURCE_DIR}/include)
-include_directories(${private_SOURCE_DIR}/include)
-include_directories(${rudp_SOURCE_DIR}/include)
-include_directories(${routing_SOURCE_DIR}/include)
-
 
 #==================================================================================================#
 # Set up all files as GLOBs                                                                        #
@@ -56,6 +50,9 @@ glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
 ms_add_static_library(nfs_core ${NfsAllFiles} ${OutputFile} ${InputFile} ${MetaFiles})
 ms_add_static_library(nfs_client ${NfsClientAllFiles})
 ms_add_static_library(nfs_vault ${NfsVaultAllFiles})
+target_include_directories(maidsafe_nfs_core PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(maidsafe_nfs_client PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(maidsafe_nfs_vault PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(maidsafe_nfs_core maidsafe_routing)
 target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
 target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
