@@ -47,13 +47,6 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
   get_timer_.AddResponse(message.id.data, *message.contents);
 }
 
-void MaidNodeService::HandleMessage(const PutResponse& /*message*/,
-                                    const PutResponse::Sender& /*sender*/,
-                                    const PutResponse::Receiver& /*receiver*/) {
-  // TODO(Fraser#5#): 2013-08-24 - Decide on how this is to be handled, and implement.
-  assert(0);
-}
-
 void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
                                     const PutFailure::Sender& /*sender*/,
                                     const PutFailure::Receiver& /*receiver*/) {
@@ -69,13 +62,12 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
   get_versions_timer_.AddResponse(message.id.data, *message.contents);
 }
 
-void MaidNodeService::HandleMessage(const PutVersionsResponse& /*message*/,
-                                    const PutVersionsResponse::Sender& /*sender*/,
-                                    const PutVersionsResponse::Receiver& /*receiver*/) {
+void MaidNodeService::HandleMessage(const PutVersionResponse& /*message*/,
+                                    const PutVersionResponse::Sender& /*sender*/,
+                                    const PutVersionResponse::Receiver& /*receiver*/) {
   // TODO(Mahmoud): Implement this.
   assert(0);
 }
-
 
 void MaidNodeService::HandleMessage(const GetBranchResponse& message,
                                     const GetBranchResponse::Sender& /*sender*/,
