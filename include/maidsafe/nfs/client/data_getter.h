@@ -109,16 +109,15 @@ boost::future<typename DataName::data_type> DataGetter::Get(
   HandleGetResult<typename DataName::data_type> response_functor(promise);
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
   auto task_id(get_timer_.NewTaskId());
-  LOG(kVerbose) << "DataGetter Add Get " << HexSubstr(data_name.value) << " into task";
   get_timer_.AddTask(timeout,
-                     [op_data](ResponseContents get_response) {
-                         LOG(kVerbose) << "DataGetter Get HandleResponseContents";
+                     [op_data, data_name](ResponseContents get_response) {
+                         LOG(kVerbose) << "DataGetter Get HandleResponseContents for "
+                                       << HexSubstr(data_name.value);
                          op_data->HandleResponseContents(std::move(get_response));
                      },
                       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
                       routing::Parameters::node_group_size * 2, task_id);
   dispatcher_.SendGetRequest(task_id, data_name);
-  LOG(kVerbose) << "DataGetter Add Get " << HexSubstr(data_name.value) << " return future";
   return promise->get_future();
 }
 

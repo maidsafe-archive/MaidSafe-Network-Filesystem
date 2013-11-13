@@ -54,21 +54,30 @@ void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
 // ==================== Implementation =============================================================
 template <typename Data>
 void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& result) const {
+  LOG(kVerbose) << "HandleGetResult<Data>::operator()";
   try {
     if (result.data) {
-      if (result.data->name.type != Data::Tag::kValue)
+      if (result.data->name.type != Data::Tag::kValue) {
+        LOG(kError) << "HandleGetResult incorrect returned data";
         ThrowError(CommonErrors::invalid_parameter);
-
+      }
+      LOG(kInfo) << "HandleGetResult fetched chunk has name : "
+                 << HexSubstr(result.data->name.raw_name) << " and content : "
+                 << HexSubstr(result.data->content);
       Data data(typename Data::Name(result.data->name.raw_name),
                 typename Data::serialised_type(result.data->content));
       promise->set_value(data);
     } else if (result.data_name_and_return_code) {
+      LOG(kWarning) << "HandleGetResult don't have a result but having a return code "
+                    << result.data_name_and_return_code->return_code.value.what();
       boost::throw_exception(result.data_name_and_return_code->return_code.value);
     } else {
+      LOG(kError) << "HandleGetResult result uninitialised";
       ThrowError(CommonErrors::uninitialised);
     }
   }
   catch (...) {
+    LOG(kError) << "processing error when try to parsing the result of get";
     promise->set_exception(boost::current_exception());
   }
 }

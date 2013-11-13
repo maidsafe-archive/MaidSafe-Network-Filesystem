@@ -132,17 +132,21 @@ template <typename DataName>
 boost::future<typename DataName::data_type> MaidNodeNfs::Get(
     const DataName& data_name,
     const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "MaidNodeNfs Get " << HexSubstr(data_name.value);
   typedef MaidNodeService::GetResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
   HandleGetResult<typename DataName::data_type> response_functor(promise);
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
   auto task_id(get_timer_.NewTaskId());
   get_timer_.AddTask(timeout,
-                     [op_data](ResponseContents get_response) {
-                       op_data->HandleResponseContents(std::move(get_response));
+                     [op_data, data_name](ResponseContents get_response) {
+                        LOG(kVerbose) << "MaidNodeNfs Get HandleResponseContents for "
+                                      << HexSubstr(data_name.value);
+                        op_data->HandleResponseContents(std::move(get_response));
                      },
                      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
                      routing::Parameters::node_group_size * 2, task_id);
+  get_timer_.PrintTaskIds();
   dispatcher_.SendGetRequest(task_id, data_name);
   return promise->get_future();
 }
@@ -165,7 +169,7 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
                                   result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_timer_.NewTaskId());
+  auto task_id(get_versions_timer_.NewTaskId());
   get_versions_timer_.AddTask(
       timeout, [op_data](ResponseContents get_versions_response) {
                  op_data->HandleResponseContents(std::move(get_versions_response));

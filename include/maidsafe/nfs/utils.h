@@ -42,6 +42,7 @@ bool CheckMutuallyExclusive(const A& a, const B& b) {
 
 template <typename MessageContents>
 bool IsSuccess(const MessageContents& response) {
+  LOG(kVerbose) << "IsSuccess return_code " << response.return_code.value.what();
   return response.return_code.value.code().value() == static_cast<int>(CommonErrors::success);
 }
 
@@ -83,18 +84,27 @@ template <typename MessageContents>
 std::pair<typename std::vector<MessageContents>::const_iterator, bool>
 GetSuccessOrMostFrequentResponse(const std::vector<MessageContents>& responses,
                                  int successes_required) {
+  LOG(kVerbose) << "GetSuccessOrMostFrequentResponse responses.size() : "
+                << responses.size() << " successes_required : " << successes_required;
   auto most_frequent_itr(std::end(responses));
   int successes(0), most_frequent(0);
   typedef std::map<std::error_code, int> Count;
   Count count;
   for (auto itr(std::begin(responses)); itr != std::end(responses); ++itr) {
     int this_reply_count(++count[ErrorCode(*itr)]);
+    LOG(kVerbose) << "GetSuccessOrMostFrequentResponse this_reply_count : " << this_reply_count;
     if (IsSuccess(*itr)) {
-      if (++successes >= successes_required)
+      LOG(kVerbose) << "GetSuccessOrMostFrequentResponse successes : " << successes;
+      if (++successes >= successes_required) {
+        LOG(kVerbose) << "GetSuccessOrMostFrequentResponse return succeeded";
         return std::make_pair(itr, true);
-    } else if (this_reply_count > most_frequent) {
-      most_frequent = this_reply_count;
-      most_frequent_itr = itr;
+      }
+    } else {
+      LOG(kVerbose) << "GetSuccessOrMostFrequentResponse failed";
+      if (this_reply_count > most_frequent) {
+        most_frequent = this_reply_count;
+        most_frequent_itr = itr;
+      }
     }
   }
   return std::make_pair(most_frequent_itr, false);
@@ -116,12 +126,15 @@ OpData<MessageContents>::OpData(int successes_required,
 
 template <typename MessageContents>
 void OpData<MessageContents>::HandleResponseContents(MessageContents&& response_contents) {
+  LOG(kVerbose) << "OpData<MessageContents>::HandleResponseContents";
   std::function<void(MessageContents)> callback;
   std::unique_ptr<MessageContents> result_ptr;
   {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (callback_executed_)
+    if (callback_executed_) {
+      LOG(kInfo) << "OpData<MessageContents>::HandleResponseContents already called back";
       return;
+    }
     responses_.push_back(std::move(response_contents));
     auto result(GetSuccessOrMostFrequentResponse(responses_, successes_required_));
     // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
@@ -131,9 +144,12 @@ void OpData<MessageContents>::HandleResponseContents(MessageContents&& response_
       callback_executed_ = true;
       result_ptr = std::unique_ptr<MessageContents>(new MessageContents(*result.first));
     } else {
+      LOG(kWarning) << "OpData<MessageContents>::HandleResponseContents"
+                    << " incorrect result or not enough result";
       return;
     }
   }
+  LOG(kInfo) << "OpData<MessageContents>::HandleResponseContents call back";
   callback(*result_ptr);
 }
 

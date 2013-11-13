@@ -34,6 +34,9 @@ DataGetterService::DataGetterService(
 void DataGetterService::HandleMessage(const GetResponse& message,
                                       const GetResponse::Sender& /*sender*/,
                                       const GetResponse::Receiver& receiver) {
+  LOG(kVerbose) << "DataGetterService::HandleMessage GetResponse "
+                << HexSubstr(message.Serialise()) << " with content "
+                << HexSubstr(message.contents->Serialise());
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   static_cast<void>(routing_);
@@ -43,6 +46,9 @@ void DataGetterService::HandleMessage(const GetResponse& message,
 void DataGetterService::HandleMessage(const GetCachedResponse& message,
                                       const GetCachedResponse::Sender& /*sender*/,
                                       const GetCachedResponse::Receiver& receiver) {
+  LOG(kVerbose) << "DataGetterService::GetCachedResponse GetResponse "
+                << HexSubstr(message.Serialise()) << " with content "
+                << HexSubstr(message.contents->Serialise());
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   static_cast<void>(routing_);

@@ -810,6 +810,7 @@ namespace nfs {
 
 template <>
 bool IsSuccess<nfs_client::ReturnCode>(const nfs_client::ReturnCode& response) {
+  LOG(kVerbose) << "IsSuccess<nfs_client::ReturnCode> return_code " << response.value.what();
   return response.value.code().value() == static_cast<int>(CommonErrors::success);
 }
 
@@ -821,6 +822,18 @@ std::error_code ErrorCode<nfs_client::ReturnCode>(const nfs_client::ReturnCode& 
 template <>
 bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response) {
+  if (response.data) {
+    LOG(kVerbose) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode> "
+                  << " data fetched, data_name_and_return_code not initialized";
+  } else {
+    if (response.data_name_and_return_code)
+      LOG(kWarning) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode> return_code "
+                    << response.data_name_and_return_code->return_code.value.what();
+    else
+      LOG(kError) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode>"
+                  << " neither data or data_name_and_return_code is initialized";
+  }
+
   return response.data;
 }
 
@@ -838,6 +851,18 @@ std::error_code ErrorCode<nfs_client::DataNameAndContentOrReturnCode>(
 template <>
 bool IsSuccess<nfs_client::StructuredDataNameAndContentOrReturnCode>(
     const nfs_client::StructuredDataNameAndContentOrReturnCode& response) {
+  if (response.structured_data) {
+    LOG(kVerbose) << "IsSuccess<nfs_client::nfs_client::StructuredDataNameAndContentOrReturnCode> "
+                  << " structured_data fetched, data_name_and_return_code not initialized";
+  } else {
+    if (response.data_name_and_return_code)
+      LOG(kWarning) << "IsSuccess<nfs_client::nfs_client::StructuredDataNameAndContentOrReturnCode>"
+                    << " return_code "
+                    << response.data_name_and_return_code->return_code.value.what();
+    else
+      LOG(kError) << "IsSuccess<nfs_client::nfs_client::StructuredDataNameAndContentOrReturnCode>"
+                  << " neither structured_data or data_name_and_return_code is initialized";
+  }
   return response.structured_data;
 }
 
