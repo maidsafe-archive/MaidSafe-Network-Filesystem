@@ -65,7 +65,7 @@ boost::future<void> MaidNodeNfs::CreateAccount(
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
       routing::Parameters::node_group_size - 1, response_functor));
-  auto task_id(get_timer_.NewTaskId());
+  auto task_id(create_account_timer_.NewTaskId());
   create_account_timer_.AddTask(
       timeout, [op_data](ResponseContents create_account_response) {
                  op_data->HandleResponseContents(std::move(create_account_response));
@@ -98,7 +98,7 @@ MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
       routing::Parameters::node_group_size - 1, response_functor));
-  auto task_id(get_timer_.NewTaskId());
+  auto task_id(pmid_health_timer_.NewTaskId());
   pmid_health_timer_.AddTask(
       timeout, [op_data](ResponseContents pmid_health_response) {
                  op_data->HandleResponseContents(std::move(pmid_health_response));
