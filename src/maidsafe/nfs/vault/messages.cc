@@ -166,6 +166,12 @@ void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT {
 DataNameOldNewVersion::DataNameOldNewVersion()
     : data_name(), old_version_name(), new_version_name() {}
 
+DataNameOldNewVersion::DataNameOldNewVersion(
+    const DataName& name, const StructuredDataVersions::VersionName& old_version,
+    const StructuredDataVersions::VersionName& new_version)
+        : data_name(name), old_version_name(old_version),
+          new_version_name(new_version) {}
+
 DataNameOldNewVersion::DataNameOldNewVersion(const DataNameOldNewVersion& other)
     : data_name(other.data_name),
       old_version_name(other.old_version_name),
