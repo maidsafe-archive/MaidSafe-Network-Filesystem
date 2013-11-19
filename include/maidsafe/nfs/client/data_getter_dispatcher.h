@@ -72,7 +72,9 @@ void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id, const DataNam
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<typename DataName::data_type>::value ?
       routing::Cacheable::kGet : routing::Cacheable::kNone);
-  NfsMessage nfs_message((nfs::MessageId(task_id), NfsMessage::Contents(data_name)));
+  nfs::MessageId message_id(task_id);
+  NfsMessage::Contents content(data_name);
+  NfsMessage nfs_message(message_id, content);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
   routing_.Send(routing_message);
