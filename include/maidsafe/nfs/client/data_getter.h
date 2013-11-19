@@ -73,6 +73,13 @@ class DataGetter {
   template <typename T>
   void HandleMessage(const T& routing_message);
 
+  template <typename Sender, typename Receiver>
+  void  HandleMessage(
+      const nfs::TypeErasedMessageWrapper& message, const Sender& sender,
+      const Receiver& receiver) {
+    return service_.HandleMessage(message, sender, receiver);
+  }
+
  private:
   typedef std::function<void(const DataNameAndContentOrReturnCode&)> GetFunctor;
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetVersionsFunctor;
