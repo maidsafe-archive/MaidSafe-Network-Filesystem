@@ -34,8 +34,8 @@ DataGetterService::DataGetterService(
 void DataGetterService::HandleMessage(const GetResponse& message,
                                       const GetResponse::Sender& /*sender*/,
                                       const GetResponse::Receiver& receiver) {
-  LOG(kVerbose) << "DataGetterService::HandleMessage GetResponse "
-                << HexSubstr(message.Serialise()) << " with content "
+  LOG(kVerbose) << "DataGetterService::HandleMessage GetResponse with message id"
+                << message.id.data << " with DataNameAndContentOrReturnCode "
                 << HexSubstr(message.contents->Serialise());
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
