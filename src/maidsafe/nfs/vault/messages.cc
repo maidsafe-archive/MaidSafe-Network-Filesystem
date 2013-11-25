@@ -279,6 +279,11 @@ std::string Content::Serialise() const {
   return data;
 }
 
+Content& Content::operator=(Content other) {
+  swap(*this, other);
+  return *this;
+}
+
 bool operator==(const Content& lhs, const Content& rhs) {
   return lhs.data == rhs.data;
 }

@@ -378,20 +378,22 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
 // ==================== DataNameAndContentOrReturnCode =============================================
 template <>
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
-    const DataNameAndReturnCode& data_name_and_return_code_in)
-    : data(), data_name_and_return_code(data_name_and_return_code_in) {}
+    const DataNameAndReturnCode& data_name_and_return_code)
+    : data_name(data_name_and_return_code.name),
+      return_code(data_name_and_return_code.return_code) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode()
-    : data(), data_name_and_return_code() {}
+    : data_name(), content(), return_code() {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndContentOrReturnCode& other)
-    : data(other.data), data_name_and_return_code(other.data_name_and_return_code) {}
+    : data_name(other.data_name), content(other.content), return_code(other.return_code) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     DataNameAndContentOrReturnCode&& other)
-    : data(std::move(other.data)),
-      data_name_and_return_code(std::move(other.data_name_and_return_code)) {}
+    : data_name(std::move(other.data_name)),
+      content(std::move(other.content)),
+      return_code(std::move(other.return_code)) {}
 
 DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
     DataNameAndContentOrReturnCode other) {
@@ -400,51 +402,57 @@ DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
 }
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(const std::string& serialised_copy)
-    : data(), data_name_and_return_code() {
+    : data_name(), content(), return_code() {
   protobuf::DataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
 
-  if (proto_copy.has_serialised_data_name_and_content())
-    data.reset(nfs_vault::DataNameAndContent(proto_copy.serialised_data_name_and_content()));
-  if (proto_copy.has_serialised_data_name_and_return_code()) {
-    data_name_and_return_code.reset(
-        DataNameAndReturnCode(proto_copy.serialised_data_name_and_return_code()));
+  data_name = nfs_vault::DataName(proto_copy.serialised_name());
+
+  if (proto_copy.has_content())
+    content.reset(nfs_vault::Content(proto_copy.content()));
+  if (proto_copy.has_serialised_return_code()) {
+    return_code.reset(ReturnCode(proto_copy.serialised_return_code()));
   }
-  if (!nfs::CheckMutuallyExclusive(data, data_name_and_return_code)) {
+  if (!nfs::CheckMutuallyExclusive(content, return_code)) {
     assert(false);
     ThrowError(CommonErrors::parsing_error);
   }
 }
 
 std::string DataNameAndContentOrReturnCode::Serialise() const {
-  if (!nfs::CheckMutuallyExclusive(data, data_name_and_return_code)) {
+  if (!nfs::CheckMutuallyExclusive(content, return_code)) {
     assert(false);
     ThrowError(CommonErrors::serialisation_error);
   }
   protobuf::DataNameAndContentOrReturnCode proto_copy;
 
-  if (data)
-    proto_copy.set_serialised_data_name_and_content(data->Serialise());
+  proto_copy.set_serialised_name(data_name.Serialise());
+  if (content)
+    proto_copy.set_content(content->Serialise());
   else
-    proto_copy.set_serialised_data_name_and_return_code(data_name_and_return_code->Serialise());
+    proto_copy.set_serialised_return_code(return_code->Serialise());
   return proto_copy.SerializeAsString();
 }
 
 bool operator==(const DataNameAndContentOrReturnCode& lhs,
                 const DataNameAndContentOrReturnCode& rhs) {
-  if (lhs.data)
-    return (*lhs.data) == (*rhs.data);
-  else if (lhs.data_name_and_return_code)
-    return (*lhs.data_name_and_return_code) == (*rhs.data_name_and_return_code);
+  if (!(lhs.data_name == rhs.data_name))
+    return false;
+
+  if (lhs.content)
+    return (*lhs.content) == (*rhs.content);
+  else if (lhs.return_code)
+    return (*lhs.return_code) == (*rhs.return_code);
   return false;
 }
 
 void swap(DataNameAndContentOrReturnCode& lhs,
           DataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
-  swap(lhs.data, rhs.data);
-  swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
+  swap(lhs.data_name, rhs.data_name);
+  swap(lhs.content, rhs.content);
+  swap(lhs.return_code, rhs.return_code);
 }
 
 // ==================== StructuredDataNameAndContentOrReturnCode ===================================
@@ -822,27 +830,27 @@ std::error_code ErrorCode<nfs_client::ReturnCode>(const nfs_client::ReturnCode& 
 template <>
 bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response) {
-  if (response.data) {
+  if (response.content) {
     LOG(kVerbose) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode> "
                   << " data fetched, data_name_and_return_code not initialized";
   } else {
-    if (response.data_name_and_return_code)
+    if (response.return_code)
       LOG(kWarning) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode> return_code "
-                    << response.data_name_and_return_code->return_code.value.what();
+                    << response.return_code->value.what();
     else
       LOG(kError) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode>"
                   << " neither data or data_name_and_return_code is initialized";
   }
 
-  return response.data;
+  return response.content;
 }
 
 template <>
 std::error_code ErrorCode<nfs_client::DataNameAndContentOrReturnCode>(
     const nfs_client::DataNameAndContentOrReturnCode& response) {
-  if (response.data_name_and_return_code)
-    return response.data_name_and_return_code->return_code.value.code();
-  else if (response.data)
+  if (response.return_code)
+    return response.return_code->value.code();
+  else if (response.content)
     return std::error_code(CommonErrors::success);
   else
     return std::error_code(NfsErrors::timed_out);

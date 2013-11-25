@@ -56,21 +56,21 @@ template <typename Data>
 void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& result) const {
   LOG(kVerbose) << "HandleGetResult<Data>::operator()";
   try {
-    if (result.data) {
-      if (result.data->name.type != Data::Tag::kValue) {
+    if (result.content) {
+      if (result.data_name.type != Data::Tag::kValue) {
         LOG(kError) << "HandleGetResult incorrect returned data";
         ThrowError(CommonErrors::invalid_parameter);
       }
       LOG(kInfo) << "HandleGetResult fetched chunk has name : "
-                 << HexSubstr(result.data->name.raw_name) << " and content : "
-                 << HexSubstr(result.data->content);
-      Data data(typename Data::Name(result.data->name.raw_name),
-                typename Data::serialised_type(result.data->content));
+                 << HexSubstr(result.data_name.raw_name) << " and content : "
+                 << HexSubstr(result.content->data);
+      Data data(typename Data::Name(result.data_name.raw_name),
+                typename Data::serialised_type(NonEmptyString(result.content->data)));
       promise->set_value(data);
-    } else if (result.data_name_and_return_code) {
+    } else if (result.return_code) {
       LOG(kWarning) << "HandleGetResult don't have a result but having a return code "
-                    << result.data_name_and_return_code->return_code.value.what();
-      boost::throw_exception(result.data_name_and_return_code->return_code.value);
+                    << result.return_code->value.what();
+      boost::throw_exception(result.return_code->value);
     } else {
       LOG(kError) << "HandleGetResult result uninitialised";
       ThrowError(CommonErrors::uninitialised);
