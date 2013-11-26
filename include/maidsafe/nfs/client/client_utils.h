@@ -57,14 +57,14 @@ void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& res
   LOG(kVerbose) << "HandleGetResult<Data>::operator()";
   try {
     if (result.content) {
-      if (result.data_name.type != Data::Tag::kValue) {
+      if (result.name.type != Data::Tag::kValue) {
         LOG(kError) << "HandleGetResult incorrect returned data";
         ThrowError(CommonErrors::invalid_parameter);
       }
       LOG(kInfo) << "HandleGetResult fetched chunk has name : "
-                 << HexSubstr(result.data_name.raw_name) << " and content : "
+                 << HexSubstr(result.name.raw_name) << " and content : "
                  << HexSubstr(result.content->data);
-      Data data(typename Data::Name(result.data_name.raw_name),
+      Data data(typename Data::Name(result.name.raw_name),
                 typename Data::serialised_type(NonEmptyString(result.content->data)));
       promise->set_value(data);
     } else if (result.return_code) {

@@ -379,21 +379,19 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
 template <>
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndReturnCode& data_name_and_return_code)
-    : data_name(data_name_and_return_code.name),
-      return_code(data_name_and_return_code.return_code) {}
+    : name(data_name_and_return_code.name), return_code(data_name_and_return_code.return_code) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode()
-    : data_name(), content(), return_code() {}
+    : name(), content(), return_code() {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndContentOrReturnCode& other)
-    : data_name(other.data_name), content(other.content), return_code(other.return_code) {}
+        : name(other.name), content(other.content), return_code(other.return_code) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     DataNameAndContentOrReturnCode&& other)
-    : data_name(std::move(other.data_name)),
-      content(std::move(other.content)),
-      return_code(std::move(other.return_code)) {}
+        : name(std::move(other.name)), content(std::move(other.content)),
+          return_code(std::move(other.return_code)) {}
 
 DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
     DataNameAndContentOrReturnCode other) {
@@ -402,12 +400,12 @@ DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
 }
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(const std::string& serialised_copy)
-    : data_name(), content(), return_code() {
+    : name(), content(), return_code() {
   protobuf::DataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     ThrowError(CommonErrors::parsing_error);
 
-  data_name = nfs_vault::DataName(proto_copy.serialised_name());
+  name = nfs_vault::DataName(proto_copy.serialised_name());
 
   if (proto_copy.has_content())
     content.reset(nfs_vault::Content(proto_copy.content()));
@@ -427,7 +425,7 @@ std::string DataNameAndContentOrReturnCode::Serialise() const {
   }
   protobuf::DataNameAndContentOrReturnCode proto_copy;
 
-  proto_copy.set_serialised_name(data_name.Serialise());
+  proto_copy.set_serialised_name(name.Serialise());
   if (content)
     proto_copy.set_content(content->Serialise());
   else
@@ -437,7 +435,7 @@ std::string DataNameAndContentOrReturnCode::Serialise() const {
 
 bool operator==(const DataNameAndContentOrReturnCode& lhs,
                 const DataNameAndContentOrReturnCode& rhs) {
-  if (!(lhs.data_name == rhs.data_name))
+  if (!(lhs.name == rhs.name))
     return false;
 
   if (lhs.content)
@@ -450,7 +448,7 @@ bool operator==(const DataNameAndContentOrReturnCode& lhs,
 void swap(DataNameAndContentOrReturnCode& lhs,
           DataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
-  swap(lhs.data_name, rhs.data_name);
+  swap(lhs.name, rhs.name);
   swap(lhs.content, rhs.content);
   swap(lhs.return_code, rhs.return_code);
 }

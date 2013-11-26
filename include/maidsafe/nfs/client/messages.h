@@ -190,13 +190,12 @@ void swap(DataAndReturnCode& lhs, DataAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 struct DataNameAndContentOrReturnCode {
   template <typename Data>
   explicit DataNameAndContentOrReturnCode(const Data& data_in)
-      : data_name(nfs_vault::DataName(data_in.name())), content(data_in.Serialise().data.string()),
+      : name(nfs_vault::DataName(data_in.name())), content(data_in.Serialise().data.string()),
         return_code() {}
 
   template <typename DataNameType>
-  DataNameAndContentOrReturnCode(const DataNameType& data_name_in,
-                                 const ReturnCode& return_code_in)
-      : data_name(nfs_vault::DataName(data_name_in)), content(), return_code(return_code_in) {}
+  DataNameAndContentOrReturnCode(const DataNameType& data_name, const ReturnCode& return_code_in)
+      : name(nfs_vault::DataName(data_name)), content(), return_code(return_code_in) {}
 
   DataNameAndContentOrReturnCode();
   DataNameAndContentOrReturnCode(const DataNameAndContentOrReturnCode& other);
@@ -206,7 +205,7 @@ struct DataNameAndContentOrReturnCode {
   explicit DataNameAndContentOrReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  nfs_vault::DataName data_name;
+  nfs_vault::DataName name;
   boost::optional<nfs_vault::Content> content;
   boost::optional<ReturnCode> return_code;
 };
