@@ -69,7 +69,7 @@ TYPED_TEST(ServiceTest, BEH_All) {
   // Set timer callback
   auto task_id(get_timer.NewTaskId());
   auto callback([immutable_data](typename GetResponse::Contents returned_contents) {
-      ImmutableData retrieved(ImmutableData::Name(returned_contents.data_name.raw_name),
+      ImmutableData retrieved(ImmutableData::Name(returned_contents.name.raw_name),
                               ImmutableData::serialised_type(
                                   NonEmptyString(returned_contents.content->data)));
       EXPECT_EQ(immutable_data.name(), retrieved.name())
