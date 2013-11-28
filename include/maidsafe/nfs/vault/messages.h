@@ -113,6 +113,13 @@ void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT;
 
 struct DataNameOldNewVersion {
   DataNameOldNewVersion();
+
+  template <typename DataNameType>
+  DataNameOldNewVersion(const DataNameType& name,
+                        const StructuredDataVersions::VersionName& old_version,
+                        const StructuredDataVersions::VersionName& new_version)
+      : data_name(name), old_version_name(old_version), new_version_name(new_version) {}
+
   DataNameOldNewVersion(const DataName& name,
                         const StructuredDataVersions::VersionName& old_version,
                         const StructuredDataVersions::VersionName& new_version);
