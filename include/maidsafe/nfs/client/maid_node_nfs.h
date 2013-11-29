@@ -222,7 +222,10 @@ void MaidNodeNfs::HandleMessage(const T& routing_message) {
                 "The value retrieved from the tuple isn't the destination type, but should be.");
   if (destination_persona.data == nfs::Persona::kMaidNode)
     return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
-  LOG(kError) << "Unhandled Persona";
+  auto action(std::get<0>(wrapper_tuple));
+  auto source_persona(std::get<1>(wrapper_tuple).data);
+  LOG(kError) << " MaidNodeNfs::HandleMessage unhandled message from " << source_persona
+              << " " << action << " to " << destination_persona;
 }
 
 }  // namespace nfs_client
