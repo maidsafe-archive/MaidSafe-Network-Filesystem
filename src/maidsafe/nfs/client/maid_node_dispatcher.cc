@@ -56,13 +56,11 @@ void MaidNodeDispatcher::SendRegisterPmidRequest(
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-void MaidNodeDispatcher::SendUnregisterPmidRequest(
-    const nfs_vault::PmidRegistration& pmid_registration) {
+void MaidNodeDispatcher::SendUnregisterPmidRequest(const passport::PublicPmid::Name& pmid_name) {
   typedef nfs::UnregisterPmidRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
-  assert(pmid_registration.unregister());
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(pmid_registration);
+  NfsMessage nfs_message(nfs_vault::DataName(DataTagValue::kPmidValue, pmid_name.value));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 

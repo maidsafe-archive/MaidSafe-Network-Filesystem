@@ -84,8 +84,8 @@ void MaidNodeNfs::RegisterPmid(const nfs_vault::PmidRegistration& pmid_registrat
   dispatcher_.SendRegisterPmidRequest(pmid_registration);
 }
 
-void MaidNodeNfs::UnregisterPmid(const nfs_vault::PmidRegistration& pmid_registration) {
-  dispatcher_.SendUnregisterPmidRequest(pmid_registration);
+void MaidNodeNfs::UnregisterPmid(const passport::PublicPmid::Name& pmid_name) {
+  dispatcher_.SendUnregisterPmidRequest(pmid_name);
 }
 
 MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(

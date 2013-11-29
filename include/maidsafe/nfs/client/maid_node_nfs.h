@@ -94,7 +94,7 @@ class MaidNodeNfs {
 
   void RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
 
-  void UnregisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
+  void UnregisterPmid(const passport::PublicPmid::Name& pmid_name);
 
   PmidHealthFuture GetPmidHealth(const passport::PublicPmid::Name& pmid_name,
                                  const std::chrono::steady_clock::duration& timeout =

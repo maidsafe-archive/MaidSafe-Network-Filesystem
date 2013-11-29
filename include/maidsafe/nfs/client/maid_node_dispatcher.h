@@ -75,7 +75,7 @@ class MaidNodeDispatcher {
 
   void SendRegisterPmidRequest(const nfs_vault::PmidRegistration& pmid_registration);
 
-  void SendUnregisterPmidRequest(const nfs_vault::PmidRegistration& pmid_registration);
+  void SendUnregisterPmidRequest(const passport::PublicPmid::Name& pmid_name);
 
   void SendPmidHealthRequest(routing::TaskId task_id, const passport::PublicPmid::Name& pmid_name);
 
