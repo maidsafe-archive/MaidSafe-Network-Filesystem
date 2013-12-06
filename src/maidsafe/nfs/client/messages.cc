@@ -44,8 +44,8 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
     return MakeError(static_cast<DriveErrors>(error_value));
   if (error_category_name == std::string(GetVaultCategory().name()))
     return MakeError(static_cast<VaultErrors>(error_value));
-  if (error_category_name == std::string(GetLifeStuffCategory().name()))
-    return MakeError(static_cast<LifeStuffErrors>(error_value));
+  if (error_category_name == std::string(GetClientCategory().name()))
+    return MakeError(static_cast<ClientErrors>(error_value));
 
   ThrowError(CommonErrors::parsing_error);
   return MakeError(CommonErrors::parsing_error);
