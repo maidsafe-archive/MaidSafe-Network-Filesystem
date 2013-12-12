@@ -39,7 +39,8 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
       dispatcher_(routing),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
-            new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_));
+            new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_,
+                                create_account_timer_, pmid_health_timer_));
         return std::move(service);
       }()),
       pmid_node_hint_mutex_(),

@@ -25,15 +25,23 @@ namespace nfs_client {
 MaidNodeService::MaidNodeService(
     routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
     routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
-    routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer)
+    routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
+      routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
+      routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer)
         : routing_(routing),
           get_timer_(get_timer),
           get_versions_timer_(get_versions_timer),
-          get_branch_timer_(get_branch_timer) {}
+          get_branch_timer_(get_branch_timer),
+          create_account_timer_(create_account_timer),
+          pmid_health_timer_(pmid_health_timer) {}
 
 void MaidNodeService::HandleMessage(const GetResponse& message,
                                     const GetResponse::Sender& /*sender*/,
                                     const GetResponse::Receiver& receiver) {
+  LOG(kVerbose) << "MaidNodeService::HandleMessage GetResponse "
+                << HexSubstr(message.Serialise()) << " with content "
+                << HexSubstr(message.contents->Serialise());
+//   get_timer_.PrintTaskIds();
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   get_timer_.AddResponse(message.id.data, *message.contents);
@@ -42,6 +50,9 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
 void MaidNodeService::HandleMessage(const GetCachedResponse& message,
                                     const GetCachedResponse::Sender& /*sender*/,
                                     const GetCachedResponse::Receiver& receiver) {
+  LOG(kVerbose) << "MaidNodeService::HandleMessage GetCachedResponse "
+                << HexSubstr(message.Serialise()) << " with content "
+                << HexSubstr(message.contents->Serialise());
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   get_timer_.AddResponse(message.id.data, *message.contents);
@@ -50,6 +61,7 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
 void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
                                     const PutFailure::Sender& /*sender*/,
                                     const PutFailure::Receiver& /*receiver*/) {
+  LOG(kInfo) << "Get response from PutFailure";
   // TODO(Fraser#5#): 2013-08-24 - Decide on how this is to be handled, and implement.
   assert(0);
 }
@@ -77,17 +89,18 @@ void MaidNodeService::HandleMessage(const GetBranchResponse& message,
   get_branch_timer_.AddResponse(message.id.data, *message.contents);
 }
 
-void MaidNodeService::HandleMessage(const PmidHealthResponse& /*message*/,
+void MaidNodeService::HandleMessage(const PmidHealthResponse& message,
                                     const PmidHealthResponse::Sender& /*sender*/,
                                     const PmidHealthResponse::Receiver& /*receiver*/) {
-  // TODO(Mahmoud): not sure about implementation
-  assert(false && "Fraser Implement me please");
+  LOG(kInfo) << "Get response for PmidHealth";
+  pmid_health_timer_.AddResponse(message.id.data, *message.contents);
 }
 
-void MaidNodeService::HandleMessage(const CreateAccountResponse& /*message*/,
+void MaidNodeService::HandleMessage(const CreateAccountResponse& message,
                                     const CreateAccountResponse::Sender& /*sender*/,
                                     const CreateAccountResponse::Receiver& /*receiver*/) {
-  assert(false && "Fraser Implement me please");
+  LOG(kInfo) << "Get response for CreateAccount";
+  create_account_timer_.AddResponse(message.id.data, *message.contents);
 }
 
 }  // namespace nfs_client

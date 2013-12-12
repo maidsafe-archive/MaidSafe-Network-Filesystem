@@ -48,7 +48,9 @@ class MaidNodeService {
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
       routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
-      routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer);
+      routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
+      routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
+      routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer);
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
@@ -84,6 +86,8 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer_;
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer_;
   routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer_;
+  routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer_;
+  routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer_;
 };
 
 }  // namespace nfs_client
