@@ -832,12 +832,14 @@ bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
     LOG(kVerbose) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode> "
                   << " data fetched, data_name_and_return_code not initialized";
   } else {
-    if (response.return_code)
-      LOG(kWarning) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode> return_code "
-                    << response.return_code->value.what();
-    else
+    if (response.return_code) {
+      LOG(kWarning)
+          << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode> return_code "
+          << response.return_code->value.what();
+    } else {
       LOG(kError) << "IsSuccess<nfs_client::nfs_client::DataNameAndContentOrReturnCode>"
                   << " neither data or data_name_and_return_code is initialized";
+    }
   }
 
   return response.content;

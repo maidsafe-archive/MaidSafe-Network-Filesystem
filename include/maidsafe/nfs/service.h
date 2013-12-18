@@ -51,7 +51,7 @@ class PersonaDemuxer : public boost::static_visitor<
   PersonaDemuxer(PersonaService& persona_service, const Sender& sender, const Receiver& receiver)
       : persona_service_(persona_service), sender_(sender), receiver_(receiver) {}
   template <typename Message>
-  typename std::enable_if<std::is_same<Sender, typename Message::Sender>::value&&
+  typename std::enable_if<std::is_same<Sender, typename Message::Sender>::value &&
                               std::is_same<Receiver, typename Message::Receiver>::value,
                           typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& message) const {
@@ -93,7 +93,7 @@ class Service {
   }
 
   template <typename Sender, typename Receiver>
-  ReturnType  HandleMessage(
+  ReturnType HandleMessage(
       const nfs::TypeErasedMessageWrapper& message, const Sender& sender,
       const Receiver& receiver) {
     const detail::PersonaDemuxer<PersonaService, Sender, Receiver> demuxer(*impl_, sender,
@@ -109,7 +109,6 @@ class Service {
       return ReturnType();
     }
   }
-
 
   void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> matrix_change) {
     LOG(kVerbose) << "NFS service calling persona_service HandleChurnEvent";
