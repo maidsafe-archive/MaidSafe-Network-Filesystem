@@ -55,26 +55,7 @@ boost::future<passport::PublicPmid> DataGetter::Get(
     const std::chrono::steady_clock::duration& timeout) {
   LOG(kVerbose) << "DataGetter Get PublicPmid " << HexSubstr(data_name.value);
 #ifdef TESTING
-  if (kAllPmids_.empty()) {
-    LOG(kVerbose) << "DataGetter Get PublicPmid Testing, fectch from network";
-#endif
-    typedef DataGetterService::GetResponse::Contents ResponseContents;
-    auto promise(std::make_shared<boost::promise<passport::PublicPmid>>());
-    HandleGetResult<passport::PublicPmid> response_functor(promise);
-    auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-    auto task_id(get_timer_.NewTaskId());
-    get_timer_.AddTask(timeout,
-                       [op_data, data_name](ResponseContents get_response) {
-                         LOG(kVerbose) << "DataGetter Get HandleResponseContents for PublicPmid "
-                                       << HexSubstr(data_name.value);
-                         op_data->HandleResponseContents(std::move(get_response));
-                       },
-                       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                       routing::Parameters::node_group_size * 2, task_id);
-    dispatcher_.SendGetRequest(task_id, data_name);
-    return promise->get_future();
-#ifdef TESTING
-  } else {
+  if (!kAllPmids_.empty()) {
     LOG(kVerbose) << "DataGetter Get PublicPmid Testing, fetch from local list containing "
                   << kAllPmids_.size() << " pmids";
     boost::promise<passport::PublicPmid> promise;
@@ -85,20 +66,37 @@ boost::future<passport::PublicPmid> DataGetter::Get(
       if (itr == kAllPmids_.end()) {
         LOG(kWarning) << "DataGetter can't Get PublicPmid " << HexSubstr(data_name.value)
                       << " from local";
-        ThrowError(NfsErrors::failed_to_get_data);
+//         ThrowError(NfsErrors::failed_to_get_data);
+      } else {
+        promise.set_value(*itr);
+        LOG(kVerbose) << "DataGetter Get PublicPmid "
+                      << HexSubstr(data_name.value) << " return future";
+        return promise.get_future();
       }
-      promise.set_value(*itr);
-    }
-    catch (...) {
+    } catch (...) {
       LOG(kError) << "Having problem in DataGetter when tring to Get PublicPmid "
                   << HexSubstr(data_name.value) << " from local";
-      promise.set_exception(boost::current_exception());
+//       promise.set_exception(boost::current_exception());
     }
-    LOG(kVerbose) << "DataGetter Get PublicPmid "
-                  << HexSubstr(data_name.value) << " return future";
-    return promise.get_future();
   }
 #endif
+
+  LOG(kVerbose) << "DataGetter Get PublicPmid, fectch from network";
+  typedef DataGetterService::GetResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<passport::PublicPmid>>());
+  HandleGetResult<passport::PublicPmid> response_functor(promise);
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
+  auto task_id(get_timer_.NewTaskId());
+  get_timer_.AddTask(timeout,
+                      [op_data, data_name](ResponseContents get_response) {
+                        LOG(kVerbose) << "DataGetter Get HandleResponseContents for PublicPmid "
+                                      << HexSubstr(data_name.value);
+                        op_data->HandleResponseContents(std::move(get_response));
+                      },
+                      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+                      routing::Parameters::node_group_size * 2, task_id);
+  dispatcher_.SendGetRequest(task_id, data_name);
+  return promise->get_future();
 }
 
 }  // namespace nfs_client
