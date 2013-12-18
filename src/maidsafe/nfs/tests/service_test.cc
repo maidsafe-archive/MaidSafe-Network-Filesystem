@@ -42,10 +42,9 @@ namespace nfs {
 namespace test {
 
 template <typename T>
-class ServiceTest : public ::testing::Test {
-};
+class ServiceTest : public testing::Test {};
 
-typedef ::testing::Types<nfs_client::MaidNodeService, nfs_client::DataGetterService> ServiceTypes;
+typedef testing::Types</*nfs_client::MaidNodeService, */nfs_client::DataGetterService> ServiceTypes;
 TYPED_TEST_CASE(ServiceTest, ServiceTypes);
 
 TYPED_TEST(ServiceTest, BEH_All) {
