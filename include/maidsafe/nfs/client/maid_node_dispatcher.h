@@ -113,6 +113,9 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
 template <typename Data>
 void MaidNodeDispatcher::SendPutRequest(const Data& data,
                                         const passport::PublicPmid::Name& pmid_node_hint) {
+  LOG(kVerbose) << "MaidNodeDispatcher::SendPutRequest for chunk "
+                << HexSubstr(data.name().value.string())
+                << " to PmidHint " << HexSubstr(pmid_node_hint.value);
   typedef nfs::PutRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
