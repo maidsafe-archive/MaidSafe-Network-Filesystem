@@ -35,21 +35,21 @@ include(../../cmake_modules/standard_setup.cmake)
 set(OutputFile ${PROJECT_SOURCE_DIR}/include/maidsafe/nfs/message_types.h)
 set(InputFile ${PROJECT_SOURCE_DIR}/cmake/message_types.h.in)
 file(GLOB_RECURSE MetaFiles "${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.message_types.meta")
-set_meta_files_custom_commands("${OutputFile}" "${InputFile}" "${MetaFiles}" "Nfs API Files" "Nfs CMake Files")
+ms_set_meta_files_custom_commands("${OutputFile}" "${InputFile}" "${MetaFiles}" "Nfs API Files" "Nfs CMake Files")
 
 set(NfsSourcesDir ${PROJECT_SOURCE_DIR}/src/maidsafe/nfs)
-glob_dir(Nfs ${NfsSourcesDir} Nfs)
-glob_dir(NfsClient ${NfsSourcesDir}/client "Nfs Client")
-glob_dir(NfsVault ${NfsSourcesDir}/vault "Nfs Vault")
-glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
+ms_glob_dir(Nfs ${NfsSourcesDir} Nfs)
+ms_glob_dir(NfsClient ${NfsSourcesDir}/client "Nfs Client")
+ms_glob_dir(NfsVault ${NfsSourcesDir}/vault "Nfs Vault")
+ms_glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
 
 
 #==================================================================================================#
 # Define MaidSafe libraries and executables                                                        #
 #==================================================================================================#
-ms_add_static_library(nfs_core ${NfsAllFiles} ${OutputFile} ${InputFile} ${MetaFiles})
-ms_add_static_library(nfs_client ${NfsClientAllFiles})
-ms_add_static_library(nfs_vault ${NfsVaultAllFiles})
+ms_add_static_library(maidsafe_nfs_core ${NfsAllFiles} ${OutputFile} ${InputFile} ${MetaFiles})
+ms_add_static_library(maidsafe_nfs_client ${NfsClientAllFiles})
+ms_add_static_library(maidsafe_nfs_vault ${NfsVaultAllFiles})
 target_include_directories(maidsafe_nfs_core PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_client PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_vault PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
@@ -62,7 +62,7 @@ if(MaidsafeTesting)
   target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_private)
 endif()
 
-rename_outdated_built_exes()
+ms_rename_outdated_built_exes()
 
 
 #==================================================================================================#
@@ -75,8 +75,8 @@ include(standard_flags)
 # Tests                                                                                            #
 #==================================================================================================#
 if(MaidsafeTesting)
-  add_style_test()
-  add_gtests(TESTnfs)
-  add_project_experimental()
-  test_summary_output()
+  ms_add_style_test()
+  ms_add_gtests(TESTnfs)
+  ms_add_project_experimental()
+  ms_test_summary_output()
 endif()
