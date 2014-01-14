@@ -176,7 +176,7 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
       routing::Parameters::node_group_size * 2, task_id);
-  dispatcher_.SendGetVersionsRequest<Data>(task_id, data_name);
+  dispatcher_.SendGetVersionsRequest(task_id, data_name);
   return promise->get_future();
 }
 
@@ -196,7 +196,7 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
       },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
       routing::Parameters::node_group_size * 2, task_id);
-  dispatcher_.SendGetBranchRequest<Data>(task_id, data_name, branch_tip);
+  dispatcher_.SendGetBranchRequest(task_id, data_name, branch_tip);
   return promise->get_future();
 }
 
