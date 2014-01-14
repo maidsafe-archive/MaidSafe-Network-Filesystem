@@ -42,11 +42,11 @@ class DataGetterDispatcher {
   template <typename DataName>
   void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
 
-  template <typename Data>
-  void SendGetVersionsRequest(routing::TaskId task_id, const typename Data::Name& data_name);
+  template <typename DataName>
+  void SendGetVersionsRequest(routing::TaskId task_id, const DataName& data_name);
 
-  template <typename Data>
-  void SendGetBranchRequest(routing::TaskId task_id, const typename Data::Name& data_name,
+  template <typename DataName>
+  void SendGetBranchRequest(routing::TaskId task_id, const DataName& data_name,
                             const StructuredDataVersions::VersionName& branch_tip);
 
  private:
@@ -82,9 +82,9 @@ void DataGetterDispatcher::SendGetRequest(routing::TaskId task_id, const DataNam
                 << " routing message sent";
 }
 
-template <typename Data>
+template <typename DataName>
 void DataGetterDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
-                                                  const typename Data::Name& data_name) {
+                                                  const DataName& data_name) {
   typedef nfs::GetVersionsRequestFromDataGetterToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
@@ -94,9 +94,9 @@ void DataGetterDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
-template <typename Data>
+template <typename DataName>
 void DataGetterDispatcher::SendGetBranchRequest(
-    routing::TaskId task_id, const typename Data::Name& data_name,
+    routing::TaskId task_id, const DataName& data_name,
     const StructuredDataVersions::VersionName& branch_tip) {
   typedef nfs::GetBranchRequestFromDataGetterToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();

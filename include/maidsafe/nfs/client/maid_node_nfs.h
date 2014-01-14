@@ -66,24 +66,24 @@ class MaidNodeNfs {
   template <typename DataName>
   void Delete(const DataName& data_name);
 
-  template <typename Data>
-  VersionNamesFuture GetVersions(const typename Data::Name& data_name,
+  template <typename DataName>
+  VersionNamesFuture GetVersions(const DataName& data_name,
                                  const std::chrono::steady_clock::duration& timeout =
                                      std::chrono::seconds(10));
 
-  template <typename Data>
-  VersionNamesFuture GetBranch(const typename Data::Name& data_name,
+  template <typename DataName>
+  VersionNamesFuture GetBranch(const DataName& data_name,
                                const StructuredDataVersions::VersionName& branch_tip,
                                const std::chrono::steady_clock::duration& timeout =
                                    std::chrono::seconds(10));
 
-  template <typename Data>
-  void PutVersion(const typename Data::Name& data_name,
+  template <typename DataName>
+  void PutVersion(const DataName& data_name,
                   const StructuredDataVersions::VersionName& old_version_name,
                   const StructuredDataVersions::VersionName& new_version_name);
 
-  template <typename Data>
-  void DeleteBranchUntilFork(const typename Data::Name& data_name,
+  template <typename DataName>
+  void DeleteBranchUntilFork(const DataName& data_name,
                              const StructuredDataVersions::VersionName& branch_tip);
 
   boost::future<void> CreateAccount(const nfs_vault::AccountCreation& account_creation,
@@ -161,9 +161,9 @@ void MaidNodeNfs::Delete(const DataName& data_name) {
   dispatcher_.SendDeleteRequest(data_name);
 }
 
-template <typename Data>
+template <typename DataName>
 MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
-    const typename Data::Name& data_name, const std::chrono::steady_clock::duration& timeout) {
+    const DataName& data_name, const std::chrono::steady_clock::duration& timeout) {
   typedef MaidNodeService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
@@ -176,38 +176,39 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
       routing::Parameters::node_group_size * 2, task_id);
-  dispatcher_.SendGetVersionsRequest(task_id, data_name);
+  dispatcher_.SendGetVersionsRequest<Data>(task_id, data_name);
   return promise->get_future();
 }
 
-template <typename Data>
+template <typename DataName>
 MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
-    const typename Data::Name& data_name, const StructuredDataVersions::VersionName& branch_tip,
+    const DataName& data_name, const StructuredDataVersions::VersionName& branch_tip,
     const std::chrono::steady_clock::duration& timeout) {
   typedef MaidNodeService::GetBranchResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
                                   result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_branch_timer_.AddTask(timeout, [op_data](ResponseContents get_branch_response) {
-                                                    op_data->HandleResponseContents(
-                                                        std::move(get_branch_response));
-                                                  },
-                                         // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                                         routing::Parameters::node_group_size * 2));
-  dispatcher_.SendGetBranchRequest(task_id, data_name, branch_tip);
+  auto task_id(get_branch_timer_.NewTaskId());
+  get_branch_timer_.AddTask(timeout,
+      [op_data](ResponseContents get_branch_response) {
+          op_data->HandleResponseContents(std::move(get_branch_response));
+      },
+      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+      routing::Parameters::node_group_size * 2, task_id);
+  dispatcher_.SendGetBranchRequest<Data>(task_id, data_name, branch_tip);
   return promise->get_future();
 }
 
-template <typename Data>
-void MaidNodeNfs::PutVersion(const typename Data::Name& data_name,
+template <typename DataName>
+void MaidNodeNfs::PutVersion(const DataName& data_name,
                              const StructuredDataVersions::VersionName& old_version_name,
                              const StructuredDataVersions::VersionName& new_version_name) {
   dispatcher_.SendPutVersionRequest(data_name, old_version_name, new_version_name);
 }
 
-template <typename Data>
-void MaidNodeNfs::DeleteBranchUntilFork(const typename Data::Name& data_name,
+template <typename DataName>
+void MaidNodeNfs::DeleteBranchUntilFork(const DataName& data_name,
                                         const StructuredDataVersions::VersionName& branch_tip) {
   dispatcher_.SendDeleteBranchUntilForkRequest(data_name, branch_tip);
 }

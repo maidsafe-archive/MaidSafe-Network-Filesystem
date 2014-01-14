@@ -52,20 +52,20 @@ class MaidNodeDispatcher {
   template <typename DataName>
   void SendDeleteRequest(const DataName& data_name);
 
-  template <typename Data>
-  void SendGetVersionsRequest(routing::TaskId task_id, const typename Data::Name& data_name);
+  template <typename DataName>
+  void SendGetVersionsRequest(routing::TaskId task_id, const DataName& data_name);
 
-  template <typename Data>
-  void SendGetBranchRequest(routing::TaskId task_id, const typename Data::Name& data_name,
+  template <typename DataName>
+  void SendGetBranchRequest(routing::TaskId task_id, const DataName& data_name,
                             const StructuredDataVersions::VersionName& branch_tip);
 
-  template <typename Data>
-  void SendPutVersionRequest(const typename Data::Name& data_name,
+  template <typename DataName>
+  void SendPutVersionRequest(const DataName& data_name,
                              const StructuredDataVersions::VersionName& old_version_name,
                              const StructuredDataVersions::VersionName& new_version_name);
 
-  template <typename Data>
-  void SendDeleteBranchUntilForkRequest(const typename Data::Name& data_name,
+  template <typename DataName>
+  void SendDeleteBranchUntilForkRequest(const DataName& data_name,
                                         const StructuredDataVersions::VersionName& branch_tip);
 
   void SendCreateAccountRequest(routing::TaskId task_id,
@@ -139,9 +139,9 @@ void MaidNodeDispatcher::SendDeleteRequest(const DataName& data_name) {
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-template <typename Data>
+template <typename DataName>
 void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
-                                                const typename Data::Name& data_name) {
+                                                const DataName& data_name) {
   typedef nfs::GetVersionsRequestFromMaidNodeToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
@@ -153,25 +153,23 @@ void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
-template <typename Data>
+template <typename DataName>
 void MaidNodeDispatcher::SendGetBranchRequest(
-    routing::TaskId task_id, const typename Data::Name& data_name,
+    routing::TaskId task_id, const DataName& data_name,
     const StructuredDataVersions::VersionName& branch_tip) {
   typedef nfs::GetBranchRequestFromMaidNodeToVersionHandler NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
-  NfsMessage::Contents contents;
-  contents.data_name = DataName(data_name);
-  contents.version_name = branch_tip;
+  NfsMessage::Contents contents(data_name, branch_tip);
   NfsMessage nfs_message(nfs::MessageId(task_id), contents);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
-template <typename Data>
+template <typename DataName>
 void MaidNodeDispatcher::SendPutVersionRequest(
-    const typename Data::Name& data_name,
+    const DataName& data_name,
     const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name) {
   typedef nfs::PutVersionRequestFromMaidNodeToMaidManager NfsMessage;
@@ -186,9 +184,9 @@ void MaidNodeDispatcher::SendPutVersionRequest(
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-template <typename Data>
+template <typename DataName>
 void MaidNodeDispatcher::SendDeleteBranchUntilForkRequest(
-    const typename Data::Name& data_name, const StructuredDataVersions::VersionName& branch_tip) {
+    const DataName& data_name, const StructuredDataVersions::VersionName& branch_tip) {
   typedef nfs::DeleteBranchUntilForkRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;

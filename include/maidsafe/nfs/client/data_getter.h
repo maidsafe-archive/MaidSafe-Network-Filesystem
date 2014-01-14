@@ -57,13 +57,13 @@ class DataGetter {
       const DataName& data_name,
       const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
 
-  template <typename Data>
-  VersionNamesFuture GetVersions(const typename Data::Name& data_name,
+  template <typename DataName>
+  VersionNamesFuture GetVersions(const DataName& data_name,
                                  const std::chrono::steady_clock::duration& timeout =
                                      std::chrono::seconds(10));
 
-  template <typename Data>
-  VersionNamesFuture GetBranch(const typename Data::Name& data_name,
+  template <typename DataName>
+  VersionNamesFuture GetBranch(const DataName& data_name,
                                const StructuredDataVersions::VersionName& branch_tip,
                                const std::chrono::steady_clock::duration& timeout =
                                    std::chrono::seconds(10));
@@ -123,9 +123,9 @@ boost::future<typename DataName::data_type> DataGetter::Get(
   return promise->get_future();
 }
 
-template <typename Data>
+template <typename DataName>
 DataGetter::VersionNamesFuture DataGetter::GetVersions(
-    const typename Data::Name& data_name, const std::chrono::steady_clock::duration& timeout) {
+    const DataName& data_name, const std::chrono::steady_clock::duration& timeout) {
   typedef DataGetterService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
@@ -141,9 +141,9 @@ DataGetter::VersionNamesFuture DataGetter::GetVersions(
   return promise->get_future();
 }
 
-template <typename Data>
+template <typename DataName>
 DataGetter::VersionNamesFuture DataGetter::GetBranch(
-    const typename Data::Name& data_name, const StructuredDataVersions::VersionName& branch_tip,
+    const DataName& data_name, const StructuredDataVersions::VersionName& branch_tip,
     const std::chrono::steady_clock::duration& timeout) {
   typedef DataGetterService::GetBranchResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
