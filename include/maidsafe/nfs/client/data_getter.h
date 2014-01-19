@@ -22,6 +22,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <mutex>
 
 #include "boost/thread/future.hpp"
 
@@ -95,6 +96,7 @@ class DataGetter {
   DataGetterDispatcher dispatcher_;
   nfs::Service<DataGetterService> service_;
 #ifdef TESTING
+  std::mutex pmids_mutex_;
   std::vector<passport::PublicPmid> all_pmids_;
 #endif
 };

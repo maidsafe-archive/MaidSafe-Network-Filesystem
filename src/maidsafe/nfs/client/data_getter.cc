@@ -38,6 +38,7 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
 }())
 #ifdef TESTING
       ,
+      pmids_mutex_(),
       all_pmids_(std::move(public_pmids_from_file))
 #endif
 {
@@ -51,6 +52,7 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
 
 #ifdef TESTING
   void DataGetter::AddPublicPmid(passport::PublicPmid public_pmid) {
+    std::lock_guard<std::mutex> lock(pmids_mutex_);
     all_pmids_.push_back(public_pmid);
   }
 #endif
