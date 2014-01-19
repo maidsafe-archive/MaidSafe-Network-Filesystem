@@ -75,6 +75,10 @@ class DataGetter {
 
   nfs::Service<DataGetterService>& service() { return service_; }
 
+#ifdef TESTING
+  void AddPublicPmid(passport::PublicPmid public_pmid);
+#endif
+
  private:
   typedef std::function<void(const DataNameAndContentOrReturnCode&)> GetFunctor;
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetVersionsFunctor;
@@ -91,7 +95,7 @@ class DataGetter {
   DataGetterDispatcher dispatcher_;
   nfs::Service<DataGetterService> service_;
 #ifdef TESTING
-  std::vector<passport::PublicPmid> kAllPmids_;
+  std::vector<passport::PublicPmid> all_pmids_;
 #endif
 };
 

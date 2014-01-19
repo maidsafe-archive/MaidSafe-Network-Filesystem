@@ -38,7 +38,7 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
 }())
 #ifdef TESTING
       ,
-      kAllPmids_(std::move(public_pmids_from_file))
+      all_pmids_(std::move(public_pmids_from_file))
 #endif
 {
 #ifndef TESTING
@@ -49,21 +49,28 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing,
 #endif
 }
 
+#ifdef TESTING
+  void DataGetter::AddPublicPmid(passport::PublicPmid public_pmid) {
+    all_pmids_.push_back(public_pmid);
+  }
+#endif
+
+
 template <>
 boost::future<passport::PublicPmid> DataGetter::Get(
     const typename passport::PublicPmid::Name& data_name,
     const std::chrono::steady_clock::duration& timeout) {
   LOG(kVerbose) << "DataGetter Get PublicPmid " << HexSubstr(data_name.value);
 #ifdef TESTING
-  if (!kAllPmids_.empty()) {
+  if (!all_pmids_.empty()) {
     LOG(kVerbose) << "DataGetter Get PublicPmid Testing, fetch from local list containing "
-                  << kAllPmids_.size() << " pmids";
+                  << all_pmids_.size() << " pmids";
     boost::promise<passport::PublicPmid> promise;
     try {
       auto itr(std::find_if(
-          std::begin(kAllPmids_), std::end(kAllPmids_),
+          std::begin(all_pmids_), std::end(all_pmids_),
           [&data_name](const passport::PublicPmid & pmid) { return pmid.name() == data_name; }));
-      if (itr == kAllPmids_.end()) {
+      if (itr == all_pmids_.end()) {
         LOG(kWarning) << "DataGetter can't Get PublicPmid " << HexSubstr(data_name.value)
                       << " from local";
 //         ThrowError(NfsErrors::failed_to_get_data);
