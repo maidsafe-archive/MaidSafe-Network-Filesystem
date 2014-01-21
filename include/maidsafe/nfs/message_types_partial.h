@@ -47,14 +47,14 @@ typedef maidsafe::nfs::MessageWrapper<
     maidsafe::nfs_vault::DataName>
         GetRequestFromDataGetterPartialToDataManager;
 
-//typedef maidsafe::nfs::MessageWrapper<
-//    maidsafe::nfs::MessageAction::kGetResponse,
-//    maidsafe::nfs::SourcePersona<maidsafe::nfs::Persona::kDataManager>,
-//    maidsafe::routing::GroupSource,
-//    maidsafe::nfs::DestinationPersona<maidsafe::nfs::Persona::kDataGetter>,
-//    maidsafe::routing::SingleIdRelay,
-//    maidsafe::nfs_client::DataNameAndContentOrReturnCode>
-//        GetResponseFromDataManagerToDataGetterPartial;
+typedef maidsafe::nfs::MessageWrapper<
+    maidsafe::nfs::MessageAction::kGetResponse,
+    maidsafe::nfs::SourcePersona<maidsafe::nfs::Persona::kDataManager>,
+    maidsafe::routing::GroupSource,
+    maidsafe::nfs::DestinationPersona<maidsafe::nfs::Persona::kDataGetter>,
+    maidsafe::routing::SingleIdRelay,
+    maidsafe::nfs_client::DataNameAndContentOrReturnCode>
+        GetResponseFromDataManagerToDataGetterPartial;
 
 }  // namespace nfs
 
