@@ -52,7 +52,6 @@ TYPED_TEST(ServiceTest, BEH_All) {
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
   AsioService asio_service(2);
-  asio_service.Start();
   typedef typename TypeParam::GetResponse GetResponse;
   routing::Timer<typename GetResponse::Contents> get_timer(asio_service);
   routing::Timer<typename TypeParam::GetVersionsResponse::Contents> get_versions_timer(
