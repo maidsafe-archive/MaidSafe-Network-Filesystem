@@ -19,15 +19,17 @@
 #ifndef MAIDSAFE_NFS_MESSAGE_TYPES_PARTIAL_H_
 #define MAIDSAFE_NFS_MESSAGE_TYPES_PARTIAL_H_
 
-#include <string>
+//#include <string>
+
+//#include "boost/variant/variant.hpp"
 
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/routing/message.h"
 
 //#include "maidsafe/common/error.h"
 
-//#include "maidsafe/nfs/client/messages.h"
-//#include "maidsafe/nfs/vault/messages.h"
+#include "maidsafe/nfs/client/messages.h"
+#include "maidsafe/nfs/vault/messages.h"
 
 namespace maidsafe { namespace nfs_client { struct DataNameAndContentOrReturnCode; } }
 namespace maidsafe { namespace nfs_vault { struct DataName; } }
@@ -39,19 +41,24 @@ namespace nfs {
 typedef maidsafe::nfs::MessageWrapper<
     maidsafe::nfs::MessageAction::kGetRequest,
     maidsafe::nfs::SourcePersona<maidsafe::nfs::Persona::kDataGetter>,
-    maidsafe::routing::SingleSource,
+    maidsafe::routing::SingleRelaySource,
     maidsafe::nfs::DestinationPersona<maidsafe::nfs::Persona::kDataManager>,
     maidsafe::routing::GroupId,
     maidsafe::nfs_vault::DataName>
         GetRequestFromDataGetterPartialToDataManager;
 
-typedef maidsafe::nfs::MessageWrapper<
-    maidsafe::nfs::MessageAction::kGetResponse,
-    maidsafe::nfs::SourcePersona<maidsafe::nfs::Persona::kDataManager>,
-    maidsafe::routing::GroupSource,
-    maidsafe::nfs::DestinationPersona<maidsafe::nfs::Persona::kDataGetter>,
-    maidsafe::routing::SingleId,
-    maidsafe::nfs_client::DataNameAndContentOrReturnCode>
-        GetResponseFromDataManagerToDataGetterPartial;
+//typedef maidsafe::nfs::MessageWrapper<
+//    maidsafe::nfs::MessageAction::kGetResponse,
+//    maidsafe::nfs::SourcePersona<maidsafe::nfs::Persona::kDataManager>,
+//    maidsafe::routing::GroupSource,
+//    maidsafe::nfs::DestinationPersona<maidsafe::nfs::Persona::kDataGetter>,
+//    maidsafe::routing::SingleIdRelay,
+//    maidsafe::nfs_client::DataNameAndContentOrReturnCode>
+//        GetResponseFromDataManagerToDataGetterPartial;
+
+}  // namespace nfs
+
+}  // namespace maidsafe
+
 
 #endif  // MAIDSAFE_NFS_MESSAGE_TYPES_PARTIAL_H_
