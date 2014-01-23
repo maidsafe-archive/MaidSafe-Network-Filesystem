@@ -28,6 +28,8 @@
 #include "maidsafe/routing/api_config.h"
 
 #include "maidsafe/nfs/message_types.h"
+#include "maidsafe/nfs/message_types_partial.h"
+
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/nfs/types.h"
 
@@ -113,6 +115,14 @@ class Service {
   void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> matrix_change) {
     LOG(kVerbose) << "NFS service calling persona_service HandleChurnEvent";
     return impl_->HandleChurnEvent(matrix_change);
+  }
+
+  // Special case to handle relay messages from data getter to data manager
+  void HandleMessage(
+      const nfs::GetRequestFromDataGetterPartialToDataManager& message,
+      const typename nfs::GetRequestFromDataGetterPartialToDataManager::Sender& sender,
+      const typename nfs::GetRequestFromDataGetterPartialToDataManager::Receiver& receiver) {
+    impl_->HandleMessage(message, sender, receiver);
   }
 
  private:
