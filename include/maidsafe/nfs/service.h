@@ -125,6 +125,14 @@ class Service {
     impl_->HandleMessage(message, sender, receiver);
   }
 
+  // Special case to handle relay messages from node to data manager
+  void HandleMessage(
+      const nfs::GetRequestFromMaidNodePartialToDataManager& message,
+      const typename nfs::GetRequestFromMaidNodePartialToDataManager::Sender& sender,
+      const typename nfs::GetRequestFromMaidNodePartialToDataManager::Receiver& receiver) {
+    impl_->HandleMessage(message, sender, receiver);
+  }
+
  private:
   typedef std::true_type IsVoid;
   typedef std::false_type IsNotVoid;

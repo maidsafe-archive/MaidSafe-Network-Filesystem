@@ -56,6 +56,24 @@ typedef maidsafe::nfs::MessageWrapper<
     maidsafe::nfs_client::DataNameAndContentOrReturnCode>
         GetResponseFromDataManagerToDataGetterPartial;
 
+typedef maidsafe::nfs::MessageWrapper<
+    maidsafe::nfs::MessageAction::kGetRequest,
+    maidsafe::nfs::SourcePersona<maidsafe::nfs::Persona::kMaidNode>,
+    maidsafe::routing::SingleRelaySource,
+    maidsafe::nfs::DestinationPersona<maidsafe::nfs::Persona::kDataManager>,
+    maidsafe::routing::GroupId,
+    maidsafe::nfs_vault::DataName>
+        GetRequestFromMaidNodePartialToDataManager;
+
+typedef maidsafe::nfs::MessageWrapper<
+    maidsafe::nfs::MessageAction::kGetResponse,
+    maidsafe::nfs::SourcePersona<maidsafe::nfs::Persona::kDataManager>,
+    maidsafe::routing::GroupSource,
+    maidsafe::nfs::DestinationPersona<maidsafe::nfs::Persona::kMaidNode>,
+    maidsafe::routing::SingleIdRelay,
+    maidsafe::nfs_client::DataNameAndContentOrReturnCode>
+        GetResponseFromDataManagerToMaidNodePartial;
+
 }  // namespace nfs
 
 }  // namespace maidsafe
