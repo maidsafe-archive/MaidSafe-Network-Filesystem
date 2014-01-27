@@ -101,11 +101,6 @@ class DataGetter {
 #endif
 };
 
-template <>
-boost::future<passport::PublicPmid::Name::data_type> DataGetter::Get<passport::PublicPmid::Name>(
-    const typename passport::PublicPmid::Name& data_name,
-    const std::chrono::steady_clock::duration& timeout);
-
 // ==================== Implementation =============================================================
 template <typename DataName>
 boost::future<typename DataName::data_type> DataGetter::Get(
