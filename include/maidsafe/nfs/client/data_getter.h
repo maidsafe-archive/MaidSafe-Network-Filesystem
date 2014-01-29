@@ -49,9 +49,7 @@ class DataGetter {
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
 
   // all_pmids_from_file should only be non-empty if TESTING is defined
-  DataGetter(AsioService& asio_service, routing::Routing& routing,
-             std::vector<passport::PublicPmid> public_pmids_from_file =
-                 std::vector<passport::PublicPmid>());
+  DataGetter(AsioService& asio_service, routing::Routing& routing);
 
   template <typename DataName>
   boost::future<typename DataName::data_type> Get(
@@ -76,10 +74,6 @@ class DataGetter {
 
   nfs::Service<DataGetterService>& service() { return service_; }
 
-#ifdef TESTING
-  void AddPublicPmid(passport::PublicPmid public_pmid);
-#endif
-
  private:
   typedef std::function<void(const DataNameAndContentOrReturnCode&)> GetFunctor;
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetVersionsFunctor;
@@ -95,10 +89,6 @@ class DataGetter {
   routing::Timer<DataGetterService::GetBranchResponse::Contents> get_branch_timer_;
   DataGetterDispatcher dispatcher_;
   nfs::Service<DataGetterService> service_;
-#ifdef TESTING
-  std::mutex pmids_mutex_;
-  std::vector<passport::PublicPmid> all_pmids_;
-#endif
 };
 
 // ==================== Implementation =============================================================
