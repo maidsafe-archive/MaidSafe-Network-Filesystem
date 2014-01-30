@@ -38,29 +38,6 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing)
                }()){
 }
 
-template <>
-boost::future<passport::PublicPmid> DataGetter::Get(
-    const typename passport::PublicPmid::Name& data_name,
-    const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "DataGetter Get PublicPmid " << HexSubstr(data_name.value)
-                << " from network";
-  typedef DataGetterService::GetResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<passport::PublicPmid>>());
-  HandleGetResult<passport::PublicPmid> response_functor(promise);
-  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_timer_.NewTaskId());
-  get_timer_.AddTask(timeout,
-                      [op_data, data_name](ResponseContents get_response) {
-                        LOG(kVerbose) << "DataGetter Get HandleResponseContents for PublicPmid "
-                                      << HexSubstr(data_name.value);
-                        op_data->HandleResponseContents(std::move(get_response));
-                      },
-                      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                      routing::Parameters::node_group_size * 2, task_id);
-  dispatcher_.SendGetRequest(task_id, data_name);
-  return promise->get_future();
-}
-
 }  // namespace nfs_client
 
 }  // namespace maidsafe
