@@ -18,9 +18,20 @@
 
 #include "maidsafe/nfs/client/maid_node_service.h"
 
+#include "maidsafe/common/error.h"
+
 namespace maidsafe {
 
 namespace nfs_client {
+
+namespace {
+
+std::error_code InvalidParameter() {
+  static std::error_code code(make_error_code(CommonErrors::invalid_parameter));
+  return code;
+}
+
+}  // unnamed namespace
 
 MaidNodeService::MaidNodeService(
     routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
@@ -48,8 +59,8 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
     get_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
-      throw error;
+    if (error.code() != InvalidParameter())
+      throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
@@ -67,8 +78,8 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
     get_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
-      throw error;
+    if (error.code() != InvalidParameter())
+      throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
@@ -91,8 +102,8 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
     get_versions_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
-      throw error;
+    if (error.code() != InvalidParameter())
+      throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
@@ -114,8 +125,8 @@ void MaidNodeService::HandleMessage(const GetBranchResponse& message,
     get_branch_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
-      throw error;
+    if (error.code() != InvalidParameter())
+      throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
@@ -129,8 +140,8 @@ void MaidNodeService::HandleMessage(const PmidHealthResponse& message,
     pmid_health_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
-      throw error;
+    if (error.code() != InvalidParameter())
+      throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
@@ -144,8 +155,8 @@ void MaidNodeService::HandleMessage(const CreateAccountResponse& message,
     create_account_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
-      throw error;
+    if (error.code() != InvalidParameter())
+      throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }

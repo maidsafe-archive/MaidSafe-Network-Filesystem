@@ -68,7 +68,7 @@ void PublicPmidHelper::Poll() {
     }
     LOG(kVerbose) << " polling on (" << futures.size() << ") futures";
     auto ready_future_itr = boost::wait_for_any(futures.begin(), futures.end());
-    int index = ready_future_itr - futures.begin();
+    auto index = ready_future_itr - futures.begin();
     try {
       auto public_pmid = ready_future_itr->get();
       functors.at(index)(public_pmid.public_key());

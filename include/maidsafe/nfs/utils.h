@@ -24,6 +24,7 @@
 #include <memory>
 #include <mutex>
 #include <utility>
+#include <string>
 #include <system_error>
 #include <vector>
 
@@ -64,7 +65,7 @@ void DoGetPublicKey(T& persona, const NodeId& node_id,
   public_pmid_helper.AddEntry(std::move(future_key), give_key);
 }
 
-} // namespace detail
+}  // namespace detail
 
 template <typename A, typename B>
 bool CheckMutuallyExclusive(const A& a, const B& b) {
