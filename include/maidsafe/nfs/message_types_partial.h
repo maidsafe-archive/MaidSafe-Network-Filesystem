@@ -19,14 +19,14 @@
 #ifndef MAIDSAFE_NFS_MESSAGE_TYPES_PARTIAL_H_
 #define MAIDSAFE_NFS_MESSAGE_TYPES_PARTIAL_H_
 
-//#include <string>
+// #include <string>
 
-//#include "boost/variant/variant.hpp"
+// #include "boost/variant/variant.hpp"
 
 #include "maidsafe/nfs/message_wrapper.h"
 #include "maidsafe/routing/message.h"
 
-//#include "maidsafe/common/error.h"
+// #include "maidsafe/common/error.h"
 
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"

@@ -40,7 +40,15 @@ void DataGetterService::HandleMessage(const GetResponse& message,
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   static_cast<void>(routing_);
-  get_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void DataGetterService::HandleMessage(const GetCachedResponse& message,
@@ -52,7 +60,15 @@ void DataGetterService::HandleMessage(const GetCachedResponse& message,
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   static_cast<void>(routing_);
-  get_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void DataGetterService::HandleMessage(const GetVersionsResponse& message,
@@ -60,7 +76,15 @@ void DataGetterService::HandleMessage(const GetVersionsResponse& message,
                                       const GetVersionsResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_versions_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_versions_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void DataGetterService::HandleMessage(const GetBranchResponse& message,
@@ -68,7 +92,15 @@ void DataGetterService::HandleMessage(const GetBranchResponse& message,
                                       const GetBranchResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_branch_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_branch_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 }  // namespace nfs_client

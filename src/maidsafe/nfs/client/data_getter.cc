@@ -35,7 +35,7 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing)
                  new DataGetterService(routing, get_timer_, get_versions_timer_,
                                        get_branch_timer_));
                  return std::move(service);
-               }()){
+               }()) {
 }
 
 }  // namespace nfs_client
