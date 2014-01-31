@@ -41,7 +41,7 @@ void PublicPmidHelper::AddEntry(boost::future<passport::PublicPmid>&& future,
 
 void PublicPmidHelper::Run() {
   if (!running_) {
-      std::cout << std::endl << "starting thread !" << std::endl;
+      LOG(kVerbose) << "starting thread !";
     running_ = true;
     worker_future_ = std::async(std::launch::async, [this]() { this->Poll(); });
   }
@@ -66,7 +66,7 @@ void PublicPmidHelper::Poll() {
         break;
       }
     }
-    std::cout << std::endl << " polling on (" << futures.size() << ") futures" << std::endl;
+    LOG(kVerbose) << " polling on (" << futures.size() << ") futures";
     auto ready_future_itr = boost::wait_for_any(futures.begin(), futures.end());
     int index = ready_future_itr - futures.begin();
     try {
