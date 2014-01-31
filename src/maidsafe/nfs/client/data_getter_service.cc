@@ -47,7 +47,7 @@ void DataGetterService::HandleMessage(const GetResponse& message,
     if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
       throw error;
     else
-      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
 }
 
@@ -67,7 +67,7 @@ void DataGetterService::HandleMessage(const GetCachedResponse& message,
     if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
       throw error;
     else
-      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
 }
 
@@ -83,7 +83,7 @@ void DataGetterService::HandleMessage(const GetVersionsResponse& message,
     if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
       throw error;
     else
-      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
 }
 
@@ -99,7 +99,7 @@ void DataGetterService::HandleMessage(const GetBranchResponse& message,
     if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
       throw error;
     else
-      LOG(kVerbose) << "Timer does not expect:" << message.id.data;
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
   }
 }
 

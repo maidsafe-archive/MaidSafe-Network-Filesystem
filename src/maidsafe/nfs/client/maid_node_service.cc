@@ -44,7 +44,15 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
 //   get_timer_.PrintTaskIds();
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void MaidNodeService::HandleMessage(const GetCachedResponse& message,
@@ -55,7 +63,15 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
                 << HexSubstr(message.contents->Serialise());
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
@@ -71,7 +87,15 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
                                     const GetVersionsResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_versions_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_versions_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void MaidNodeService::HandleMessage(const PutVersionResponse& /*message*/,
@@ -86,21 +110,45 @@ void MaidNodeService::HandleMessage(const GetBranchResponse& message,
                                     const GetBranchResponse::Receiver& receiver) {
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
-  get_branch_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    get_branch_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void MaidNodeService::HandleMessage(const PmidHealthResponse& message,
                                     const PmidHealthResponse::Sender& /*sender*/,
                                     const PmidHealthResponse::Receiver& /*receiver*/) {
   LOG(kInfo) << "Get response for PmidHealth";
-  pmid_health_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    pmid_health_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void MaidNodeService::HandleMessage(const CreateAccountResponse& message,
                                     const CreateAccountResponse::Sender& /*sender*/,
                                     const CreateAccountResponse::Receiver& /*receiver*/) {
   LOG(kInfo) << "Get response for CreateAccount";
-  create_account_timer_.AddResponse(message.id.data, *message.contents);
+  try {
+    create_account_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code().value() != static_cast<int>(CommonErrors::invalid_parameter))
+      throw error;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 }  // namespace nfs_client

@@ -21,7 +21,7 @@
 #include <functional>
 #include <memory>
 
-#include <boost/thread/future.hpp>
+#include "boost/thread/future.hpp"
 
 #include "maidsafe/common/test.h"
 
@@ -44,12 +44,12 @@ passport::Pmid MakePmid() {
   return passport::Pmid(MakeMaid());
 }
 
-}  // namespace anonymous
+}  // namespace
 
 void RunFutureTestInParallel(int thread_count, std::function<void()> functor) {
   std::vector<std::thread> threads;
   for (int i = 0; i < thread_count; ++i)
-    threads.push_back(std::move(std::thread([functor]() { functor(); } )));
+    threads.push_back(std::move(std::thread([functor]() { functor(); })));
   for (auto& thread : threads)
     thread.join();
 }
@@ -79,7 +79,7 @@ TEST(PublicPmidHelperTest, BEH_FutureWaitForAny) {
   std::this_thread::sleep_for(std::chrono::seconds(1));
   RunFutureTestInParallel(2, test);
 
-  // TODO Extend test and fix exception handling mechanism
+  // TODO(Prakash): Extend test and fix exception handling mechanism
 }
 
 }  // namespace test

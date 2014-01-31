@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include <boost/thread/future.hpp>
+#include "boost/thread/future.hpp"
 
 #include "maidsafe/passport/types.h"
 #include "maidsafe/routing/api_config.h"
