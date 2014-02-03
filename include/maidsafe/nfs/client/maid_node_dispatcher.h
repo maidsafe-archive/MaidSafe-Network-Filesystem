@@ -176,10 +176,7 @@ void MaidNodeDispatcher::SendPutVersionRequest(
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
-  NfsMessage::Contents contents;
-  contents.data_name = DataName(data_name);
-  contents.old_version_name = old_version_name;
-  contents.new_version_name = new_version_name;
+  NfsMessage::Contents contents(data_name, old_version_name, new_version_name);
   NfsMessage nfs_message(contents);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
