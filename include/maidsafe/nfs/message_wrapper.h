@@ -24,6 +24,8 @@
 #include <tuple>
 #include <utility>
 
+#include "boost/exception/error_info.hpp"
+
 #include "maidsafe/common/utils.h"
 #include "maidsafe/common/tagged_value.h"
 
@@ -53,6 +55,8 @@ struct MessageWrapper {
   typedef DestinationPersonaType DestinationPersona;
   typedef RoutingReceiverType Receiver;
   typedef ContentsType Contents;
+  struct Tag;
+  typedef boost::error_info<Tag, MessageWrapper> ErrorInfo;
 
   MessageWrapper();
 
@@ -71,10 +75,20 @@ struct MessageWrapper {
 
   std::string Serialise() const;
 
+  ErrorInfo error_info() const;
+
   friend void swap(MessageWrapper& lhs, MessageWrapper& rhs) {
     using std::swap;
     swap(lhs.id, rhs.id);
     swap(lhs.contents, rhs.contents);
+  }
+
+  template <typename Elem, typename Traits>
+  friend std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& ostream,
+                                                      const MessageWrapper& msg) {
+    ostream << action << " from " << SourcePersona::value << " to " << DestinationPersona::value
+            << " with ID " << std::to_string(msg.id);
+    return ostream;
   }
 
   MessageId id;
@@ -186,6 +200,15 @@ std::string MessageWrapper<action, SourcePersonaType, RoutingSenderType, Destina
                            RoutingReceiverType, ContentsType>::Serialise() const {
   return detail::SerialiseMessageWrapper(std::make_tuple(
       action, kSourceTaggedValue, kDestinationTaggedValue, id, contents->Serialise()));
+}
+
+template <MessageAction action, typename SourcePersonaType, typename RoutingSenderType,
+          typename DestinationPersonaType, typename RoutingReceiverType, typename ContentsType>
+typename MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+                        RoutingReceiverType, ContentsType>::ErrorInfo
+    MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
+                   RoutingReceiverType, ContentsType>::error_info() const {
+  return ErrorInfo(*this);
 }
 
 }  // namespace nfs
