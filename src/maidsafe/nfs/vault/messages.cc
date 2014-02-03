@@ -51,7 +51,7 @@ AvailableSize::AvailableSize(const std::string& serialised_copy)
     : available_size([&serialised_copy]() {
                        protobuf::AvailableSize proto_size;
                        if (!proto_size.ParseFromString(serialised_copy))
-                         ThrowError(CommonErrors::parsing_error);
+                         BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
                        return proto_size.size();
                      }()) {}
 
@@ -90,7 +90,7 @@ DataName::DataName(const std::string& serialised_copy)
     : type(DataTagValue::kAnmidValue), raw_name() {
   protobuf::DataName proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   type = static_cast<DataTagValue>(proto_copy.type());
   raw_name = Identity(proto_copy.raw_name());
 }
@@ -139,7 +139,7 @@ DataNameAndVersion::DataNameAndVersion(const std::string& serialised_copy)
     : data_name(), version_name() {
   protobuf::DataNameAndVersion proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name = DataName(proto_copy.serialised_data_name());
   version_name = StructuredDataVersions::VersionName(proto_copy.serialised_version_name());
 }
@@ -191,7 +191,7 @@ DataNameOldNewVersion::DataNameOldNewVersion(const std::string& serialised_copy)
     : data_name(), old_version_name(), new_version_name() {
   protobuf::DataNameOldNewVersion proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name = DataName(proto_copy.serialised_data_name());
   old_version_name = StructuredDataVersions::VersionName(proto_copy.serialised_old_version_name());
   new_version_name = StructuredDataVersions::VersionName(proto_copy.serialised_new_version_name());
@@ -239,7 +239,7 @@ DataNameAndContent& DataNameAndContent::operator=(DataNameAndContent other) {
 DataNameAndContent::DataNameAndContent(const std::string& serialised_copy) : name(), content() {
   protobuf::DataNameAndContent proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   name = DataName(proto_copy.serialised_name());
   content = NonEmptyString(proto_copy.content());
 }
@@ -316,7 +316,7 @@ DataNameAndRandomString::DataNameAndRandomString(const std::string& serialised_c
     : name(), random_string() {
   protobuf::DataNameAndRandomString proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   name = DataName(proto_copy.serialised_name());
   random_string = NonEmptyString(proto_copy.random_string());
 }
@@ -359,7 +359,7 @@ DataNameAndCost& DataNameAndCost::operator=(DataNameAndCost other) {
 DataNameAndCost::DataNameAndCost(const std::string& serialised_copy) : name(), cost(0) {
   protobuf::DataNameAndCost proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   name = DataName(proto_copy.serialised_name());
   cost = proto_copy.cost();
 }
@@ -402,7 +402,7 @@ DataNameAndSize& DataNameAndSize::operator=(DataNameAndSize other) {
 DataNameAndSize::DataNameAndSize(const std::string& serialised_copy) : name(), size(0) {
   protobuf::DataNameAndSize proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   name = DataName(proto_copy.serialised_name());
   size = proto_copy.size();
 }
@@ -446,7 +446,7 @@ DataAndPmidHint& DataAndPmidHint::operator=(DataAndPmidHint other) {
 DataAndPmidHint::DataAndPmidHint(const std::string& serialised_copy) : data(), pmid_hint() {
   protobuf::DataAndPmidHint proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data = DataNameAndContent(proto_copy.serialised_data_name_and_content());
   pmid_hint = Identity(proto_copy.pmid_hint());
 }
@@ -503,7 +503,7 @@ DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
     const std::string& serialised_copy) {
   protobuf::DataNameAndContentOrCheckResult proto;
   if (!proto.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   name = DataName(proto.serialised_name());
   if (proto.has_content())
@@ -513,7 +513,7 @@ DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
 
   if (!nfs::CheckMutuallyExclusive(content, check_result)) {
     assert(false);
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
 }
 
@@ -527,7 +527,7 @@ std::string DataNameAndContentOrCheckResult::Serialise() const {
 
   if (!nfs::CheckMutuallyExclusive(content, check_result)) {
     assert(false);
-    ThrowError(CommonErrors::serialisation_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::serialisation_error));
   }
 
   return proto.SerializeAsString();

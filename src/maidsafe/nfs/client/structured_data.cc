@@ -45,7 +45,7 @@ StructuredData& StructuredData::operator=(StructuredData other) {
 StructuredData::StructuredData(const std::string& serialised_copy) : versions() {
   protobuf::StructuredData proto_structured_data;
   if (!proto_structured_data.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   for (auto i(0); i < proto_structured_data.serialised_versions_size(); ++i)
     versions.emplace_back(proto_structured_data.serialised_versions(i));
 }

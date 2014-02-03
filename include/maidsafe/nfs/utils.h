@@ -152,7 +152,7 @@ OpData<MessageContents>::OpData(int successes_required,
       callback_executed_(!callback) {
   if (!callback || successes_required <= 0) {
     LOG(kError) << "invalid parameters for OpData constructor";
-    ThrowError(CommonErrors::invalid_parameter);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
   }
 }
 

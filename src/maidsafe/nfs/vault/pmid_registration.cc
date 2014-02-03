@@ -70,7 +70,7 @@ PmidRegistration::PmidRegistration(const std::string& serialised_copy)
     : maid_name_(), pmid_name_(), unregister_(), maid_signature_(), pmid_signature_() {
   auto fail([]() {
     LOG(kError) << "Failed to parse pmid_registration.";
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   });
   protobuf::PmidRegistration proto_pmid_registration;
   if (!proto_pmid_registration.ParseFromString(serialised_copy))

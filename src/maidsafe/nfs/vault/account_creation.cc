@@ -42,7 +42,7 @@ AccountCreation::AccountCreation(const std::string& serialised_copy)
   protobuf::AccountCreation proto_account_creation;
   if (!proto_account_creation.ParseFromString(serialised_copy)) {
     LOG(kError) << "Failed to parse account_creation.";
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
 
   public_maid_ptr.reset(new passport::PublicMaid(

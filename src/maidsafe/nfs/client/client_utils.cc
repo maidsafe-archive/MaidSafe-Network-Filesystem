@@ -36,7 +36,7 @@ void HandleGetVersionsOrBranchResult(
     } else {
       LOG(kInfo) << "nfs_client::HandleGetVersionsOrBranchResult"
                  << " uninitialised during get version or branch";
-      ThrowError(CommonErrors::uninitialised);
+      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::uninitialised));
     }
   }
   catch (...) {

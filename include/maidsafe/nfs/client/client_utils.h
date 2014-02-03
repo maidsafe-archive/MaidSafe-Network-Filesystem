@@ -59,7 +59,7 @@ void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& res
     if (result.content) {
       if (result.name.type != Data::Tag::kValue) {
         LOG(kError) << "HandleGetResult incorrect returned data";
-        ThrowError(CommonErrors::invalid_parameter);
+        BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
       }
       LOG(kInfo) << "HandleGetResult fetched chunk has name : "
                  << HexSubstr(result.name.raw_name) << " and content : "
@@ -73,7 +73,7 @@ void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& res
       boost::throw_exception(result.return_code->value);
     } else {
       LOG(kError) << "HandleGetResult result uninitialised";
-      ThrowError(CommonErrors::uninitialised);
+      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::uninitialised));
     }
   }
   catch (...) {

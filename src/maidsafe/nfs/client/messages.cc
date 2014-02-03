@@ -47,8 +47,7 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
   if (error_category_name == std::string(GetClientCategory().name()))
     return MakeError(static_cast<ClientErrors>(error_value));
 
-  ThrowError(CommonErrors::parsing_error);
-  return MakeError(CommonErrors::parsing_error);
+  BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 }
 
 }  // unnamed namespace
@@ -70,7 +69,7 @@ ReturnCode::ReturnCode(const std::string& serialised_copy)
         protobuf::ReturnCode proto_copy;
         if (!proto_copy.ParseFromString(serialised_copy)) {
           LOG(kError) << "ReturnCode parsing error";
-          ThrowError(CommonErrors::parsing_error);
+          BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
         }
         return GetError(proto_copy.error_value(), proto_copy.error_category_name());
       }()) {}
@@ -115,7 +114,7 @@ AvailableSizeAndReturnCode::AvailableSizeAndReturnCode(const std::string& serial
   protobuf::AvailableSizeAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy)) {
     LOG(kError) << "can't parse AvailableSizeAndReturnCode from incoming string";
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
   available_size = nfs_vault::AvailableSize(proto_copy.serialised_available_size());
   return_code = ReturnCode(proto_copy.serialised_return_code());
@@ -159,7 +158,7 @@ DataNameAndReturnCode::DataNameAndReturnCode(const std::string& serialised_copy)
     : name(), return_code() {
   protobuf::DataNameAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   name = nfs_vault::DataName(proto_copy.serialised_name());
   return_code = ReturnCode(proto_copy.serialised_return_code());
 }
@@ -214,7 +213,7 @@ DataNamesAndReturnCode::DataNamesAndReturnCode(const std::string& serialised_cop
       return_code() {
   protobuf::DataNamesAndReturnCode names_proto;
   if (!names_proto.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   for (auto index(0); index < names_proto.serialised_name_size(); ++index)
     names.insert(nfs_vault::DataName(std::string(names_proto.serialised_name(index))));
   return_code = nfs_client::ReturnCode(names_proto.serialised_return_code());
@@ -262,7 +261,7 @@ DataNameVersionAndReturnCode::DataNameVersionAndReturnCode(const std::string& se
     : data_name_and_version(), return_code() {
   protobuf::DataNameVersionAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name_and_version =
       nfs_vault::DataNameAndVersion(proto_copy.serialised_data_name_and_version());
   return_code = ReturnCode(proto_copy.serialised_return_code());
@@ -310,7 +309,7 @@ DataNameOldNewVersionAndReturnCode::DataNameOldNewVersionAndReturnCode(
     : data_name_old_new_version(), return_code() {
   protobuf::DataNameOldNewVersionAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name_old_new_version =
       nfs_vault::DataNameOldNewVersion(proto_copy.serialised_data_name_old_new_version());
   return_code = ReturnCode(proto_copy.serialised_return_code());
@@ -353,7 +352,7 @@ DataAndReturnCode& DataAndReturnCode::operator=(DataAndReturnCode other) {
 DataAndReturnCode::DataAndReturnCode(const std::string& serialised_copy) : data(), return_code() {
   protobuf::DataAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data = nfs_vault::DataNameAndContent(proto_copy.serialised_data_name_and_content());
   return_code = ReturnCode(proto_copy.serialised_return_code());
 }
@@ -403,7 +402,7 @@ DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(const std::string
     : name(), content(), return_code() {
   protobuf::DataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   name = nfs_vault::DataName(proto_copy.serialised_name());
 
@@ -414,14 +413,14 @@ DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(const std::string
   }
   if (!nfs::CheckMutuallyExclusive(content, return_code)) {
     assert(false);
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
 }
 
 std::string DataNameAndContentOrReturnCode::Serialise() const {
   if (!nfs::CheckMutuallyExclusive(content, return_code)) {
     assert(false);
-    ThrowError(CommonErrors::serialisation_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::serialisation_error));
   }
   protobuf::DataNameAndContentOrReturnCode proto_copy;
 
@@ -478,7 +477,7 @@ StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCo
     : structured_data(), data_name_and_return_code() {
   protobuf::StructuredDataNameAndContentOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   if (proto_copy.has_serialised_structured_data())
     structured_data.reset(StructuredData(proto_copy.serialised_structured_data()));
@@ -488,14 +487,14 @@ StructuredDataNameAndContentOrReturnCode::StructuredDataNameAndContentOrReturnCo
   }
   if (!nfs::CheckMutuallyExclusive(structured_data, data_name_and_return_code)) {
     assert(false);
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
 }
 
 std::string StructuredDataNameAndContentOrReturnCode::Serialise() const {
   if (!nfs::CheckMutuallyExclusive(structured_data, data_name_and_return_code)) {
     assert(false);
-    ThrowError(CommonErrors::serialisation_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::serialisation_error));
   }
   protobuf::StructuredDataNameAndContentOrReturnCode proto_copy;
 
@@ -546,7 +545,7 @@ DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
     const std::string& serialised_copy) {
   protobuf::DataNameAndTipOfTreeOrReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   data_name = nfs_vault::DataName(proto_copy.serialised_name());
   if (proto_copy.has_serialised_tip_of_tree()) {
@@ -560,14 +559,14 @@ DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
 
   if (!nfs::CheckMutuallyExclusive(tip_of_tree, return_code)) {
     assert(false);
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
 }
 
 std::string DataNameAndTipOfTreeOrReturnCode::Serialise() const {
   if (!nfs::CheckMutuallyExclusive(tip_of_tree, return_code)) {
     assert(false);
-    ThrowError(CommonErrors::serialisation_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::serialisation_error));
   }
   protobuf::DataNameAndTipOfTreeOrReturnCode proto_copy;
 
@@ -624,7 +623,7 @@ DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(const std::string& serialis
     : data_and_pmid_hint(), return_code() {
   protobuf::DataPmidHintAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_and_pmid_hint = nfs_vault::DataAndPmidHint(proto_copy.serialised_data_and_pmid_hint());
   return_code = ReturnCode(proto_copy.serialised_return_code());
 }
@@ -672,7 +671,7 @@ PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(const std::string& 
     : pmid_registration(), return_code() {
   protobuf::PmidRegistrationAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   pmid_registration = nfs_vault::PmidRegistration(proto_copy.serialised_pmid_registration());
   return_code = ReturnCode(proto_copy.serialised_return_code());
 }
@@ -720,7 +719,7 @@ DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(DataNameAndSpaceAnd
 DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(const std::string& serialised_copy) {
   protobuf::DataNameAndSpaceAndReturnCode proto;
   if (!proto.ParseFromString(serialised_copy))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   name = nfs_vault::DataName(proto.serialised_name());
   available_space = proto.space();
@@ -769,7 +768,7 @@ PmidHealthAndReturnCode::PmidHealthAndReturnCode(const std::string& serialised_c
   protobuf::PmidHealthAndReturnCode pmid_health_proto;
   if (!pmid_health_proto.ParseFromString(serialised_copy)) {
     LOG(kError) << "PmidHealthAndReturnCode can't parse from string " << HexSubstr(serialised_copy);
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
   pmid_health = nfs_vault::PmidHealth(pmid_health_proto.serialised_pmid_health());
   return_code = ReturnCode(pmid_health_proto.serialised_return_code());

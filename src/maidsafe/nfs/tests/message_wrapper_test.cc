@@ -23,7 +23,6 @@
 #include "boost/variant/static_visitor.hpp"
 #include "boost/variant/variant.hpp"
 
-#include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
@@ -84,8 +83,7 @@ class MaidManagerServiceImpl {
 
   template <typename T>
   std::string Handle(const T& /*message*/) {
-    ThrowError(CommonErrors::invalid_parameter);
-    return "";
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
   }
 };
 
@@ -107,8 +105,7 @@ class DataManagerServiceImpl {
 
   template <typename T>
   std::string Handle(const T& /*message*/) {
-    ThrowError(CommonErrors::invalid_parameter);
-    return "";
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
   }
 };
 
@@ -161,16 +158,6 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 
   EXPECT_EQ(data3.name()->string(), maid_manager_service.HandleMessage(tuple_del));
   EXPECT_THROW(data_manager_service.HandleMessage(tuple_del), maidsafe_error);
-
-  try {
-    BOOST_THROW_EXCEPTION(boost::enable_error_info(MakeError(EncryptErrors::bad_sequence))
-                          << get.error_info());
-  }
-  catch (const boost::exception& e) {
-    LOG(kSuccess) << boost::diagnostic_information(e);
-    if (auto info = boost::get_error_info<GetRequest::ErrorInfo>(e))
-      LOG(kWarning) << *info;
-  }
 }
 
 /*

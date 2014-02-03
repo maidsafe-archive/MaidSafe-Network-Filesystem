@@ -58,7 +58,7 @@ std::string SerialiseMessageWrapper(const TypeErasedMessageWrapper& message_tupl
 TypeErasedMessageWrapper ParseMessageWrapper(const std::string& serialised_message_wrapper) {
   protobuf::MessageWrapper proto_message_wrapper;
   if (!proto_message_wrapper.ParseFromString(serialised_message_wrapper))
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   return std::make_tuple(
       static_cast<MessageAction>(proto_message_wrapper.action()),

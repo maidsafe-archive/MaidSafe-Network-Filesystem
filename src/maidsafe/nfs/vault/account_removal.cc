@@ -42,7 +42,7 @@ AccountRemoval::AccountRemoval(const std::string& serialised_copy)
   protobuf::AccountRemoval proto_account_removal;
   if (!proto_account_removal.ParseFromString(serialised_copy)) {
     LOG(kError) << "Failed to parse account_removal.";
-    ThrowError(CommonErrors::parsing_error);
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   }
 
   random_data_ = NonEmptyString(proto_account_removal.random_data());
