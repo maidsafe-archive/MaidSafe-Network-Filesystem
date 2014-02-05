@@ -193,14 +193,17 @@ DataNameOldNewVersion::DataNameOldNewVersion(const std::string& serialised_copy)
   if (!proto_copy.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name = DataName(proto_copy.serialised_data_name());
-  old_version_name = StructuredDataVersions::VersionName(proto_copy.serialised_old_version_name());
+  if (proto_copy.has_serialised_old_version_name())
+    old_version_name = StructuredDataVersions::VersionName(
+                           proto_copy.serialised_old_version_name());
   new_version_name = StructuredDataVersions::VersionName(proto_copy.serialised_new_version_name());
 }
 
 std::string DataNameOldNewVersion::Serialise() const {
   protobuf::DataNameOldNewVersion proto_copy;
   proto_copy.set_serialised_data_name(data_name.Serialise());
-  proto_copy.set_serialised_old_version_name(old_version_name.Serialise());
+  if (old_version_name.id->IsInitialised())
+    proto_copy.set_serialised_old_version_name(old_version_name.Serialise());
   proto_copy.set_serialised_new_version_name(new_version_name.Serialise());
   return proto_copy.SerializeAsString();
 }
