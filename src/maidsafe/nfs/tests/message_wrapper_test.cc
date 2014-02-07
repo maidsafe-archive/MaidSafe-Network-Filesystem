@@ -84,7 +84,6 @@ class MaidManagerServiceImpl {
   template <typename T>
   std::string Handle(const T& /*message*/) {
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
-    return std::string();
   }
 };
 
@@ -107,7 +106,6 @@ class DataManagerServiceImpl {
   template <typename T>
   std::string Handle(const T& /*message*/) {
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
-    return std::string();
   }
 };
 

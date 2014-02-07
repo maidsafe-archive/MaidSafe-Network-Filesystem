@@ -189,7 +189,7 @@ void MaidNodeDispatcher::SendDeleteBranchUntilForkRequest(
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
   NfsMessage::Contents contents;
-  contents.data_name = DataName(data_name);
+  contents.data_name = nfs_vault::DataName(data_name);
   contents.version_name = branch_tip;
   NfsMessage nfs_message(contents);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
