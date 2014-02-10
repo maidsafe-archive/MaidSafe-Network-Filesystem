@@ -72,7 +72,9 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (IntegrityCheckResponse)
     (PutToCache)
     (GetFromCache)
-    (CreatePmidAccountRequest))
+    (CreatePmidAccountRequest)
+    (IncrementReferenceCounts)
+    (DecrementReferenceCounts))
 
 // Defines:
 //     enum class Persona : int32_t { kMaidNode, kMpidNode, ... };

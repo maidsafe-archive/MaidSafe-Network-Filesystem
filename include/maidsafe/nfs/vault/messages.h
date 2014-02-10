@@ -89,6 +89,31 @@ bool operator==(const DataName& lhs, const DataName& rhs);
 bool operator<(const DataName& lhs, const DataName& rhs);
 void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT;
 
+// ==================================== DataNames ==================================================
+
+struct DataNames {
+  template <typename DataNameType>
+  explicit DataNames(const std::vector<DataNameType>& data_names)
+      : data_names_() {
+    for (const auto& data_name : data_names)
+      data_names_.push_back(DataName(data_name));
+  }
+
+  explicit DataNames(const std::vector<DataName>& data_names);
+  DataNames();
+  DataNames(const DataNames& other);
+  DataNames(DataNames&& other);
+  DataNames& operator=(DataNames other);
+
+  explicit DataNames(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  std::vector<DataName> data_names_;
+};
+
+bool operator==(const DataNames& lhs, const DataNames& rhs);
+void swap(DataNames& lhs, DataNames& rhs) MAIDSAFE_NOEXCEPT;
+
 // ========================== DataNameAndVersion ===================================================
 
 struct DataNameAndVersion {

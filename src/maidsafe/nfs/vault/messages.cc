@@ -116,6 +116,61 @@ void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.raw_name, rhs.raw_name);
 }
 
+// ==================== DataNames ===================================================================
+DataNames::DataNames(const std::vector<DataName>& data_names)
+    : data_names_(data_names) {}
+
+DataNames::DataNames() : data_names_() {}
+
+DataNames::DataNames(const DataNames& other) : data_names_(other.data_names_) {}
+
+DataNames::DataNames(DataNames&& other)
+    : data_names_(std::move(other.data_names_)) {}
+
+DataNames& DataNames::operator=(DataNames other) {
+  swap(*this, other);
+  return *this;
+}
+
+DataNames::DataNames(const std::string& serialised_copy)
+    : data_names_() {
+  protobuf::DataNames proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+  for (int index(0); index < proto_copy.data_names_size(); ++index) {
+    data_names_.push_back(DataName(static_cast<DataTagValue>(proto_copy.data_names(index).type()),
+                                   Identity(proto_copy.data_names(index).raw_name())));
+  }
+}
+
+std::string DataNames::Serialise() const {
+  protobuf::DataNames proto_data_names;
+  for (const auto& data_name : data_names_) {
+    protobuf::DataName proto_data_name;
+    proto_data_name.set_type(static_cast<uint32_t>(data_name.type));
+    proto_data_name.set_raw_name(data_name.raw_name.string());
+    auto value(proto_data_names.add_data_names());
+    *value = proto_data_name;
+  }
+  return proto_data_names.SerializeAsString();
+}
+
+bool operator==(const DataNames& lhs, const DataNames& rhs) {
+  if (lhs.data_names_.size() != rhs.data_names_.size())
+    return false;
+  for (const auto& data_name : lhs.data_names_) {
+    if (std::find(std::begin(rhs.data_names_), std::end(rhs.data_names_), data_name) ==
+            std::end(rhs.data_names_))
+      return false;
+  }
+  return true;
+}
+
+void swap(DataNames& lhs, DataNames& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.data_names_, rhs.data_names_);
+}
+
 // ==================== DataNameAndVersion =========================================================
 
 DataNameAndVersion::DataNameAndVersion() : data_name(), version_name() {}
