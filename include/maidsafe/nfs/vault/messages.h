@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "maidsafe/common/config.h"
 #include "maidsafe/common/crypto.h"

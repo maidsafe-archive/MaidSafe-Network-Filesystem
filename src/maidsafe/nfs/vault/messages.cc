@@ -116,7 +116,7 @@ void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.raw_name, rhs.raw_name);
 }
 
-// ==================== DataNames ===================================================================
+// ==================== DataNames ==================================
 DataNames::DataNames(const std::vector<DataName>& data_names)
     : data_names_(data_names) {}
 
