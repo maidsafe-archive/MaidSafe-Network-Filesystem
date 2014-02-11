@@ -65,14 +65,14 @@ boost::future<void> MaidNodeNfs::CreateAccount(
       HandleCreateAccountResult(result, promise);
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
-      routing::Parameters::node_group_size - 1, response_functor));
+      routing::Parameters::group_size - 1, response_functor));
   auto task_id(create_account_timer_.NewTaskId());
   create_account_timer_.AddTask(
       timeout, [op_data](ResponseContents create_account_response) {
                  op_data->HandleResponseContents(std::move(create_account_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2, task_id);
+      routing::Parameters::group_size * 2, task_id);
   dispatcher_.SendCreateAccountRequest(task_id, account_creation);
   return promise->get_future();
 }
@@ -98,14 +98,14 @@ MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(
       HandlePmidHealthResult(result, promise);
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
-      routing::Parameters::node_group_size - 1, response_functor));
+      routing::Parameters::group_size - 1, response_functor));
   auto task_id(pmid_health_timer_.NewTaskId());
   pmid_health_timer_.AddTask(
       timeout, [op_data](ResponseContents pmid_health_response) {
                  op_data->HandleResponseContents(std::move(pmid_health_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2, task_id);
+      routing::Parameters::group_size * 2, task_id);
   dispatcher_.SendPmidHealthRequest(task_id, pmid_name);
   return promise->get_future();
 }

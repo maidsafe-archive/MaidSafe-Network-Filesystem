@@ -170,7 +170,7 @@ void OpData<MessageContents>::HandleResponseContents(MessageContents&& response_
     responses_.push_back(std::move(response_contents));
     auto result(GetSuccessOrMostFrequentResponse(responses_, successes_required_));
     // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-    if (result.second || responses_.size() == routing::Parameters::node_group_size) {
+    if (result.second || responses_.size() == routing::Parameters::group_size) {
       // Operation has succeeded or failed overall
       callback = callback_;
       callback_executed_ = true;

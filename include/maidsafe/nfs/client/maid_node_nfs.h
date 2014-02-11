@@ -145,7 +145,7 @@ boost::future<typename DataName::data_type> MaidNodeNfs::Get(
                         op_data->HandleResponseContents(std::move(get_response));
                      },
                      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                     routing::Parameters::node_group_size * 2, task_id);
+                     routing::Parameters::group_size * 2, task_id);
   get_timer_.PrintTaskIds();
   dispatcher_.SendGetRequest(task_id, data_name);
   return promise->get_future();
@@ -175,7 +175,7 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
                  op_data->HandleResponseContents(std::move(get_versions_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2, task_id);
+      routing::Parameters::group_size * 2, task_id);
   dispatcher_.SendGetVersionsRequest(task_id, data_name);
   return promise->get_future();
 }
@@ -195,7 +195,7 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
           op_data->HandleResponseContents(std::move(get_branch_response));
       },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2, task_id);
+      routing::Parameters::group_size * 2, task_id);
   dispatcher_.SendGetBranchRequest(task_id, data_name, branch_tip);
   return promise->get_future();
 }

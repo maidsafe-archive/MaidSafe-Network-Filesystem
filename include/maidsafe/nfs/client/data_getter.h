@@ -109,7 +109,7 @@ boost::future<typename DataName::data_type> DataGetter::Get(
                          op_data->HandleResponseContents(std::move(get_response));
                      },
                       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                      routing::Parameters::node_group_size * 2, task_id);
+                      routing::Parameters::group_size * 2, task_id);
   dispatcher_.SendGetRequest(task_id, data_name);
   return promise->get_future();
 }
@@ -127,7 +127,7 @@ DataGetter::VersionNamesFuture DataGetter::GetVersions(
                  op_data->HandleResponseContents(std::move(get_versions_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::node_group_size * 2));
+      routing::Parameters::group_size * 2));
   dispatcher_.SendGetVersionsRequest(task_id, data_name);
   return promise->get_future();
 }
@@ -146,7 +146,7 @@ DataGetter::VersionNamesFuture DataGetter::GetBranch(
                                                         std::move(get_branch_response));
                                                   },
                                          // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                                         routing::Parameters::node_group_size * 2));
+                                         routing::Parameters::group_size * 2));
   dispatcher_.SendGetBranchRequest(task_id, data_name, branch_tip);
   return promise->get_future();
 }
