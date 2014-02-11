@@ -6,5 +6,5 @@ Action:CreateAccountRequest             Source:MaidNode:Single        Destinatio
 Action:RemoveAccountRequest             Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::AccountRemoval
 Action:RegisterPmidRequest              Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::PmidRegistration
 Action:UnregisterPmidRequest            Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::DataName
-Action:IncrementReferenceCounts         Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::DataNames
-Action:DecrementReferenceCounts         Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::DataNames
+Action:IncrementReferenceCounts         Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::DataNames
+Action:DecrementReferenceCounts         Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::DataNames
