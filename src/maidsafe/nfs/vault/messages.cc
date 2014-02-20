@@ -275,6 +275,61 @@ void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXC
   swap(lhs.new_version_name, rhs.new_version_name);
 }
 
+// ========================== VersionTreeCreation ==================================================
+
+VersionTreeCreation::VersionTreeCreation(const DataName& name,
+                                         const StructuredDataVersions::VersionName& version,
+                                         uint32_t max_versions_in, uint32_t max_branches_in)
+    : data_name(name), version_name(version), max_versions(max_versions_in),
+      max_branches(max_branches_in) {}
+
+VersionTreeCreation::VersionTreeCreation(const VersionTreeCreation& other)
+    : data_name(other.data_name), version_name(other.version_name),
+      max_versions(other.max_versions), max_branches(other.max_branches) {}
+
+VersionTreeCreation::VersionTreeCreation(VersionTreeCreation&& other)
+    : data_name(std::move(other.data_name)), version_name(std::move(other.version_name)),
+      max_versions(std::move(other.max_versions)), max_branches(std::move(other.max_branches)) {}
+
+VersionTreeCreation& VersionTreeCreation::operator=(VersionTreeCreation other) {
+  swap(*this, other);
+  return *this;
+}
+
+VersionTreeCreation::VersionTreeCreation(const std::string& serialised_copy)
+    : data_name(), version_name(), max_versions(0), max_branches(0) {
+  protobuf::VersionTreeCreation proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+  data_name = DataName(proto_copy.serialised_data_name());
+  version_name = StructuredDataVersions::VersionName(proto_copy.serialised_version_name());
+  max_versions = proto_copy.max_versions();
+  max_branches = proto_copy.max_branches();
+}
+
+std::string VersionTreeCreation::Serialise() const {
+  protobuf::VersionTreeCreation proto_copy;
+  proto_copy.set_serialised_data_name(data_name.Serialise());
+  proto_copy.set_serialised_version_name(version_name.Serialise());
+  proto_copy.set_max_versions(max_versions);
+  proto_copy.set_max_branches(max_branches);
+  return proto_copy.SerializeAsString();
+}
+
+bool operator==(const VersionTreeCreation& lhs, const VersionTreeCreation& rhs) {
+  return lhs.data_name == rhs.data_name && lhs.version_name == rhs.version_name &&
+         lhs.max_versions == rhs.max_versions && lhs.max_branches == rhs.max_branches;
+}
+
+void swap(VersionTreeCreation& lhs, VersionTreeCreation& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.data_name, rhs.data_name);
+  swap(lhs.version_name, rhs.version_name);
+  swap(lhs.max_versions, rhs.max_versions);
+  swap(lhs.max_branches, rhs.max_branches);
+}
+
+
 // ==================== DataNameAndContent =========================================================
 
 DataNameAndContent::DataNameAndContent(DataTagValue type_in, const Identity& name_in,

@@ -169,6 +169,32 @@ struct DataNameOldNewVersion {
 bool operator==(const DataNameOldNewVersion& lhs, const DataNameOldNewVersion& rhs);
 void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXCEPT;
 
+// ========================== VersionTreeCreation ==================================================
+
+struct VersionTreeCreation {
+  template <typename DataNameType>
+  VersionTreeCreation(const DataNameType& name, const StructuredDataVersions::VersionName& version,
+                      uint32_t max_versions_in, uint32_t max_branches_in)
+      : data_name(name), version_name(version), max_versions(max_versions_in),
+        max_branches(max_branches_in) {}
+
+  VersionTreeCreation(const DataName& name, const StructuredDataVersions::VersionName& version,
+                      uint32_t max_versions_in, uint32_t max_branches_in);
+  VersionTreeCreation(const VersionTreeCreation& other);
+  VersionTreeCreation(VersionTreeCreation&& other);
+  VersionTreeCreation& operator=(VersionTreeCreation other);
+
+  explicit VersionTreeCreation(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  DataName data_name;
+  StructuredDataVersions::VersionName version_name;
+  uint32_t max_versions, max_branches;
+};
+
+bool operator==(const VersionTreeCreation& lhs, const VersionTreeCreation& rhs);
+void swap(VersionTreeCreation& lhs, VersionTreeCreation& rhs) MAIDSAFE_NOEXCEPT;
+
 // ========================== DataNameAndContent ===================================================
 
 struct DataNameAndContent {
