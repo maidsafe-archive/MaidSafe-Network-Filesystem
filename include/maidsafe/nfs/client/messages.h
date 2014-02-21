@@ -31,7 +31,7 @@
 #include "maidsafe/common/config.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
-#include "maidsafe/data_types/data_type_values.h"
+#include "maidsafe/common/data_types/data_type_values.h"
 
 #include "maidsafe/nfs/client/structured_data.h"
 #include "maidsafe/nfs/vault/messages.h"

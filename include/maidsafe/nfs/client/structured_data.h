@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "maidsafe/common/config.h"
-#include "maidsafe/data_types/structured_data_versions.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 
 namespace maidsafe {
 

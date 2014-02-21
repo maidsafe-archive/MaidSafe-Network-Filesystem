@@ -27,7 +27,7 @@
 #include "boost/thread/future.hpp"
 
 #include "maidsafe/common/asio_service.h"
-#include "maidsafe/data_types/structured_data_versions.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 #include "maidsafe/passport/types.h"
 #include "maidsafe/routing/parameters.h"
 #include "maidsafe/routing/routing_api.h"

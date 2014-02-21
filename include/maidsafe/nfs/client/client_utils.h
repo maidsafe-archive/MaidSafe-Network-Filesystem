@@ -25,7 +25,7 @@
 #include "boost/exception/all.hpp"
 #include "boost/thread/future.hpp"
 
-#include "maidsafe/data_types/structured_data_versions.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 
 #include "maidsafe/nfs/client/messages.h"
 

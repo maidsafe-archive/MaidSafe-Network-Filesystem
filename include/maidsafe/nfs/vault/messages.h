@@ -26,8 +26,8 @@
 #include "maidsafe/common/config.h"
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/types.h"
-#include "maidsafe/data_types/data_type_values.h"
-#include "maidsafe/data_types/structured_data_versions.h"
+#include "maidsafe/common/data_types/data_type_values.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 
 #include "maidsafe/nfs/vault/account_creation.h"
 #include "maidsafe/nfs/vault/account_removal.h"

@@ -23,9 +23,9 @@
 
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
+#include "maidsafe/common/data_types/data_type_values.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 #include "maidsafe/passport/types.h"
-#include "maidsafe/data_types/data_type_values.h"
-#include "maidsafe/data_types/structured_data_versions.h"
 #include "maidsafe/routing/message.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/routing/timer.h"
