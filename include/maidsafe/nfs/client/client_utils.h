@@ -54,6 +54,9 @@ void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
 void HandleCreateVersionTreeResult(const ReturnCode& result,
                                    std::shared_ptr<boost::promise<void>> promise);
 
+void HandlePutVersionResult(const DataNameAndTipOfTreeOrReturnCode& result,
+                            std::shared_ptr<boost::promise<void>> promise);
+
 // ==================== Implementation =============================================================
 template <typename Data>
 void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& result) const {

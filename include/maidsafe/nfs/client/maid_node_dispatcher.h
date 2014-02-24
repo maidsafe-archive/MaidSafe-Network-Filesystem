@@ -65,7 +65,7 @@ class MaidNodeDispatcher {
                             const StructuredDataVersions::VersionName& branch_tip);
 
   template <typename DataName>
-  void SendPutVersionRequest(const DataName& data_name,
+  void SendPutVersionRequest(routing::TaskId task_id, const DataName& data_name,
                              const StructuredDataVersions::VersionName& old_version_name,
                              const StructuredDataVersions::VersionName& new_version_name);
 
@@ -187,7 +187,7 @@ void MaidNodeDispatcher::SendCreateVersionTreeRequest(
 }
 
 template <typename DataName>
-void MaidNodeDispatcher::SendPutVersionRequest(
+void MaidNodeDispatcher::SendPutVersionRequest(routing::TaskId task_id,
     const DataName& data_name,
     const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name) {
@@ -196,7 +196,7 @@ void MaidNodeDispatcher::SendPutVersionRequest(
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
   NfsMessage::Contents contents(data_name, old_version_name, new_version_name);
-  NfsMessage nfs_message(contents);
+  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 

@@ -101,6 +101,24 @@ void HandleCreateVersionTreeResult(const ReturnCode& result,
   }
 }
 
+void HandlePutVersionResult(const DataNameAndTipOfTreeOrReturnCode& result,
+                            std::shared_ptr<boost::promise<void>> promise) {
+  LOG(kVerbose) << "nfs_client::HandlePutVersionResult";
+  try {
+    if (nfs::IsSuccess(*result.return_code)) {
+      LOG(kInfo) << "Put Version succeeded";
+      promise->set_value();
+    } else {
+      LOG(kWarning) << "nfs_client::HandlePutVersionResult error during put version";
+      boost::throw_exception(result.return_code->value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandlePutVersionResult exception during create account";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

@@ -39,14 +39,16 @@ MaidNodeService::MaidNodeService(
     routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
     routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
     routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer,
-    routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer)
+    routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer,
+    routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer)
         : routing_(routing),
           get_timer_(get_timer),
           get_versions_timer_(get_versions_timer),
           get_branch_timer_(get_branch_timer),
           create_account_timer_(create_account_timer),
           pmid_health_timer_(pmid_health_timer),
-          create_version_tree_timer_(create_version_tree_timer) {}
+          create_version_tree_timer_(create_version_tree_timer),
+          put_version_timer_(put_version_timer) {}
 
 void MaidNodeService::HandleMessage(const GetResponse& message,
                                     const GetResponse::Sender& /*sender*/,

@@ -37,12 +37,13 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
       create_account_timer_(asio_service),
       pmid_health_timer_(asio_service),
       create_verstion_tree_timer_(asio_service),
+      put_verstion_timer_(asio_service),
       dispatcher_(routing),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
             new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_,
                                 create_account_timer_, pmid_health_timer_,
-                                create_verstion_tree_timer_));
+                                create_verstion_tree_timer_, put_verstion_timer_));
         return std::move(service);
       }()),
       pmid_node_hint_mutex_(),
