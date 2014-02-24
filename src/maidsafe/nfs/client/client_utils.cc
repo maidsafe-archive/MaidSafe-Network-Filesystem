@@ -101,16 +101,16 @@ void HandleCreateVersionTreeResult(const ReturnCode& result,
   }
 }
 
-void HandlePutVersionResult(const DataNameAndTipOfTreeOrReturnCode& result,
+void HandlePutVersionResult(const DataNameAndTipOfTreeAndReturnCode& result,
                             std::shared_ptr<boost::promise<void>> promise) {
   LOG(kVerbose) << "nfs_client::HandlePutVersionResult";
   try {
-    if (nfs::IsSuccess(*result.return_code)) {
+    if (nfs::IsSuccess(result.return_code)) {
       LOG(kInfo) << "Put Version succeeded";
       promise->set_value();
     } else {
       LOG(kWarning) << "nfs_client::HandlePutVersionResult error during put version";
-      boost::throw_exception(result.return_code->value);
+      boost::throw_exception(result.return_code.value);
     }
   }
   catch (...) {

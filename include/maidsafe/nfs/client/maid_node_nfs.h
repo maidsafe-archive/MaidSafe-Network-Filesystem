@@ -244,9 +244,9 @@ boost::future<void> MaidNodeNfs::PutVersion(
     const StructuredDataVersions::VersionName& new_version_name,
     const std::chrono::steady_clock::duration& timeout) {
   LOG(kVerbose) << "MaidNodeNfs Put Version " << HexSubstr(data_name.value);
-  typedef MaidNodeService::CreateVersionTreeResponse::Contents ResponseContents;
+  typedef MaidNodeService::PutVersionResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
-  auto response_functor([promise](const nfs_client::DataNameAndTipOfTreeOrReturnCode& result) {
+  auto response_functor([promise](const nfs_client::DataNameAndTipOfTreeAndReturnCode& result) {
                            HandlePutVersionResult(result, promise);
                         });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));

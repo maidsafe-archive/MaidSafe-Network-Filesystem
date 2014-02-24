@@ -239,25 +239,25 @@ bool operator==(const StructuredDataNameAndContentOrReturnCode& lhs,
 void swap(StructuredDataNameAndContentOrReturnCode& lhs,
           StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ========================== DataNameAndTipOfTreeOrReturnCode ===================================
-struct DataNameAndTipOfTreeOrReturnCode {
-  DataNameAndTipOfTreeOrReturnCode();
-  DataNameAndTipOfTreeOrReturnCode(const DataNameAndTipOfTreeOrReturnCode& other);
-  DataNameAndTipOfTreeOrReturnCode(DataNameAndTipOfTreeOrReturnCode&& other);
-  DataNameAndTipOfTreeOrReturnCode& operator=(DataNameAndTipOfTreeOrReturnCode other);
+// ========================== DataNameAndTipOfTreeAndReturnCode ===================================
+struct DataNameAndTipOfTreeAndReturnCode {
+  DataNameAndTipOfTreeAndReturnCode();
+  DataNameAndTipOfTreeAndReturnCode(const DataNameAndTipOfTreeAndReturnCode& other);
+  DataNameAndTipOfTreeAndReturnCode(DataNameAndTipOfTreeAndReturnCode&& other);
+  DataNameAndTipOfTreeAndReturnCode& operator=(DataNameAndTipOfTreeAndReturnCode other);
 
-  explicit DataNameAndTipOfTreeOrReturnCode(const std::string& serialised_copy);
+  explicit DataNameAndTipOfTreeAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
   nfs_vault::DataName data_name;
   boost::optional<StructuredDataVersions::VersionName> tip_of_tree;
-  boost::optional<ReturnCode> return_code;
+  ReturnCode return_code;
 };
 
-bool operator==(const DataNameAndTipOfTreeOrReturnCode& lhs,
-                const DataNameAndTipOfTreeOrReturnCode& rhs);
-void swap(DataNameAndTipOfTreeOrReturnCode& lhs,
-          DataNameAndTipOfTreeOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndTipOfTreeAndReturnCode& lhs,
+                const DataNameAndTipOfTreeAndReturnCode& rhs);
+void swap(DataNameAndTipOfTreeAndReturnCode& lhs,
+          DataNameAndTipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 // ==================== DataPmidHintAndReturnCode ==================================================
 struct DataPmidHintAndReturnCode {
