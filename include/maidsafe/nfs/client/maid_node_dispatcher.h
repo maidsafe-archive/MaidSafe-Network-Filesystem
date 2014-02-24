@@ -53,6 +53,11 @@ class MaidNodeDispatcher {
   void SendDeleteRequest(const DataName& data_name);
 
   template <typename DataName>
+  void SendCreateVersionTreeRequest(routing::TaskId task_id, const DataName& data_name,
+                                    const StructuredDataVersions::VersionName& version_name,
+                                    uint32_t max_versions, uint32_t max_branches);
+
+  template <typename DataName>
   void SendGetVersionsRequest(routing::TaskId task_id, const DataName& data_name);
 
   template <typename DataName>
@@ -165,6 +170,20 @@ void MaidNodeDispatcher::SendGetBranchRequest(
   NfsMessage nfs_message(nfs::MessageId(task_id), contents);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
+}
+
+template <typename DataName>
+void MaidNodeDispatcher::SendCreateVersionTreeRequest(
+    routing::TaskId task_id, const DataName& data_name,
+    const StructuredDataVersions::VersionName& version_name, uint32_t max_versions,
+    uint32_t max_branches) {
+  typedef nfs::CreateVersionTreeRequestFromMaidNodeToMaidManager NfsMessage;
+  CheckSourcePersonaType<NfsMessage>();
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage::Contents contents(data_name, version_name, max_versions, max_branches);
+  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template <typename DataName>

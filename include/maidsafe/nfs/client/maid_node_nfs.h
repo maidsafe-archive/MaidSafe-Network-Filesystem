@@ -67,6 +67,13 @@ class MaidNodeNfs {
   void Delete(const DataName& data_name);
 
   template <typename DataName>
+  boost::future<void> CreateVersionTree(const DataName& data_name,
+                         const StructuredDataVersions::VersionName& version_name,
+                         uint32_t max_versions, uint32_t max_branches,
+                         const std::chrono::steady_clock::duration& timeout =
+                             std::chrono::seconds(10));
+
+  template <typename DataName>
   VersionNamesFuture GetVersions(const DataName& data_name,
                                  const std::chrono::steady_clock::duration& timeout =
                                      std::chrono::seconds(10));
@@ -121,6 +128,7 @@ class MaidNodeNfs {
   routing::Timer<MaidNodeService::GetBranchResponse::Contents> get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents> create_account_timer_;
   routing::Timer<MaidNodeService::PmidHealthResponse::Contents> pmid_health_timer_;
+  routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents> create_verstion_tree_timer_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
   mutable std::mutex pmid_node_hint_mutex_;
@@ -162,11 +170,38 @@ void MaidNodeNfs::Delete(const DataName& data_name) {
 }
 
 template <typename DataName>
+boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
+                       const StructuredDataVersions::VersionName& version_name,
+                       uint32_t max_versions, uint32_t max_branches,
+                       const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "MaidNodeNfs Get " << HexSubstr(data_name.value);
+  typedef MaidNodeService::CreateVersionTreeResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<void>>());
+  auto response_functor([promise](const nfs_client::ReturnCode& result) {
+                           HandleCreateVersionTreeResult(result, promise);
+                        });
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
+  auto task_id(create_verstion_tree_timer_.NewTaskId());
+  create_verstion_tree_timer_.AddTask(
+      timeout,
+      [op_data, data_name](ResponseContents get_response) {
+        LOG(kVerbose) << "MaidNodeNfs CreateVersionTree HandleResponseContents for "
+                      << HexSubstr(data_name.value);
+        op_data->HandleResponseContents(std::move(get_response));
+      },
+      routing::Parameters::group_size * 3, task_id);
+  create_verstion_tree_timer_.PrintTaskIds();
+  dispatcher_.SendCreateVersionTreeRequest(task_id, data_name, version_name, max_versions,
+                                           max_branches);
+  return promise->get_future();
+}
+
+template <typename DataName>
 MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
     const DataName& data_name, const std::chrono::steady_clock::duration& timeout) {
   typedef MaidNodeService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
-  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
+  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode&
                                   result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
   auto task_id(get_versions_timer_.NewTaskId());

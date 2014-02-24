@@ -37,14 +37,16 @@ MaidNodeService::MaidNodeService(
     routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
     routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
     routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
-      routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
-      routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer)
+    routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
+    routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer,
+    routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer)
         : routing_(routing),
           get_timer_(get_timer),
           get_versions_timer_(get_versions_timer),
           get_branch_timer_(get_branch_timer),
           create_account_timer_(create_account_timer),
-          pmid_health_timer_(pmid_health_timer) {}
+          pmid_health_timer_(pmid_health_timer),
+          create_version_tree_timer_(create_version_tree_timer) {}
 
 void MaidNodeService::HandleMessage(const GetResponse& message,
                                     const GetResponse::Sender& /*sender*/,
@@ -153,6 +155,21 @@ void MaidNodeService::HandleMessage(const CreateAccountResponse& message,
   LOG(kInfo) << "Get response for CreateAccount";
   try {
     create_account_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code() != InvalidParameter())
+      throw;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
+}
+
+void MaidNodeService::HandleMessage(const CreateVersionTreeResponse& message,
+                                    const CreateVersionTreeResponse::Sender& /*sender*/,
+                                    const CreateVersionTreeResponse::Receiver& /*receiver*/) {
+  LOG(kInfo) << "Get response for CreateVersionTree";
+  try {
+    create_version_tree_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != InvalidParameter())

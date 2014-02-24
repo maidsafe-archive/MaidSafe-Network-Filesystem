@@ -75,7 +75,8 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (CreatePmidAccountRequest)
     (IncrementReferenceCounts)
     (DecrementReferenceCounts)
-    (CreateVersionTreeRequest))
+    (CreateVersionTreeRequest)
+    (CreateVersionTreeResponse))
 
 // Defines:
 //     enum class Persona : int32_t { kMaidNode, kMpidNode, ... };

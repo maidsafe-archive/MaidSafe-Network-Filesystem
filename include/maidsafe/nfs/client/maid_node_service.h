@@ -44,13 +44,16 @@ class MaidNodeService {
   typedef nfs::GetBranchResponseFromVersionHandlerToMaidNode GetBranchResponse;
   typedef nfs::PmidHealthResponseFromMaidManagerToMaidNode PmidHealthResponse;
   typedef nfs::CreateAccountResponseFromMaidManagerToMaidNode CreateAccountResponse;
+  typedef nfs::CreateVersionTreeResponseFromMaidManagerToMaidNode CreateVersionTreeResponse;
 
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
       routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
       routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
-      routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer);
+      routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer,
+      routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>&
+          create_version_tree_timer);
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
@@ -77,6 +80,10 @@ class MaidNodeService {
                      const CreateAccountResponse::Sender& sender,
                      const CreateAccountResponse::Receiver& receiver);
 
+  void HandleMessage(const CreateVersionTreeResponse& message,
+                     const CreateVersionTreeResponse::Sender& sender,
+                     const CreateVersionTreeResponse::Receiver& receiver);
+
  private:
   template <typename Data>
   void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,
@@ -88,7 +95,8 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer_;
   routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer_;
-};
+  routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer_;
+ };
 
 }  // namespace nfs_client
 

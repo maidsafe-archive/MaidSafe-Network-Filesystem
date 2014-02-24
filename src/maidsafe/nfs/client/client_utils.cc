@@ -83,6 +83,24 @@ void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
   }
 }
 
+void HandleCreateVersionTreeResult(const ReturnCode& result,
+                                   std::shared_ptr<boost::promise<void>> promise) {
+  LOG(kVerbose) << "nfs_client::HandleCreateVersionTreeResult";
+  try {
+    if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Create Version Tree succeeded";
+      promise->set_value();
+    } else {
+      LOG(kWarning) << "nfs_client::HandleCreateVersionTreeResult error during version creation";
+      boost::throw_exception(result.value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandleCreateAccountResult exception during create account";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe
