@@ -47,6 +47,7 @@ namespace nfs_client {
 class MaidNodeNfs {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
+  typedef boost::future<std::unique_ptr<StructuredDataVersions::VersionName>> PutVersionFuture;
   typedef boost::future<uint64_t> PmidHealthFuture;
 
   MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
@@ -85,11 +86,11 @@ class MaidNodeNfs {
                                    std::chrono::seconds(10));
 
   template <typename DataName>
-  boost::future<void> PutVersion(const DataName& data_name,
-                                 const StructuredDataVersions::VersionName& old_version_name,
-                                 const StructuredDataVersions::VersionName& new_version_name,
-                                 const std::chrono::steady_clock::duration& timeout =
-                                     std::chrono::seconds(10));
+  PutVersionFuture PutVersion(const DataName& data_name,
+                              const StructuredDataVersions::VersionName& old_version_name,
+                              const StructuredDataVersions::VersionName& new_version_name,
+                              const std::chrono::steady_clock::duration& timeout =
+                                  std::chrono::seconds(10));
 
   template <typename DataName>
   void DeleteBranchUntilFork(const DataName& data_name,
@@ -177,7 +178,7 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
                        const StructuredDataVersions::VersionName& version_name,
                        uint32_t max_versions, uint32_t max_branches,
                        const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Get " << HexSubstr(data_name.value);
+  LOG(kVerbose) << "MaidNodeNfs Create Version " << HexSubstr(data_name.value);
   typedef MaidNodeService::CreateVersionTreeResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
   auto response_functor([promise](const nfs_client::ReturnCode& result) {
@@ -239,14 +240,15 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
 }
 
 template <typename DataName>
-boost::future<void> MaidNodeNfs::PutVersion(
+MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
     const DataName& data_name, const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name,
     const std::chrono::steady_clock::duration& timeout) {
   LOG(kVerbose) << "MaidNodeNfs Put Version " << HexSubstr(data_name.value);
   typedef MaidNodeService::PutVersionResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<void>>());
-  auto response_functor([promise](const nfs_client::DataNameAndTipOfTreeAndReturnCode& result) {
+  auto promise(
+      std::make_shared<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>>());
+  auto response_functor([promise](const nfs_client::TipOfTreeAndReturnCode& result) {
                            HandlePutVersionResult(result, promise);
                         });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));

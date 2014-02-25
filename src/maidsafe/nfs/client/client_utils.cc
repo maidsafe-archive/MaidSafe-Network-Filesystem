@@ -101,13 +101,17 @@ void HandleCreateVersionTreeResult(const ReturnCode& result,
   }
 }
 
-void HandlePutVersionResult(const DataNameAndTipOfTreeAndReturnCode& result,
-                            std::shared_ptr<boost::promise<void>> promise) {
+void HandlePutVersionResult(
+    const TipOfTreeAndReturnCode& result,
+    std::shared_ptr<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>> promise) {
   LOG(kVerbose) << "nfs_client::HandlePutVersionResult";
   try {
     if (nfs::IsSuccess(result.return_code)) {
       LOG(kInfo) << "Put Version succeeded";
-      promise->set_value();
+      std::unique_ptr<StructuredDataVersions::VersionName> tip_of_tree;
+      if (result.tip_of_tree)
+        tip_of_tree.reset(new StructuredDataVersions::VersionName(*result.tip_of_tree));
+      promise->set_value(std::move(tip_of_tree));
     } else {
       LOG(kWarning) << "nfs_client::HandlePutVersionResult error during put version";
       boost::throw_exception(result.return_code.value);

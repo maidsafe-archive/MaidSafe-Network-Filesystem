@@ -113,11 +113,19 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
   }
 }
 
-void MaidNodeService::HandleMessage(const PutVersionResponse& /*message*/,
+void MaidNodeService::HandleMessage(const PutVersionResponse& message,
                                     const PutVersionResponse::Sender& /*sender*/,
                                     const PutVersionResponse::Receiver& /*receiver*/) {
-  // TODO(Mahmoud): Implement this.
-  assert(0);
+  LOG(kInfo) << "Get response for PutVersion";
+  try {
+    put_version_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code() != InvalidParameter())
+      throw;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
 }
 
 void MaidNodeService::HandleMessage(const GetBranchResponse& message,

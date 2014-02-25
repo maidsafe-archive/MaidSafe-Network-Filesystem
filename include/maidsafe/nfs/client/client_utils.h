@@ -54,8 +54,9 @@ void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
 void HandleCreateVersionTreeResult(const ReturnCode& result,
                                    std::shared_ptr<boost::promise<void>> promise);
 
-void HandlePutVersionResult(const DataNameAndTipOfTreeAndReturnCode& result,
-                            std::shared_ptr<boost::promise<void>> promise);
+void HandlePutVersionResult(
+    const TipOfTreeAndReturnCode& result,
+    std::shared_ptr<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>> promise);
 
 // ==================== Implementation =============================================================
 template <typename Data>

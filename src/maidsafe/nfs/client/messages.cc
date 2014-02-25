@@ -521,33 +521,30 @@ void swap(StructuredDataNameAndContentOrReturnCode& lhs,
   swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
 }
 
-// ========================== DataNameAndTipOfTreeAndReturnCode ===================================
-DataNameAndTipOfTreeAndReturnCode::DataNameAndTipOfTreeAndReturnCode()
-    : data_name(), tip_of_tree(), return_code() {}
+// ========================== TipOfTreeAndReturnCode ===================================
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode()
+    : tip_of_tree(), return_code() {}
 
-DataNameAndTipOfTreeAndReturnCode::DataNameAndTipOfTreeAndReturnCode(
-    const DataNameAndTipOfTreeAndReturnCode& other)
-        : data_name(other.data_name), tip_of_tree(other.tip_of_tree),
-          return_code(other.return_code) {}
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(const ReturnCode return_code_in)
+    : tip_of_tree(), return_code(return_code_in) {}
 
-DataNameAndTipOfTreeAndReturnCode::DataNameAndTipOfTreeAndReturnCode(
-    DataNameAndTipOfTreeAndReturnCode&& other)
-        : data_name(std::move(other.data_name)), tip_of_tree(std::move(other.tip_of_tree)),
-          return_code(std::move(other.return_code)) {}
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(
+    const TipOfTreeAndReturnCode& other)
+        : tip_of_tree(other.tip_of_tree), return_code(other.return_code) {}
 
-DataNameAndTipOfTreeAndReturnCode& DataNameAndTipOfTreeAndReturnCode::operator=(
-    DataNameAndTipOfTreeAndReturnCode other) {
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(TipOfTreeAndReturnCode&& other)
+        : tip_of_tree(std::move(other.tip_of_tree)), return_code(std::move(other.return_code)) {}
+
+TipOfTreeAndReturnCode& TipOfTreeAndReturnCode::operator=(TipOfTreeAndReturnCode other) {
   swap(*this, other);
   return *this;
 }
 
-DataNameAndTipOfTreeAndReturnCode::DataNameAndTipOfTreeAndReturnCode(
-    const std::string& serialised_copy) {
-  protobuf::DataNameAndTipOfTreeAndReturnCode proto_copy;
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(const std::string& serialised_copy) {
+  protobuf::TipOfTreeAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
-  data_name = nfs_vault::DataName(proto_copy.serialised_name());
   if (proto_copy.has_serialised_tip_of_tree()) {
     tip_of_tree.reset(StructuredDataVersions::VersionName(
                           proto_copy.serialised_tip_of_tree()));
@@ -556,10 +553,8 @@ DataNameAndTipOfTreeAndReturnCode::DataNameAndTipOfTreeAndReturnCode(
   return_code = ReturnCode(proto_copy.serialised_return_code());
 }
 
-std::string DataNameAndTipOfTreeAndReturnCode::Serialise() const {
-  protobuf::DataNameAndTipOfTreeAndReturnCode proto_copy;
-
-  proto_copy.set_serialised_name(data_name.Serialise());
+std::string TipOfTreeAndReturnCode::Serialise() const {
+  protobuf::TipOfTreeAndReturnCode proto_copy;
 
   if (tip_of_tree)
     proto_copy.set_serialised_tip_of_tree(tip_of_tree->Serialise());
@@ -568,24 +563,18 @@ std::string DataNameAndTipOfTreeAndReturnCode::Serialise() const {
   return proto_copy.SerializeAsString();
 }
 
-bool operator==(const DataNameAndTipOfTreeAndReturnCode& lhs,
-                const DataNameAndTipOfTreeAndReturnCode& rhs) {
-  if (!(lhs.data_name == rhs.data_name))
-    return false;
-
+bool operator==(const TipOfTreeAndReturnCode& lhs, const TipOfTreeAndReturnCode& rhs) {
   if ((lhs.tip_of_tree && !rhs.tip_of_tree) || (!lhs.tip_of_tree && rhs.tip_of_tree))
     return false;
 
-  if (lhs.tip_of_tree && (*lhs.tip_of_tree == rhs.tip_of_tree))
+  if (lhs.tip_of_tree && (*lhs.tip_of_tree != *rhs.tip_of_tree))
     return false;
 
   return lhs.return_code == rhs.return_code;
 }
 
-void swap(DataNameAndTipOfTreeAndReturnCode& lhs,
-          DataNameAndTipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
-  swap(lhs.data_name, rhs.data_name);
   swap(lhs.tip_of_tree, rhs.tip_of_tree);
   swap(lhs.return_code, rhs.return_code);
 }

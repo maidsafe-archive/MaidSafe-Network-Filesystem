@@ -239,25 +239,23 @@ bool operator==(const StructuredDataNameAndContentOrReturnCode& lhs,
 void swap(StructuredDataNameAndContentOrReturnCode& lhs,
           StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ========================== DataNameAndTipOfTreeAndReturnCode ===================================
-struct DataNameAndTipOfTreeAndReturnCode {
-  DataNameAndTipOfTreeAndReturnCode();
-  DataNameAndTipOfTreeAndReturnCode(const DataNameAndTipOfTreeAndReturnCode& other);
-  DataNameAndTipOfTreeAndReturnCode(DataNameAndTipOfTreeAndReturnCode&& other);
-  DataNameAndTipOfTreeAndReturnCode& operator=(DataNameAndTipOfTreeAndReturnCode other);
+// =============================== TipOfTreeAndReturnCode =======================================
+struct TipOfTreeAndReturnCode {
+  TipOfTreeAndReturnCode();
+  explicit TipOfTreeAndReturnCode(const ReturnCode return_code_in);
+  TipOfTreeAndReturnCode(const TipOfTreeAndReturnCode& other);
+  TipOfTreeAndReturnCode(TipOfTreeAndReturnCode&& other);
+  TipOfTreeAndReturnCode& operator=(TipOfTreeAndReturnCode other);
 
-  explicit DataNameAndTipOfTreeAndReturnCode(const std::string& serialised_copy);
+  explicit TipOfTreeAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  nfs_vault::DataName data_name;
   boost::optional<StructuredDataVersions::VersionName> tip_of_tree;
   ReturnCode return_code;
 };
 
-bool operator==(const DataNameAndTipOfTreeAndReturnCode& lhs,
-                const DataNameAndTipOfTreeAndReturnCode& rhs);
-void swap(DataNameAndTipOfTreeAndReturnCode& lhs,
-          DataNameAndTipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const TipOfTreeAndReturnCode& lhs, const TipOfTreeAndReturnCode& rhs);
+void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 // ==================== DataPmidHintAndReturnCode ==================================================
 struct DataPmidHintAndReturnCode {
