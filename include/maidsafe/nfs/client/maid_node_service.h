@@ -98,7 +98,7 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer_;
   routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer_;
   routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer_;
- };
+};
 
 }  // namespace nfs_client
 
