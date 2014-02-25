@@ -92,6 +92,6 @@ message PmidHealthAndReturnCode {
 }
 
 message TipOfTreeAndReturnCode {
-  optional bytes serialised_tip_of_tree = 2;
-  required bytes serialised_return_code = 3;
+  optional bytes serialised_tip_of_tree = 1;
+  required bytes serialised_return_code = 2;
 }
