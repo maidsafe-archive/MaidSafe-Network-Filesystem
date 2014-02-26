@@ -66,13 +66,11 @@ void MaidNodeDispatcher::SendUnregisterPmidRequest(const passport::PublicPmid::N
 
 void MaidNodeDispatcher::SendPmidHealthRequest(routing::TaskId task_id,
                                                const passport::PublicPmid::Name& pmid_name) {
-  typedef nfs::PmidHealthRequestFromMaidNodeToPmidManager NfsMessage;
+  typedef nfs::PmidHealthRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message;
-  nfs_message.id = nfs::MessageId(task_id);
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_,
-                               NfsMessage::Receiver(NodeId(pmid_name->string()))));
+  NfsMessage nfs_message(nfs::MessageId(task_id), (nfs_vault::DataName(pmid_name)));
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 }  // namespace nfs_client

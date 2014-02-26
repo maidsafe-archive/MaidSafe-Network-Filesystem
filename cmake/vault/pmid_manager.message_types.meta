@@ -1,1 +1,1 @@
-Action:PmidHealthRequest      Source:MaidNode:Single        Destination:PmidManager:Group      Contents:struct:maidsafe::nfs_vault::Empty
+Action:PmidHealthRequest      Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::DataName
