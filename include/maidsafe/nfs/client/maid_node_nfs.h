@@ -102,7 +102,9 @@ class MaidNodeNfs {
 
   void RemoveAccount(const nfs_vault::AccountRemoval& account_removal);
 
-  void RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration);
+  boost::future<void> RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration,
+                                   const std::chrono::_V2::steady_clock::duration& timeout =
+                                       std::chrono::seconds(10));
 
   void UnregisterPmid(const passport::PublicPmid::Name& pmid_name);
 
@@ -133,6 +135,7 @@ class MaidNodeNfs {
   routing::Timer<MaidNodeService::PmidHealthResponse::Contents> pmid_health_timer_;
   routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents> create_verstion_tree_timer_;
   routing::Timer<MaidNodeService::PutVersionResponse::Contents> put_verstion_timer_;
+  routing::Timer<MaidNodeService::RegisterPmidResponse::Contents> register_pmid_timer_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
   mutable std::mutex pmid_node_hint_mutex_;

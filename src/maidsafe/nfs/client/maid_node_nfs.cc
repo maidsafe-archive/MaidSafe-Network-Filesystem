@@ -38,12 +38,14 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
       pmid_health_timer_(asio_service),
       create_verstion_tree_timer_(asio_service),
       put_verstion_timer_(asio_service),
+      register_pmid_timer_(asio_service),
       dispatcher_(routing),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
             new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_,
                                 create_account_timer_, pmid_health_timer_,
-                                create_verstion_tree_timer_, put_verstion_timer_));
+                                create_verstion_tree_timer_, put_verstion_timer_,
+                                register_pmid_timer_));
         return std::move(service);
       }()),
       pmid_node_hint_mutex_(),
@@ -84,8 +86,25 @@ void MaidNodeNfs::RemoveAccount(const nfs_vault::AccountRemoval& account_removal
   dispatcher_.SendRemoveAccountRequest(account_removal);
 }
 
-void MaidNodeNfs::RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration) {
-  dispatcher_.SendRegisterPmidRequest(pmid_registration);
+boost::future<void> MaidNodeNfs::RegisterPmid(
+    const nfs_vault::PmidRegistration& pmid_registration,
+    const std::chrono::steady_clock::duration& timeout) {
+  typedef MaidNodeService::RegisterPmidResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<void>>());
+  auto response_functor([promise](const ResponseContents &result) {
+      HandleCreateAccountResult(result, promise);
+  });
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
+      routing::Parameters::group_size - 1, response_functor));
+  auto task_id(create_account_timer_.NewTaskId());
+  register_pmid_timer_.AddTask(
+      timeout, [op_data](ResponseContents create_account_response) {
+                 op_data->HandleResponseContents(std::move(create_account_response));
+               },
+      // TODO(Mahmoud): Confirm expected count
+      routing::Parameters::group_size - 1, task_id);
+  dispatcher_.SendRegisterPmidRequest(task_id, pmid_registration);
+  return promise->get_future();
 }
 
 void MaidNodeNfs::UnregisterPmid(const passport::PublicPmid::Name& pmid_name) {
