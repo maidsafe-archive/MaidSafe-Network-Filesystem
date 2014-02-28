@@ -165,7 +165,7 @@ boost::future<typename DataName::data_type> MaidNodeNfs::Get(
 
 template <typename Data>
 void MaidNodeNfs::Put(const Data& data) {
-  passport::PublicPmid::Name pmid_hint(Identity(NodeId().string()));
+  passport::PublicPmid::Name pmid_hint(Identity((NodeId().string())));
   dispatcher_.SendPutRequest(data, pmid_hint);
 }
 
