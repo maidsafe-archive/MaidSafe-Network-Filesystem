@@ -127,7 +127,7 @@ MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(
                  op_data->HandleResponseContents(std::move(pmid_health_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::group_size * 2, task_id);
+      routing::Parameters::group_size - 1, task_id);
   dispatcher_.SendPmidHealthRequest(task_id, pmid_name);
   return promise->get_future();
 }
