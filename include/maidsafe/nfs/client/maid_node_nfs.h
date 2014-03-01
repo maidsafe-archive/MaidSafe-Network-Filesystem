@@ -103,7 +103,7 @@ class MaidNodeNfs {
   void RemoveAccount(const nfs_vault::AccountRemoval& account_removal);
 
   boost::future<void> RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration,
-                                   const std::chrono::_V2::steady_clock::duration& timeout =
+                                   const std::chrono::steady_clock::duration& timeout =
                                        std::chrono::seconds(10));
 
   void UnregisterPmid(const passport::PublicPmid::Name& pmid_name);
