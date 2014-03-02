@@ -7,3 +7,4 @@ Action:PmidHealthResponse         Source:MaidManager:Group      Destination:Maid
 Action:CreateAccountResponse      Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode
 Action:PutVersionResponse         Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::TipOfTreeAndReturnCode
 Action:CreateVersionTreeResponse  Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode
+Action:RegisterPmidResponse       Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode

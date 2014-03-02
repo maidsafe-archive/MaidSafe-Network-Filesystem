@@ -123,6 +123,24 @@ void HandlePutVersionResult(
   }
 }
 
+void HandleRegisterPmidResult(const ReturnCode& result,
+                              std::shared_ptr<boost::promise<void>> promise) {
+  LOG(kVerbose) << "nfs_client::HandleRegisterPmidResult";
+  try {
+    if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Pmid Registration succeeded";
+      promise->set_value();
+    } else {
+      LOG(kWarning) << "nfs_client::HandleRegisterPmidResult error during pmid registration";
+      boost::throw_exception(result.value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandleRegisterPmidResult exception during pmid registration";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

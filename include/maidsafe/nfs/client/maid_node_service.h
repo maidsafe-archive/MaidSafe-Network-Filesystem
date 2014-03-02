@@ -45,6 +45,8 @@ class MaidNodeService {
   typedef nfs::PmidHealthResponseFromMaidManagerToMaidNode PmidHealthResponse;
   typedef nfs::CreateAccountResponseFromMaidManagerToMaidNode CreateAccountResponse;
   typedef nfs::CreateVersionTreeResponseFromMaidManagerToMaidNode CreateVersionTreeResponse;
+  typedef nfs::RegisterPmidResponseFromMaidManagerToMaidNode RegisterPmidResponse;
+
 
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
@@ -54,7 +56,8 @@ class MaidNodeService {
       routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer,
       routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>&
           create_version_tree_timer,
-      routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer);
+      routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer,
+      routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer);
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
@@ -85,6 +88,10 @@ class MaidNodeService {
                      const CreateVersionTreeResponse::Sender& sender,
                      const CreateVersionTreeResponse::Receiver& receiver);
 
+  void HandleMessage(const RegisterPmidResponse& message,
+                     const RegisterPmidResponse::Sender& sender,
+                     const RegisterPmidResponse::Receiver& receiver);
+
  private:
   template <typename Data>
   void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,
@@ -98,6 +105,7 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer_;
   routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer_;
   routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer_;
+  routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer_;
 };
 
 }  // namespace nfs_client
