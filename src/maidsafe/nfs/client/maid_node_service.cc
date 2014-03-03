@@ -196,7 +196,7 @@ void MaidNodeService::HandleMessage(const RegisterPmidResponse& message,
                                     const RegisterPmidResponse::Receiver& /*receiver*/) {
   LOG(kInfo) << "Get response for RegisterPmid";
   try {
-    create_account_timer_.AddResponse(message.id.data, *message.contents);
+    register_pmid_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != InvalidParameter())
