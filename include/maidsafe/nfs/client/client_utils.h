@@ -58,6 +58,9 @@ void HandlePutVersionResult(
     const TipOfTreeAndReturnCode& result,
     std::shared_ptr<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>> promise);
 
+void HandleRegisterPmidResult(const ReturnCode& result,
+                              std::shared_ptr<boost::promise<void>> promise);
+
 // ==================== Implementation =============================================================
 template <typename Data>
 void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& result) const {

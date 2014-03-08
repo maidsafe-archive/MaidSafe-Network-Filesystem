@@ -92,7 +92,7 @@ boost::future<void> MaidNodeNfs::RegisterPmid(
   typedef MaidNodeService::RegisterPmidResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
   auto response_functor([promise](const ResponseContents &result) {
-      HandleCreateAccountResult(result, promise);
+      HandleRegisterPmidResult(result, promise);
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
       routing::Parameters::group_size - 1, response_functor));
