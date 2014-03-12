@@ -22,6 +22,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <vector>
 
 #include "boost/thread/future.hpp"
@@ -168,7 +169,8 @@ boost::future<typename DataName::data_type> MaidNodeNfs::Get(
 
 template <typename Data>
 void MaidNodeNfs::Put(const Data& data) {
-  passport::PublicPmid::Name pmid_hint(Identity((NodeId().string())));
+  NodeId node_id;
+  passport::PublicPmid::Name pmid_hint(Identity((node_id.string())));
   dispatcher_.SendPutRequest(data, pmid_hint);
 }
 

@@ -41,7 +41,8 @@ passport::Maid MakeMaid() {
 }
 
 passport::Pmid MakePmid() {
-  return passport::Pmid(MakeMaid());
+  passport::Anpmid anpmid;
+  return passport::Pmid(anpmid);
 }
 
 }  // namespace

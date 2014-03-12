@@ -38,11 +38,9 @@ namespace test {
 
 class PublicKeyGetterTest : public testing::Test {
  protected:
-  typedef boost::variant<passport::PublicAnmid,
-                         passport::PublicAnsmid,
-                         passport::PublicAntmid,
-                         passport::PublicAnmaid,
+  typedef boost::variant<passport::PublicAnmaid,
                          passport::PublicMaid,
+                         passport::PublicAnpmid,
                          passport::PublicPmid,
                          passport::PublicAnmpid,
                          passport::PublicMpid> PublicDataType;
@@ -61,26 +59,22 @@ class PublicKeyGetterTest : public testing::Test {
         public_key_getter_(new PublicKeyGetter(routing_, PublicPmidVector())) {}
 
   PublicDataType GetRandomPublicData() {
-    uint32_t number_of_types = boost::mpl::size<typename PublicDataType::types>::type::value;
-    uint32_t type_number = RandomUint32() % number_of_types;
+    auto type_number = static_cast<DataTagValue>(RandomUint32() % MAIDSAFE_DATA_TYPES_SIZE);
     switch (type_number) {
-      case 0: return passport::PublicAnmid(passport::Anmid());
-      case 1: return passport::PublicAnsmid(passport::Ansmid());
-      case 2: return passport::PublicAntmid(passport::Antmid());
-      case 3: return passport::PublicAnmaid(passport::Anmaid());
-      case 4: {
+      case 0: return passport::PublicAnmaid(passport::Anmaid());
+      case 1: {
         passport::Anmaid anmaid;
         passport::Maid maid(anmaid);
         return passport::PublicMaid(maid);
       }
-      case 5: {
-        passport::Anmaid anmaid;
-        passport::Maid maid(anmaid);
-        passport::Pmid pmid(maid);
+      case 2: return passport::PublicAnpmid(passport::Anpmid());
+      case 3: {
+        passport::Anpmid anpmid;
+        passport::Pmid pmid(anpmid);
         return passport::PublicPmid(pmid);
       }
-      case 6: return passport::PublicAnmpid(passport::Anmpid());
-      case 7: {
+      case 4: return passport::PublicAnmpid(passport::Anmpid());
+      case 5: {
         passport::Anmpid anmpid;
         passport::Mpid mpid(NonEmptyString(RandomAlphaNumericString(1 +RandomUint32() % 100)),
                             anmpid);
@@ -89,7 +83,6 @@ class PublicKeyGetterTest : public testing::Test {
       default : LOG(kError) << "No type found";
       BOOST_THROW_EXCEPTION(MakeError(NfsErrors::failed_to_get_data));
     }
-    return passport::PublicAnmid(passport::Anmid());  // compiler silence
   }
 
   PublicPmidVector GeneratePublicPmids() {
@@ -97,9 +90,8 @@ class PublicKeyGetterTest : public testing::Test {
     PublicPmidVector public_pmids;
     public_pmids.reserve(number);
     for (uint32_t i = 0; i != number; ++i) {
-      passport::Anmaid anmaid;
-      passport::Maid maid(anmaid);
-      passport::Pmid pmid(maid);
+      passport::Anpmid anpmid;
+      passport::Pmid pmid(anpmid);
       public_pmids.push_back(passport::PublicPmid(pmid));
     }
     return public_pmids;

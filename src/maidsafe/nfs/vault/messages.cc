@@ -74,7 +74,7 @@ void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT {
 DataName::DataName(DataTagValue type_in, Identity raw_name_in)
     : type(type_in), raw_name(std::move(raw_name_in)) {}
 
-DataName::DataName() : type(DataTagValue::kAnmidValue), raw_name() {}
+DataName::DataName() : type(DataTagValue::kAnmaidValue), raw_name() {}
 
 DataName::DataName(const DataName& other) : type(other.type), raw_name(other.raw_name) {}
 
@@ -87,7 +87,7 @@ DataName& DataName::operator=(DataName other) {
 }
 
 DataName::DataName(const std::string& serialised_copy)
-    : type(DataTagValue::kAnmidValue), raw_name() {
+    : type(DataTagValue::kAnmaidValue), raw_name() {
   protobuf::DataName proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
