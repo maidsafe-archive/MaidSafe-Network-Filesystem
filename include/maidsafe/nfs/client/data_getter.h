@@ -119,15 +119,16 @@ DataGetter::VersionNamesFuture DataGetter::GetVersions(
     const DataName& data_name, const std::chrono::steady_clock::duration& timeout) {
   typedef DataGetterService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
-  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
+  auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode&
                                   result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_versions_timer_.AddTask(
+  auto task_id(get_versions_timer_.NewTaskId());
+  get_versions_timer_.AddTask(
       timeout, [op_data](ResponseContents get_versions_response) {
                  op_data->HandleResponseContents(std::move(get_versions_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::group_size * 2));
+      routing::Parameters::group_size * 2, task_id);
   dispatcher_.SendGetVersionsRequest(task_id, data_name);
   return promise->get_future();
 }
