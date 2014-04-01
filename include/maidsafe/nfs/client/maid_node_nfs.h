@@ -134,8 +134,8 @@ class MaidNodeNfs {
   routing::Timer<MaidNodeService::GetBranchResponse::Contents> get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents> create_account_timer_;
   routing::Timer<MaidNodeService::PmidHealthResponse::Contents> pmid_health_timer_;
-  routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents> create_verstion_tree_timer_;
-  routing::Timer<MaidNodeService::PutVersionResponse::Contents> put_verstion_timer_;
+  routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents> create_version_tree_timer_;
+  routing::Timer<MaidNodeService::PutVersionResponse::Contents> put_version_timer_;
   routing::Timer<MaidNodeService::RegisterPmidResponse::Contents> register_pmid_timer_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
@@ -191,8 +191,8 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
                            HandleCreateVersionTreeResult(result, promise);
                         });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(create_verstion_tree_timer_.NewTaskId());
-  create_verstion_tree_timer_.AddTask(
+  auto task_id(create_version_tree_timer_.NewTaskId());
+  create_version_tree_timer_.AddTask(
       timeout,
       [op_data, data_name](ResponseContents get_response) {
         LOG(kVerbose) << "MaidNodeNfs CreateVersionTree HandleResponseContents for "
@@ -200,7 +200,7 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
         op_data->HandleResponseContents(std::move(get_response));
       },
       routing::Parameters::group_size * 3, task_id);
-  create_verstion_tree_timer_.PrintTaskIds();
+  create_version_tree_timer_.PrintTaskIds();
   dispatcher_.SendCreateVersionTreeRequest(task_id, data_name, version_name, max_versions,
                                            max_branches);
   return promise->get_future();
@@ -258,8 +258,8 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
                            HandlePutVersionResult(result, promise);
                         });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(put_verstion_timer_.NewTaskId());
-  put_verstion_timer_.AddTask(
+  auto task_id(put_version_timer_.NewTaskId());
+  put_version_timer_.AddTask(
       timeout,
       [op_data, data_name](ResponseContents get_response) {
         LOG(kVerbose) << "MaidNodeNfs CreateVersionTree HandleResponseContents for "
@@ -267,7 +267,7 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
         op_data->HandleResponseContents(std::move(get_response));
       },
       routing::Parameters::group_size * 3, task_id);
-  put_verstion_timer_.PrintTaskIds();
+  put_version_timer_.PrintTaskIds();
   dispatcher_.SendPutVersionRequest(task_id, data_name, old_version_name, new_version_name);
   return promise->get_future();
 }
