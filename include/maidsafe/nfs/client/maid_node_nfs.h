@@ -175,6 +175,8 @@ boost::future<typename DataName::data_type> MaidNodeNfs::Get(
 
 template <typename Data>
 void MaidNodeNfs::Put(const Data& data) {
+  LOG(kVerbose) << "MaidNodeNfs put " << HexSubstr(data.name().value.string())
+                << " of size " << data.Serialise().data.string().size();
   NodeId node_id;
   passport::PublicPmid::Name pmid_hint(Identity((node_id.string())));
   dispatcher_.SendPutRequest(data, pmid_hint);
@@ -223,6 +225,7 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
 template <typename DataName>
 MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
     const DataName& data_name, const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "MaidNodeNfs Get Version for " << HexSubstr(data_name.value);
   typedef MaidNodeService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode&
@@ -243,6 +246,7 @@ template <typename DataName>
 MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
     const DataName& data_name, const StructuredDataVersions::VersionName& branch_tip,
     const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "MaidNodeNfs Get Branch for " << HexSubstr(data_name.value);
   typedef MaidNodeService::GetBranchResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
