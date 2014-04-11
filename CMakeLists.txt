@@ -66,7 +66,7 @@ target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(MaidsafeTesting)
   ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})
-  target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_private)
+  target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(TESTnfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 endif()

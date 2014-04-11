@@ -83,6 +83,64 @@ void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
   }
 }
 
+void HandleCreateVersionTreeResult(const ReturnCode& result,
+                                   std::shared_ptr<boost::promise<void>> promise) {
+  LOG(kVerbose) << "nfs_client::HandleCreateVersionTreeResult";
+  try {
+    if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Create Version Tree succeeded";
+      promise->set_value();
+    } else {
+      LOG(kWarning) << "nfs_client::HandleCreateVersionTreeResult error during version creation";
+      boost::throw_exception(result.value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandleCreateAccountResult exception during create account";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
+void HandlePutVersionResult(
+    const TipOfTreeAndReturnCode& result,
+    std::shared_ptr<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>> promise) {
+  LOG(kVerbose) << "nfs_client::HandlePutVersionResult";
+  try {
+    if (nfs::IsSuccess(result.return_code)) {
+      LOG(kInfo) << "Put Version succeeded";
+      std::unique_ptr<StructuredDataVersions::VersionName> tip_of_tree;
+      if (result.tip_of_tree)
+        tip_of_tree.reset(new StructuredDataVersions::VersionName(*result.tip_of_tree));
+      promise->set_value(std::move(tip_of_tree));
+    } else {
+      LOG(kWarning) << "nfs_client::HandlePutVersionResult error during put version";
+      boost::throw_exception(result.return_code.value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandlePutVersionResult exception during create account";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
+void HandleRegisterPmidResult(const ReturnCode& result,
+                              std::shared_ptr<boost::promise<void>> promise) {
+  LOG(kVerbose) << "nfs_client::HandleRegisterPmidResult";
+  try {
+    if (nfs::IsSuccess(result)) {
+      LOG(kInfo) << "Pmid Registration succeeded";
+      promise->set_value();
+    } else {
+      LOG(kWarning) << "nfs_client::HandleRegisterPmidResult error during pmid registration";
+      boost::throw_exception(result.value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandleRegisterPmidResult exception during pmid registration";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

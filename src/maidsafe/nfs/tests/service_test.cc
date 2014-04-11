@@ -22,11 +22,10 @@
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/types.h"
 #include "maidsafe/common/utils.h"
-
+#include "maidsafe/common/data_types/immutable_data.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/routing/timer.h"
 #include "maidsafe/passport/types.h"
-#include "maidsafe/data_types/immutable_data.h"
 
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/message_wrapper.h"

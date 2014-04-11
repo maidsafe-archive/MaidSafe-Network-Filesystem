@@ -21,7 +21,7 @@
 
 #include <string>
 
-#include "maidsafe/data_types/structured_data_versions.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 #include "maidsafe/routing/message.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/routing/timer.h"
@@ -89,9 +89,13 @@ void DataGetterDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
-  NfsMessage nfs_message((nfs::MessageId(task_id), NfsMessage::Contents(data_name)));
+  nfs::MessageId message_id(task_id);
+  NfsMessage::Contents content(data_name);
+  NfsMessage nfs_message(message_id, content);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
+  LOG(kVerbose) << "DataGetterDispatcher::SendGetVersionsRequest " << HexSubstr(data_name.value)
+                << " routing message sent";
 }
 
 template <typename DataName>

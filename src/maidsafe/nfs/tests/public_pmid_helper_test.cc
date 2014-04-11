@@ -35,13 +35,10 @@ namespace nfs {
 namespace test {
 
 namespace {
-passport::Maid MakeMaid() {
-  passport::Anmaid anmaid;
-  return passport::Maid(anmaid);
-}
 
 passport::Pmid MakePmid() {
-  return passport::Pmid(MakeMaid());
+  passport::Anpmid anpmid;
+  return passport::Pmid(anpmid);
 }
 
 }  // namespace

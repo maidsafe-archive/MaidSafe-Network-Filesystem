@@ -25,7 +25,7 @@
 #include "boost/exception/all.hpp"
 #include "boost/thread/future.hpp"
 
-#include "maidsafe/data_types/structured_data_versions.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 
 #include "maidsafe/nfs/client/messages.h"
 
@@ -50,6 +50,16 @@ void HandleCreateAccountResult(const ReturnCode& result,
 
 void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
                             std::shared_ptr<boost::promise<uint64_t>> promise);
+
+void HandleCreateVersionTreeResult(const ReturnCode& result,
+                                   std::shared_ptr<boost::promise<void>> promise);
+
+void HandlePutVersionResult(
+    const TipOfTreeAndReturnCode& result,
+    std::shared_ptr<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>> promise);
+
+void HandleRegisterPmidResult(const ReturnCode& result,
+                              std::shared_ptr<boost::promise<void>> promise);
 
 // ==================== Implementation =============================================================
 template <typename Data>

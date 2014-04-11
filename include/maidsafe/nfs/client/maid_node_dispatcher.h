@@ -23,9 +23,9 @@
 
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
+#include "maidsafe/common/data_types/data_type_values.h"
+#include "maidsafe/common/data_types/structured_data_versions.h"
 #include "maidsafe/passport/types.h"
-#include "maidsafe/data_types/data_type_values.h"
-#include "maidsafe/data_types/structured_data_versions.h"
 #include "maidsafe/routing/message.h"
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/routing/timer.h"
@@ -53,6 +53,11 @@ class MaidNodeDispatcher {
   void SendDeleteRequest(const DataName& data_name);
 
   template <typename DataName>
+  void SendCreateVersionTreeRequest(routing::TaskId task_id, const DataName& data_name,
+                                    const StructuredDataVersions::VersionName& version_name,
+                                    uint32_t max_versions, uint32_t max_branches);
+
+  template <typename DataName>
   void SendGetVersionsRequest(routing::TaskId task_id, const DataName& data_name);
 
   template <typename DataName>
@@ -60,7 +65,7 @@ class MaidNodeDispatcher {
                             const StructuredDataVersions::VersionName& branch_tip);
 
   template <typename DataName>
-  void SendPutVersionRequest(const DataName& data_name,
+  void SendPutVersionRequest(routing::TaskId task_id, const DataName& data_name,
                              const StructuredDataVersions::VersionName& old_version_name,
                              const StructuredDataVersions::VersionName& new_version_name);
 
@@ -73,7 +78,8 @@ class MaidNodeDispatcher {
 
   void SendRemoveAccountRequest(const nfs_vault::AccountRemoval& account_removal);
 
-  void SendRegisterPmidRequest(const nfs_vault::PmidRegistration& pmid_registration);
+  void SendRegisterPmidRequest(routing::TaskId task_id,
+                               const nfs_vault::PmidRegistration& pmid_registration);
 
   void SendUnregisterPmidRequest(const passport::PublicPmid::Name& pmid_name);
 
@@ -168,7 +174,21 @@ void MaidNodeDispatcher::SendGetBranchRequest(
 }
 
 template <typename DataName>
-void MaidNodeDispatcher::SendPutVersionRequest(
+void MaidNodeDispatcher::SendCreateVersionTreeRequest(
+    routing::TaskId task_id, const DataName& data_name,
+    const StructuredDataVersions::VersionName& version_name, uint32_t max_versions,
+    uint32_t max_branches) {
+  typedef nfs::CreateVersionTreeRequestFromMaidNodeToMaidManager NfsMessage;
+  CheckSourcePersonaType<NfsMessage>();
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage::Contents contents(data_name, version_name, max_versions, max_branches);
+  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
+  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+}
+
+template <typename DataName>
+void MaidNodeDispatcher::SendPutVersionRequest(routing::TaskId task_id,
     const DataName& data_name,
     const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name) {
@@ -176,8 +196,8 @@ void MaidNodeDispatcher::SendPutVersionRequest(
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
-  NfsMessage::Contents contents(data_name, old_version_name, new_version_name);
-  NfsMessage nfs_message(contents);
+  NfsMessage nfs_message(nfs::MessageId(task_id),
+                         NfsMessage::Contents(data_name, old_version_name, new_version_name));
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 

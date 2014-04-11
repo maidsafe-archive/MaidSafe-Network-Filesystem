@@ -40,17 +40,24 @@ class MaidNodeService {
   typedef nfs::GetCachedResponseFromCacheHandlerToMaidNode GetCachedResponse;
   typedef nfs::PutFailureFromMaidManagerToMaidNode PutFailure;
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
-  typedef nfs::PutVersionResponseFromVersionHandlerToMaidNode PutVersionResponse;
+  typedef nfs::PutVersionResponseFromMaidManagerToMaidNode PutVersionResponse;
   typedef nfs::GetBranchResponseFromVersionHandlerToMaidNode GetBranchResponse;
   typedef nfs::PmidHealthResponseFromMaidManagerToMaidNode PmidHealthResponse;
   typedef nfs::CreateAccountResponseFromMaidManagerToMaidNode CreateAccountResponse;
+  typedef nfs::CreateVersionTreeResponseFromMaidManagerToMaidNode CreateVersionTreeResponse;
+  typedef nfs::RegisterPmidResponseFromMaidManagerToMaidNode RegisterPmidResponse;
+
 
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
       routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
       routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
-      routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer);
+      routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer,
+      routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>&
+          create_version_tree_timer,
+      routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer,
+      routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer);
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
@@ -77,6 +84,14 @@ class MaidNodeService {
                      const CreateAccountResponse::Sender& sender,
                      const CreateAccountResponse::Receiver& receiver);
 
+  void HandleMessage(const CreateVersionTreeResponse& message,
+                     const CreateVersionTreeResponse::Sender& sender,
+                     const CreateVersionTreeResponse::Receiver& receiver);
+
+  void HandleMessage(const RegisterPmidResponse& message,
+                     const RegisterPmidResponse::Sender& sender,
+                     const RegisterPmidResponse::Receiver& receiver);
+
  private:
   template <typename Data>
   void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,
@@ -88,6 +103,9 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer_;
   routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer_;
+  routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer_;
+  routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer_;
+  routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer_;
 };
 
 }  // namespace nfs_client

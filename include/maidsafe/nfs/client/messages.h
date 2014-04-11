@@ -31,7 +31,7 @@
 #include "maidsafe/common/config.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/types.h"
-#include "maidsafe/data_types/data_type_values.h"
+#include "maidsafe/common/data_types/data_type_values.h"
 
 #include "maidsafe/nfs/client/structured_data.h"
 #include "maidsafe/nfs/vault/messages.h"
@@ -239,25 +239,23 @@ bool operator==(const StructuredDataNameAndContentOrReturnCode& lhs,
 void swap(StructuredDataNameAndContentOrReturnCode& lhs,
           StructuredDataNameAndContentOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ========================== DataNameAndTipOfTreeOrReturnCode ===================================
-struct DataNameAndTipOfTreeOrReturnCode {
-  DataNameAndTipOfTreeOrReturnCode();
-  DataNameAndTipOfTreeOrReturnCode(const DataNameAndTipOfTreeOrReturnCode& other);
-  DataNameAndTipOfTreeOrReturnCode(DataNameAndTipOfTreeOrReturnCode&& other);
-  DataNameAndTipOfTreeOrReturnCode& operator=(DataNameAndTipOfTreeOrReturnCode other);
+// =============================== TipOfTreeAndReturnCode =======================================
+struct TipOfTreeAndReturnCode {
+  TipOfTreeAndReturnCode();
+  explicit TipOfTreeAndReturnCode(const ReturnCode return_code_in);
+  TipOfTreeAndReturnCode(const TipOfTreeAndReturnCode& other);
+  TipOfTreeAndReturnCode(TipOfTreeAndReturnCode&& other);
+  TipOfTreeAndReturnCode& operator=(TipOfTreeAndReturnCode other);
 
-  explicit DataNameAndTipOfTreeOrReturnCode(const std::string& serialised_copy);
+  explicit TipOfTreeAndReturnCode(const std::string& serialised_copy);
   std::string Serialise() const;
 
-  nfs_vault::DataName data_name;
   boost::optional<StructuredDataVersions::VersionName> tip_of_tree;
-  boost::optional<ReturnCode> return_code;
+  ReturnCode return_code;
 };
 
-bool operator==(const DataNameAndTipOfTreeOrReturnCode& lhs,
-                const DataNameAndTipOfTreeOrReturnCode& rhs);
-void swap(DataNameAndTipOfTreeOrReturnCode& lhs,
-          DataNameAndTipOfTreeOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const TipOfTreeAndReturnCode& lhs, const TipOfTreeAndReturnCode& rhs);
+void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 // ==================== DataPmidHintAndReturnCode ==================================================
 struct DataPmidHintAndReturnCode {

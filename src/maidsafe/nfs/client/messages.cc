@@ -44,8 +44,8 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
     return MakeError(static_cast<DriveErrors>(error_value));
   if (error_category_name == std::string(GetVaultCategory().name()))
     return MakeError(static_cast<VaultErrors>(error_value));
-  if (error_category_name == std::string(GetClientCategory().name()))
-    return MakeError(static_cast<ClientErrors>(error_value));
+  if (error_category_name == std::string(GetApiCategory().name()))
+    return MakeError(static_cast<ApiErrors>(error_value));
 
   BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 }
@@ -521,85 +521,60 @@ void swap(StructuredDataNameAndContentOrReturnCode& lhs,
   swap(lhs.data_name_and_return_code, rhs.data_name_and_return_code);
 }
 
-// ========================== DataNameAndTipOfTreeOrReturnCode ===================================
-DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode()
-    : data_name(), tip_of_tree(), return_code() {}
+// ========================== TipOfTreeAndReturnCode ===================================
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode()
+    : tip_of_tree(), return_code() {}
 
-DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
-    const DataNameAndTipOfTreeOrReturnCode& other)
-        : data_name(other.data_name), tip_of_tree(other.tip_of_tree),
-          return_code(other.return_code) {}
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(const ReturnCode return_code_in)
+    : tip_of_tree(), return_code(return_code_in) {}
 
-DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
-    DataNameAndTipOfTreeOrReturnCode&& other)
-        : data_name(std::move(other.data_name)), tip_of_tree(std::move(other.tip_of_tree)),
-          return_code(std::move(other.return_code)) {}
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(
+    const TipOfTreeAndReturnCode& other)
+        : tip_of_tree(other.tip_of_tree), return_code(other.return_code) {}
 
-DataNameAndTipOfTreeOrReturnCode& DataNameAndTipOfTreeOrReturnCode::operator=(
-    DataNameAndTipOfTreeOrReturnCode other) {
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(TipOfTreeAndReturnCode&& other)
+        : tip_of_tree(std::move(other.tip_of_tree)), return_code(std::move(other.return_code)) {}
+
+TipOfTreeAndReturnCode& TipOfTreeAndReturnCode::operator=(TipOfTreeAndReturnCode other) {
   swap(*this, other);
   return *this;
 }
 
-DataNameAndTipOfTreeOrReturnCode::DataNameAndTipOfTreeOrReturnCode(
-    const std::string& serialised_copy) {
-  protobuf::DataNameAndTipOfTreeOrReturnCode proto_copy;
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(const std::string& serialised_copy) {
+  protobuf::TipOfTreeAndReturnCode proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
-  data_name = nfs_vault::DataName(proto_copy.serialised_name());
   if (proto_copy.has_serialised_tip_of_tree()) {
     tip_of_tree.reset(StructuredDataVersions::VersionName(
                           proto_copy.serialised_tip_of_tree()));
   }
 
-  if (proto_copy.has_serialised_return_code()) {
-    return_code.reset(ReturnCode(proto_copy.serialised_return_code()));
-  }
-
-  if (!nfs::CheckMutuallyExclusive(tip_of_tree, return_code)) {
-    assert(false);
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-  }
+  return_code = ReturnCode(proto_copy.serialised_return_code());
 }
 
-std::string DataNameAndTipOfTreeOrReturnCode::Serialise() const {
-  if (!nfs::CheckMutuallyExclusive(tip_of_tree, return_code)) {
-    assert(false);
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::serialisation_error));
-  }
-  protobuf::DataNameAndTipOfTreeOrReturnCode proto_copy;
-
-  proto_copy.set_serialised_name(data_name.Serialise());
+std::string TipOfTreeAndReturnCode::Serialise() const {
+  protobuf::TipOfTreeAndReturnCode proto_copy;
 
   if (tip_of_tree)
     proto_copy.set_serialised_tip_of_tree(tip_of_tree->Serialise());
-  else
-    proto_copy.set_serialised_return_code(return_code->Serialise());
+
+  proto_copy.set_serialised_return_code(return_code.Serialise());
   return proto_copy.SerializeAsString();
 }
 
-bool operator==(const DataNameAndTipOfTreeOrReturnCode& lhs,
-                const DataNameAndTipOfTreeOrReturnCode& rhs) {
-  if (!(lhs.data_name == rhs.data_name))
-    return false;
-
+bool operator==(const TipOfTreeAndReturnCode& lhs, const TipOfTreeAndReturnCode& rhs) {
   if ((lhs.tip_of_tree && !rhs.tip_of_tree) || (!lhs.tip_of_tree && rhs.tip_of_tree))
     return false;
 
-  if (lhs.tip_of_tree)
-    return *lhs.tip_of_tree == rhs.tip_of_tree;
-
-  if ((lhs.return_code && !rhs.return_code) || (!lhs.return_code && rhs.return_code))
+  if (lhs.tip_of_tree && (*lhs.tip_of_tree != *rhs.tip_of_tree))
     return false;
 
-  return *lhs.return_code == *rhs.return_code;
+  return lhs.return_code == rhs.return_code;
 }
 
-void swap(DataNameAndTipOfTreeOrReturnCode& lhs,
-          DataNameAndTipOfTreeOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
-  swap(lhs.data_name, rhs.data_name);
   swap(lhs.tip_of_tree, rhs.tip_of_tree);
   swap(lhs.return_code, rhs.return_code);
 }
