@@ -152,8 +152,10 @@ class Service {
     LOG(kVerbose) << "nfs HandleVaultMessage";
     VaultMessages vault_variant_message;
     if (!vault::GetVariant(message, vault_variant_message)) {
-      LOG(kError) << "Not a valid vault message";
+      LOG(kError) << "Not a valid vault message" << vault_variant_message;
       BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+    } else {
+      LOG(kVerbose) << "processing: " << vault_variant_message;
     }
     return boost::apply_visitor(demuxer, vault_variant_message);
   }
