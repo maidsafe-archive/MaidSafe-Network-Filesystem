@@ -70,14 +70,13 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (SetPmidOffline)
     (IntegrityCheckRequest)
     (IntegrityCheckResponse)
-    (PutToCache)
-    (GetFromCache)
     (CreatePmidAccountRequest)
     (IncrementReferenceCounts)
     (DecrementReferenceCounts)
     (CreateVersionTreeRequest)
-    (CreateVersionTreeResponse))
-
+    (CreateVersionTreeResponse)
+    (NoOperation))  // NoOperation is added to avoid re-definition of types error in
+                    // vault::message_types.
 // Defines:
 //     enum class Persona : int32_t { kMaidNode, kMpidNode, ... };
 // Also defines a std::ostream operator<< for the Persona.
