@@ -125,8 +125,6 @@ void MaidNodeDispatcher::SendPutRequest(const Data& data,
   typedef nfs::PutRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-//  static const routing::Cacheable kCacheable(is_cacheable<Data>::value ? routing::Cacheable::kPut
-//                                                                       : routing::Cacheable::kNone);
   NfsMessage::Contents contents;
   contents.data = nfs_vault::DataNameAndContent(data);
   contents.pmid_hint = pmid_node_hint.value;
