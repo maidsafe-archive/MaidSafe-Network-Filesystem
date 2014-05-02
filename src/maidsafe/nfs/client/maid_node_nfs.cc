@@ -32,6 +32,7 @@ namespace nfs_client {
 MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
                          passport::PublicPmid::Name pmid_node_hint)
     : get_timer_(asio_service),
+      put_timer_(asio_service),
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       create_account_timer_(asio_service),
@@ -42,8 +43,8 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
       dispatcher_(routing),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
-            new MaidNodeService(routing, get_timer_, get_versions_timer_, get_branch_timer_,
-                                create_account_timer_, pmid_health_timer_,
+            new MaidNodeService(routing, get_timer_, put_timer_, get_versions_timer_,
+                                get_branch_timer_, create_account_timer_, pmid_health_timer_,
                                 create_version_tree_timer_, put_version_timer_,
                                 register_pmid_timer_));
         return std::move(service);

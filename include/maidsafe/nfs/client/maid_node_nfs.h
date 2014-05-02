@@ -63,7 +63,8 @@ class MaidNodeNfs {
       const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
 
   template <typename Data>
-  void Put(const Data& data);
+  boost::future<void> Put(const Data& data, const std::chrono::steady_clock::duration& timeout =
+                                                std::chrono::seconds(10));
 
   template <typename DataName>
   void Delete(const DataName& data_name);
@@ -130,6 +131,7 @@ class MaidNodeNfs {
   MaidNodeNfs& operator=(MaidNodeNfs);
 
   routing::Timer<MaidNodeService::GetResponse::Contents> get_timer_;
+  routing::Timer<MaidNodeService::PutResponse::Contents> put_timer_;
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents> get_versions_timer_;
   routing::Timer<MaidNodeService::GetBranchResponse::Contents> get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents> create_account_timer_;
@@ -168,10 +170,30 @@ boost::future<typename DataName::data_type> MaidNodeNfs::Get(
 }
 
 template <typename Data>
-void MaidNodeNfs::Put(const Data& data) {
+boost::future<void> MaidNodeNfs::Put(const Data& data,
+                                     const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "MaidNodeNfs Put " << HexSubstr(data.name().value);
+  typedef MaidNodeService::PutResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<void>>());
   NodeId node_id;
   passport::PublicPmid::Name pmid_hint(Identity((node_id.string())));
-  dispatcher_.SendPutRequest(data, pmid_hint);
+
+  auto response_functor([promise](const nfs_client::ReturnCode& result) {
+                           HandlePutResponseResult(result, promise);
+                        });
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
+  auto task_id(put_timer_.NewTaskId());
+  put_timer_.AddTask(
+      timeout,
+      [op_data, data](ResponseContents put_response) {
+        LOG(kVerbose) << "MaidNodeNfs Put HandleResponseContents for "
+                      << HexSubstr(data.name().value);
+        op_data->HandleResponseContents(std::move(put_response));
+      },
+      routing::Parameters::group_size - 1, task_id);
+  put_timer_.PrintTaskIds();
+  dispatcher_.SendPutRequest(task_id, data, pmid_hint);
+  return promise->get_future();
 }
 
 template <typename DataName>

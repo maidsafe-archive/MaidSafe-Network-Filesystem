@@ -35,6 +35,7 @@ std::error_code InvalidParameter() {
 
 MaidNodeService::MaidNodeService(
     routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
+    routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer,
     routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
     routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
     routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
@@ -44,6 +45,7 @@ MaidNodeService::MaidNodeService(
     routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer)
         : routing_(routing),
           get_timer_(get_timer),
+          put_timer_(put_timer),
           get_versions_timer_(get_versions_timer),
           get_branch_timer_(get_branch_timer),
           create_account_timer_(create_account_timer),
@@ -63,6 +65,23 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
   static_cast<void>(receiver);
   try {
     get_timer_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code() != InvalidParameter())
+      throw;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
+}
+
+void MaidNodeService::HandleMessage(const PutResponse& message,
+                                    const PutResponse::Sender& /*sender*/,
+                                    const PutResponse::Receiver& receiver) {
+  LOG(kVerbose) << "MaidNodeService::HandleMessage PutResponse " << message.id;
+  assert(receiver.data == routing_.kNodeId());
+  static_cast<void>(receiver);
+  try {
+    put_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != InvalidParameter())

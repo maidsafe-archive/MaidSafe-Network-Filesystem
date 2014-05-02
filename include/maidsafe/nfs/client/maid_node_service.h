@@ -37,6 +37,7 @@ class MaidNodeService {
   typedef void HandleMessageReturnType;
 
   typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
+  typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
   typedef nfs::GetCachedResponseFromCacheHandlerToMaidNode GetCachedResponse;
   typedef nfs::PutFailureFromMaidManagerToMaidNode PutFailure;
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
@@ -50,6 +51,7 @@ class MaidNodeService {
 
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
+      routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer,
       routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
       routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
@@ -61,6 +63,9 @@ class MaidNodeService {
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
+
+  void HandleMessage(const PutResponse& message, const PutResponse::Sender& sender,
+                     const PutResponse::Receiver& receiver);
 
   void HandleMessage(const GetCachedResponse& message, const GetCachedResponse::Sender& sender,
                      const GetCachedResponse::Receiver& receiver);
@@ -99,6 +104,7 @@ class MaidNodeService {
 
   routing::Routing& routing_;
   routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer_;
+  routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer_;
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer_;
   routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer_;

@@ -47,7 +47,8 @@ class MaidNodeDispatcher {
   void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
 
   template <typename Data>
-  void SendPutRequest(const Data& data, const passport::PublicPmid::Name& pmid_node_hint);
+  void SendPutRequest(routing::TaskId task_id, const Data& data,
+                      const passport::PublicPmid::Name& pmid_node_hint);
 
   template <typename DataName>
   void SendDeleteRequest(const DataName& data_name);
@@ -117,7 +118,7 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
 }
 
 template <typename Data>
-void MaidNodeDispatcher::SendPutRequest(const Data& data,
+void MaidNodeDispatcher::SendPutRequest(routing::TaskId task_id, const Data& data,
                                         const passport::PublicPmid::Name& pmid_node_hint) {
   LOG(kVerbose) << "MaidNodeDispatcher::SendPutRequest for chunk "
                 << HexSubstr(data.name().value.string())
@@ -128,7 +129,7 @@ void MaidNodeDispatcher::SendPutRequest(const Data& data,
   NfsMessage::Contents contents;
   contents.data = nfs_vault::DataNameAndContent(data);
   contents.pmid_hint = pmid_node_hint.value;
-  NfsMessage nfs_message(contents);
+  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
