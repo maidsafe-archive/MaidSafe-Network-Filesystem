@@ -22,7 +22,7 @@
 #include <cstdint>
 
 #include "maidsafe/common/tagged_value.h"
-#include "maidsafe/nfs/type_macros.h"
+#include "maidsafe/common/type_macros.h"
 
 namespace maidsafe {
 
