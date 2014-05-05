@@ -50,7 +50,8 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
         return std::move(service);
       }()),
       pmid_node_hint_mutex_(),
-      pmid_node_hint_(pmid_node_hint) {}
+      pmid_node_hint_(pmid_node_hint),
+      get_handler_(get_timer_, dispatcher_) {}
 
 passport::PublicPmid::Name MaidNodeNfs::pmid_node_hint() const {
   std::lock_guard<std::mutex> lock(pmid_node_hint_mutex_);
