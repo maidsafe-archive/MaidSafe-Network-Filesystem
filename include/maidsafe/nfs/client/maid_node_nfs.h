@@ -68,6 +68,9 @@ class MaidNodeNfs {
   template <typename DataName>
   void Delete(const DataName& data_name);
 
+  void IncrementReferenceCount(const std::vector<ImmutableData::Name>& /*data_names*/) {}
+  void DecrementReferenceCount(const std::vector<ImmutableData::Name>& /*data_names*/) {}
+
   template <typename DataName>
   boost::future<void> CreateVersionTree(const DataName& data_name,
                          const StructuredDataVersions::VersionName& version_name,
