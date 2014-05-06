@@ -40,63 +40,11 @@
 #include "maidsafe/nfs/client/client_utils.h"
 #include "maidsafe/nfs/client/maid_node_dispatcher.h"
 #include "maidsafe/nfs/client/maid_node_service.h"
+#include "maidsafe/nfs/client/get_handler.h"
 
 namespace maidsafe {
 
 namespace nfs_client {
-
-struct GetHandler {
-  GetHandler(routing::Timer<DataNameAndContentOrReturnCode>& get_timer_in,
-             MaidNodeDispatcher& dispatcher_in)
-      : get_timer(get_timer_in), dispatcher(dispatcher_in) {}
-
-  template <typename DataNameType>
-  void Get(const DataNameType data_name,
-           std::shared_ptr<boost::promise<typename DataNameType::data_type>> promise,
-           const std::chrono::steady_clock::duration& timeout) {
-    auto task_id(get_timer.NewTaskId());
-    get_time_out.insert(std::make_pair(task_id, std::chrono::steady_clock::now() + timeout));
-    HandleGetResult<typename DataNameType::data_type> response_functor(promise);
-    auto op_data(std::make_shared<nfs::OpData<DataNameAndContentOrReturnCode>>(1,
-                                                                               response_functor));
-    DoGet(data_name, task_id, op_data);
-  }
-
-  template <typename DataNameType>
-  void DoGet(const DataNameType data_name, routing::TaskId task_id,
-             std::shared_ptr<nfs::OpData<DataNameAndContentOrReturnCode>> op_data) {
-    using namespace std::chrono;
-    auto now(std::chrono::steady_clock::now());
-    duration<double> time_span = duration_cast<duration<double>>(get_time_out[task_id] - now);
-    LOG(kVerbose) << "DoGet data: " << DebugId(data_name.value)
-                  << "timeout: " << time_span.count();
-    get_timer.AddTask(
-        get_time_out[task_id] - now,
-        [op_data, data_name, task_id, this](DataNameAndContentOrReturnCode get_response) {
-          LOG(kVerbose) << "MaidNodeNfs Get HandleResponseContents for "
-                        << HexSubstr(data_name.value);
-          auto now(std::chrono::steady_clock::now());
-          auto local_time_out(get_time_out[task_id]);
-          get_time_out.erase(task_id);
-          if (get_response.return_code && (local_time_out > now)) {
-            LOG(kVerbose) << "DoGet: Retry:" << DebugId(data_name.value)
-                          << "return code" << get_response.return_code;
-            auto task_id(get_timer.NewTaskId());
-            get_time_out.insert(std::make_pair(task_id, local_time_out));
-            this->DoGet(data_name, task_id, op_data);
-          } else {
-            LOG(kVerbose) << "DoGet: Success" << DebugId(data_name.value);
-            op_data->HandleResponseContents(std::move(get_response));
-          }
-        },
-        // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-        routing::Parameters::group_size * 2, task_id);
-    dispatcher.SendGetRequest(task_id, data_name);
-  }
-  routing::Timer<DataNameAndContentOrReturnCode>& get_timer;
-  MaidNodeDispatcher& dispatcher;
-  std::map<routing::TaskId, std::chrono::steady_clock::time_point> get_time_out;
-};
 
 class MaidNodeNfs {
  public:
@@ -192,7 +140,7 @@ class MaidNodeNfs {
   routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents> create_version_tree_timer_;
   routing::Timer<MaidNodeService::PutVersionResponse::Contents> put_version_timer_;
   routing::Timer<MaidNodeService::RegisterPmidResponse::Contents> register_pmid_timer_;
-  MaidNodeDispatcher dispatcher_;  
+  MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
   mutable std::mutex pmid_node_hint_mutex_;
   passport::PublicPmid::Name pmid_node_hint_;
