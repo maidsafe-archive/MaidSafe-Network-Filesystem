@@ -72,6 +72,12 @@ class MaidNodeNfs {
   void DecrementReferenceCount(const std::vector<ImmutableData::Name>& /*data_names*/) {}
 
   template <typename DataName>
+  void IncrementReferenceCount(const DataName& data_name);
+
+  template <typename DataName>
+  void DecrementReferenceCount(const DataName& data_name);
+
+  template <typename DataName>
   boost::future<void> CreateVersionTree(const DataName& data_name,
                          const StructuredDataVersions::VersionName& version_name,
                          uint32_t max_versions, uint32_t max_branches,
@@ -172,6 +178,8 @@ boost::future<typename DataName::data_type> MaidNodeNfs::Get(
 
 template <typename Data>
 void MaidNodeNfs::Put(const Data& data) {
+  LOG(kVerbose) << "MaidNodeNfs put " << HexSubstr(data.name().value.string())
+                << " of size " << data.Serialise().data.string().size();
   NodeId node_id;
   passport::PublicPmid::Name pmid_hint(Identity((node_id.string())));
   dispatcher_.SendPutRequest(data, pmid_hint);
@@ -180,6 +188,14 @@ void MaidNodeNfs::Put(const Data& data) {
 template <typename DataName>
 void MaidNodeNfs::Delete(const DataName& data_name) {
   dispatcher_.SendDeleteRequest(data_name);
+}
+
+template <typename DataName>
+void MaidNodeNfs::IncrementReferenceCount(const DataName& /*data_name*/) {
+}
+
+template <typename DataName>
+void MaidNodeNfs::DecrementReferenceCount(const DataName& /*data_name*/) {
 }
 
 template <typename DataName>
@@ -212,6 +228,7 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
 template <typename DataName>
 MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
     const DataName& data_name, const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "MaidNodeNfs Get Version for " << HexSubstr(data_name.value);
   typedef MaidNodeService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode&
@@ -232,6 +249,7 @@ template <typename DataName>
 MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
     const DataName& data_name, const StructuredDataVersions::VersionName& branch_tip,
     const std::chrono::steady_clock::duration& timeout) {
+  LOG(kVerbose) << "MaidNodeNfs Get Branch for " << HexSubstr(data_name.value);
   typedef MaidNodeService::GetBranchResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &

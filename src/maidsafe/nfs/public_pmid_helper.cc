@@ -41,7 +41,7 @@ void PublicPmidHelper::AddEntry(boost::future<passport::PublicPmid>&& future,
 
 void PublicPmidHelper::Run() {
   if (!running_) {
-      LOG(kVerbose) << "starting thread !";
+    LOG(kVerbose) << "starting thread !";
     running_ = true;
     worker_future_ = std::async(std::launch::async, [this]() { this->Poll(); });
   }
@@ -61,6 +61,7 @@ void PublicPmidHelper::Poll() {
       new_functors_.resize(0);
 
       if (futures.empty()) {
+        LOG(kVerbose) << "reset running_ to false";
         assert(functors.empty());
         running_ = false;
         break;
@@ -71,6 +72,8 @@ void PublicPmidHelper::Poll() {
     auto index = ready_future_itr - futures.begin();
     try {
       auto public_pmid = ready_future_itr->get();
+      LOG(kVerbose) << " got public_pmid of " << HexSubstr(public_pmid.name()->string())
+                    << " from network";
       functors.at(index)(public_pmid.public_key());
     } catch (const std::exception& /*e*/) {
       functors.at(index)(asymm::PublicKey());
