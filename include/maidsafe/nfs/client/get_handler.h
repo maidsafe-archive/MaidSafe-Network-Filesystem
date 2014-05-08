@@ -44,13 +44,13 @@ struct GetHandler {
       : get_timer(get_timer_in), dispatcher(dispatcher_in), get_info(), mutex() {}
 
   template <typename DataName>
-  void Get(const DataName data_name,
+  void Get(const DataName& data_name,
            std::shared_ptr<boost::promise<typename DataName::data_type>> promise,
            const std::chrono::steady_clock::duration& timeout);
 
  private:
   template <typename DataName>
-  void DoGet(const DataName data_name, routing::TaskId task_id,
+  void DoGet(const DataName& data_name, routing::TaskId task_id,
              std::shared_ptr<nfs::OpData<DataNameAndContentOrReturnCode>> op_data);
 
  private:
@@ -61,7 +61,7 @@ struct GetHandler {
 };
 
 template <typename DataName>
-void GetHandler::Get(const DataName data_name,
+void GetHandler::Get(const DataName& data_name,
                      std::shared_ptr<boost::promise<typename DataName::data_type>> promise,
            const std::chrono::steady_clock::duration& timeout) {
   auto task_id(get_timer.NewTaskId());
@@ -77,13 +77,14 @@ void GetHandler::Get(const DataName data_name,
 }
 
 template <typename DataName>
-void GetHandler::DoGet(const DataName data_name, routing::TaskId task_id,
+void GetHandler::DoGet(const DataName& data_name, routing::TaskId task_id,
                        std::shared_ptr<nfs::OpData<DataNameAndContentOrReturnCode>> op_data) {
   {
     std::lock_guard<std::mutex> lock(mutex);
     auto found(get_info.find(task_id));
     assert(found != std::end(get_info));
   }
+
   get_timer.AddTask(
       std::get<1>(get_info[task_id]) - std::chrono::steady_clock::now(),
       [op_data, data_name, task_id, this](DataNameAndContentOrReturnCode get_response) {
