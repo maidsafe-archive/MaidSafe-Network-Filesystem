@@ -108,7 +108,8 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<typename DataName::data_type>::value ?
       routing::Cacheable::kGet : routing::Cacheable::kNone);
-  LOG(kVerbose) << "MaidNodeDispatcher::SendGetRequest for task_id " << task_id;
+  LOG(kVerbose) << "MaidNodeDispatcher::SendGetRequest for task_id " << task_id
+                << ", data name: " << HexSubstr(data_name->string());
   nfs::MessageId message_id(task_id);
   NfsMessage::Contents content(data_name);
   NfsMessage nfs_message(message_id, content);
