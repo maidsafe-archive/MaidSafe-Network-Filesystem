@@ -17,6 +17,7 @@
     use of the MaidSafe Software.                                                                 */
 
 #include "maidsafe/nfs/client/maid_node_service.h"
+#include "maidsafe/nfs/client/get_handler.h"
 
 #include "maidsafe/common/error.h"
 
@@ -42,7 +43,8 @@ MaidNodeService::MaidNodeService(
     routing::Timer<MaidNodeService::PmidHealthResponse::Contents>& pmid_health_timer,
     routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer,
     routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer,
-    routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer)
+    routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer,
+    GetHandler& get_handler)
         : routing_(routing),
           get_timer_(get_timer),
           put_timer_(put_timer),
@@ -52,7 +54,8 @@ MaidNodeService::MaidNodeService(
           pmid_health_timer_(pmid_health_timer),
           create_version_tree_timer_(create_version_tree_timer),
           put_version_timer_(put_version_timer),
-          register_pmid_timer_(register_pmid_timer) {}
+          register_pmid_timer_(register_pmid_timer),
+          get_handler_(get_handler) {}
 
 void MaidNodeService::HandleMessage(const GetResponse& message,
                                     const GetResponse::Sender& /*sender*/,
@@ -64,7 +67,7 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   try {
-    get_timer_.AddResponse(message.id.data, *message.contents);
+    get_handler_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != InvalidParameter())
@@ -100,7 +103,7 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   try {
-    get_timer_.AddResponse(message.id.data, *message.contents);
+    get_handler_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != InvalidParameter())

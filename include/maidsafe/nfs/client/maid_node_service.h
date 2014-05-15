@@ -25,10 +25,13 @@
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
+#include "maidsafe/nfs/client/get_handler.h"
 
 namespace maidsafe {
 
 namespace nfs_client {
+
+class GetHandler;
 
 class MaidNodeService {
  public:
@@ -59,7 +62,8 @@ class MaidNodeService {
       routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>&
           create_version_tree_timer,
       routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer,
-      routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer);
+      routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer,
+      GetHandler& get_handler);
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
@@ -112,6 +116,7 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer_;
   routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer_;
   routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer_;
+  GetHandler& get_handler_;
 };
 
 }  // namespace nfs_client

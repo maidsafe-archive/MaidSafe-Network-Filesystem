@@ -46,7 +46,7 @@ MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
             new MaidNodeService(routing, get_timer_, put_timer_, get_versions_timer_,
                                 get_branch_timer_, create_account_timer_, pmid_health_timer_,
                                 create_version_tree_timer_, put_version_timer_,
-                                register_pmid_timer_));
+                                register_pmid_timer_, get_handler_));
         return std::move(service);
       }()),
       pmid_node_hint_mutex_(),

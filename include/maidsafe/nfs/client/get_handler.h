@@ -24,6 +24,7 @@
 
 #include "boost/thread/future.hpp"
 
+#include "maidsafe/common/data_types/data_name_variant.h"
 
 #include "maidsafe/routing/routing_api.h"
 #include "maidsafe/routing/timer.h"
@@ -31,14 +32,39 @@
 #include "maidsafe/nfs/service.h"
 #include "maidsafe/nfs/client/maid_node_dispatcher.h"
 #include "maidsafe/nfs/client/maid_node_service.h"
+#include "maidsafe/nfs/client/client_utils.h"
 
 namespace maidsafe {
 
 namespace nfs_client {
 
-struct GetHandler {
-  typedef std::tuple<size_t, std::chrono::steady_clock::time_point> GetInfo;
+class GetHandlerVisitor : public boost::static_visitor<> {
+ public:
+  GetHandlerVisitor(MaidNodeDispatcher& dispatcher_in, routing::TaskId task_id)
+      : dispatcher_(dispatcher_in), kTaskId_(task_id) {}
 
+  template <typename Name>
+  void operator()(const Name& data_name) {
+    LOG(kVerbose) << "Get handler visitor sending get request for chunk "
+                  << HexSubstr(data_name.value.string());
+    dispatcher_.SendGetRequest(kTaskId_, data_name);
+  }
+
+ private:
+  MaidNodeDispatcher& dispatcher_;
+  const routing::TaskId kTaskId_;
+};
+
+class GetHandler {
+  typedef std::tuple<size_t, routing::TaskId, DataNameVariant> GetInfo;
+  enum class Operation : int {
+    kNoOperation = 0,
+    kAddResponse = 1,
+    kSendRequest = 2,
+    kCancelTask = 3
+  };
+
+ public:
   GetHandler(routing::Timer<DataNameAndContentOrReturnCode>& get_timer_in,
              MaidNodeDispatcher& dispatcher_in)
       : get_timer(get_timer_in), dispatcher(dispatcher_in), get_info(), mutex() {}
@@ -48,10 +74,7 @@ struct GetHandler {
            std::shared_ptr<boost::promise<typename DataName::data_type>> promise,
            const std::chrono::steady_clock::duration& timeout);
 
- private:
-  template <typename DataName>
-  void DoGet(const DataName& data_name, routing::TaskId task_id,
-             std::shared_ptr<nfs::OpData<DataNameAndContentOrReturnCode>> op_data);
+  void AddResponse(routing::TaskId task_id, const DataNameAndContentOrReturnCode& response);
 
  private:
   routing::Timer<DataNameAndContentOrReturnCode>& get_timer;
@@ -65,61 +88,23 @@ void GetHandler::Get(const DataName& data_name,
                      std::shared_ptr<boost::promise<typename DataName::data_type>> promise,
            const std::chrono::steady_clock::duration& timeout) {
   auto task_id(get_timer.NewTaskId());
-  {
-    std::lock_guard<std::mutex> lock(mutex);
-    get_info.insert(
-        std::make_pair(task_id, std::make_tuple(0, std::chrono::steady_clock::now() + timeout)));
-  }
   HandleGetResult<typename DataName::data_type> response_functor(promise);
   auto op_data(
            std::make_shared<nfs::OpData<DataNameAndContentOrReturnCode>>(1, response_functor));
-  DoGet(data_name, task_id, op_data);
-}
-
-template <typename DataName>
-void GetHandler::DoGet(const DataName& data_name, routing::TaskId task_id,
-                       std::shared_ptr<nfs::OpData<DataNameAndContentOrReturnCode>> op_data) {
   {
     std::lock_guard<std::mutex> lock(mutex);
-    auto found(get_info.find(task_id));
-    assert(found != std::end(get_info));
+    get_info.insert(std::make_pair(task_id, std::make_tuple(0, task_id,
+                                   GetDataNameVariant(DataName::data_type::Tag::kValue,
+                                                      data_name.value))));
   }
-
-  get_timer.AddTask(
-      std::get<1>(get_info[task_id]) - std::chrono::steady_clock::now(),
-      [op_data, data_name, task_id, this](DataNameAndContentOrReturnCode get_response) {
-        LOG(kVerbose) << "MaidNodeNfs Get HandleResponseContents for "
-                      << HexSubstr(data_name.value);
-        GetInfo info;
-        {
-          std::lock_guard<std::mutex> lock(mutex);
-          std::get<0>(get_info[task_id])++;
-          info = get_info[task_id];
-        }
-        auto now(std::chrono::steady_clock::now());
-        LOG(kVerbose) << std::get<0>(info) << ", " << HexSubstr(data_name.value);
-        if (get_response.return_code && (std::get<1>(info) > now) &&
-            (std::get<0>(info) == routing::Parameters::group_size)) {
-          LOG(kVerbose) << "DoGet: Retry" << DebugId(data_name.value)
-                        << "return code" << get_response.return_code;
-          auto new_task_id(get_timer.NewTaskId());
-          {
-            std::lock_guard<std::mutex> lock(mutex);
-            get_info.insert(std::make_pair(new_task_id, std::make_tuple(0, std::get<1>(info))));
-            get_info.erase(task_id);
-          }
-          this->DoGet(data_name, new_task_id, op_data);
-        } else if (get_response.content) {
-          LOG(kVerbose) << "DoGet: Success" << DebugId(data_name.value);
-          {
-            std::lock_guard<std::mutex> lock(mutex);
-            get_info.erase(task_id);
-          }
-          op_data->HandleResponseContents(std::move(get_response));
-        }
-      },
-      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::group_size * 2, task_id);
+  get_timer.AddTask(timeout,
+                    [op_data, data_name](DataNameAndContentOrReturnCode get_response) {
+                       LOG(kVerbose) << "GetHandler Get HandleResponseContents for "
+                                     << HexSubstr(data_name.value);
+                       op_data->HandleResponseContents(std::move(get_response));
+                    },
+                    // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+                    routing::Parameters::group_size * 2, task_id);
   dispatcher.SendGetRequest(task_id, data_name);
 }
 
