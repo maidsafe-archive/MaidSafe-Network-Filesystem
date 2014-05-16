@@ -92,7 +92,8 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(Persona, int32_t,
     (PmidNode)
     (MpidManager)
     (VersionHandler)
-    (CacheHandler))
+    (CacheHandler)
+    (NA))
 
 template <Persona PersonaType>
 struct DestinationPersona {
