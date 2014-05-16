@@ -40,7 +40,8 @@ void GetHandler::AddResponse(routing::TaskId task_id,
       new_task_id = get_timer.NewTaskId();
       get_info.insert(std::make_pair(new_task_id,
                                      std::make_tuple(0, std::get<1>(get_info[task_id]),
-                                                     std::get<2>(get_info[task_id]))));
+                                                     std::get<2>(get_info[task_id]),
+                                                     std::get<3>(get_info[task_id]))));
       get_info.erase(task_id);
       operation = Operation::kSendRequest;
     } else  if (!response.return_code && !response.content) {
