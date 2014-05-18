@@ -142,15 +142,16 @@ void GetHandler::DoGet(const DataName& data_name,
         } else {
           if (timeout_count == 1) {
             auto new_task_id(get_timer.NewTaskId());
-            LOG(kVerbose) << "GetHandler::DoGet::Timer::Functor::Retry " << task_id;
+            LOG(kVerbose) << "GetHandler::DoGet::Timer::Functor::Retry " << task_id
+                          << " new task id: " << new_task_id;
             {
               std::lock_guard<std::mutex> lock(mutex);
-              get_info.insert(std::make_pair(new_task_id, std::make_tuple(0, task_id,
+              get_info.insert(std::make_pair(new_task_id, std::make_tuple(0, new_task_id,
                                              GetDataNameVariant(DataName::data_type::Tag::kValue,
                                                                 data_name.value), 0)));
             }
             DoGet(data_name, op_data, timeout, new_task_id);
-          } else if ((timeout_count == 0)) {
+          } else if (timeout_count == 0) {
             LOG(kVerbose) << "GetHandler::DoGet::Timer::Functor::Final::Timeout " << task_id;
             op_data->HandleResponseContents(std::move(response));
           }
