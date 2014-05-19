@@ -56,7 +56,7 @@ class GetHandlerVisitor : public boost::static_visitor<> {
 };
 
 class GetHandler {
-  typedef std::tuple<size_t, routing::TaskId, DataNameVariant, size_t> GetInfo;
+  typedef std::tuple<size_t, routing::TaskId, DataNameVariant> GetInfo;
   enum class Operation : int {
     kNoOperation = 0,
     kAddResponse = 1,
@@ -77,12 +77,6 @@ class GetHandler {
   void AddResponse(routing::TaskId task_id, const DataNameAndContentOrReturnCode& response);
 
  private:
-  template <typename DataName>
-  void DoGet(const DataName& data_name,
-             std::shared_ptr<nfs::OpData<DataNameAndContentOrReturnCode>> op_data,
-             const std::chrono::steady_clock::duration& timeout,
-             const routing::TaskId task_id);
-
   routing::Timer<DataNameAndContentOrReturnCode>& get_timer;
   MaidNodeDispatcher& dispatcher;
   std::map<routing::TaskId, GetInfo> get_info;
@@ -101,64 +95,16 @@ void GetHandler::Get(const DataName& data_name,
     std::lock_guard<std::mutex> lock(mutex);
     get_info.insert(std::make_pair(task_id, std::make_tuple(0, task_id,
                                    GetDataNameVariant(DataName::data_type::Tag::kValue,
-                                                      data_name.value), 1)));
+                                                      data_name.value))));
   }
-  DoGet(data_name, op_data, timeout, task_id);
-}
-
-template <typename DataName>
-void GetHandler::DoGet(const DataName& data_name,
-                       std::shared_ptr<nfs::OpData<DataNameAndContentOrReturnCode>> op_data,
-                       const std::chrono::steady_clock::duration& timeout,
-                       const routing::TaskId task_id) {
-  get_timer.AddTask(
-      timeout,
-      [op_data, data_name, timeout, task_id, this](DataNameAndContentOrReturnCode response) {
-        LOG(kVerbose) << "GetHandler Get HandleResponseContents for " << HexSubstr(data_name.value);
-        size_t timeout_count(2);
-        {
-          std::lock_guard<std::mutex> lock(this->mutex);
-          for (auto iter(std::begin(this->get_info)); iter != std::end(this->get_info);) {
-            if (std::get<1>(iter->second) == task_id) {
-              timeout_count = std::get<3>(iter->second);
-              this->get_info.erase(iter);
-              break;
-            } else {
-              iter++;
-            }
-          }
-        }
-        if (timeout_count == 2)
-          return;
-
-        LOG(kVerbose) << "GetHandler Get HandleResponseContents for "
-                      << HexSubstr(data_name.value) << ", "
-                      << timeout_count;
-
-        if (response.content) {
-          LOG(kVerbose) << "GetHandler::DoGet::Timer::Functor::Final::Data " << task_id;
-          op_data->HandleResponseContents(std::move(response));
-
-        } else {
-          if (timeout_count == 1) {
-            auto new_task_id(get_timer.NewTaskId());
-            LOG(kVerbose) << "GetHandler::DoGet::Timer::Functor::Retry " << task_id
-                          << " new task id: " << new_task_id;
-            {
-              std::lock_guard<std::mutex> lock(mutex);
-              get_info.insert(std::make_pair(new_task_id, std::make_tuple(0, new_task_id,
-                                             GetDataNameVariant(DataName::data_type::Tag::kValue,
-                                                                data_name.value), 0)));
-            }
-            DoGet(data_name, op_data, timeout, new_task_id);
-          } else if (timeout_count == 0) {
-            LOG(kVerbose) << "GetHandler::DoGet::Timer::Functor::Final::Timeout " << task_id;
-            op_data->HandleResponseContents(std::move(response));
-          }
-        }
-      },
-      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::group_size * 2, task_id);
+  get_timer.AddTask(timeout,
+                    [op_data, data_name](DataNameAndContentOrReturnCode get_response) {
+                       LOG(kVerbose) << "GetHandler Get HandleResponseContents for "
+                                     << HexSubstr(data_name.value);
+                       op_data->HandleResponseContents(std::move(get_response));
+                    },
+                    // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
+                    routing::Parameters::group_size * 2, task_id);
   dispatcher.SendGetRequest(task_id, data_name);
 }
 
