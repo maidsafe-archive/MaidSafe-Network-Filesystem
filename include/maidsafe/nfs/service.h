@@ -131,6 +131,10 @@ class Service {
     impl_->HandleMessage(message, sender, receiver);
   }
 
+  void Stop() {
+    impl_->Stop();
+  }
+
  private:
   typedef std::true_type IsVoid;
   typedef std::false_type IsNotVoid;
