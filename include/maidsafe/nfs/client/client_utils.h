@@ -27,7 +27,11 @@
 
 #include "maidsafe/common/data_types/structured_data_versions.h"
 
+#include "maidsafe/routing/timer.h"
+
+#include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/client/messages.h"
+#include "maidsafe/nfs/client/maid_node_dispatcher.h"
 
 namespace maidsafe {
 
@@ -40,6 +44,9 @@ struct HandleGetResult {
   void operator()(const DataNameAndContentOrReturnCode& result) const;
   std::shared_ptr<boost::promise<Data>> promise;
 };
+
+void HandlePutResponseResult(const ReturnCode& result,
+                             std::shared_ptr<boost::promise<void>> promise);
 
 void HandleGetVersionsOrBranchResult(
     const StructuredDataNameAndContentOrReturnCode& result,

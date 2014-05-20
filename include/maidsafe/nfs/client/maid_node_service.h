@@ -25,10 +25,13 @@
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
+#include "maidsafe/nfs/client/get_handler.h"
 
 namespace maidsafe {
 
 namespace nfs_client {
+
+class GetHandler;
 
 class MaidNodeService {
  public:
@@ -37,6 +40,7 @@ class MaidNodeService {
   typedef void HandleMessageReturnType;
 
   typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
+  typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
   typedef nfs::GetCachedResponseFromCacheHandlerToMaidNode GetCachedResponse;
   typedef nfs::PutFailureFromMaidManagerToMaidNode PutFailure;
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
@@ -50,6 +54,7 @@ class MaidNodeService {
 
   MaidNodeService(
       routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
+      routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer,
       routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
       routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer,
@@ -57,10 +62,14 @@ class MaidNodeService {
       routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>&
           create_version_tree_timer,
       routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer,
-      routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer);
+      routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer,
+      GetHandler& get_handler);
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
+
+  void HandleMessage(const PutResponse& message, const PutResponse::Sender& sender,
+                     const PutResponse::Receiver& receiver);
 
   void HandleMessage(const GetCachedResponse& message, const GetCachedResponse::Sender& sender,
                      const GetCachedResponse::Receiver& receiver);
@@ -99,6 +108,7 @@ class MaidNodeService {
 
   routing::Routing& routing_;
   routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer_;
+  routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer_;
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer_;
   routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer_;
   routing::Timer<MaidNodeService::CreateAccountResponse::Contents>& create_account_timer_;
@@ -106,6 +116,7 @@ class MaidNodeService {
   routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents>& create_version_tree_timer_;
   routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer_;
   routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer_;
+  GetHandler& get_handler_;
 };
 
 }  // namespace nfs_client

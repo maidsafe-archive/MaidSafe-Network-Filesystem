@@ -47,7 +47,8 @@ class MaidNodeDispatcher {
   void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
 
   template <typename Data>
-  void SendPutRequest(const Data& data, const passport::PublicPmid::Name& pmid_node_hint);
+  void SendPutRequest(routing::TaskId task_id, const Data& data,
+                      const passport::PublicPmid::Name& pmid_node_hint);
 
   template <typename DataName>
   void SendDeleteRequest(const DataName& data_name);
@@ -107,7 +108,8 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<typename DataName::data_type>::value ?
       routing::Cacheable::kGet : routing::Cacheable::kNone);
-  LOG(kVerbose) << "MaidNodeDispatcher::SendGetRequest for task_id " << task_id;
+  LOG(kVerbose) << "MaidNodeDispatcher::SendGetRequest for task_id " << task_id
+                << ", data name: " << HexSubstr(data_name->string());
   nfs::MessageId message_id(task_id);
   NfsMessage::Contents content(data_name);
   NfsMessage nfs_message(message_id, content);
@@ -117,7 +119,7 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
 }
 
 template <typename Data>
-void MaidNodeDispatcher::SendPutRequest(const Data& data,
+void MaidNodeDispatcher::SendPutRequest(routing::TaskId task_id, const Data& data,
                                         const passport::PublicPmid::Name& pmid_node_hint) {
   LOG(kVerbose) << "MaidNodeDispatcher::SendPutRequest for chunk "
                 << HexSubstr(data.name().value.string())
@@ -128,7 +130,7 @@ void MaidNodeDispatcher::SendPutRequest(const Data& data,
   NfsMessage::Contents contents;
   contents.data = nfs_vault::DataNameAndContent(data);
   contents.pmid_hint = pmid_node_hint.value;
-  NfsMessage nfs_message(contents);
+  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
   routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
