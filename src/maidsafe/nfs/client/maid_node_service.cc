@@ -64,6 +64,12 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
                 << HexSubstr(message.Serialise()) << " with content "
                 << HexSubstr(message.contents->Serialise());
 //   get_timer_.PrintTaskIds();
+  try {
+    if (receiver.data != routing_.kNodeId())
+      return;
+  } catch(...) {
+    return;
+  }
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   try {
