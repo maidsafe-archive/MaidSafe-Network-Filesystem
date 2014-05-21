@@ -106,6 +106,12 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
   LOG(kVerbose) << "MaidNodeService::HandleMessage GetCachedResponse "
                 << HexSubstr(message.Serialise()) << " with content "
                 << HexSubstr(message.contents->Serialise());
+  try {
+    if (receiver.data != routing_.kNodeId())
+      return;
+  } catch(...) {
+    return;
+  }
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   try {
