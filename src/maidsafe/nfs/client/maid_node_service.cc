@@ -130,6 +130,12 @@ void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
 void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
                                     const GetVersionsResponse::Sender& /*sender*/,
                                     const GetVersionsResponse::Receiver& receiver) {
+  try {
+    if (receiver.data != routing_.kNodeId())
+      return;
+  } catch(...) {
+    return;
+  }
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   try {
@@ -161,6 +167,12 @@ void MaidNodeService::HandleMessage(const PutVersionResponse& message,
 void MaidNodeService::HandleMessage(const GetBranchResponse& message,
                                     const GetBranchResponse::Sender& /*sender*/,
                                     const GetBranchResponse::Receiver& receiver) {
+  try {
+    if (receiver.data != routing_.kNodeId())
+      return;
+  } catch(...) {
+    return;
+  }
   assert(receiver.data == routing_.kNodeId());
   static_cast<void>(receiver);
   try {
