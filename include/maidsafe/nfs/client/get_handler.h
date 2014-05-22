@@ -86,7 +86,7 @@ class GetHandler {
 template <typename DataName>
 void GetHandler::Get(const DataName& data_name,
                      std::shared_ptr<boost::promise<typename DataName::data_type>> promise,
-           const std::chrono::steady_clock::duration& timeout) {
+                     const std::chrono::steady_clock::duration& timeout) {
   auto task_id(get_timer.NewTaskId());
   HandleGetResult<typename DataName::data_type> response_functor(promise);
   auto op_data(
