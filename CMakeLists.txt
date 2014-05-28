@@ -49,7 +49,7 @@ ms_glob_dir(Nfs ${NfsSourcesDir} Nfs)
 ms_glob_dir(NfsClient ${NfsSourcesDir}/client "Nfs Client")
 ms_glob_dir(NfsVault ${NfsSourcesDir}/vault "Nfs Vault")
 ms_glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
-
+list(REMOVE_ITEM NfsTestsAllFiles ${NfsSourcesDir}/tests/fake_store_test.cc ${NfsSourcesDir}/tests/fake_store.cc)
 
 #==================================================================================================#
 # Define MaidSafe libraries and executables                                                        #
@@ -66,7 +66,9 @@ target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(MaidsafeTesting)
   ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})
+  ms_add_executable(test_nfs "Tests/NFS" ${NfsSourcesDir}/tests/fake_store_test.cc ${NfsSourcesDir}/tests/fake_store.cc ${NfsSourcesDir}/tests/tests_main.cc)
   target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault)
+  target_link_libraries(test_nfs maidsafe_common)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(TESTnfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 endif()
@@ -86,6 +88,7 @@ include(standard_flags)
 if(MaidsafeTesting)
   ms_add_style_test()
   ms_add_gtests(TESTnfs)
+  ms_add_catch_tests(test_nfs)
   ms_add_project_experimental()
   ms_test_summary_output()
 endif()
