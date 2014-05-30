@@ -16,8 +16,7 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "fake_store.h"
-
+#include "maidsafe/nfs/client/fake_store.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
 #include "maidsafe/common/data_types/data_type_values.h"
@@ -25,6 +24,8 @@
 #include "maidsafe/common/data_types/mutable_data.h"
 
 namespace maidsafe {
+
+namespace nfs {
 
 namespace test {
 
@@ -96,6 +97,6 @@ TEST_CASE_METHOD(FakeStoreTest, "SuccessfulStore", "[Behavioural]") {
 }
 
 }  // namespace test
-
+}  // namespace nfs
 
 }  // namespace maidsafe

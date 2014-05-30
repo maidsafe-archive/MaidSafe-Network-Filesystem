@@ -16,7 +16,7 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "fake_store.h"
+#include "maidsafe/nfs/client/fake_store.h"
 
 #include <string>
 #include <vector>
@@ -30,6 +30,8 @@
 namespace fs = boost::filesystem;
 
 namespace maidsafe {
+
+namespace nfs {
 
 namespace {
 
@@ -358,5 +360,7 @@ void FakeStore::WriteVersions(const KeyType& key, const StructuredDataVersions& 
   Write(file_path, serialised_versions, value_size);
   current_disk_usage_.data += value_size;
 }
+
+}  // namespace nfs
 
 }  // namespace maidsafe

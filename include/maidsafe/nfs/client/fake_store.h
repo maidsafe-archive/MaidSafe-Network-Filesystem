@@ -44,6 +44,8 @@
 
 namespace maidsafe {
 
+namespace nfs {
+
 class FakeStore {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
@@ -296,6 +298,8 @@ void FakeStore::DeleteBranchUntilFork(const DataName& data_name,
     LOG(kError) << "Failed deleting branch: " << boost::diagnostic_information(e);
   }
 }
+
+}  // namespace nfs
 
 }  // namespace maidsafe
 
