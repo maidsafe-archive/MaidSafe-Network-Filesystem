@@ -16,8 +16,8 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#ifndef MAIDSAFE_NFS_TESTS_FAKE_STORE_H_
-#define MAIDSAFE_NFS_TESTS_FAKE_STORE_H_
+#ifndef MAIDSAFE_NFS_CLIENT_FAKE_STORE_H_
+#define MAIDSAFE_NFS_CLIENT_FAKE_STORE_H_
 
 #include <cstdint>
 #include <memory>
@@ -303,4 +303,4 @@ void FakeStore::DeleteBranchUntilFork(const DataName& data_name,
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_TESTS_FAKE_STORE_H_
+#endif  // MAIDSAFE_NFS_CLIENT_FAKE_STORE_H_
