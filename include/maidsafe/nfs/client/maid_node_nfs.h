@@ -53,7 +53,8 @@ class MaidNodeNfs {
   typedef boost::future<uint64_t> PmidHealthFuture;
 
   MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
-              passport::PublicPmid::Name pmid_node_hint);
+              passport::PublicPmid::Name pmid_node_hint =
+                  passport::PublicPmid::Name(Identity(RandomString(64))));
 
   passport::PublicPmid::Name pmid_node_hint() const;
   void set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint);
