@@ -29,6 +29,57 @@ namespace maidsafe {
 
 namespace nfs_client {
 
+void CreateAccount(std::shared_ptr<passport::Maid> maid,
+                   std::shared_ptr<passport::Anmaid> anmaid,
+                   std::shared_ptr<passport::Pmid> pmid,
+                   std::shared_ptr<MaidNodeNfs> client_nfs) {
+  passport::PublicPmid::Name pmid_name(Identity(pmid->name().value));
+  passport::PublicMaid public_maid(*maid);
+  {
+    passport::PublicAnmaid public_anmaid(*anmaid);
+    auto future(client_nfs->CreateAccount(nfs_vault::AccountCreation(public_maid,
+                                                                     public_anmaid)));
+    auto status(future.wait_for(boost::chrono::seconds(10)));
+    if (status == boost::future_status::timeout) {
+      std::cout << "can't create account" << std::endl;
+      BOOST_THROW_EXCEPTION(MakeError(VaultErrors::failed_to_handle_request));
+    }
+    if (future.has_exception()) {
+      try {
+        future.get();
+      } catch (const maidsafe_error& error) {
+        if (error.code() == make_error_code(VaultErrors::account_already_exists))
+          std::cout << "account already existed" << std::endl;
+      } catch (...) {
+        std::cout << "caught an unknown exception" << std::endl;
+      }
+      return;
+    }
+  }
+
+  // waiting for syncs resolved
+  boost::this_thread::sleep_for(boost::chrono::seconds(2));
+  std::cout << "Account created for maid " << HexSubstr(public_maid.name()->string())
+            << std::endl;
+  // before register pmid, need to store pmid to network first
+  client_nfs->Put(passport::PublicPmid(*pmid));
+  boost::this_thread::sleep_for(boost::chrono::seconds(2));
+
+  client_nfs->RegisterPmid(nfs_vault::PmidRegistration(*maid, *pmid, false));
+  boost::this_thread::sleep_for(boost::chrono::seconds(3));
+//   auto future(client_nfs->GetPmidHealth(pmid_name));
+//   auto status(future.wait_for(boost::chrono::seconds(3)));
+//   if (status == boost::future_status::timeout) {
+//     std::cout << "can't fetch pmid health" << std::endl;
+//     BOOST_THROW_EXCEPTION(MakeError(VaultErrors::failed_to_handle_request));
+//   }
+//   std::cout << "The fetched PmidHealth for pmid_name " << HexSubstr(pmid_name.value.string())
+//             << " is " << future.get() << std::endl;
+//   // waiting for the GetPmidHealth updating corresponding accounts
+//   boost::this_thread::sleep_for(boost::chrono::seconds(3));
+  LOG(kInfo) << "Pmid Registered created for the client node to store chunks";
+}
+
 MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
                          passport::PublicPmid::Name pmid_node_hint)
     : get_timer_(asio_service),

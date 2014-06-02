@@ -157,6 +157,11 @@ class MaidNodeNfs {
   GetHandler get_handler_;
 };
 
+void CreateAccount(std::shared_ptr<passport::Maid> maid,
+                   std::shared_ptr<passport::Anmaid> anmaid,
+                   std::shared_ptr<passport::Pmid> pmid,
+                   std::shared_ptr<MaidNodeNfs> client_nfs);
+
 // ==================== Implementation =============================================================
 template <typename DataName>
 boost::future<typename DataName::data_type> MaidNodeNfs::Get(
