@@ -25,10 +25,12 @@
 #include <string>
 #include <vector>
 
+#include "boost/signals2/signal.hpp"
 #include "boost/thread/future.hpp"
 
 #include "maidsafe/common/asio_service.h"
 #include "maidsafe/common/data_types/structured_data_versions.h"
+#include "maidsafe/passport/passport.h"
 #include "maidsafe/passport/types.h"
 #include "maidsafe/routing/parameters.h"
 #include "maidsafe/routing/routing_api.h"
@@ -46,7 +48,7 @@ namespace maidsafe {
 
 namespace nfs_client {
 
-class MaidNodeNfs {
+class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
   typedef boost::future<std::unique_ptr<StructuredDataVersions::VersionName>> PutVersionFuture;
@@ -55,6 +57,11 @@ class MaidNodeNfs {
   MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
               passport::PublicPmid::Name pmid_node_hint =
                   passport::PublicPmid::Name(Identity(RandomString(64))));
+
+  MaidNodeNfs(const passport::Maid& maid, const routing::BootstrapContacts& bootstrap_contacts);
+  // Creates account
+  MaidNodeNfs(const passport::MaidAndSigner& maid_and_signer,
+              const routing::BootstrapContacts& bootstrap_contacts);
 
   passport::PublicPmid::Name pmid_node_hint() const;
   void set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint);
@@ -125,11 +132,6 @@ class MaidNodeNfs {
                                  const std::chrono::steady_clock::duration& timeout =
                                      std::chrono::seconds(10));
 
-  // This should be the function used in the GroupToSingle (and maybe also SingleToSingle) functors
-  // passed to 'routing.Join'.
-  template <typename T>
-  void HandleMessage(const T& routing_message);
-
  private:
   typedef std::function<void(const DataNameAndContentOrReturnCode&)> GetFunctor;
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetVersionsFunctor;
@@ -141,6 +143,14 @@ class MaidNodeNfs {
   MaidNodeNfs(MaidNodeNfs&&);
   MaidNodeNfs& operator=(MaidNodeNfs);
 
+  void InitRouting(const routing::BootstrapContacts& bootstrap_contacts);
+  routing::Functors InitialiseRoutingCallbacks();
+  void OnNetworkStatusChange(int updated_network_health);
+
+  template <typename T>
+  void HandleMessage(const T& routing_message);
+
+  AsioService asio_service_;
   routing::Timer<MaidNodeService::GetResponse::Contents> get_timer_;
   routing::Timer<MaidNodeService::PutResponse::Contents> put_timer_;
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents> get_versions_timer_;
@@ -150,10 +160,15 @@ class MaidNodeNfs {
   routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents> create_version_tree_timer_;
   routing::Timer<MaidNodeService::PutVersionResponse::Contents> put_version_timer_;
   routing::Timer<MaidNodeService::RegisterPmidResponse::Contents> register_pmid_timer_;
+  std::mutex network_health_mutex_;
+  std::condition_variable network_health_condition_variable_;
+  int network_health_;
+  boost::signals2::signal<void(int32_t)> network_health_change_signal_;
+  passport::Maid maid_;
+  routing::Routing routing_;
+  nfs::detail::PublicPmidHelper public_pmid_helper_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
-  mutable std::mutex pmid_node_hint_mutex_;
-  passport::PublicPmid::Name pmid_node_hint_;
   GetHandler get_handler_;
 };
 

@@ -80,38 +80,130 @@ void CreateAccount(std::shared_ptr<passport::Maid> maid,
   LOG(kInfo) << "Pmid Registered created for the client node to store chunks";
 }
 
-MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
-                         passport::PublicPmid::Name pmid_node_hint)
-    : get_timer_(asio_service),
-      put_timer_(asio_service),
-      get_versions_timer_(asio_service),
-      get_branch_timer_(asio_service),
-      create_account_timer_(asio_service),
-      pmid_health_timer_(asio_service),
-      create_version_tree_timer_(asio_service),
-      put_version_timer_(asio_service),
-      register_pmid_timer_(asio_service),
-      dispatcher_(routing),
+
+MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid,
+                         const routing::BootstrapContacts& bootstrap_contacts)
+    : asio_service_(2),
+      get_timer_(asio_service_),
+      put_timer_(asio_service_),
+      get_versions_timer_(asio_service_),
+      get_branch_timer_(asio_service_),
+      create_account_timer_(asio_service_),
+      pmid_health_timer_(asio_service_),
+      create_version_tree_timer_(asio_service_),
+      put_version_timer_(asio_service_),
+      register_pmid_timer_(asio_service_),
+      network_health_change_signal_(),
+      maid_(maid),
+      routing_(maid_),
+      dispatcher_(routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
-            new MaidNodeService(routing, get_timer_, put_timer_, get_versions_timer_,
+            new MaidNodeService(routing_, get_timer_, put_timer_, get_versions_timer_,
                                 get_branch_timer_, create_account_timer_, pmid_health_timer_,
                                 create_version_tree_timer_, put_version_timer_,
                                 register_pmid_timer_, get_handler_));
         return std::move(service);
       }()),
-      pmid_node_hint_mutex_(),
-      pmid_node_hint_(pmid_node_hint),
-      get_handler_(get_timer_, dispatcher_) {}
-
-passport::PublicPmid::Name MaidNodeNfs::pmid_node_hint() const {
-  std::lock_guard<std::mutex> lock(pmid_node_hint_mutex_);
-  return pmid_node_hint_;
+      get_handler_(get_timer_, dispatcher_) {
+  InitRouting(bootstrap_contacts);
 }
 
-void MaidNodeNfs::set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint) {
-  std::lock_guard<std::mutex> lock(pmid_node_hint_mutex_);
-  pmid_node_hint_ = pmid_node_hint;
+
+MaidNodeNfs::MaidNodeNfs(const passport::MaidAndSigner& maid_and_signer,
+                         const routing::BootstrapContacts& bootstrap_contacts)
+    : asio_service_(2),
+      get_timer_(asio_service_),
+      put_timer_(asio_service_),
+      get_versions_timer_(asio_service_),
+      get_branch_timer_(asio_service_),
+      create_account_timer_(asio_service_),
+      pmid_health_timer_(asio_service_),
+      create_version_tree_timer_(asio_service_),
+      put_version_timer_(asio_service_),
+      register_pmid_timer_(asio_service_),
+      network_health_change_signal_(),
+      maid_(maid_and_signer.first),
+      routing_(maid_),
+      dispatcher_(routing_),
+      service_([&]()->std::unique_ptr<MaidNodeService> {
+        std::unique_ptr<MaidNodeService> service(
+            new MaidNodeService(routing_, get_timer_, put_timer_, get_versions_timer_,
+                                get_branch_timer_, create_account_timer_, pmid_health_timer_,
+                                create_version_tree_timer_, put_version_timer_,
+                                register_pmid_timer_, get_handler_));
+        return std::move(service);
+      }()),
+      get_handler_(get_timer_, dispatcher_) {
+  InitRouting(bootstrap_contacts);
+  LOG(kInfo) << "Routing Initialised";
+  passport::PublicMaid public_maid{ maid_ };
+  passport::PublicAnmaid public_anmaid{ maid_and_signer.second };
+  LOG(kInfo) << "Calling CreateAccount for maid ID:" << DebugId(public_maid.name());
+  nfs_vault::AccountCreation account_creation{ public_maid, public_anmaid };
+  auto create_account_future = CreateAccount(account_creation);
+  create_account_future.get();
+  LOG(kInfo) << " CreateAccount for maid ID:" << DebugId(public_maid.name()) << " succeeded.";
+}
+
+void MaidNodeNfs::InitRouting(const routing::BootstrapContacts& bootstrap_contacts) {
+  routing::Functors functors(InitialiseRoutingCallbacks());
+  routing_.Join(functors, bootstrap_contacts);
+  std::unique_lock<std::mutex> lock(network_health_mutex_);
+  // FIXME BEFORE_RELEASE discuss this
+  // This should behave differently. In case of new maid account, it should timeout
+  // For existing clients, should we try infinitly ?
+  network_health_condition_variable_.wait(lock, [this] { return network_health_ >= 100; });
+}
+
+routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
+  routing::Functors functors;
+  std::shared_ptr<MaidNodeNfs> this_ptr{ shared_from_this() };
+  functors.typed_message_and_caching.single_to_single.message_received =
+      [this_ptr](const routing::SingleToSingleMessage& message) {
+        this_ptr->HandleMessage(message);
+      };
+
+  functors.typed_message_and_caching.group_to_single.message_received =
+      [this_ptr](const routing::GroupToSingleMessage& message) {
+        this_ptr->HandleMessage(message);
+      };
+
+  functors.network_status =
+      [this_ptr](const int& network_health) { this_ptr->OnNetworkStatusChange(network_health); };
+  functors.matrix_changed = [](std::shared_ptr<routing::MatrixChange> /*matrix_change*/) {};
+  functors.request_public_key = [this_ptr](const NodeId& node_id,
+                                       const routing::GivePublicKeyFunctor& give_key) {
+    auto future_key(this_ptr->Get(passport::PublicPmid::Name{ Identity{ node_id.string() } },
+                                        std::chrono::seconds(10)));
+    this_ptr->public_pmid_helper_.AddEntry(std::move(future_key), give_key);
+  };
+
+  // TODO(Prakash) fix routing asserts for clients so client need not to provide callbacks for all
+  // functors
+  functors.typed_message_and_caching.single_to_group.message_received =
+      [this](const routing::SingleToGroupMessage& /*message*/) {};
+  functors.typed_message_and_caching.group_to_group.message_received =
+      [this](const routing::GroupToGroupMessage& /*message*/) {};
+  functors.typed_message_and_caching.single_to_group_relay.message_received =
+      [this](const routing::SingleToGroupRelayMessage& /*message*/) {};
+  functors.typed_message_and_caching.single_to_group.put_cache_data =
+      [this](const routing::SingleToGroupMessage& /*message*/) {};
+  functors.typed_message_and_caching.group_to_single.put_cache_data =
+      [this](const routing::GroupToSingleMessage& /*message*/) {};
+  functors.typed_message_and_caching.group_to_group.put_cache_data =
+      [this](const routing::GroupToGroupMessage& /*message*/) {};
+  functors.new_bootstrap_contact =
+      [this](const routing::BootstrapContact& /*bootstrap_contact*/) {};
+
+  return functors;
+}
+
+void MaidNodeNfs::OnNetworkStatusChange(int updated_network_health) {
+  asio_service_.service().post([=] {
+    routing::UpdateNetworkHealth(updated_network_health, network_health_, network_health_mutex_,
+                                 network_health_condition_variable_, routing_.kNodeId());
+  });
 }
 
 boost::future<void> MaidNodeNfs::CreateAccount(
