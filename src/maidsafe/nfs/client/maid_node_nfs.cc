@@ -48,7 +48,8 @@ void CreateAccount(std::shared_ptr<passport::Maid> maid,
       try {
         future.get();
       } catch (const maidsafe_error& error) {
-        if (error.code() == make_error_code(VaultErrors::account_already_exists))
+        if (error.code() == make_error_code(VaultErrors::account_already_exists) ||
+            error.code() == make_error_code(VaultErrors::unique_data_clash))
           std::cout << "account already existed" << std::endl;
       } catch (...) {
         std::cout << "caught an unknown exception" << std::endl;
