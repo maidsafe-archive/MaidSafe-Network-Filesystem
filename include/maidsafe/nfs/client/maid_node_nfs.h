@@ -54,14 +54,22 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef boost::future<std::unique_ptr<StructuredDataVersions::VersionName>> PutVersionFuture;
   typedef boost::future<uint64_t> PmidHealthFuture;
 
+  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::Maid& maid,
+      const routing::BootstrapContacts& bootstrap_contacts);
+  // Creates account
+  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::MaidAndSigner& maid_and_signer,
+      const routing::BootstrapContacts& bootstrap_contacts);
+
   MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
               passport::PublicPmid::Name pmid_node_hint =
                   passport::PublicPmid::Name(Identity(RandomString(64))));
 
-  MaidNodeNfs(const passport::Maid& maid, const routing::BootstrapContacts& bootstrap_contacts);
-  // Creates account
-  MaidNodeNfs(const passport::MaidAndSigner& maid_and_signer,
-              const routing::BootstrapContacts& bootstrap_contacts);
+  void Init(const passport::MaidAndSigner& maid_and_signer,
+            const routing::BootstrapContacts& bootstrap_contacts);
+
+  void Init(const routing::BootstrapContacts& bootstrap_contacts);
+
+  void Stop();
 
   passport::PublicPmid::Name pmid_node_hint() const;
   void set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint);
@@ -139,6 +147,10 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef boost::promise<std::vector<StructuredDataVersions::VersionName>> VersionNamesPromise;
   typedef std::function<void(const AvailableSizeAndReturnCode&)> PmidHealthFunctor;
 
+  MaidNodeNfs(const passport::Maid& maid);
+  MaidNodeNfs(const passport::MaidAndSigner& maid_and_signer,
+              const routing::BootstrapContacts& bootstrap_contacts);
+
   MaidNodeNfs(const MaidNodeNfs&);
   MaidNodeNfs(MaidNodeNfs&&);
   MaidNodeNfs& operator=(MaidNodeNfs);
@@ -164,7 +176,6 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   std::condition_variable network_health_condition_variable_;
   int network_health_;
   boost::signals2::signal<void(int32_t)> network_health_change_signal_;
-  passport::Maid maid_;
   routing::Routing routing_;
   nfs::detail::PublicPmidHelper public_pmid_helper_;
   MaidNodeDispatcher dispatcher_;
