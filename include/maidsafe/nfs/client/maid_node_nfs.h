@@ -159,7 +159,6 @@ class MaidNodeNfs {
 
 void CreateAccount(std::shared_ptr<passport::Maid> maid,
                    std::shared_ptr<passport::Anmaid> anmaid,
-                   std::shared_ptr<passport::Pmid> pmid,
                    std::shared_ptr<MaidNodeNfs> client_nfs);
 
 // ==================== Implementation =============================================================
