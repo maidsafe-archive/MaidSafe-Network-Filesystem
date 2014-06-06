@@ -32,7 +32,7 @@ namespace nfs_client {
 
 std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(const passport::Maid& maid,
     const routing::BootstrapContacts& bootstrap_contacts) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid, bootstrap_contacts } };
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid } };
   maid_node_ptr->Init(bootstrap_contacts);
   return maid_node_ptr;
 }
@@ -144,7 +144,6 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
       [this](const routing::GroupToGroupMessage& /*message*/) {};
   functors.new_bootstrap_contact =
       [this](const routing::BootstrapContact& /*bootstrap_contact*/) {};
-
   return functors;
 }
 

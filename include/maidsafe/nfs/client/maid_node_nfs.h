@@ -64,10 +64,6 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
               passport::PublicPmid::Name pmid_node_hint =
                   passport::PublicPmid::Name(Identity(RandomString(64))));
 
-  void Init(const passport::MaidAndSigner& maid_and_signer,
-            const routing::BootstrapContacts& bootstrap_contacts);
-
-  void Init(const routing::BootstrapContacts& bootstrap_contacts);
 
   void Stop();
 
@@ -154,6 +150,11 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   MaidNodeNfs(const MaidNodeNfs&);
   MaidNodeNfs(MaidNodeNfs&&);
   MaidNodeNfs& operator=(MaidNodeNfs);
+
+  void Init(const passport::MaidAndSigner& maid_and_signer,
+            const routing::BootstrapContacts& bootstrap_contacts);
+
+  void Init(const routing::BootstrapContacts& bootstrap_contacts);
 
   void InitRouting(const routing::BootstrapContacts& bootstrap_contacts);
   routing::Functors InitialiseRoutingCallbacks();
