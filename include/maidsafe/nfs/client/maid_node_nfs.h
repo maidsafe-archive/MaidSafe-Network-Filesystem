@@ -67,9 +67,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
 
   void Stop();
 
-  passport::PublicPmid::Name pmid_node_hint() const;
-  void set_pmid_node_hint(const passport::PublicPmid::Name& pmid_node_hint);
-
+  // RPCs
   template <typename DataName>
   boost::future<typename DataName::data_type> Get(
       const DataName& data_name,
