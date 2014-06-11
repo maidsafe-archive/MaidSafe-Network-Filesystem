@@ -55,6 +55,8 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
   typedef boost::future<std::unique_ptr<StructuredDataVersions::VersionName>> PutVersionFuture;
   typedef boost::future<uint64_t> PmidHealthFuture;
+  typedef boost::signals2::signal<void(int32_t)> OnNetworkHealthChange;
+
   // Logging in for already existing maid accounts
   static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::Maid& maid,
       const routing::BootstrapContacts& bootstrap_contacts);
@@ -64,7 +66,9 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   // Disconnects from network and all unfinished tasks will be cancelled
   void Stop();
 
-  // RPCs
+  OnNetworkHealthChange& network_health_change_signal();
+
+  //========================== Data accessors and mutators =========================================
   template <typename DataName>
   boost::future<typename DataName::data_type> Get(
       const DataName& data_name,
@@ -121,7 +125,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
 
   void RemoveAccount(const nfs_vault::AccountRemoval& account_removal);
 
-  boost::future<void> RegisterPmid(const nfs_vault::PmidRegistration& pmid_registration,
+  boost::future<void> RegisterPmid(const passport::Pmid& pmid,
                                    const std::chrono::steady_clock::duration& timeout =
                                        std::chrono::seconds(10));
 
@@ -173,6 +177,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   template <typename T>
   void HandleMessage(const T& routing_message);
 
+  const passport::Maid kMaid_;
   AsioService asio_service_;
   routing::Timer<MaidNodeService::GetResponse::Contents> get_timer_;
   routing::Timer<MaidNodeService::PutResponse::Contents> put_timer_;
@@ -186,7 +191,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   std::mutex network_health_mutex_;
   std::condition_variable network_health_condition_variable_;
   int network_health_;
-  boost::signals2::signal<void(int32_t)> network_health_change_signal_;
+  OnNetworkHealthChange network_health_change_signal_;
   routing::Routing routing_;
   nfs::detail::PublicPmidHelper public_pmid_helper_;
   MaidNodeDispatcher dispatcher_;

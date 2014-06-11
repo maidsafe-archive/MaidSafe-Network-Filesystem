@@ -125,7 +125,8 @@ void MaidNodeNfs::Init(const routing::BootstrapContacts& bootstrap_contacts) {
 }
 
 MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
-    : asio_service_(2),
+    : kMaid_(maid),
+      asio_service_(2),
       get_timer_(asio_service_),
       put_timer_(asio_service_),
       get_versions_timer_(asio_service_),
@@ -136,7 +137,7 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
       put_version_timer_(asio_service_),
       register_pmid_timer_(asio_service_),
       network_health_change_signal_(),
-      routing_(maid),
+      routing_(kMaid_),
       dispatcher_(routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
@@ -151,6 +152,10 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
 
 void MaidNodeNfs::Stop() {
   asio_service_.Stop();
+}
+
+MaidNodeNfs::OnNetworkHealthChange& MaidNodeNfs::network_health_change_signal() {
+  return network_health_change_signal_;
 }
 
 void MaidNodeNfs::InitRouting(const routing::BootstrapContacts& bootstrap_contacts,
@@ -243,9 +248,9 @@ void MaidNodeNfs::RemoveAccount(const nfs_vault::AccountRemoval& account_removal
   dispatcher_.SendRemoveAccountRequest(account_removal);
 }
 
-boost::future<void> MaidNodeNfs::RegisterPmid(
-    const nfs_vault::PmidRegistration& pmid_registration,
-    const std::chrono::steady_clock::duration& timeout) {
+boost::future<void> MaidNodeNfs::RegisterPmid(const passport::Pmid& pmid,
+                                              const std::chrono::steady_clock::duration& timeout) {
+  nfs_vault::PmidRegistration pmid_registration{ kMaid_, pmid, false };
   typedef MaidNodeService::RegisterPmidResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
   auto response_functor([promise](const ResponseContents &result) {
