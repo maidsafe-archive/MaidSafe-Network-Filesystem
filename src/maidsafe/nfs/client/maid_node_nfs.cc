@@ -30,6 +30,42 @@ namespace maidsafe {
 
 namespace nfs_client {
 
+namespace {
+
+// NOTE: methods - MakeSharedZeroState() GivePublicPmidKey() & UpdateRequestPublicKeyFunctor()
+// are used for ZeroState network setup only.
+// This allows a cleint to lookup *only* in a provided public pmid list, when it is
+// validating a peer while connecting.
+void GivePublicPmidKey(const NodeId& node_id, routing::GivePublicKeyFunctor give_key,
+                       const std::vector<passport::PublicPmid>& public_pmids) {
+  assert(!public_pmids.empty());
+  passport::PublicPmid::Name name(Identity(node_id.string()));
+  LOG(kVerbose) << "fetch from local list containing "
+                << public_pmids.size() << " pmids";
+  auto itr(std::find_if(
+      std::begin(public_pmids), std::end(public_pmids),
+      [&name](const passport::PublicPmid & pmid) { return pmid.name() == name; }));
+  if (itr == public_pmids.end()) {
+    LOG(kError) << "can't Get PublicPmid " << HexSubstr(name.value)
+                << " from local list";
+    assert(false);
+  } else {
+    LOG(kVerbose) << "Got PublicPmid from local list " << HexSubstr(name.value);
+    give_key((*itr).public_key());
+  }
+}
+
+void UpdateRequestPublicKeyFunctor(routing::RequestPublicKeyFunctor& request_public_key,
+                                   const std::vector<passport::PublicPmid>& public_pmids) {
+  LOG(kInfo) << " Zero state UpdateRequestPublicKeyFunctor";
+  request_public_key = [=](const NodeId& node_id, const routing::GivePublicKeyFunctor& give_key) {
+                         GivePublicPmidKey(node_id, give_key, public_pmids);
+                       };
+}
+
+}  // anonymous namespace
+
+
 std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(const passport::Maid& maid,
     const routing::BootstrapContacts& bootstrap_contacts) {
   std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid } };
@@ -45,18 +81,41 @@ std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(
   return maid_node_ptr;
 }
 
+std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeSharedZeroState(
+    const passport::MaidAndSigner& maid_and_signer,
+    const routing::BootstrapContacts& bootstrap_contacts,
+    const std::vector<passport::PublicPmid>& public_pmids) {
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first } };
+  maid_node_ptr->InitZeroState(maid_and_signer, bootstrap_contacts, public_pmids);
+  return maid_node_ptr;
+}
+
 void MaidNodeNfs::Init(const passport::MaidAndSigner& maid_and_signer,
                        const routing::BootstrapContacts& bootstrap_contacts) {
   on_scope_exit cleanup_on_error([&] { Stop(); });
   InitRouting(bootstrap_contacts);
-  passport::PublicMaid public_maid{ maid_and_signer.first };
-  passport::PublicAnmaid public_anmaid{ maid_and_signer.second };
+  CreateAccount(passport::PublicMaid{ maid_and_signer.first },
+                passport::PublicAnmaid{ maid_and_signer.second });
+  cleanup_on_error.Release();
+}
+
+void MaidNodeNfs::InitZeroState(const passport::MaidAndSigner& maid_and_signer,
+                                const routing::BootstrapContacts& bootstrap_contacts,
+                                const std::vector<passport::PublicPmid>& public_pmids) {
+  on_scope_exit cleanup_on_error([&] { Stop(); });
+  InitRouting(bootstrap_contacts, public_pmids);
+  CreateAccount(passport::PublicMaid{ maid_and_signer.first },
+                passport::PublicAnmaid{ maid_and_signer.second });
+  cleanup_on_error.Release();
+}
+
+void MaidNodeNfs::CreateAccount(const passport::PublicMaid& public_maid,
+                                const passport::PublicAnmaid& public_anmaid) {
   LOG(kInfo) << "Calling CreateAccount for maid ID:" << DebugId(public_maid.name());
   nfs_vault::AccountCreation account_creation{ public_maid, public_anmaid };
   auto create_account_future = CreateAccount(account_creation);
   create_account_future.get();
   LOG(kInfo) << " CreateAccount for maid ID:" << DebugId(public_maid.name()) << " succeeded.";
-  cleanup_on_error.Release();
 }
 
 void MaidNodeNfs::Init(const routing::BootstrapContacts& bootstrap_contacts) {
@@ -94,8 +153,13 @@ void MaidNodeNfs::Stop() {
   asio_service_.Stop();
 }
 
-void MaidNodeNfs::InitRouting(const routing::BootstrapContacts& bootstrap_contacts) {
+void MaidNodeNfs::InitRouting(const routing::BootstrapContacts& bootstrap_contacts,
+                              std::vector<passport::PublicPmid> public_pmids) {
   routing::Functors functors(InitialiseRoutingCallbacks());
+  if (!public_pmids.empty()) {
+    UpdateRequestPublicKeyFunctor(functors.request_public_key, public_pmids);
+    LOG(kInfo) << "Modified RequestPublicKeyFunctor for Zero state client";
+  }
   LOG(kInfo) << "after  InitialiseRoutingCallbacks";
   routing_.Join(functors, bootstrap_contacts);
   LOG(kInfo) << "after  routing_.Join()";
