@@ -93,3 +93,18 @@ if(MaidsafeTesting)
   ms_add_project_experimental()
   ms_test_summary_output()
 endif()
+
+
+#==================================================================================================#
+# Package                                                                                          #
+#==================================================================================================#
+set(EXPORT_NAME maidsafe_nfs_core)
+install(TARGETS maidsafe_nfs_core EXPORT ${EXPORT_NAME} ARCHIVE DESTINATION lib)
+set(EXPORT_NAME maidsafe_nfs_client)
+install(TARGETS maidsafe_nfs_client EXPORT ${EXPORT_NAME} ARCHIVE DESTINATION lib)
+set(EXPORT_NAME maidsafe_nfs_vault)
+install(TARGETS maidsafe_nfs_vault EXPORT ${EXPORT_NAME} ARCHIVE DESTINATION lib)
+
+install(FILES ${NfsApi} DESTINATION include/maidsafe/nfs)
+install(FILES ${NfsClientApi} DESTINATION include/maidsafe/nfs/client)
+install(FILES ${NfsVaultApi} DESTINATION include/maidsafe/nfs/vault)

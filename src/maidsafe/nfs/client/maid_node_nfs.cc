@@ -29,6 +29,38 @@ namespace maidsafe {
 
 namespace nfs_client {
 
+void CreateAccount(std::shared_ptr<passport::Maid> maid,
+                   std::shared_ptr<passport::Anmaid> anmaid,
+                   std::shared_ptr<MaidNodeNfs> client_nfs) {
+  passport::PublicMaid public_maid(*maid);
+  {
+    passport::PublicAnmaid public_anmaid(*anmaid);
+    auto future(client_nfs->CreateAccount(nfs_vault::AccountCreation(public_maid,
+                                                                     public_anmaid)));
+    auto status(future.wait_for(boost::chrono::seconds(10)));
+    if (status == boost::future_status::timeout) {
+      std::cout << "can't create account" << std::endl;
+      BOOST_THROW_EXCEPTION(MakeError(VaultErrors::failed_to_handle_request));
+    }
+    if (future.has_exception()) {
+      try {
+        future.get();
+      } catch (const maidsafe_error& error) {
+        if (error.code() == make_error_code(VaultErrors::account_already_exists) ||
+            error.code() == make_error_code(VaultErrors::unique_data_clash))
+          std::cout << "account already existed" << std::endl;
+      } catch (...) {
+        std::cout << "caught an unknown exception" << std::endl;
+      }
+      return;
+    }
+  }
+  // waiting for syncs resolved
+  boost::this_thread::sleep_for(boost::chrono::seconds(5));
+  std::cout << "Account created for maid " << HexSubstr(public_maid.name()->string())
+            << std::endl;
+}
+
 MaidNodeNfs::MaidNodeNfs(AsioService& asio_service, routing::Routing& routing,
                          passport::PublicPmid::Name pmid_node_hint)
     : get_timer_(asio_service),
