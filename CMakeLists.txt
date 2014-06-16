@@ -66,7 +66,7 @@ target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(MaidsafeTesting)
   ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})
-  target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault)
+  target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(TESTnfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 endif()
@@ -94,13 +94,10 @@ endif()
 #==================================================================================================#
 # Package                                                                                          #
 #==================================================================================================#
-set(EXPORT_NAME maidsafe_nfs_core)
-install(TARGETS maidsafe_nfs_core EXPORT ${EXPORT_NAME} ARCHIVE DESTINATION lib)
-set(EXPORT_NAME maidsafe_nfs_client)
-install(TARGETS maidsafe_nfs_client EXPORT ${EXPORT_NAME} ARCHIVE DESTINATION lib)
-set(EXPORT_NAME maidsafe_nfs_vault)
-install(TARGETS maidsafe_nfs_vault EXPORT ${EXPORT_NAME} ARCHIVE DESTINATION lib)
+install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault COMPONENT Development CONFIGURATIONS Debug Release ARCHIVE DESTINATION lib)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ COMPONENT Development DESTINATION include)
 
-install(FILES ${NfsApi} DESTINATION include/maidsafe/nfs)
-install(FILES ${NfsClientApi} DESTINATION include/maidsafe/nfs/client)
-install(FILES ${NfsVaultApi} DESTINATION include/maidsafe/nfs/vault)
+if(MaidsafeTesting)
+  install(TARGETS TESTnfs COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
+  install(TARGETS TESTnfs COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
+endif()
