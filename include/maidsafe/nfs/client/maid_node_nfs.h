@@ -26,7 +26,15 @@
 #include <vector>
 
 #include "boost/signals2/signal.hpp"
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
+
 #include "boost/thread/future.hpp"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include "maidsafe/common/asio_service.h"
 #include "maidsafe/common/data_types/structured_data_versions.h"
@@ -206,7 +214,6 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
 
 void CreateAccount(std::shared_ptr<passport::Maid> maid,
                    std::shared_ptr<passport::Anmaid> anmaid,
-                   std::shared_ptr<passport::Pmid> pmid,
                    std::shared_ptr<MaidNodeNfs> client_nfs);
 
 // ==================== Implementation =============================================================
