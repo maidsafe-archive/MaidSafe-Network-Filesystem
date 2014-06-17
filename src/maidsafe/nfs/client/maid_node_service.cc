@@ -34,8 +34,8 @@ std::error_code InvalidParameter() {
 
 }  // unnamed namespace
 
-MaidNodeService::MaidNodeService(
-    routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
+MaidNodeService::MaidNodeService(const routing::SingleId& receiver,
+    routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
     routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer,
     routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
     routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
@@ -45,7 +45,7 @@ MaidNodeService::MaidNodeService(
     routing::Timer<MaidNodeService::PutVersionResponse::Contents>& put_version_timer,
     routing::Timer<MaidNodeService::RegisterPmidResponse::Contents>& register_pmid_timer,
     GetHandler& get_handler)
-        : routing_(routing),
+        : kReceiver_(receiver),
           get_timer_(get_timer),
           put_timer_(put_timer),
           get_versions_timer_(get_versions_timer),
@@ -63,14 +63,7 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
   LOG(kVerbose) << "MaidNodeService::HandleMessage GetResponse "
                 << HexSubstr(message.Serialise()) << " with content "
                 << HexSubstr(message.contents->Serialise());
-//   get_timer_.PrintTaskIds();
-  try {
-    if (receiver.data != routing_.kNodeId())
-      return;
-  } catch(...) {
-    return;
-  }
-  assert(receiver.data == routing_.kNodeId());
+  assert(receiver == kReceiver_);
   static_cast<void>(receiver);
   try {
     get_handler_.AddResponse(message.id.data, *message.contents);
@@ -87,7 +80,7 @@ void MaidNodeService::HandleMessage(const PutResponse& message,
                                     const PutResponse::Sender& /*sender*/,
                                     const PutResponse::Receiver& receiver) {
   LOG(kVerbose) << "MaidNodeService::HandleMessage PutResponse " << message.id;
-  assert(receiver.data == routing_.kNodeId());
+  assert(receiver == kReceiver_);
   static_cast<void>(receiver);
   try {
     put_timer_.AddResponse(message.id.data, *message.contents);
@@ -106,13 +99,7 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
   LOG(kVerbose) << "MaidNodeService::HandleMessage GetCachedResponse "
                 << HexSubstr(message.Serialise()) << " with content "
                 << HexSubstr(message.contents->Serialise());
-  try {
-    if (receiver.data != routing_.kNodeId())
-      return;
-  } catch(...) {
-    return;
-  }
-  assert(receiver.data == routing_.kNodeId());
+  assert(receiver == kReceiver_);
   static_cast<void>(receiver);
   try {
     get_handler_.AddResponse(message.id.data, *message.contents);
@@ -136,13 +123,7 @@ void MaidNodeService::HandleMessage(const PutFailure& /*message*/,
 void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
                                     const GetVersionsResponse::Sender& /*sender*/,
                                     const GetVersionsResponse::Receiver& receiver) {
-  try {
-    if (receiver.data != routing_.kNodeId())
-      return;
-  } catch(...) {
-    return;
-  }
-  assert(receiver.data == routing_.kNodeId());
+  assert(receiver == kReceiver_);
   static_cast<void>(receiver);
   try {
     get_versions_timer_.AddResponse(message.id.data, *message.contents);
@@ -173,13 +154,7 @@ void MaidNodeService::HandleMessage(const PutVersionResponse& message,
 void MaidNodeService::HandleMessage(const GetBranchResponse& message,
                                     const GetBranchResponse::Sender& /*sender*/,
                                     const GetBranchResponse::Receiver& receiver) {
-  try {
-    if (receiver.data != routing_.kNodeId())
-      return;
-  } catch(...) {
-    return;
-  }
-  assert(receiver.data == routing_.kNodeId());
+  assert(receiver == kReceiver_);
   static_cast<void>(receiver);
   try {
     get_branch_timer_.AddResponse(message.id.data, *message.contents);

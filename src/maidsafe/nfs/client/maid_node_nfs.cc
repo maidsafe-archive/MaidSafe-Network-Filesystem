@@ -21,6 +21,7 @@
 #include "maidsafe/common/on_scope_exit.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
+#include "maidsafe/common/make_unique.h"
 
 #include "maidsafe/nfs/vault/account_creation.h"
 #include "maidsafe/nfs/vault/account_removal.h"
@@ -137,20 +138,38 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
       put_version_timer_(asio_service_),
       register_pmid_timer_(asio_service_),
       network_health_change_signal_(),
-      routing_(kMaid_),
-      dispatcher_(routing_),
+      routing_(maidsafe::make_unique<routing::Routing>(kMaid_)),
+      dispatcher_(*routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
-            new MaidNodeService(routing_, get_timer_, put_timer_, get_versions_timer_,
-                                get_branch_timer_, create_account_timer_, pmid_health_timer_,
-                                create_version_tree_timer_, put_version_timer_,
+            new MaidNodeService(routing::SingleId(routing_->kNodeId()), get_timer_, put_timer_,
+                                get_versions_timer_, get_branch_timer_, create_account_timer_,
+                                pmid_health_timer_, create_version_tree_timer_, put_version_timer_,
                                 register_pmid_timer_, get_handler_));
         return std::move(service);
       }()),
       get_handler_(get_timer_, dispatcher_) {
 }
 
+MaidNodeNfs::~MaidNodeNfs() {
+  LOG(kError) << "~MaidNodeNfs ";
+}
+
 void MaidNodeNfs::Stop() {
+  // Stop dispatcher
+  // reset routing
+  // cancel timers
+  dispatcher_.Stop();
+  routing_.reset();
+  get_timer_.CancelAll();
+  put_timer_.CancelAll();
+  get_versions_timer_.CancelAll();
+  get_branch_timer_.CancelAll();
+  create_account_timer_.CancelAll();
+  pmid_health_timer_.CancelAll();
+  create_version_tree_timer_.CancelAll();
+  put_version_timer_.CancelAll();
+  register_pmid_timer_.CancelAll();
   asio_service_.Stop();
 }
 
@@ -166,7 +185,7 @@ void MaidNodeNfs::InitRouting(const routing::BootstrapContacts& bootstrap_contac
     LOG(kInfo) << "Modified RequestPublicKeyFunctor for Zero state client";
   }
   LOG(kInfo) << "after  InitialiseRoutingCallbacks";
-  routing_.Join(functors, bootstrap_contacts);
+  routing_->Join(functors, bootstrap_contacts);
   LOG(kInfo) << "after  routing_.Join()";
   std::unique_lock<std::mutex> lock(network_health_mutex_);
   // FIXME BEFORE_RELEASE discuss this
@@ -180,11 +199,11 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
   std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
   functors.typed_message_and_caching.single_to_single.message_received =
       [=](const routing::SingleToSingleMessage& message) {
-        this_ptr->HandleMessage(message);
+        this_ptr->OnMessageReceived(message);
       };
   functors.typed_message_and_caching.group_to_single.message_received =
       [this_ptr](const routing::GroupToSingleMessage& message) {
-        this_ptr->HandleMessage(message);
+        this_ptr->OnMessageReceived(message);
       };
 
   functors.network_status =
@@ -200,26 +219,27 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
   // TODO(Prakash) fix routing asserts for clients so client need not to provide callbacks for all
   // functors
   functors.typed_message_and_caching.single_to_group.message_received =
-      [this](const routing::SingleToGroupMessage& /*message*/) {};
+      [](const routing::SingleToGroupMessage& /*message*/) {};
   functors.typed_message_and_caching.group_to_group.message_received =
-      [this](const routing::GroupToGroupMessage& /*message*/) {};
+      [](const routing::GroupToGroupMessage& /*message*/) {};
   functors.typed_message_and_caching.single_to_group_relay.message_received =
-      [this](const routing::SingleToGroupRelayMessage& /*message*/) {};
+      [](const routing::SingleToGroupRelayMessage& /*message*/) {};
   functors.typed_message_and_caching.single_to_group.put_cache_data =
-      [this](const routing::SingleToGroupMessage& /*message*/) {};
+      [](const routing::SingleToGroupMessage& /*message*/) {};
   functors.typed_message_and_caching.group_to_single.put_cache_data =
-      [this](const routing::GroupToSingleMessage& /*message*/) {};
+      [](const routing::GroupToSingleMessage& /*message*/) {};
   functors.typed_message_and_caching.group_to_group.put_cache_data =
-      [this](const routing::GroupToGroupMessage& /*message*/) {};
+      [](const routing::GroupToGroupMessage& /*message*/) {};
   functors.new_bootstrap_contact =
-      [this](const routing::BootstrapContact& /*bootstrap_contact*/) {};
+      [](const routing::BootstrapContact& /*bootstrap_contact*/) {};
   return functors;
 }
 
 void MaidNodeNfs::OnNetworkStatusChange(int updated_network_health) {
   asio_service_.service().post([=] {
     routing::UpdateNetworkHealth(updated_network_health, network_health_, network_health_mutex_,
-                                 network_health_condition_variable_, routing_.kNodeId());
+                                 network_health_condition_variable_,
+                                 NodeId(kMaid_.name()->string()));
   });
 }
 

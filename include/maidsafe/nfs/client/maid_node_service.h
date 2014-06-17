@@ -53,7 +53,8 @@ class MaidNodeService {
 
 
   MaidNodeService(
-      routing::Routing& routing, routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
+      const routing::SingleId& receiver,
+      routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer,
       routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer,
       routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<MaidNodeService::GetBranchResponse::Contents>& get_branch_timer,
@@ -106,7 +107,7 @@ class MaidNodeService {
   void HandlePutResponse(const nfs::PutRequestFromMaidNodeToMaidManager& message,
                          const typename nfs::PutRequestFromMaidNodeToMaidManager::Sender& sender);
 
-  routing::Routing& routing_;
+  routing::SingleId kReceiver_;
   routing::Timer<MaidNodeService::GetResponse::Contents>& get_timer_;
   routing::Timer<MaidNodeService::PutResponse::Contents>& put_timer_;
   routing::Timer<MaidNodeService::GetVersionsResponse::Contents>& get_versions_timer_;

@@ -66,6 +66,8 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   // Disconnects from network and all unfinished tasks will be cancelled
   void Stop();
 
+  ~MaidNodeNfs();
+
   OnNetworkHealthChange& network_health_change_signal();
 
   //========================== Data accessors and mutators =========================================
@@ -175,6 +177,9 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   void OnNetworkStatusChange(int updated_network_health);
 
   template <typename T>
+  void OnMessageReceived(const T& routing_message);
+
+  template <typename T>
   void HandleMessage(const T& routing_message);
 
   const passport::Maid kMaid_;
@@ -192,7 +197,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   std::condition_variable network_health_condition_variable_;
   int network_health_;
   OnNetworkHealthChange network_health_change_signal_;
-  routing::Routing routing_;
+  std::unique_ptr<routing::Routing> routing_;
   nfs::detail::PublicPmidHelper public_pmid_helper_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
@@ -355,6 +360,16 @@ template <typename DataName>
 void MaidNodeNfs::DeleteBranchUntilFork(const DataName& data_name,
                                         const StructuredDataVersions::VersionName& branch_tip) {
   dispatcher_.SendDeleteBranchUntilForkRequest(data_name, branch_tip);
+}
+
+template <typename T>
+void MaidNodeNfs::OnMessageReceived(const T& routing_message) {
+  LOG(kVerbose) << "NFS::OnMessageReceived";
+  std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
+  asio_service_.service().post([=] {
+      LOG(kVerbose) << "NFS::OnMessageReceived invoked task in asio_service";
+      this_ptr->HandleMessage(routing_message);
+  });
 }
 
 template <typename T>

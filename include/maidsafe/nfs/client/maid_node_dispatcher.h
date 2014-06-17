@@ -43,6 +43,8 @@ class MaidNodeDispatcher {
  public:
   explicit MaidNodeDispatcher(routing::Routing& routing);
 
+  void Stop();
+
   template <typename DataName>
   void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
 
@@ -95,6 +97,11 @@ class MaidNodeDispatcher {
   template <typename Message>
   void CheckSourcePersonaType() const;
 
+  template <typename RoutingMessage>
+  void RoutingSend(const RoutingMessage& routing_message);
+
+  bool running_;
+  std::mutex running_mutex_;
   routing::Routing& routing_;
   const routing::SingleSource kThisNodeAsSender_;
   const routing::GroupId kMaidManagerReceiver_;
@@ -115,7 +122,7 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
   NfsMessage nfs_message(message_id, content);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
-  routing_.Send(routing_message);
+  RoutingSend(routing_message);
 }
 
 template <typename Data>
@@ -131,7 +138,7 @@ void MaidNodeDispatcher::SendPutRequest(routing::TaskId task_id, const Data& dat
   contents.data = nfs_vault::DataNameAndContent(data);
   contents.pmid_hint = pmid_node_hint.value;
   NfsMessage nfs_message(nfs::MessageId(task_id), contents);
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template <typename DataName>
@@ -141,7 +148,7 @@ void MaidNodeDispatcher::SendDeleteRequest(const DataName& data_name) {
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
   NfsMessage nfs_message((NfsMessage::Contents(data_name)));
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template <typename DataName>
@@ -155,7 +162,7 @@ void MaidNodeDispatcher::SendGetVersionsRequest(routing::TaskId task_id,
   NfsMessage::Contents content(data_name);
   NfsMessage nfs_message(message_id, content);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
 template <typename DataName>
@@ -169,7 +176,7 @@ void MaidNodeDispatcher::SendGetBranchRequest(
   NfsMessage::Contents contents(data_name, branch_tip);
   NfsMessage nfs_message(nfs::MessageId(task_id), contents);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, receiver));
 }
 
 template <typename DataName>
@@ -183,7 +190,7 @@ void MaidNodeDispatcher::SendCreateVersionTreeRequest(
 
   NfsMessage::Contents contents(data_name, version_name, max_versions, max_branches);
   NfsMessage nfs_message(nfs::MessageId(task_id), contents);
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template <typename DataName>
@@ -197,7 +204,7 @@ void MaidNodeDispatcher::SendPutVersionRequest(routing::TaskId task_id,
 
   NfsMessage nfs_message(nfs::MessageId(task_id),
                          NfsMessage::Contents(data_name, old_version_name, new_version_name));
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template <typename DataName>
@@ -209,13 +216,23 @@ void MaidNodeDispatcher::SendDeleteBranchUntilForkRequest(
 
   NfsMessage::Contents contents(data_name, branch_tip);
   NfsMessage nfs_message(contents);
-  routing_.Send(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 template <typename Message>
 void MaidNodeDispatcher::CheckSourcePersonaType() const {
   static_assert(Message::SourcePersona::value == nfs::Persona::kMaidNode,
                 "The source Persona must be kMaidNode.");
+}
+
+template <typename RoutingMessage>
+void MaidNodeDispatcher::RoutingSend(const RoutingMessage& routing_message) {
+  std::lock_guard<std::mutex> lock(running_mutex_);
+  if (!running_) {
+    LOG(kWarning) << " Shutting down. Send ignored !";
+    return;
+  }
+  routing_.Send(routing_message);
 }
 
 }  // namespace nfs_client
