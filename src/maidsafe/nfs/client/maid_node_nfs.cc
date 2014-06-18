@@ -128,27 +128,16 @@ void MaidNodeNfs::Init(const routing::BootstrapContacts& bootstrap_contacts) {
 MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
     : kMaid_(maid),
       asio_service_(2),
-      get_timer_(asio_service_),
-      put_timer_(asio_service_),
-      get_versions_timer_(asio_service_),
-      get_branch_timer_(asio_service_),
-      create_account_timer_(asio_service_),
-      pmid_health_timer_(asio_service_),
-      create_version_tree_timer_(asio_service_),
-      put_version_timer_(asio_service_),
-      register_pmid_timer_(asio_service_),
+      rpc_timers_(asio_service_),
       network_health_change_signal_(),
       routing_(maidsafe::make_unique<routing::Routing>(kMaid_)),
       dispatcher_(*routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
-            new MaidNodeService(routing::SingleId(routing_->kNodeId()), get_timer_, put_timer_,
-                                get_versions_timer_, get_branch_timer_, create_account_timer_,
-                                pmid_health_timer_, create_version_tree_timer_, put_version_timer_,
-                                register_pmid_timer_, get_handler_));
+            new MaidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_, get_handler_));
         return std::move(service);
       }()),
-      get_handler_(get_timer_, dispatcher_) {
+      get_handler_(rpc_timers_.get_timer, dispatcher_) {
 }
 
 MaidNodeNfs::~MaidNodeNfs() {
@@ -161,15 +150,7 @@ void MaidNodeNfs::Stop() {
   // cancel timers
   dispatcher_.Stop();
   routing_.reset();
-  get_timer_.CancelAll();
-  put_timer_.CancelAll();
-  get_versions_timer_.CancelAll();
-  get_branch_timer_.CancelAll();
-  create_account_timer_.CancelAll();
-  pmid_health_timer_.CancelAll();
-  create_version_tree_timer_.CancelAll();
-  put_version_timer_.CancelAll();
-  register_pmid_timer_.CancelAll();
+  rpc_timers_.CancellAll();
   asio_service_.Stop();
 }
 
@@ -253,8 +234,8 @@ boost::future<void> MaidNodeNfs::CreateAccount(
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
       routing::Parameters::group_size - 1, response_functor));
-  auto task_id(create_account_timer_.NewTaskId());
-  create_account_timer_.AddTask(
+  auto task_id(rpc_timers_.create_account_timer.NewTaskId());
+  rpc_timers_.create_account_timer.AddTask(
       timeout, [op_data](ResponseContents create_account_response) {
                  op_data->HandleResponseContents(std::move(create_account_response));
                },
@@ -278,8 +259,8 @@ boost::future<void> MaidNodeNfs::RegisterPmid(const passport::Pmid& pmid,
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
       routing::Parameters::group_size - 1, response_functor));
-  auto task_id(create_account_timer_.NewTaskId());
-  register_pmid_timer_.AddTask(
+  auto task_id(rpc_timers_.register_pmid_timer.NewTaskId());
+  rpc_timers_.register_pmid_timer.AddTask(
       timeout, [op_data](ResponseContents create_account_response) {
                  op_data->HandleResponseContents(std::move(create_account_response));
                },
@@ -303,8 +284,8 @@ MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(
   });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
       routing::Parameters::group_size - 1, response_functor));
-  auto task_id(pmid_health_timer_.NewTaskId());
-  pmid_health_timer_.AddTask(
+  auto task_id(rpc_timers_.pmid_health_timer.NewTaskId());
+  rpc_timers_.pmid_health_timer.AddTask(
       timeout, [op_data](ResponseContents pmid_health_response) {
                  op_data->HandleResponseContents(std::move(pmid_health_response));
                },

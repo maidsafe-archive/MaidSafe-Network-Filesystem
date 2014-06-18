@@ -192,15 +192,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
 
   const passport::Maid kMaid_;
   AsioService asio_service_;
-  routing::Timer<MaidNodeService::GetResponse::Contents> get_timer_;
-  routing::Timer<MaidNodeService::PutResponse::Contents> put_timer_;
-  routing::Timer<MaidNodeService::GetVersionsResponse::Contents> get_versions_timer_;
-  routing::Timer<MaidNodeService::GetBranchResponse::Contents> get_branch_timer_;
-  routing::Timer<MaidNodeService::CreateAccountResponse::Contents> create_account_timer_;
-  routing::Timer<MaidNodeService::PmidHealthResponse::Contents> pmid_health_timer_;
-  routing::Timer<MaidNodeService::CreateVersionTreeResponse::Contents> create_version_tree_timer_;
-  routing::Timer<MaidNodeService::PutVersionResponse::Contents> put_version_timer_;
-  routing::Timer<MaidNodeService::RegisterPmidResponse::Contents> register_pmid_timer_;
+  MaidNodeService::RpcTimers rpc_timers_;
   std::mutex network_health_mutex_;
   std::condition_variable network_health_condition_variable_;
   int network_health_;
@@ -241,8 +233,8 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
                            HandlePutResponseResult(result, promise);
                         });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(put_timer_.NewTaskId());
-  put_timer_.AddTask(
+  auto task_id(rpc_timers_.put_timer.NewTaskId());
+  rpc_timers_.put_timer.AddTask(
       timeout,
       [op_data, data](ResponseContents put_response) {
         LOG(kVerbose) << "MaidNodeNfs Put HandleResponseContents for "
@@ -250,7 +242,7 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
         op_data->HandleResponseContents(std::move(put_response));
       },
       routing::Parameters::group_size - 1, task_id);
-  put_timer_.PrintTaskIds();
+  rpc_timers_.put_timer.PrintTaskIds();
   dispatcher_.SendPutRequest(task_id, data, pmid_hint);
   return promise->get_future();
 }
@@ -280,8 +272,8 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
                            HandleCreateVersionTreeResult(result, promise);
                         });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(create_version_tree_timer_.NewTaskId());
-  create_version_tree_timer_.AddTask(
+  auto task_id(rpc_timers_.create_version_tree_timer.NewTaskId());
+  rpc_timers_.create_version_tree_timer.AddTask(
       timeout,
       [op_data, data_name](ResponseContents get_response) {
         LOG(kVerbose) << "MaidNodeNfs CreateVersionTree HandleResponseContents for "
@@ -289,7 +281,7 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
         op_data->HandleResponseContents(std::move(get_response));
       },
       routing::Parameters::group_size * 3, task_id);
-  create_version_tree_timer_.PrintTaskIds();
+  rpc_timers_.create_version_tree_timer.PrintTaskIds();
   dispatcher_.SendCreateVersionTreeRequest(task_id, data_name, version_name, max_versions,
                                            max_branches);
   return promise->get_future();
@@ -304,8 +296,8 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode&
                                   result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_versions_timer_.NewTaskId());
-  get_versions_timer_.AddTask(
+  auto task_id(rpc_timers_.get_versions_timer.NewTaskId());
+  rpc_timers_.get_versions_timer.AddTask(
       timeout, [op_data](ResponseContents get_versions_response) {
                  op_data->HandleResponseContents(std::move(get_versions_response));
                },
@@ -325,8 +317,8 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
                                   result) { HandleGetVersionsOrBranchResult(result, promise); });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_branch_timer_.NewTaskId());
-  get_branch_timer_.AddTask(timeout,
+  auto task_id(rpc_timers_.get_branch_timer.NewTaskId());
+  rpc_timers_.get_branch_timer.AddTask(timeout,
       [op_data](ResponseContents get_branch_response) {
           op_data->HandleResponseContents(std::move(get_branch_response));
       },
@@ -349,8 +341,8 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
                            HandlePutVersionResult(result, promise);
                         });
   auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(put_version_timer_.NewTaskId());
-  put_version_timer_.AddTask(
+  auto task_id(rpc_timers_.put_version_timer.NewTaskId());
+  rpc_timers_.put_version_timer.AddTask(
       timeout,
       [op_data, data_name](ResponseContents get_response) {
         LOG(kVerbose) << "MaidNodeNfs CreateVersionTree HandleResponseContents for "
@@ -358,7 +350,7 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
         op_data->HandleResponseContents(std::move(get_response));
       },
       routing::Parameters::group_size * 3, task_id);
-  put_version_timer_.PrintTaskIds();
+  rpc_timers_.put_version_timer.PrintTaskIds();
   dispatcher_.SendPutVersionRequest(task_id, data_name, old_version_name, new_version_name);
   return promise->get_future();
 }
