@@ -145,9 +145,6 @@ MaidNodeNfs::~MaidNodeNfs() {
 }
 
 void MaidNodeNfs::Stop() {
-  // Stop dispatcher
-  // reset routing
-  // cancel timers
   dispatcher_.Stop();
   routing_.reset();
   rpc_timers_.CancellAll();
