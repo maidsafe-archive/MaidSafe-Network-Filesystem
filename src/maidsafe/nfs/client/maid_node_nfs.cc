@@ -140,10 +140,6 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
       get_handler_(rpc_timers_.get_timer, dispatcher_) {
 }
 
-MaidNodeNfs::~MaidNodeNfs() {
-  LOG(kError) << "~MaidNodeNfs ";
-}
-
 void MaidNodeNfs::Stop() {
   dispatcher_.Stop();
   routing_.reset();

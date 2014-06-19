@@ -31,6 +31,14 @@ PublicPmidHelper::PublicPmidHelper()
       new_futures_(),
       worker_future_() {}
 
+PublicPmidHelper::~PublicPmidHelper() {
+  try {
+    worker_future_.get();
+  } catch (const std::exception& ex) {
+    LOG(kWarning) << "Error in ~PublicPmidHelper() : " << boost::diagnostic_information(ex);
+  }
+}
+
 void PublicPmidHelper::AddEntry(boost::future<passport::PublicPmid>&& future,
                                 routing::GivePublicKeyFunctor give_key) {
   std::lock_guard<std::mutex> lock(mutex_);

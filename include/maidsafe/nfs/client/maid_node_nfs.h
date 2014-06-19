@@ -74,8 +74,6 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   // Disconnects from network and all unfinished tasks will be cancelled
   void Stop();
 
-  ~MaidNodeNfs();
-
   OnNetworkHealthChange& network_health_change_signal();
 
   //========================== Data accessors and mutators =========================================

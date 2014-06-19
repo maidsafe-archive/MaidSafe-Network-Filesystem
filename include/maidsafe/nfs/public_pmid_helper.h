@@ -37,6 +37,7 @@ namespace detail {
 class PublicPmidHelper {
  public :
   PublicPmidHelper();
+  ~PublicPmidHelper();
   void AddEntry(boost::future<passport::PublicPmid>&& future,
                 routing::GivePublicKeyFunctor give_key_functors);
 
