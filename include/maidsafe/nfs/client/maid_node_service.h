@@ -52,7 +52,7 @@ class MaidNodeService {
   typedef nfs::RegisterPmidResponseFromMaidManagerToMaidNode RegisterPmidResponse;
 
   struct RpcTimers {
-    RpcTimers(AsioService& asio_service_);
+    explicit RpcTimers(AsioService& asio_service_);
     void CancellAll();
 
     routing::Timer<GetResponse::Contents> get_timer;
