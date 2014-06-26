@@ -27,8 +27,8 @@ namespace nfs_client {
 
 namespace {
 
-std::error_code InvalidParameter() {
-  static std::error_code code(make_error_code(CommonErrors::invalid_parameter));
+std::error_code NoSuchElement() {
+  static std::error_code code(make_error_code(CommonErrors::no_such_element));
   return code;
 }
 
@@ -76,7 +76,7 @@ void MaidNodeService::HandleMessage(const GetResponse& message,
     get_handler_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -93,7 +93,7 @@ void MaidNodeService::HandleMessage(const PutResponse& message,
     rpc_timers_.put_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -112,7 +112,7 @@ void MaidNodeService::HandleMessage(const GetCachedResponse& message,
     get_handler_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -136,7 +136,7 @@ void MaidNodeService::HandleMessage(const GetVersionsResponse& message,
     rpc_timers_.get_versions_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -151,7 +151,7 @@ void MaidNodeService::HandleMessage(const PutVersionResponse& message,
     rpc_timers_.put_version_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -167,7 +167,7 @@ void MaidNodeService::HandleMessage(const GetBranchResponse& message,
     rpc_timers_.get_branch_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -182,7 +182,7 @@ void MaidNodeService::HandleMessage(const PmidHealthResponse& message,
     rpc_timers_.pmid_health_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -197,7 +197,7 @@ void MaidNodeService::HandleMessage(const CreateAccountResponse& message,
     rpc_timers_.create_account_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -212,7 +212,7 @@ void MaidNodeService::HandleMessage(const CreateVersionTreeResponse& message,
     rpc_timers_.create_version_tree_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -227,7 +227,7 @@ void MaidNodeService::HandleMessage(const RegisterPmidResponse& message,
     rpc_timers_.register_pmid_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != InvalidParameter())
+    if (error.code() != NoSuchElement())
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
