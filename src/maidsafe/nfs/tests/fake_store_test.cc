@@ -31,7 +31,7 @@ namespace test {
 
 const DiskUsage kDefaultMaxDiskUsage(2000);
 
-class FakeStoreTest {
+class FakeStoreTest : public testing::Test {
  protected:
   FakeStoreTest()
       : fake_store_path_(maidsafe::test::CreateTestPath("MaidSafe_Test_FakeStore")),
@@ -41,7 +41,7 @@ class FakeStoreTest {
   FakeStore fake_store_;
 };
 
-TEST_CASE_METHOD(FakeStoreTest, "SuccessfulStore", "[Behavioural]") {
+TEST_F(FakeStoreTest, BEH_SuccessfulStore) {
   const size_t kDataSize(100);
   ImmutableData data(NonEmptyString(RandomString(kDataSize)));
   fake_store_.Put(data);
@@ -52,12 +52,12 @@ TEST_CASE_METHOD(FakeStoreTest, "SuccessfulStore", "[Behavioural]") {
     else
       break;
   }
-  REQUIRE(DiskUsage(kDataSize) == fake_store_.GetCurrentDiskUsage());
+  ASSERT_TRUE(DiskUsage(kDataSize) == fake_store_.GetCurrentDiskUsage());
 
   auto retrieved_data(fake_store_.Get(data.name()).get());
-  REQUIRE(data.name() == retrieved_data.name());
-  REQUIRE(data.data() == retrieved_data.data());
-  REQUIRE(DiskUsage(kDataSize) == fake_store_.GetCurrentDiskUsage());
+  ASSERT_TRUE(data.name() == retrieved_data.name());
+  ASSERT_TRUE(data.data() == retrieved_data.data());
+  ASSERT_TRUE(DiskUsage(kDataSize) == fake_store_.GetCurrentDiskUsage());
 
   fake_store_.Delete(data.name());
   auto delete_timeout(std::chrono::system_clock::now() + std::chrono::milliseconds(100));
@@ -67,7 +67,7 @@ TEST_CASE_METHOD(FakeStoreTest, "SuccessfulStore", "[Behavioural]") {
     else
       break;
   }
-  REQUIRE(DiskUsage(0) == fake_store_.GetCurrentDiskUsage());
+  ASSERT_TRUE(DiskUsage(0) == fake_store_.GetCurrentDiskUsage());
 
   StructuredDataVersions::VersionName default_version;
   StructuredDataVersions::VersionName version0(0, ImmutableData::Name(Identity(RandomString(64))));
@@ -81,19 +81,19 @@ TEST_CASE_METHOD(FakeStoreTest, "SuccessfulStore", "[Behavioural]") {
   fake_store_.PutVersion(dir_name, version1, version2);
 
   auto retrieved_versions(fake_store_.GetVersions(dir_name).get());
-  REQUIRE(1U == retrieved_versions.size());
-  REQUIRE(version2 == retrieved_versions.front());
+  ASSERT_TRUE(1U == retrieved_versions.size());
+  ASSERT_TRUE(version2 == retrieved_versions.front());
 
   retrieved_versions = fake_store_.GetBranch(dir_name, version2).get();
-  REQUIRE(3U == retrieved_versions.size());
+  ASSERT_TRUE(3U == retrieved_versions.size());
   auto itr(std::begin(retrieved_versions));
-  REQUIRE(version2 == *itr++);
-  REQUIRE(version1 == *itr++);
-  REQUIRE(version0 == *itr);
+  ASSERT_TRUE(version2 == *itr++);
+  ASSERT_TRUE(version1 == *itr++);
+  ASSERT_TRUE(version0 == *itr);
 
   fake_store_.DeleteBranchUntilFork(dir_name, version2);
   retrieved_versions = fake_store_.GetVersions(dir_name).get();
-  REQUIRE(retrieved_versions.empty());
+  ASSERT_TRUE(retrieved_versions.empty());
 }
 
 }  // namespace test
