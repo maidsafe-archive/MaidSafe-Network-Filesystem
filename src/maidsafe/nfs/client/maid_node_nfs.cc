@@ -182,7 +182,7 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
 
   functors.network_status =
       [this_ptr](const int& network_health) { this_ptr->OnNetworkStatusChange(network_health); };
-  functors.matrix_changed = [](std::shared_ptr<routing::MatrixChange> /*matrix_change*/) {};
+  functors.close_nodes_change = [](std::shared_ptr<routing::CloseNodesChange> /*close_change*/) {};
   functors.request_public_key = [this_ptr](const NodeId& node_id,
                                        const routing::GivePublicKeyFunctor& give_key) {
     auto future_key(this_ptr->Get(passport::PublicPmid::Name{ Identity{ node_id.string() } },
