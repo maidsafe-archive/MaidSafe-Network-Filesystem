@@ -33,9 +33,9 @@ namespace test {
 
 static const size_t kTestChunkSize = 1024 * 1024;
 
-class ClientTest : public testing::Test {
+class MaidNodeNfsTest : public testing::Test {
  public:
-  ClientTest() {}
+  MaidNodeNfsTest() {}
 
  protected:
   void AddClient() {
@@ -61,15 +61,17 @@ class ClientTest : public testing::Test {
 
   void GenerateChunks(const size_t iterations) {
     chunks_.clear();
-    for (auto index(iterations); index > 0; --index)
+    for (auto index(iterations); index > 0; --index) {
       chunks_.emplace_back(NonEmptyString(RandomString(kTestChunkSize)));
+//       std::cout << "Generated : " << DebugId(chunks_.back().name()) << std::endl;
+    }
   }
 
   std::vector<ImmutableData> chunks_;
   std::vector<std::shared_ptr<nfs_client::MaidNodeNfs>> clients_;
 };
 
-TEST_F(ClientTest, FUNC_Constructor) {
+TEST_F(MaidNodeNfsTest, FUNC_Constructor) {
   routing::Parameters::append_local_live_port_endpoint = true;
   routing::BootstrapContacts bootstrap_contacts;
   auto maid_and_signer(passport::CreateMaidAndSigner());
@@ -81,8 +83,7 @@ TEST_F(ClientTest, FUNC_Constructor) {
       nfs_client::MaidNodeNfs::MakeShared(maid_and_signer.first, bootstrap_contacts);
 }
 
-
-TEST_F(ClientTest, FUNC_PutGet) {
+TEST_F(MaidNodeNfsTest, FUNC_PutGet) {
   AddClient();
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   LOG(kVerbose) << "Before put";
@@ -103,8 +104,7 @@ TEST_F(ClientTest, FUNC_PutGet) {
   }
 }
 
-
-TEST_F(ClientTest, FUNC_MultipleSequentialPuts) {
+TEST_F(MaidNodeNfsTest, FUNC_MultipleSequentialPuts) {
   routing::Parameters::caching = true;
   const size_t kIterations(10);
   GenerateChunks(kIterations);
@@ -125,7 +125,7 @@ TEST_F(ClientTest, FUNC_MultipleSequentialPuts) {
   LOG(kVerbose) << "Multiple sequential puts is finished successfully";
 }
 
-TEST_F(ClientTest, FUNC_MultipleParallelPuts) {
+TEST_F(MaidNodeNfsTest, FUNC_MultipleParallelPuts) {
   routing::Parameters::caching = false;
   const size_t kIterations(20);
   GenerateChunks(kIterations);
@@ -151,17 +151,37 @@ TEST_F(ClientTest, FUNC_MultipleParallelPuts) {
   LOG(kVerbose) << "Multiple parallel puts is finished successfully";
 }
 
-
-TEST_F(ClientTest, FUNC_FailingGet) {
+TEST_F(MaidNodeNfsTest, FUNC_FailingGet) {
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   AddClient();
   auto future(clients_.back()->Get<ImmutableData::Name>(data.name()));
   EXPECT_THROW(future.get(), std::exception) << "must have failed";
 }
 
+TEST_F(MaidNodeNfsTest, FUNC_MultipleClientsPut) {
+  const size_t kIterations(10);
+  GenerateChunks(kIterations);
+  const size_t kClientsSize(5);
+  for (auto index(kClientsSize); index > 0; --index)
+    AddClient();
+
+  for (const auto& chunk : chunks_) {
+    LOG(kVerbose) << "Storing: " << DebugId(chunk.name());
+    EXPECT_NO_THROW(clients_[RandomInt32() % kClientsSize]->Put(chunk));
+  }
+
+  LOG(kVerbose) << "Chunks are sent to be stored...";
+
+  std::vector<boost::future<ImmutableData>> get_futures;
+  for (const auto& chunk : chunks_)
+    get_futures.emplace_back(
+        clients_[RandomInt32() % kClientsSize]->Get<ImmutableData::Name>(chunk.name()));
+  CompareGetResult(chunks_, get_futures);
+}
+
 /*
 // The test below is disbaled as its proper operation assumes a delete funcion is in place
-TEST_F(ClientTest, DISABLED_FUNC_PutMultipleCopies) {
+TEST_F(MaidNodeNfsTest, DISABLED_FUNC_PutMultipleCopies) {
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   boost::future<ImmutableData> future;
   GetClients().front()->Put(data);
@@ -226,26 +246,6 @@ TEST_F(ClientTest, DISABLED_FUNC_PutMultipleCopies) {
 }
 */
 
-
-TEST_F(ClientTest, FUNC_MultipleClientsPut) {
-  const size_t kIterations(10);
-  GenerateChunks(kIterations);
-  const size_t kClientsSize(5);
-  for (auto index(kClientsSize); index > 0; --index)
-    AddClient();
-
-  for (const auto& chunk : chunks_) {
-    LOG(kVerbose) << "Storing: " << DebugId(chunk.name());
-    EXPECT_NO_THROW(clients_[RandomInt32() % kClientsSize]->Put(chunk));
-  }
-
-  LOG(kVerbose) << "Chunks are sent to be stored...";
-
-  std::vector<boost::future<ImmutableData>> get_futures;
-  for (const auto& chunk : chunks_)
-    get_futures.emplace_back(
-        clients_[RandomInt32() % kClientsSize]->Get<ImmutableData::Name>(chunk.name()));
-  CompareGetResult(chunks_, get_futures);
 }
 
 }  // namespace test
