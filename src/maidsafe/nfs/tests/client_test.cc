@@ -35,12 +35,38 @@ static const size_t kTestChunkSize = 1024 * 1024;
 
 class ClientTest : public testing::Test {
  public:
-  ClientTest() /*: env_(VaultEnvironment::g_environment())*/ {}
-
-//   std::vector<VaultNetwork::ClientPtr>& GetClients() { return env_->clients_; }
+  ClientTest() {}
 
  protected:
-//   std::shared_ptr<VaultNetwork> env_;
+  void AddClient() {
+    routing::Parameters::append_local_live_port_endpoint = true;
+    routing::BootstrapContacts bootstrap_contacts;
+    auto maid_and_signer(passport::CreateMaidAndSigner());
+    clients_.emplace_back(nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts));
+  }
+
+  void CompareGetResult(const std::vector<ImmutableData>& chunks,
+                        std::vector<boost::future<ImmutableData>>& get_futures) {
+    for (size_t index(0); index < chunks.size(); ++index) {
+      try {
+        auto retrieved(get_futures[index].get());
+        EXPECT_EQ(retrieved.data(), chunks[index].data());
+      }
+      catch (const std::exception& ex) {
+        LOG(kError) << "Failed to retrieve chunk: " << DebugId(chunks[index].name())
+                    << " because: " << boost::diagnostic_information(ex);
+      }
+    }
+  }
+
+  void GenerateChunks(const size_t iterations) {
+    chunks_.clear();
+    for (auto index(iterations); index > 0; --index)
+      chunks_.emplace_back(NonEmptyString(RandomString(kTestChunkSize)));
+  }
+
+  std::vector<ImmutableData> chunks_;
+  std::vector<std::shared_ptr<nfs_client::MaidNodeNfs>> clients_;
 };
 
 TEST_F(ClientTest, FUNC_Constructor) {
@@ -57,22 +83,18 @@ TEST_F(ClientTest, FUNC_Constructor) {
 
 
 TEST_F(ClientTest, FUNC_PutGet) {
-  routing::Parameters::append_local_live_port_endpoint = true;
-  routing::BootstrapContacts bootstrap_contacts;
-  auto maid_and_signer(passport::CreateMaidAndSigner());
-  auto nfs_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts);
-
+  AddClient();
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   LOG(kVerbose) << "Before put";
   try {
-    auto future(nfs_account->Put(data));
+    auto future(clients_.back()->Put(data));
     EXPECT_NO_THROW(future.get());
     LOG(kVerbose) << "After put";
   } catch (...) {
     EXPECT_TRUE(false) << "Failed to put: " << DebugId(NodeId(data.name()->string()));
   }
 
-  auto future(nfs_account->Get<ImmutableData::Name>(data.name()));
+  auto future(clients_.back()->Get<ImmutableData::Name>(data.name()));
   try {
     auto retrieved(future.get());
     EXPECT_EQ(retrieved.data(), data.data());
@@ -84,95 +106,56 @@ TEST_F(ClientTest, FUNC_PutGet) {
 
 TEST_F(ClientTest, FUNC_MultipleSequentialPuts) {
   routing::Parameters::caching = true;
-  const size_t kIterations(20);
-  std::vector<ImmutableData> chunks;
-  for (auto index(kIterations); index > 0; --index)
-    chunks.emplace_back(NonEmptyString(RandomString(kTestChunkSize)));
-
-  routing::Parameters::append_local_live_port_endpoint = true;
-  routing::BootstrapContacts bootstrap_contacts;
-  auto maid_and_signer(passport::CreateMaidAndSigner());
-  auto nfs_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts);
-
+  const size_t kIterations(10);
+  GenerateChunks(kIterations);
+  AddClient();
   int index(0);
-  for (const auto& chunk : chunks) {
-    auto future(nfs_account->Put(chunk));
+  for (const auto& chunk : chunks_) {
+    auto future(clients_.back()->Put(chunk));
     EXPECT_NO_THROW(future.get()) << "Store failure " << DebugId(NodeId(chunk.name()->string()));
     LOG(kVerbose) << DebugId(NodeId(chunk.name()->string())) << " stored: " << index++;
   }
 
   std::vector<boost::future<ImmutableData>> get_futures;
-  for (const auto& chunk : chunks) {
-    get_futures.emplace_back(nfs_account->Get<ImmutableData::Name>(
+  for (const auto& chunk : chunks_) {
+    get_futures.emplace_back(clients_.back()->Get<ImmutableData::Name>(
         chunk.name(), std::chrono::seconds(kIterations * 2)));
   }
-
-  for (size_t index(0); index < kIterations; ++index) {
-    try {
-      auto retrieved(get_futures[index].get());
-      EXPECT_EQ(retrieved.data(), chunks[index].data());
-      LOG(kVerbose) << "Cache enabled Retrieved: " << index;
-    }
-    catch (const std::exception& ex) {
-      EXPECT_TRUE(false) << "Failed to retrieve chunk: " << DebugId(chunks[index].name())
-                         << " because: " << boost::diagnostic_information(ex) << " " << index;
-    }
-  }
+  CompareGetResult(chunks_, get_futures);
   LOG(kVerbose) << "Multiple sequential puts is finished successfully";
 }
 
 TEST_F(ClientTest, FUNC_MultipleParallelPuts) {
   routing::Parameters::caching = false;
   const size_t kIterations(20);
-  std::vector<ImmutableData> chunks;
-  for (auto index(kIterations); index > 0; --index)
-    chunks.emplace_back(NonEmptyString(RandomString(kTestChunkSize)));
-
-  routing::Parameters::append_local_live_port_endpoint = true;
-  routing::BootstrapContacts bootstrap_contacts;
-  auto maid_and_signer(passport::CreateMaidAndSigner());
-  auto nfs_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts);
-
+  GenerateChunks(kIterations);
+  AddClient();
   std::vector<boost::future<void>> put_futures;
-  for (const auto& chunk : chunks)
-    put_futures.emplace_back(nfs_account->Put(chunk));
+  for (const auto& chunk : chunks_)
+    put_futures.emplace_back(clients_.back()->Put(chunk));
 
   int index(0);
   for (auto& future : put_futures) {
     EXPECT_NO_THROW(future.get()) << "Store failure "
-                                  << DebugId(NodeId(chunks[index].name()->string()));
-    LOG(kVerbose) << DebugId(NodeId(chunks[index].name()->string())) << " stored: " << index;
+                                  << DebugId(NodeId(chunks_[index].name()->string()));
+    LOG(kVerbose) << DebugId(NodeId(chunks_[index].name()->string())) << " stored: " << index;
     ++index;
   }
 
   std::vector<boost::future<ImmutableData>> get_futures;
-  for (const auto& chunk : chunks) {
-    get_futures.emplace_back(nfs_account->Get<ImmutableData::Name>(
+  for (const auto& chunk : chunks_) {
+    get_futures.emplace_back(clients_.back()->Get<ImmutableData::Name>(
         chunk.name(), std::chrono::seconds(kIterations * 2)));
   }
-
-  for (size_t index(0); index < kIterations; ++index) {
-    try {
-      auto retrieved(get_futures[index].get());
-      EXPECT_EQ(retrieved.data(), chunks[index].data());
-      LOG(kVerbose) << "Cache disabled Retrieved: " << index;
-    }
-    catch (const std::exception& ex) {
-      EXPECT_TRUE(false) << "Failed to retrieve chunk: " << DebugId(chunks[index].name())
-                         << " because: " << boost::diagnostic_information(ex) << " " << index;
-    }
-  }
+  CompareGetResult(chunks_, get_futures);
   LOG(kVerbose) << "Multiple parallel puts is finished successfully";
 }
 
 
 TEST_F(ClientTest, FUNC_FailingGet) {
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
-  routing::Parameters::append_local_live_port_endpoint = true;
-  routing::BootstrapContacts bootstrap_contacts;
-  auto maid_and_signer(passport::CreateMaidAndSigner());
-  auto nfs_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts);
-  auto future(nfs_account->Get<ImmutableData::Name>(data.name()));
+  AddClient();
+  auto future(clients_.back()->Get<ImmutableData::Name>(data.name()));
   EXPECT_THROW(future.get(), std::exception) << "must have failed";
 }
 
@@ -246,41 +229,23 @@ TEST_F(ClientTest, DISABLED_FUNC_PutMultipleCopies) {
 
 TEST_F(ClientTest, FUNC_MultipleClientsPut) {
   const size_t kIterations(10);
+  GenerateChunks(kIterations);
   const size_t kClientsSize(5);
-  std::vector<ImmutableData> chunks;
-  for (auto index(kIterations); index > 0; --index)
-    chunks.emplace_back(NonEmptyString(RandomString(kTestChunkSize)));
+  for (auto index(kClientsSize); index > 0; --index)
+    AddClient();
 
-  std::vector<std::shared_ptr<nfs_client::MaidNodeNfs>> clients;
-  routing::Parameters::append_local_live_port_endpoint = true;
-  routing::BootstrapContacts bootstrap_contacts;
-  for (auto index(kClientsSize); index > 0; --index) {
-    auto maid_and_signer(passport::CreateMaidAndSigner());
-    clients.emplace_back(nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts));
-  }
-
-  for (const auto& chunk : chunks) {
+  for (const auto& chunk : chunks_) {
     LOG(kVerbose) << "Storing: " << DebugId(chunk.name());
-    EXPECT_NO_THROW(clients[RandomInt32() % kClientsSize]->Put(chunk));
+    EXPECT_NO_THROW(clients_[RandomInt32() % kClientsSize]->Put(chunk));
   }
 
   LOG(kVerbose) << "Chunks are sent to be stored...";
 
   std::vector<boost::future<ImmutableData>> get_futures;
-  for (const auto& chunk : chunks)
+  for (const auto& chunk : chunks_)
     get_futures.emplace_back(
-        clients[RandomInt32() % kClientsSize]->Get<ImmutableData::Name>(chunk.name()));
-
-  for (size_t index(0); index < kIterations; ++index) {
-    try {
-      auto retrieved(get_futures[index].get());
-      EXPECT_EQ(retrieved.data(), chunks[index].data());
-    }
-    catch (const std::exception& ex) {
-      LOG(kError) << "Failed to retrieve chunk: " << DebugId(chunks[index].name())
-                  << " because: " << boost::diagnostic_information(ex);
-    }
-  }
+        clients_[RandomInt32() % kClientsSize]->Get<ImmutableData::Name>(chunk.name()));
+  CompareGetResult(chunks_, get_futures);
 }
 
 }  // namespace test
