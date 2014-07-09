@@ -246,6 +246,48 @@ TEST_F(MaidNodeNfsTest, DISABLED_FUNC_PutMultipleCopies) {
 }
 */
 
+
+TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
+  ImmutableData chunk(NonEmptyString(RandomAlphaNumericString(1024)));
+  const size_t max_versions(5), max_branch(1);
+  GenerateChunks(max_versions * 2);
+  StructuredDataVersions::VersionName v_ori(0, chunks_.front().name());
+  AddClient();
+  auto create_version_future(clients_.back()->CreateVersionTree(chunk.name(), v_ori,
+                                                                max_versions, max_branch));
+  EXPECT_NO_THROW(create_version_future.get()) << "failure to create version";
+  for (size_t index(1); index < (max_versions * 2); ++index) {
+    StructuredDataVersions::VersionName v_old(index - 1, chunks_[index - 1].name());
+    StructuredDataVersions::VersionName v_new(index, chunks_[index].name());
+    auto put_version_future(clients_.back()->PutVersion(chunk.name(), v_old, v_new));
+    EXPECT_NO_THROW(put_version_future.get()) << "failure to put version " << index;
+//     std::cout << "version " << index << " has been put" << std::endl;
+  }
+  try {
+    auto future(clients_.back()->GetVersions(chunk.name()));
+    auto versions(future.get());
+    EXPECT_EQ(versions.size(), max_branch);
+//     for (auto& version : versions)
+//       std::cout << "tip version : " << DebugId(version.id) << std::endl;
+    EXPECT_EQ(versions.front().index, max_versions * 2 - 1);
+    EXPECT_EQ(versions.front().id, chunks_.back().name());
+  } catch (const maidsafe_error& error) {
+    EXPECT_TRUE(false) << "Failed to retrieve version: " << boost::diagnostic_information(error);
+  }
+
+  try {
+    StructuredDataVersions::VersionName v_tip(max_versions * 2 - 1, chunks_.back().name());
+    auto future(clients_.back()->GetBranch(chunk.name(), v_tip));
+    auto versions(future.get());
+    EXPECT_EQ(versions.size(), max_versions);
+    for (size_t index(0); index < versions.size(); ++index) {
+//       std::cout << "version : " << DebugId(versions[index].id) << std::endl;
+      EXPECT_EQ(versions[index].index, max_versions * 2 - index - 1);
+      EXPECT_EQ(versions[index].id, chunks_[max_versions * 2 - index - 1].name());
+    }
+  } catch (const maidsafe_error& error) {
+    EXPECT_TRUE(false) << "Failed to retrieve branch: " << boost::diagnostic_information(error);
+  }
 }
 
 }  // namespace test
