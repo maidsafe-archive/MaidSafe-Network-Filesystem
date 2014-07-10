@@ -340,7 +340,7 @@ TEST_F(MaidNodeNfsTest, FUNC_PopulateMultipleBranchTree) {
   for (auto& put_version_future : put_version_futures)
     EXPECT_NO_THROW(put_version_future.get()) << "failure to put version "
         << DebugId(chunks_[++index].name());
-  int num_of_tip_versions(0);
+  size_t num_of_tip_versions(0);
   try {
     auto future(clients_.back()->GetVersions(chunk.name()));
     auto versions(future.get());
