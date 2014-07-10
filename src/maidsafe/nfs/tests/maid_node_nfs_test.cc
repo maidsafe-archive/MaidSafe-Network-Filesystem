@@ -249,12 +249,12 @@ TEST_F(MaidNodeNfsTest, DISABLED_FUNC_PutMultipleCopies) {
 
 TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
   ImmutableData chunk(NonEmptyString(RandomAlphaNumericString(1024)));
-  const size_t max_versions(5), max_branch(1);
+  const size_t max_versions(5), max_branches(1);
   GenerateChunks(max_versions * 2);
   StructuredDataVersions::VersionName v_ori(0, chunks_.front().name());
   AddClient();
   auto create_version_future(clients_.back()->CreateVersionTree(chunk.name(), v_ori,
-                                                                max_versions, max_branch));
+                                                                max_versions, max_branches));
   EXPECT_NO_THROW(create_version_future.get()) << "failure to create version";
   for (size_t index(1); index < (max_versions * 2); ++index) {
     StructuredDataVersions::VersionName v_old(index - 1, chunks_[index - 1].name());
@@ -266,7 +266,7 @@ TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
   try {
     auto future(clients_.back()->GetVersions(chunk.name()));
     auto versions(future.get());
-    EXPECT_EQ(versions.size(), max_branch);
+    EXPECT_EQ(versions.size(), max_branches);
 //     for (auto& version : versions)
 //       std::cout << "tip version : " << DebugId(version.id) << std::endl;
     EXPECT_EQ(versions.front().index, max_versions * 2 - 1);
@@ -288,6 +288,90 @@ TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
   } catch (const maidsafe_error& error) {
     EXPECT_TRUE(false) << "Failed to retrieve branch: " << boost::diagnostic_information(error);
   }
+}
+
+TEST_F(MaidNodeNfsTest, FUNC_PopulateMultipleBranchTree) {
+  ImmutableData chunk(NonEmptyString(RandomAlphaNumericString(1024)));
+  const size_t max_versions(5), max_branches(4);
+  GenerateChunks(max_versions * max_branches * 2);
+  StructuredDataVersions::VersionName v_ori(0, chunks_.front().name());
+  AddClient();
+  auto create_version_future(clients_.back()->CreateVersionTree(chunk.name(), v_ori,
+                                                                max_versions, max_branches));
+  EXPECT_NO_THROW(create_version_future.get()) << "failure to create version";
+
+  size_t total_branches(1);
+  // branch -> (version_index, chunk_index)
+  std::vector<std::vector<std::pair<size_t, size_t>>> version_tree(
+      max_branches, std::vector<std::pair<size_t, size_t>>());
+  version_tree[0].push_back(std::make_pair(0, 0));
+
+  std::vector<nfs_client::MaidNodeNfs::PutVersionFuture> put_version_futures;
+  for (size_t index(1); index < chunks_.size(); ++index) {
+    size_t cur_branch(RandomInt32() % total_branches);
+    size_t cur_version_index(version_tree[cur_branch].back().first);
+    StructuredDataVersions::VersionName v_old(
+        cur_version_index, chunks_[version_tree[cur_branch].back().second].name());
+    bool fork(RandomInt32() % 2 == 0);
+    size_t new_version_index(cur_version_index);
+    if (fork && total_branches < max_branches && cur_version_index > 0) {
+      for (auto& entry : version_tree[cur_branch])
+        version_tree[total_branches].push_back(entry);
+      version_tree[total_branches].pop_back();
+      cur_branch = total_branches;
+      ++total_branches;
+    } else {
+      ++new_version_index;
+    }
+    version_tree[cur_branch].push_back(std::make_pair(new_version_index, index));
+    StructuredDataVersions::VersionName v_new(new_version_index, chunks_[index].name());
+    put_version_futures.emplace_back(clients_.back()->PutVersion(chunk.name(), v_old, v_new));
+  }
+
+  for (size_t cur_branch(0); cur_branch < max_branches; ++cur_branch) {
+    std::cout << "branch " << cur_branch << " containing versions : " << std::endl;
+    for (auto& entry : version_tree[cur_branch])
+      std::cout << " ( " << entry.first << " , "
+                << DebugId(chunks_[entry.second].name()) << " ) ";
+    std::cout << std::endl;
+  }
+
+  size_t index(0);
+  for (auto& put_version_future : put_version_futures)
+    EXPECT_NO_THROW(put_version_future.get()) << "failure to put version "
+        << DebugId(chunks_[++index].name());
+  int num_of_tip_versions(0);
+  try {
+    auto future(clients_.back()->GetVersions(chunk.name()));
+    auto versions(future.get());
+    for (auto& version : versions)
+      std::cout << "tip version : " << DebugId(version.id) << std::endl;
+    num_of_tip_versions = versions.size();
+    EXPECT_LE(num_of_tip_versions, max_branches);
+    EXPECT_GT(num_of_tip_versions, 0);
+  } catch (const maidsafe_error& error) {
+    EXPECT_TRUE(false) << "Failed to retrieve version: " << boost::diagnostic_information(error);
+  }
+
+  for (size_t cur_branch(0); cur_branch < max_branches; ++cur_branch) {
+    try {
+      StructuredDataVersions::VersionName v_tip(version_tree[cur_branch].back().first,
+          chunks_[version_tree[cur_branch].back().second].name());
+      auto future(clients_.back()->GetBranch(chunk.name(), v_tip));
+      auto versions(future.get());
+      std::cout << "get " << versions.size() << " versions for branch " << cur_branch << std::endl;
+      --num_of_tip_versions;
+      auto chunk_index_itr(version_tree[cur_branch].end());
+      for (size_t index(0); index < versions.size(); ++index) {
+        --chunk_index_itr;
+        std::cout << "version : " << DebugId(versions[index].id) << std::endl;
+        EXPECT_EQ(versions[index].id, chunks_[chunk_index_itr->second].name());
+      }
+    } catch (const maidsafe_error& error) {
+      LOG(kInfo) << "Failed to retrieve branch: " << boost::diagnostic_information(error);
+    }
+  }
+  EXPECT_EQ(num_of_tip_versions, 0);
 }
 
 }  // namespace test
