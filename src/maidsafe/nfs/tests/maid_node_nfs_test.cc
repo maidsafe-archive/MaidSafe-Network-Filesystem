@@ -67,6 +67,99 @@ class MaidNodeNfsTest : public testing::Test {
     }
   }
 
+  void VertionTreeTest(const size_t max_versions,
+                       const size_t max_branches,
+                       const size_t num_of_versions) {
+    ImmutableData chunk(NonEmptyString(RandomAlphaNumericString(1024)));
+    GenerateChunks(num_of_versions);
+    StructuredDataVersions::VersionName v_ori(0, chunks_.front().name());
+    AddClient();
+    auto create_version_future(clients_.back()->CreateVersionTree(chunk.name(), v_ori,
+                                                                  max_versions, max_branches));
+    EXPECT_NO_THROW(create_version_future.get()) << "failure to create version";
+
+    size_t total_branches(1);
+    // branch -> (version_index, chunk_index)
+    std::vector<std::vector<std::pair<size_t, size_t>>> version_tree(
+        max_branches, std::vector<std::pair<size_t, size_t>>());
+    version_tree[0].push_back(std::make_pair(0, 0));
+
+    std::vector<nfs_client::MaidNodeNfs::PutVersionFuture> put_version_futures;
+    for (size_t index(1); index < chunks_.size(); ++index) {
+      size_t cur_branch(RandomInt32() % total_branches);
+      size_t cur_version_index(version_tree[cur_branch].back().first);
+      std::shared_ptr<StructuredDataVersions::VersionName> v_old;
+      bool fork(RandomInt32() % 2 == 0);
+      size_t new_version_index(cur_version_index);
+      if (fork && total_branches < max_branches && cur_version_index > 0) {
+        for (auto& entry : version_tree[cur_branch])
+          version_tree[total_branches].push_back(entry);
+        version_tree[total_branches].pop_back();
+        v_old.reset(new StructuredDataVersions::VersionName(cur_version_index,
+            chunks_[version_tree[total_branches].back().second].name()));
+        cur_branch = total_branches;
+        ++total_branches;
+      } else {
+        v_old.reset(new StructuredDataVersions::VersionName(cur_version_index,
+            chunks_[version_tree[cur_branch].back().second].name()));
+        ++new_version_index;
+      }
+      version_tree[cur_branch].push_back(std::make_pair(new_version_index, index));
+      StructuredDataVersions::VersionName v_new(new_version_index, chunks_[index].name());
+      std::cout << "put new version " << DebugId(v_new.id)
+                << " after old version " << DebugId(v_old->id) << std::endl;
+      put_version_futures.emplace_back(clients_.back()->PutVersion(chunk.name(), *v_old, v_new));
+    }
+
+    for (size_t cur_branch(0); cur_branch < max_branches; ++cur_branch) {
+      std::cout << "branch " << cur_branch << " containing versions : " << std::endl;
+      for (auto& entry : version_tree[cur_branch])
+        std::cout << " ( " << entry.first << " , "
+                  << DebugId(chunks_[entry.second].name()) << " ) ";
+      std::cout << std::endl;
+    }
+
+    size_t index(0);
+    for (auto& put_version_future : put_version_futures)
+      EXPECT_NO_THROW(put_version_future.get()) << "failure to put version "
+          << DebugId(chunks_[++index].name());
+    size_t num_of_tip_versions(0);
+    try {
+      auto future(clients_.back()->GetVersions(chunk.name()));
+      auto versions(future.get());
+      for (auto& version : versions)
+        std::cout << "tip version : " << DebugId(version.id) << std::endl;
+      num_of_tip_versions = versions.size();
+      EXPECT_LE(num_of_tip_versions, max_branches);
+      EXPECT_GT(num_of_tip_versions, 0);
+    } catch (const maidsafe_error& error) {
+      EXPECT_TRUE(false) << "Failed to retrieve version: " << boost::diagnostic_information(error);
+    }
+
+    for (size_t cur_branch(0); cur_branch < max_branches; ++cur_branch) {
+      try {
+        StructuredDataVersions::VersionName v_tip(version_tree[cur_branch].back().first,
+            chunks_[version_tree[cur_branch].back().second].name());
+        auto future(clients_.back()->GetBranch(chunk.name(), v_tip));
+        auto versions(future.get());
+//         std::cout << "get " << versions.size() << " versions for branch " << cur_branch << std::endl;
+        EXPECT_LE(versions.size(), version_tree[cur_branch].size());
+        --num_of_tip_versions;
+        auto chunk_index_itr(version_tree[cur_branch].end());
+        for (size_t index(0); index < versions.size(); ++index) {
+          std::cout << "version : " << DebugId(versions[index].id) << std::endl;
+          if (chunk_index_itr != version_tree[cur_branch].begin()) {
+            --chunk_index_itr;
+            EXPECT_EQ(versions[index].id, chunks_[chunk_index_itr->second].name());
+          }
+        }
+      } catch (const maidsafe_error& error) {
+        LOG(kInfo) << "Failed to retrieve branch: " << boost::diagnostic_information(error);
+      }
+    }
+    EXPECT_EQ(num_of_tip_versions, 0);
+  }
+
   std::vector<ImmutableData> chunks_;
   std::vector<std::shared_ptr<nfs_client::MaidNodeNfs>> clients_;
 };
@@ -291,87 +384,10 @@ TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
 }
 
 TEST_F(MaidNodeNfsTest, FUNC_PopulateMultipleBranchTree) {
-  ImmutableData chunk(NonEmptyString(RandomAlphaNumericString(1024)));
-  const size_t max_versions(5), max_branches(4);
-  GenerateChunks(max_versions * max_branches * 2);
-  StructuredDataVersions::VersionName v_ori(0, chunks_.front().name());
-  AddClient();
-  auto create_version_future(clients_.back()->CreateVersionTree(chunk.name(), v_ori,
-                                                                max_versions, max_branches));
-  EXPECT_NO_THROW(create_version_future.get()) << "failure to create version";
-
-  size_t total_branches(1);
-  // branch -> (version_index, chunk_index)
-  std::vector<std::vector<std::pair<size_t, size_t>>> version_tree(
-      max_branches, std::vector<std::pair<size_t, size_t>>());
-  version_tree[0].push_back(std::make_pair(0, 0));
-
-  std::vector<nfs_client::MaidNodeNfs::PutVersionFuture> put_version_futures;
-  for (size_t index(1); index < chunks_.size(); ++index) {
-    size_t cur_branch(RandomInt32() % total_branches);
-    size_t cur_version_index(version_tree[cur_branch].back().first);
-    StructuredDataVersions::VersionName v_old(
-        cur_version_index, chunks_[version_tree[cur_branch].back().second].name());
-    bool fork(RandomInt32() % 2 == 0);
-    size_t new_version_index(cur_version_index);
-    if (fork && total_branches < max_branches && cur_version_index > 0) {
-      for (auto& entry : version_tree[cur_branch])
-        version_tree[total_branches].push_back(entry);
-      version_tree[total_branches].pop_back();
-      cur_branch = total_branches;
-      ++total_branches;
-    } else {
-      ++new_version_index;
-    }
-    version_tree[cur_branch].push_back(std::make_pair(new_version_index, index));
-    StructuredDataVersions::VersionName v_new(new_version_index, chunks_[index].name());
-    put_version_futures.emplace_back(clients_.back()->PutVersion(chunk.name(), v_old, v_new));
-  }
-
-  for (size_t cur_branch(0); cur_branch < max_branches; ++cur_branch) {
-    std::cout << "branch " << cur_branch << " containing versions : " << std::endl;
-    for (auto& entry : version_tree[cur_branch])
-      std::cout << " ( " << entry.first << " , "
-                << DebugId(chunks_[entry.second].name()) << " ) ";
-    std::cout << std::endl;
-  }
-
-  size_t index(0);
-  for (auto& put_version_future : put_version_futures)
-    EXPECT_NO_THROW(put_version_future.get()) << "failure to put version "
-        << DebugId(chunks_[++index].name());
-  size_t num_of_tip_versions(0);
-  try {
-    auto future(clients_.back()->GetVersions(chunk.name()));
-    auto versions(future.get());
-    for (auto& version : versions)
-      std::cout << "tip version : " << DebugId(version.id) << std::endl;
-    num_of_tip_versions = versions.size();
-    EXPECT_LE(num_of_tip_versions, max_branches);
-    EXPECT_GT(num_of_tip_versions, 0);
-  } catch (const maidsafe_error& error) {
-    EXPECT_TRUE(false) << "Failed to retrieve version: " << boost::diagnostic_information(error);
-  }
-
-  for (size_t cur_branch(0); cur_branch < max_branches; ++cur_branch) {
-    try {
-      StructuredDataVersions::VersionName v_tip(version_tree[cur_branch].back().first,
-          chunks_[version_tree[cur_branch].back().second].name());
-      auto future(clients_.back()->GetBranch(chunk.name(), v_tip));
-      auto versions(future.get());
-      std::cout << "get " << versions.size() << " versions for branch " << cur_branch << std::endl;
-      --num_of_tip_versions;
-      auto chunk_index_itr(version_tree[cur_branch].end());
-      for (size_t index(0); index < versions.size(); ++index) {
-        --chunk_index_itr;
-        std::cout << "version : " << DebugId(versions[index].id) << std::endl;
-        EXPECT_EQ(versions[index].id, chunks_[chunk_index_itr->second].name());
-      }
-    } catch (const maidsafe_error& error) {
-      LOG(kInfo) << "Failed to retrieve branch: " << boost::diagnostic_information(error);
-    }
-  }
-  EXPECT_EQ(num_of_tip_versions, 0);
+  LOG(kInfo) << "Testing with max_versions = 5, max_branches = 4, total_versions = 20";
+  VertionTreeTest(5, 4, 20);
+  LOG(kInfo) << "Testing with max_versions = 100, max_branches = 10, total_versions = 60";
+  VertionTreeTest(100, 10, 60);
 }
 
 }  // namespace test
