@@ -63,7 +63,8 @@ class MaidNodeNfsTest : public testing::Test {
     chunks_.clear();
     for (auto index(iterations); index > 0; --index) {
       chunks_.emplace_back(NonEmptyString(RandomString(kTestChunkSize)));
-//       std::cout << "Generated : " << DebugId(chunks_.back().name()) << std::endl;
+//       std::cout << "Generated chunk " << iterations - index
+//                 << " with id : " << DebugId(chunks_.back().name()) << std::endl;
     }
   }
 
@@ -270,6 +271,35 @@ TEST_F(MaidNodeNfsTest, FUNC_MultipleClientsPut) {
     get_futures.emplace_back(
         clients_[RandomInt32() % kClientsSize]->Get<ImmutableData::Name>(chunk.name()));
   CompareGetResult(chunks_, get_futures);
+}
+
+TEST_F(MaidNodeNfsTest, FUNC_DataFlooding) {
+  const size_t kIterations(100);
+  GenerateChunks(kIterations);
+  const size_t kClientsSize(10);
+  for (auto index(kClientsSize); index > 0; --index) {
+//     std::cout << "client " << kClientsSize - index << " added" << std::endl;
+    AddClient();
+  }
+
+  std::vector<boost::future<void>> put_futures;
+  for (const auto& chunk : chunks_)
+    put_futures.emplace_back(clients_[RandomInt32() % kClientsSize]->Put(chunk));
+  int index(0);
+  for (auto& future : put_futures) {
+    EXPECT_NO_THROW(future.get()) << "Store failure "
+                                  << DebugId(NodeId(chunks_[index].name()->string()));
+//     std::cout << DebugId(NodeId(chunks_[index].name()->string()))
+//               << " stored: " << index << std::endl;
+    ++index;
+  }
+
+  std::vector<boost::future<ImmutableData>> get_futures;
+  for (const auto& chunk : chunks_) {
+    get_futures.emplace_back(clients_.back()->Get<ImmutableData::Name>(chunk.name()));
+  }
+  CompareGetResult(chunks_, get_futures);
+  LOG(kVerbose) << "Data flooding test has finished successfully";
 }
 
 /*
