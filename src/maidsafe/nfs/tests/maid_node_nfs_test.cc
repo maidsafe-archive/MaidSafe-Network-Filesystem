@@ -59,12 +59,12 @@ class MaidNodeNfsTest : public testing::Test {
     }
   }
 
-  void GenerateChunks(const size_t iterations) {
+  void GenerateChunks(const size_t iterations, const size_t chunk_size = kTestChunkSize) {
     chunks_.clear();
     for (auto index(iterations); index > 0; --index) {
-      chunks_.emplace_back(NonEmptyString(RandomString(kTestChunkSize)));
-//       std::cout << "Generated chunk " << iterations - index
-//                 << " with id : " << DebugId(chunks_.back().name()) << std::endl;
+      chunks_.emplace_back(NonEmptyString(RandomString(chunk_size)));
+      std::cout << "Generated chunk " << iterations - index
+                << " with id : " << DebugId(chunks_.back().name()) << std::endl;
     }
   }
 
@@ -96,13 +96,14 @@ class MaidNodeNfsTest : public testing::Test {
 
   void VertionTreeTest(const size_t max_versions,
                        const size_t max_branches,
-                       const size_t num_of_versions) {
+                       const size_t num_of_versions,
+                       const size_t chunk_size = kTestChunkSize) {
     ImmutableData chunk(NonEmptyString(RandomAlphaNumericString(1024)));
-    GenerateChunks(num_of_versions);
+    GenerateChunks(num_of_versions, chunk_size);
     StructuredDataVersions::VersionName v_ori(0, chunks_.front().name());
     AddClient();
     auto create_version_future(clients_.back()->CreateVersionTree(chunk.name(), v_ori,
-                                                                  max_versions, max_branches));
+      static_cast<uint32_t>(max_versions), static_cast<uint32_t>(max_branches)));
     EXPECT_NO_THROW(create_version_future.get()) << "failure to create version";
 
     size_t total_branches(1);
@@ -133,9 +134,10 @@ class MaidNodeNfsTest : public testing::Test {
       }
       version_tree[cur_branch].push_back(std::make_pair(new_version_index, index));
       StructuredDataVersions::VersionName v_new(new_version_index, chunks_[index].name());
-      std::cout << "put new version " << DebugId(v_new.id)
+      std::cout << "operation " << index << " put new version " << DebugId(v_new.id)
                 << " after old version " << DebugId(v_old->id) << std::endl;
       put_version_futures.emplace_back(clients_.back()->PutVersion(chunk.name(), *v_old, v_new));
+      Sleep(std::chrono::milliseconds(100));
     }
 
     for (size_t cur_branch(0); cur_branch < max_branches; ++cur_branch) {
@@ -169,7 +171,7 @@ class MaidNodeNfsTest : public testing::Test {
             chunks_[version_tree[cur_branch].back().second].name());
         auto future(clients_.back()->GetBranch(chunk.name(), v_tip));
         auto versions(future.get());
-//         std::cout << "get " << versions.size() << " versions for branch " << cur_branch << std::endl;
+        std::cout << "get " << versions.size() << " versions for branch " << cur_branch << std::endl;
         EXPECT_LE(versions.size(), version_tree[cur_branch].size());
         --num_of_tip_versions;
         auto chunk_index_itr(version_tree[cur_branch].end());
@@ -346,7 +348,7 @@ TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
   StructuredDataVersions::VersionName v_ori(0, chunks_.front().name());
   AddClient();
   auto create_version_future(clients_.back()->CreateVersionTree(chunk.name(), v_ori,
-                                                                max_versions, max_branches));
+      static_cast<uint32_t>(max_versions), static_cast<uint32_t>(max_branches)));
   EXPECT_NO_THROW(create_version_future.get()) << "failure to create version";
   for (size_t index(1); index < (max_versions * 2); ++index) {
     StructuredDataVersions::VersionName v_old(index - 1, chunks_[index - 1].name());
@@ -387,6 +389,15 @@ TEST_F(MaidNodeNfsTest, FUNC_PopulateMultipleBranchTree) {
   VertionTreeTest(5, 4, 20);
   LOG(kInfo) << "Testing with max_versions = 100, max_branches = 10, total_versions = 60";
   VertionTreeTest(100, 10, 60);
+}
+
+TEST_F(MaidNodeNfsTest, FUNC_PopulateLengthyTree) {
+  LOG(kInfo) << "Testing with max_versions = 100, max_branches = 1, total_versions = 1500";
+  VertionTreeTest(100, 1, 1500, 256);
+  LOG(kInfo) << "Testing with max_versions = 15000, max_branches = 1, total_versions = 14580";
+  VertionTreeTest(15000, 1, 14580, 128);
+  LOG(kInfo) << "Testing with max_versions = 100, max_branches = 1, total_versions = 20000";
+  VertionTreeTest(100, 1, 20000, 128);
 }
 
 }  // namespace test
