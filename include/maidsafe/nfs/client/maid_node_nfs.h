@@ -331,7 +331,9 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
     const DataName& data_name, const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name,
     const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Put Version " << HexSubstr(data_name.value);
+  LOG(kVerbose) << "MaidNodeNfs::PutVersion put new version "
+                << DebugId(new_version_name.id) << " after old version "
+                << DebugId(old_version_name.id) << " for " << HexSubstr(data_name.value);
   typedef MaidNodeService::PutVersionResponse::Contents ResponseContents;
   auto promise(
       std::make_shared<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>>());
@@ -342,9 +344,10 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
   auto task_id(rpc_timers_.put_version_timer.NewTaskId());
   rpc_timers_.put_version_timer.AddTask(
       timeout,
-      [op_data, data_name](ResponseContents get_response) {
-        LOG(kVerbose) << "MaidNodeNfs CreateVersionTree HandleResponseContents for "
-                      << HexSubstr(data_name.value);
+      [op_data, data_name, new_version_name, old_version_name](ResponseContents get_response) {
+        LOG(kVerbose) << "MaidNodeNfs PutVersion HandleResponseContents put new version "
+                      << DebugId(new_version_name.id) << " after old version "
+                      << DebugId(old_version_name.id) << " for " << HexSubstr(data_name.value);
         op_data->HandleResponseContents(std::move(get_response));
       },
       routing::Parameters::group_size * 3, task_id);
