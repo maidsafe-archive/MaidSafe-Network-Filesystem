@@ -160,7 +160,7 @@ class MaidNodeNfsTest : public testing::Test {
         std::cout << "tip version : " << DebugId(version.id) << std::endl;
       num_of_tip_versions = versions.size();
       EXPECT_LE(num_of_tip_versions, max_branches);
-      EXPECT_GT(num_of_tip_versions, 0);
+      EXPECT_GT(num_of_tip_versions, size_t(0));
     } catch (const maidsafe_error& error) {
       EXPECT_TRUE(false) << "Failed to retrieve version: " << boost::diagnostic_information(error);
     }
