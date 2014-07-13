@@ -49,7 +49,7 @@ TYPED_TEST_CASE(ServiceTest, ServiceTypes);
 TYPED_TEST(ServiceTest, BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
-  routing::Routing routing(maid);
+  routing::Routing routing(maid, boost::filesystem::path());
   AsioService asio_service(2);
   typedef typename TypeParam::GetResponse GetResponse;
   routing::Timer<typename GetResponse::Contents> get_timer(asio_service);

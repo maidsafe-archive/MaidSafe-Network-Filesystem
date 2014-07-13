@@ -18,6 +18,8 @@
 
 #include "maidsafe/nfs/client/maid_node_nfs.h"
 
+//#include "maidsafe/common/application_support_directories.h"
+
 #include "maidsafe/common/on_scope_exit.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
@@ -68,43 +70,43 @@ void UpdateRequestPublicKeyFunctor(routing::RequestPublicKeyFunctor& request_pub
 
 
 std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(const passport::Maid& maid,
-    const routing::BootstrapContacts& bootstrap_contacts) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid } };
-  maid_node_ptr->Init(bootstrap_contacts);
+    boost::filesystem::path bootstrap_file_path/* = GetUserAppDir()*/) {                        // FIXME
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid, bootstrap_file_path } };
+  maid_node_ptr->Init();
   return maid_node_ptr;
 }
 
 std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(
     const passport::MaidAndSigner& maid_and_signer,
-    const routing::BootstrapContacts& bootstrap_contacts) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first } };
-  maid_node_ptr->Init(maid_and_signer, bootstrap_contacts);
+    boost::filesystem::path bootstrap_file_path /*= GetUserAppDir()*/) {                         // FIXME
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first,
+                                                               bootstrap_file_path} };
+  maid_node_ptr->Init(maid_and_signer);
   return maid_node_ptr;
 }
 
 std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeSharedZeroState(
     const passport::MaidAndSigner& maid_and_signer,
-    const routing::BootstrapContacts& bootstrap_contacts,
+    const boost::filesystem::path& bootstrap_file_path,
     const std::vector<passport::PublicPmid>& public_pmids) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first } };
-  maid_node_ptr->InitZeroState(maid_and_signer, bootstrap_contacts, public_pmids);
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first,
+                                                               bootstrap_file_path } };
+  maid_node_ptr->InitZeroState(maid_and_signer, public_pmids);
   return maid_node_ptr;
 }
 
-void MaidNodeNfs::Init(const passport::MaidAndSigner& maid_and_signer,
-                       const routing::BootstrapContacts& bootstrap_contacts) {
+void MaidNodeNfs::Init(const passport::MaidAndSigner& maid_and_signer) {
   on_scope_exit cleanup_on_error([&] { Stop(); });
-  InitRouting(bootstrap_contacts);
+  InitRouting();
   CreateAccount(passport::PublicMaid{ maid_and_signer.first },
                 passport::PublicAnmaid{ maid_and_signer.second });
   cleanup_on_error.Release();
 }
 
 void MaidNodeNfs::InitZeroState(const passport::MaidAndSigner& maid_and_signer,
-                                const routing::BootstrapContacts& bootstrap_contacts,
                                 const std::vector<passport::PublicPmid>& public_pmids) {
   on_scope_exit cleanup_on_error([&] { Stop(); });
-  InitRouting(bootstrap_contacts, public_pmids);
+  InitRouting(public_pmids);
   CreateAccount(passport::PublicMaid{ maid_and_signer.first },
                 passport::PublicAnmaid{ maid_and_signer.second });
   cleanup_on_error.Release();
@@ -119,18 +121,19 @@ void MaidNodeNfs::CreateAccount(const passport::PublicMaid& public_maid,
   LOG(kInfo) << " CreateAccount for maid ID:" << DebugId(public_maid.name()) << " succeeded.";
 }
 
-void MaidNodeNfs::Init(const routing::BootstrapContacts& bootstrap_contacts) {
+void MaidNodeNfs::Init() {
   on_scope_exit cleanup_on_error([&] { Stop(); });
-  InitRouting(bootstrap_contacts);
+  InitRouting();
   cleanup_on_error.Release();
 }
 
-MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
+MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid,
+                         const boost::filesystem::path& bootstrap_file_path)
     : kMaid_(maid),
       asio_service_(2),
       rpc_timers_(asio_service_),
       network_health_change_signal_(),
-      routing_(maidsafe::make_unique<routing::Routing>(kMaid_)),
+      routing_(maidsafe::make_unique<routing::Routing>(kMaid_, bootstrap_file_path)),
       dispatcher_(*routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
@@ -151,15 +154,14 @@ MaidNodeNfs::OnNetworkHealthChange& MaidNodeNfs::network_health_change_signal() 
   return network_health_change_signal_;
 }
 
-void MaidNodeNfs::InitRouting(const routing::BootstrapContacts& bootstrap_contacts,
-                              std::vector<passport::PublicPmid> public_pmids) {
+void MaidNodeNfs::InitRouting(std::vector<passport::PublicPmid> public_pmids) {
   routing::Functors functors(InitialiseRoutingCallbacks());
   if (!public_pmids.empty()) {
     UpdateRequestPublicKeyFunctor(functors.request_public_key, public_pmids);
     LOG(kInfo) << "Modified RequestPublicKeyFunctor for Zero state client";
   }
   LOG(kInfo) << "after  InitialiseRoutingCallbacks";
-  routing_->Join(functors, bootstrap_contacts);
+  routing_->Join(functors);
   LOG(kInfo) << "after  routing_.Join()";
   std::unique_lock<std::mutex> lock(network_health_mutex_);
   // FIXME BEFORE_RELEASE discuss this

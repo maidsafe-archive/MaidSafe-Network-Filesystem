@@ -67,10 +67,10 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
 
   // Logging in for already existing maid accounts
   static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::Maid& maid,
-      const routing::BootstrapContacts& bootstrap_contacts);
+      boost::filesystem::path bootstrap_file_path);
   // Creates maid account and logs in. Throws on failure to create account.
   static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::MaidAndSigner& maid_and_signer,
-      const routing::BootstrapContacts& bootstrap_contacts);
+      boost::filesystem::path bootstrap_file_path);
   // Disconnects from network and all unfinished tasks will be cancelled
   void Stop();
 
@@ -150,9 +150,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef boost::promise<std::vector<StructuredDataVersions::VersionName>> VersionNamesPromise;
   typedef std::function<void(const AvailableSizeAndReturnCode&)> PmidHealthFunctor;
 
-  explicit MaidNodeNfs(const passport::Maid& maid);
-  MaidNodeNfs(const passport::MaidAndSigner& maid_and_signer,
-              const routing::BootstrapContacts& bootstrap_contacts);
+  MaidNodeNfs(const passport::Maid& maid, const boost::filesystem::path& bootstrap_file_path);
 
   MaidNodeNfs(const MaidNodeNfs&);
   MaidNodeNfs(MaidNodeNfs&&);
@@ -162,22 +160,19 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   // Can only do public key lookup in provided public_pmids (not in network).
   static std::shared_ptr<MaidNodeNfs> MakeSharedZeroState(
       const passport::MaidAndSigner& maid_and_signer,
-      const routing::BootstrapContacts& bootstrap_contacts,
+      const boost::filesystem::path& bootstrap_file_path,
       const std::vector<passport::PublicPmid>& public_pmids);
 
-  void Init(const passport::MaidAndSigner& maid_and_signer,
-            const routing::BootstrapContacts& bootstrap_contacts);
+  void Init(const passport::MaidAndSigner& maid_and_signer);
 
-  void Init(const routing::BootstrapContacts& bootstrap_contacts);
+  void Init();
 
   void InitZeroState(const passport::MaidAndSigner& maid_and_signer,
-                     const routing::BootstrapContacts& bootstrap_contacts,
                      const std::vector<passport::PublicPmid>& public_pmids);
 
   void CreateAccount(const passport::PublicMaid& public_maid,
                      const passport::PublicAnmaid& public_anmaid);
-  void InitRouting(const routing::BootstrapContacts& bootstrap_contacts,
-                   std::vector<passport::PublicPmid> = std::vector<passport::PublicPmid>());
+  void InitRouting(std::vector<passport::PublicPmid> = std::vector<passport::PublicPmid>());
 
   routing::Functors InitialiseRoutingCallbacks();
   void OnNetworkStatusChange(int updated_network_health);

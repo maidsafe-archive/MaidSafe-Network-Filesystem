@@ -35,14 +35,16 @@ static const size_t kTestChunkSize = 1024 * 1024;
 
 class MaidNodeNfsTest : public testing::Test {
  public:
-  MaidNodeNfsTest() {}
+  MaidNodeNfsTest()
+      : test_path_(maidsafe::test::CreateTestPath("MaidSafe_Test_MaidNodeNfs")){}
 
  protected:
   void AddClient() {
     routing::Parameters::append_local_live_port_endpoint = true;
-    routing::BootstrapContacts bootstrap_contacts;
+    // routing::BootstrapContacts bootstrap_contacts;
     auto maid_and_signer(passport::CreateMaidAndSigner());
-    clients_.emplace_back(nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts));
+    clients_.emplace_back(nfs_client::MaidNodeNfs::MakeShared(maid_and_signer,
+                                                              *test_path_ / "bootstrap"));
   }
 
   void CompareGetResult(const std::vector<ImmutableData>& chunks,
@@ -189,6 +191,7 @@ class MaidNodeNfsTest : public testing::Test {
     EXPECT_EQ(num_of_tip_versions, 0);
   }
 
+  maidsafe::test::TestPath test_path_;
   std::vector<ImmutableData> chunks_;
   std::vector<std::shared_ptr<nfs_client::MaidNodeNfs>> clients_;
 };
@@ -198,11 +201,12 @@ TEST_F(MaidNodeNfsTest, FUNC_Constructor) {
   routing::BootstrapContacts bootstrap_contacts;
   auto maid_and_signer(passport::CreateMaidAndSigner());
   {
-    auto nfs_new_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer, bootstrap_contacts);
+    auto nfs_new_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer,
+                                                               *test_path_ / "bootstrap");
   }
   LOG(kInfo) << "joining existing account";
   auto nfs_existing_account =
-      nfs_client::MaidNodeNfs::MakeShared(maid_and_signer.first, bootstrap_contacts);
+      nfs_client::MaidNodeNfs::MakeShared(maid_and_signer.first, *test_path_ / "bootstrap");
 }
 
 TEST_F(MaidNodeNfsTest, FUNC_FailingGet) {
