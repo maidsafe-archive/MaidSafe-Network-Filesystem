@@ -171,7 +171,8 @@ class MaidNodeNfsTest : public testing::Test {
             chunks_[version_tree[cur_branch].back().second].name());
         auto future(clients_.back()->GetBranch(chunk.name(), v_tip));
         auto versions(future.get());
-        std::cout << "get " << versions.size() << " versions for branch " << cur_branch << std::endl;
+        std::cout << "get " << versions.size() << " versions for branch " << cur_branch
+                  << std::endl;
         EXPECT_LE(versions.size(), version_tree[cur_branch].size());
         --num_of_tip_versions;
         auto chunk_index_itr(version_tree[cur_branch].end());
