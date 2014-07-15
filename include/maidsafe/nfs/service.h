@@ -110,9 +110,9 @@ class Service {
     }
   }
 
-  void HandleChurnEvent(std::shared_ptr<routing::MatrixChange> matrix_change) {
+  void HandleChurnEvent(std::shared_ptr<routing::CloseNodesChange> close_nodes_change) {
     LOG(kVerbose) << "NFS service calling persona_service HandleChurnEvent";
-    return impl_->HandleChurnEvent(matrix_change);
+    return impl_->HandleChurnEvent(close_nodes_change);
   }
 
   // Special case to handle relay messages from data getter to data manager
