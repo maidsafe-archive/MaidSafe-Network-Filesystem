@@ -69,28 +69,23 @@ void UpdateRequestPublicKeyFunctor(routing::RequestPublicKeyFunctor& request_pub
 }  // anonymous namespace
 
 
-std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(const passport::Maid& maid,
-    boost::filesystem::path bootstrap_file_path/* = GetUserAppDir()*/) {                        // FIXME
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid, bootstrap_file_path } };
+std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(const passport::Maid& maid) {
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid } };
   maid_node_ptr->Init();
   return maid_node_ptr;
 }
 
 std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(
-    const passport::MaidAndSigner& maid_and_signer,
-    boost::filesystem::path bootstrap_file_path /*= GetUserAppDir()*/) {                         // FIXME
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first,
-                                                               bootstrap_file_path} };
+    const passport::MaidAndSigner& maid_and_signer) {
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first } };
   maid_node_ptr->Init(maid_and_signer);
   return maid_node_ptr;
 }
 
 std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeSharedZeroState(
     const passport::MaidAndSigner& maid_and_signer,
-    const boost::filesystem::path& bootstrap_file_path,
     const std::vector<passport::PublicPmid>& public_pmids) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first,
-                                                               bootstrap_file_path } };
+  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first } };
   maid_node_ptr->InitZeroState(maid_and_signer, public_pmids);
   return maid_node_ptr;
 }
@@ -127,13 +122,12 @@ void MaidNodeNfs::Init() {
   cleanup_on_error.Release();
 }
 
-MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid,
-                         const boost::filesystem::path& bootstrap_file_path)
+MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
     : kMaid_(maid),
       asio_service_(2),
       rpc_timers_(asio_service_),
       network_health_change_signal_(),
-      routing_(maidsafe::make_unique<routing::Routing>(kMaid_, bootstrap_file_path)),
+      routing_(maidsafe::make_unique<routing::Routing>(kMaid_)),
       dispatcher_(*routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(

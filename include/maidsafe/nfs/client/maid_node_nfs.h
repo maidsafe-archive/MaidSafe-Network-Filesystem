@@ -66,11 +66,9 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef boost::signals2::signal<void(int32_t)> OnNetworkHealthChange;
 
   // Logging in for already existing maid accounts
-  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::Maid& maid,
-      boost::filesystem::path bootstrap_file_path);
+  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::Maid& maid);
   // Creates maid account and logs in. Throws on failure to create account.
-  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::MaidAndSigner& maid_and_signer,
-      boost::filesystem::path bootstrap_file_path);
+  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::MaidAndSigner& maid_and_signer);
   // Disconnects from network and all unfinished tasks will be cancelled
   void Stop();
 
@@ -150,7 +148,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef boost::promise<std::vector<StructuredDataVersions::VersionName>> VersionNamesPromise;
   typedef std::function<void(const AvailableSizeAndReturnCode&)> PmidHealthFunctor;
 
-  MaidNodeNfs(const passport::Maid& maid, const boost::filesystem::path& bootstrap_file_path);
+  MaidNodeNfs(const passport::Maid& maid);
 
   MaidNodeNfs(const MaidNodeNfs&);
   MaidNodeNfs(MaidNodeNfs&&);
@@ -160,7 +158,6 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   // Can only do public key lookup in provided public_pmids (not in network).
   static std::shared_ptr<MaidNodeNfs> MakeSharedZeroState(
       const passport::MaidAndSigner& maid_and_signer,
-      const boost::filesystem::path& bootstrap_file_path,
       const std::vector<passport::PublicPmid>& public_pmids);
 
   void Init(const passport::MaidAndSigner& maid_and_signer);
