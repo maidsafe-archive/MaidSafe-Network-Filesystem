@@ -64,10 +64,18 @@ target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
 target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(MaidsafeTesting)
+  list(REMOVE_ITEM NfsTestsAllFiles ${NfsSourcesDir}/tests/maid_node_nfs_test.cc)
   ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})
   target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(TESTnfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+
+  set(NfsFunctionalTestFiles ${NfsSourcesDir}/tests/tests_main.cc
+                             ${NfsSourcesDir}/tests/maid_node_nfs_test.cc)
+  ms_add_executable(TESTnfs_func "Tests/NFS" ${NfsFunctionalTestFiles})
+  target_link_libraries(TESTnfs_func maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
+  # TODO - Investigate why boost variant requires this warning to be disabled.
+  target_compile_options(TESTnfs_func PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 endif()
 
 ms_rename_outdated_built_exes()
@@ -85,6 +93,8 @@ include(standard_flags)
 if(MaidsafeTesting)
   ms_add_style_test()
   ms_add_gtests(TESTnfs)
+  add_test(NAME Nfs_Functional_Tests COMMAND TESTnfs_func)
+  set_property(TEST Nfs_Functional_Tests PROPERTY LABELS Nfs Functional)
   ms_add_project_experimental()
   ms_test_summary_output()
 endif()
@@ -97,6 +107,6 @@ install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault COMPONE
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ COMPONENT Development DESTINATION include)
 
 if(MaidsafeTesting)
-  install(TARGETS TESTnfs COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
-  install(TARGETS TESTnfs COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
+  install(TARGETS TESTnfs TESTnfs_func COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
+  install(TARGETS TESTnfs TESTnfs_func COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
 endif()
