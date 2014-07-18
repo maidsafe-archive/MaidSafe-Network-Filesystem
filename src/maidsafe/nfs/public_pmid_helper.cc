@@ -33,7 +33,8 @@ PublicPmidHelper::PublicPmidHelper()
 
 PublicPmidHelper::~PublicPmidHelper() {
   try {
-    worker_future_.get();
+    if (worker_future_.valid())
+      worker_future_.get();
   } catch (const std::exception& ex) {
     LOG(kWarning) << "Error in ~PublicPmidHelper() : " << boost::diagnostic_information(ex);
   }
