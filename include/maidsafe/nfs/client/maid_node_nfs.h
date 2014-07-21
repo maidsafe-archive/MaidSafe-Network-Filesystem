@@ -148,7 +148,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef boost::promise<std::vector<StructuredDataVersions::VersionName>> VersionNamesPromise;
   typedef std::function<void(const AvailableSizeAndReturnCode&)> PmidHealthFunctor;
 
-  MaidNodeNfs(const passport::Maid& maid);
+  explicit MaidNodeNfs(const passport::Maid& maid);
 
   MaidNodeNfs(const MaidNodeNfs&);
   MaidNodeNfs(MaidNodeNfs&&);

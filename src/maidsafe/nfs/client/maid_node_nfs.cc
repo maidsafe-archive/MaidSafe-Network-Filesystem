@@ -18,8 +18,6 @@
 
 #include "maidsafe/nfs/client/maid_node_nfs.h"
 
-//#include "maidsafe/common/application_support_directories.h"
-
 #include "maidsafe/common/on_scope_exit.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
@@ -200,8 +198,6 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
       [](const routing::GroupToSingleMessage& /*message*/) {};
   functors.typed_message_and_caching.group_to_group.put_cache_data =
       [](const routing::GroupToGroupMessage& /*message*/) {};
-  functors.new_bootstrap_contact =
-      [](const routing::BootstrapContact& /*bootstrap_contact*/) {};
   return functors;
 }
 
