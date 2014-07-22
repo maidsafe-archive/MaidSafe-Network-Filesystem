@@ -230,7 +230,8 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
   auto response_functor([promise](const nfs_client::ReturnCode& result) {
                            HandlePutResponseResult(result, promise);
                         });
-  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(routing::Parameters::group_size - 1,
+                                                               response_functor));
   auto task_id(rpc_timers_.put_timer.NewTaskId());
   rpc_timers_.put_timer.AddTask(
       timeout,
