@@ -121,7 +121,7 @@ void GetHandler::Get(const DataName& data_name,
                         op_data->HandleResponseContents(std::move(get_response));
                      },
                      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                     routing::Parameters::group_size * 2, task_id);
+                     1, task_id);
   dispatcher_.SendGetRequest(task_id, data_name);
 }
 
