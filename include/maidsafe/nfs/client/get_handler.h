@@ -115,13 +115,22 @@ void GetHandler::Get(const DataName& data_name,
                                                        data_name.value))));
   }
   get_timer_.AddTask(timeout,
-                     [op_data, data_name](DataNameAndContentOrReturnCode get_response) {
+                     [op_data, data_name, task_id, this](
+                         DataNameAndContentOrReturnCode get_response) {
                         LOG(kVerbose) << "GetHandler Get HandleResponseContents for "
                                       << HexSubstr(data_name.value);
                         op_data->HandleResponseContents(std::move(get_response));
-                     },
-                     // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                     1, task_id);
+                        {
+                          std::lock_guard<std::mutex> lock(mutex_);
+                          auto iter(std::find_if(std::begin(get_info_), std::end(get_info_),
+                                                 [task_id](const std::pair<routing::TaskId,
+                                                                           GetInfo>& info) {
+                                                   return std::get<1>(info.second) == task_id;
+                                                 }));
+                          if (iter != std::end(get_info_))
+                            get_info_.erase(iter);
+                        }
+                     }, 1, task_id);
   dispatcher_.SendGetRequest(task_id, data_name);
 }
 
