@@ -21,7 +21,6 @@
 #include "maidsafe/common/test.h"
 #include "maidsafe/passport/passport.h"
 #include "maidsafe/routing/parameters.h"
-#include "maidsafe/routing/bootstrap_file_operations.h"
 
 #include "maidsafe/nfs/client/maid_node_nfs.h"
 
@@ -39,8 +38,6 @@ class MaidNodeNfsTest : public testing::Test {
 
  protected:
   void AddClient() {
-    routing::Parameters::append_local_live_port_endpoint = true;
-    // routing::BootstrapContacts bootstrap_contacts;
     auto maid_and_signer(passport::CreateMaidAndSigner());
     clients_.emplace_back(nfs_client::MaidNodeNfs::MakeShared(maid_and_signer));
   }
@@ -195,7 +192,6 @@ class MaidNodeNfsTest : public testing::Test {
 };
 
 TEST_F(MaidNodeNfsTest, FUNC_Constructor) {
-  routing::Parameters::append_local_live_port_endpoint = true;
   auto maid_and_signer(passport::CreateMaidAndSigner());
   {
     auto nfs_new_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer);
