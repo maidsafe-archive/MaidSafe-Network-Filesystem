@@ -50,8 +50,8 @@ class MaidNodeNfsTest : public testing::Test {
         EXPECT_EQ(retrieved.data(), chunks[index].data());
       }
       catch (const std::exception& ex) {
-        LOG(kError) << "Failed to retrieve chunk: " << DebugId(chunks[index].name())
-                    << " because: " << boost::diagnostic_information(ex);
+        EXPECT_TRUE(false) << "Failed to retrieve chunk: " << DebugId(chunks[index].name())
+                           << " because: " << boost::diagnostic_information(ex);
       }
     }
   }
@@ -87,7 +87,10 @@ class MaidNodeNfsTest : public testing::Test {
     std::vector<boost::future<ImmutableData>> get_futures;
     for (const auto& chunk : chunks_)
       get_futures.emplace_back(
-          clients_[RandomInt32() % num_of_clients]->Get<ImmutableData::Name>(chunk.name()));
+          clients_[RandomInt32() % num_of_clients]->Get<ImmutableData::Name>(
+              chunk.name(), std::chrono::seconds(
+                                num_of_chunks + num_of_clients +
+                                    routing::Parameters::default_response_timeout.count() / 1000)));
     CompareGetResult(chunks_, get_futures);
   }
 
