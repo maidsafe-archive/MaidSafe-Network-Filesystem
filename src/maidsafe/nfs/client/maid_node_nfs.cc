@@ -141,10 +141,15 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
 }
 
 void MaidNodeNfs::Stop() {
+  LOG(kVerbose) << "MaidNodeNfs::Stop()";
   dispatcher_.Stop();
+  LOG(kVerbose) << "MaidNodeNfs::Stop() : dispatcher_";
   routing_.reset();
+  LOG(kVerbose) << "MaidNodeNfs::Stop() : routing_";
   rpc_timers_.CancellAll();
+  LOG(kVerbose) << "MaidNodeNfs::Stop() : rpc_timers_";
   asio_service_.Stop();
+  LOG(kVerbose) << "MaidNodeNfs::Stop() : asio_service_";
 }
 
 MaidNodeNfs::OnNetworkHealthChange& MaidNodeNfs::network_health_change_signal() {
