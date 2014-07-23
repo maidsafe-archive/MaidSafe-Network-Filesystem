@@ -25,7 +25,7 @@
 
 #include "maidsafe/common/test.h"
 
-#include "maidsafe/passport/types.h"
+#include "maidsafe/passport/passport.h"
 #include "maidsafe/routing/routing_api.h"
 
 namespace maidsafe {
@@ -33,15 +33,6 @@ namespace maidsafe {
 namespace nfs {
 
 namespace test {
-
-namespace {
-
-passport::Pmid MakePmid() {
-  passport::Anpmid anpmid;
-  return passport::Pmid(anpmid);
-}
-
-}  // namespace
 
 void RunFutureTestInParallel(int thread_count, std::function<void()> functor) {
   std::vector<std::thread> threads;
@@ -53,7 +44,7 @@ void RunFutureTestInParallel(int thread_count, std::function<void()> functor) {
 
 TEST(PublicPmidHelperTest, BEH_FutureWaitForAny) {
   detail::PublicPmidHelper public_pmid_helper;
-  auto pmid(MakePmid());
+  auto pmid(passport::CreatePmidAndSigner().first);
   passport::PublicPmid::Name pmid_name(pmid.name());
   auto test = [pmid, pmid_name, &public_pmid_helper]() {
     std::vector<boost::promise<passport::PublicPmid>> promises;
