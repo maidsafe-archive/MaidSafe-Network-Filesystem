@@ -91,8 +91,9 @@ class MaidNodeNfsTest : public testing::Test {
     for (const auto& chunk : chunks_)
       get_futures.emplace_back(
           clients_[RandomInt32() % num_of_clients]->Get<ImmutableData::Name>(
-              chunk.name(), std::chrono::seconds(num_of_chunks + num_of_clients +
-                                                 routing::Parameters::default_response_timeout )));
+              chunk.name(), std::chrono::seconds(
+                                num_of_chunks + num_of_clients +
+                                    routing::Parameters::default_response_timeout.count() / 1000)));
     CompareGetResult(chunks_, get_futures);
   }
 
