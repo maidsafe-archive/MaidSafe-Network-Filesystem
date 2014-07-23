@@ -22,6 +22,7 @@
 #include <map>
 #include <tuple>
 #include <string>
+#include <utility>
 
 #include "boost/thread/future.hpp"
 
