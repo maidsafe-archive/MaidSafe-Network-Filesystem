@@ -36,18 +36,16 @@ void GetHandler::AddResponse(routing::TaskId task_id,
     get_info = get_info_[task_id];
     std::get<0>(get_info_[task_id])++;
     if (response.content && ValidateData(*response.content, std::get<2>(get_info_[task_id]))) {
-      get_info_.erase(task_id);
       operation = Operation::kAddResponse;
     } else if (response.return_code &&
                (std::get<0>(get_info_[task_id]) >= routing::Parameters::group_size)) {
       new_task_id = get_timer_.NewTaskId();
       get_info_.insert(std::make_pair(new_task_id,
-                                     std::make_tuple(0, std::get<1>(get_info_[task_id]),
-                                                     std::get<2>(get_info_[task_id]))));
+                                      std::make_tuple(0, std::get<1>(get_info_[task_id]),
+                                                      std::get<2>(get_info_[task_id]))));
       get_info_.erase(task_id);
       operation = Operation::kSendRequest;
     } else  if (!response.return_code && !response.content) {
-      get_info_.erase(task_id);
       operation = Operation::kCancelTask;
     }
   }
