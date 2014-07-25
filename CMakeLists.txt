@@ -91,11 +91,10 @@ include(standard_flags)
 # Tests                                                                                            #
 #==================================================================================================#
 if(MaidsafeTesting)
-  ms_add_style_test()
+  ms_add_default_tests()
   ms_add_gtests(TESTnfs)
 #   add_test(NAME Nfs_Functional_Tests COMMAND TESTnfs_func)
 #   set_property(TEST Nfs_Functional_Tests PROPERTY LABELS Nfs Functional)
-  ms_add_project_experimental()
   ms_test_summary_output()
 endif()
 
