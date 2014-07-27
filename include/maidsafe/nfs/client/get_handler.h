@@ -62,10 +62,10 @@ class ValidateDataVisitor : public boost::static_visitor<bool> {
   explicit ValidateDataVisitor(const nfs_vault::Content& content) : content_(content) {}
 
   template<typename DataNameType>
-  result_type operator()(const DataNameType& /*data_name*/) {
-    // FIXME(Mahmoud)
-    // return (typename DataNameType::data_type(content_.data)).name() == data_name;
-    return true;
+  result_type operator()(const DataNameType& data_name) {
+    return (typename DataNameType::data_type(data_name,
+                     typename DataNameType::data_type::serialised_type(
+                         NonEmptyString(content_.data)))).name() == data_name;
   }
 
  private:
