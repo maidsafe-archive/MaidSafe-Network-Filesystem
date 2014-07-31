@@ -31,6 +31,7 @@ namespace maidsafe {
 
 namespace nfs_client {
 
+template <typename DispatcherType>
 class GetHandler;
 
 class MaidNodeService {
@@ -69,7 +70,7 @@ class MaidNodeService {
 
   MaidNodeService(const routing::SingleId& receiver,
                   RpcTimers& rpc_timers,
-                  GetHandler& get_handler);
+                  GetHandler<MaidNodeDispatcher>& get_handler);
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
@@ -114,7 +115,7 @@ class MaidNodeService {
 
   const routing::SingleId kReceiver_;
   RpcTimers& rpc_timers_;
-  GetHandler& get_handler_;
+  GetHandler<MaidNodeDispatcher>& get_handler_;
 };
 
 }  // namespace nfs_client

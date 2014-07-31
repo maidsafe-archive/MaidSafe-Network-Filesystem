@@ -59,10 +59,8 @@ void MaidNodeService::RpcTimers::CancellAll() {
 
 MaidNodeService::MaidNodeService(const routing::SingleId& receiver,
                                  RpcTimers& rpc_timers,
-                                 GetHandler& get_handler)
-        : kReceiver_(receiver),
-          rpc_timers_(rpc_timers),
-          get_handler_(get_handler) {}
+                                 GetHandler<MaidNodeDispatcher>& get_handler)
+    : kReceiver_(receiver), rpc_timers_(rpc_timers), get_handler_(get_handler) {}
 
 void MaidNodeService::HandleMessage(const GetResponse& message,
                                     const GetResponse::Sender& /*sender*/,

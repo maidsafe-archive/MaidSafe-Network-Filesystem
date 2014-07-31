@@ -191,7 +191,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   nfs::detail::PublicPmidHelper public_pmid_helper_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
-  GetHandler get_handler_;
+  GetHandler<MaidNodeDispatcher> get_handler_;
 };
 
 void CreateAccount(std::shared_ptr<passport::Maid> maid,

@@ -39,6 +39,7 @@
 #include "maidsafe/nfs/client/client_utils.h"
 #include "maidsafe/nfs/client/data_getter_dispatcher.h"
 #include "maidsafe/nfs/client/data_getter_service.h"
+#include "maidsafe/nfs/client/get_handler.h"
 
 namespace maidsafe {
 
@@ -89,6 +90,7 @@ class DataGetter {
   routing::Timer<DataGetterService::GetBranchResponse::Contents> get_branch_timer_;
   DataGetterDispatcher dispatcher_;
   nfs::Service<DataGetterService> service_;
+  GetHandler<DataGetterDispatcher> get_handler_;
 };
 
 // ==================== Implementation =============================================================
@@ -96,21 +98,9 @@ template <typename DataName>
 boost::future<typename DataName::data_type> DataGetter::Get(
     const DataName& data_name,
     const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "DataGetter Get " << HexSubstr(data_name.value);
-  typedef DataGetterService::GetResponse::Contents ResponseContents;
+  LOG(kVerbose) << "MaidNodeNfs Get " << HexSubstr(data_name.value);
   auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
-  HandleGetResult<typename DataName::data_type> response_functor(promise);
-  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(1, response_functor));
-  auto task_id(get_timer_.NewTaskId());
-  get_timer_.AddTask(timeout,
-                     [op_data, data_name](ResponseContents get_response) {
-                         LOG(kVerbose) << "DataGetter Get HandleResponseContents for "
-                                       << HexSubstr(data_name.value);
-                         op_data->HandleResponseContents(std::move(get_response));
-                     },
-                      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-                      routing::Parameters::group_size * 2, task_id);
-  dispatcher_.SendGetRequest(task_id, data_name);
+  get_handler_.Get(data_name, promise, timeout);
   return promise->get_future();
 }
 
