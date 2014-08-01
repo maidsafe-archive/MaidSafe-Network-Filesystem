@@ -49,6 +49,12 @@ ms_glob_dir(Nfs ${NfsSourcesDir} Nfs)
 ms_glob_dir(NfsClient ${NfsSourcesDir}/client "Nfs Client")
 ms_glob_dir(NfsVault ${NfsSourcesDir}/vault "Nfs Vault")
 ms_glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
+set(NfsTestsMain ${NfsSourcesDir}/tests/tests_main.cc)
+set(NfsNetworkTestsAllFiles ${NfsSourcesDir}/tests/data_getter_test.cc ${NfsTestsMain})
+set(NfsWeeklyTestsAllFiles ${NfsSourcesDir}/tests/maid_node_nfs_test.cc ${NfsTestsMain})
+list(REMOVE_ITEM NfsTestsAllFiles ${NfsNetworkTestsAllFiles} ${NfsWeeklyTestsAllFiles})
+list(APPEND NfsTestsAllFiles ${NfsTestsMain})
+
 
 #==================================================================================================#
 # Define MaidSafe libraries and executables                                                        #
@@ -64,18 +70,20 @@ target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
 target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(MaidsafeTesting)
-  list(REMOVE_ITEM NfsTestsAllFiles ${NfsSourcesDir}/tests/maid_node_nfs_test.cc)
-  ms_add_executable(TESTnfs "Tests/NFS" ${NfsTestsAllFiles})
-  target_link_libraries(TESTnfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
+  ms_add_executable(test_nfs "Tests/NFS" ${NfsTestsAllFiles})
+  target_link_libraries(test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
-  target_compile_options(TESTnfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+  target_compile_options(test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 
-  set(NfsFunctionalTestFiles ${NfsSourcesDir}/tests/tests_main.cc
-                             ${NfsSourcesDir}/tests/maid_node_nfs_test.cc)
-  ms_add_executable(TESTnfs_func "Tests/NFS" ${NfsFunctionalTestFiles})
-  target_link_libraries(TESTnfs_func maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
+  ms_add_executable(network_test_nfs "Tests/NFS" ${NfsNetworkTestsAllFiles})
+  target_link_libraries(network_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
-  target_compile_options(TESTnfs_func PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+  target_compile_options(network_test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+
+  ms_add_executable(weekly_test_nfs "Tests/NFS" ${NfsWeeklyTestsAllFiles})
+  target_link_libraries(weekly_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
+  # TODO - Investigate why boost variant requires this warning to be disabled.
+  target_compile_options(weekly_test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 endif()
 
 ms_rename_outdated_built_exes()
@@ -92,11 +100,10 @@ include(standard_flags)
 #==================================================================================================#
 if(MaidsafeTesting)
   ms_add_default_tests()
-  ms_add_gtests(TESTnfs)
+  ms_add_gtests(test_nfs)
+  ms_add_network_gtests(network_test_nfs)
   if(WEEKLY)
-#   add_test(NAME Nfs_Functional_Tests COMMAND TESTnfs_func)
-#   set_property(TEST Nfs_Functional_Tests PROPERTY LABELS Nfs Functional)
-    ms_add_gtests(TESTnfs_func)
+    ms_add_network_gtests(weekly_test_nfs)
     set_property(TEST MaidNodeNfsTest.FUNC_PopulateLengthyTree PROPERTY TIMEOUT 5000)
   endif()
   ms_test_summary_output()
@@ -110,6 +117,6 @@ install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault COMPONE
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ COMPONENT Development DESTINATION include)
 
 if(MaidsafeTesting)
-  install(TARGETS TESTnfs TESTnfs_func COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
-  install(TARGETS TESTnfs TESTnfs_func COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
+  install(TARGETS test_nfs network_test_nfs weekly_test_nfs COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
+  install(TARGETS test_nfs network_test_nfs weekly_test_nfs COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
 endif()
