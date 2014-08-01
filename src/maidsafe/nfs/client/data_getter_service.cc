@@ -44,7 +44,7 @@ void DataGetterService::HandleMessage(const GetResponse& message,
     get_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != make_error_code(CommonErrors::invalid_parameter))
+    if (error.code() != make_error_code(CommonErrors::no_such_element))
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
