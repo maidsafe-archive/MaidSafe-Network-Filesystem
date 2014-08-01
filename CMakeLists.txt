@@ -80,10 +80,10 @@ if(MaidsafeTesting)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(network_test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 
-  ms_add_executable(weekly_test_nfs "Tests/NFS" ${NfsWeeklyTestsAllFiles})
-  target_link_libraries(weekly_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
+  ms_add_executable(weekly_network_test_nfs "Tests/NFS" ${NfsWeeklyTestsAllFiles})
+  target_link_libraries(weekly_network_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
-  target_compile_options(weekly_test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+  target_compile_options(weekly_network_test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 endif()
 
 ms_rename_outdated_built_exes()
@@ -103,7 +103,7 @@ if(MaidsafeTesting)
   ms_add_gtests(test_nfs)
   ms_add_network_gtests(network_test_nfs)
   if(WEEKLY)
-    ms_add_network_gtests(weekly_test_nfs)
+    ms_add_network_gtests(weekly_network_test_nfs)
     set_property(TEST MaidNodeNfsTest.FUNC_PopulateLengthyTree PROPERTY TIMEOUT 5000)
   endif()
   ms_test_summary_output()
@@ -117,6 +117,6 @@ install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault COMPONE
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ COMPONENT Development DESTINATION include)
 
 if(MaidsafeTesting)
-  install(TARGETS test_nfs network_test_nfs weekly_test_nfs COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
-  install(TARGETS test_nfs network_test_nfs weekly_test_nfs COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
+  install(TARGETS test_nfs network_test_nfs weekly_network_test_nfs COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
+  install(TARGETS test_nfs network_test_nfs weekly_network_test_nfs COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
 endif()
