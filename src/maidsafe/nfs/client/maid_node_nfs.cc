@@ -160,11 +160,13 @@ void MaidNodeNfs::InitRouting(std::vector<passport::PublicPmid> public_pmids) {
   LOG(kInfo) << "after  InitialiseRoutingCallbacks";
   routing_->Join(functors);
   LOG(kInfo) << "after  routing_.Join()";
-  std::unique_lock<std::mutex> lock(network_health_mutex_);
-  // FIXME BEFORE_RELEASE discuss this
-  // This should behave differently. In case of new maid account, it should timeout
-  // For existing clients, should we try infinitly ?
-  network_health_condition_variable_.wait(lock, [this] { return network_health_ >= 100; });
+  // FIXME BEFORE_RELEASE discuss: parallel attempts, max no. of endpoints to try,
+  // prioritise live ports. To reduce the blocking duration in case of no network connectivity
+  std::unique_lock<std::mutex> lock{ network_health_mutex_ };
+  network_health_condition_variable_.wait(lock, [this] {
+    return (network_health_ == 100) || (network_health_ < -300000); });
+  if (network_health_ < 0)
+    BOOST_THROW_EXCEPTION(MakeError(RoutingErrors::not_connected));
 }
 
 routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {

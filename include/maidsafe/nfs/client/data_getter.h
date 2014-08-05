@@ -52,6 +52,10 @@ class DataGetter {
   // all_pmids_from_file should only be non-empty if TESTING is defined
   DataGetter(AsioService& asio_service, routing::Routing& routing);
 
+  // This call only cancels the rpc timers. As routing object is not owned by data getter,
+  // it doesn't stop routing.
+  void Stop();
+
   template <typename DataName>
   boost::future<typename DataName::data_type> Get(
       const DataName& data_name,

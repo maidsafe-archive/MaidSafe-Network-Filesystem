@@ -39,6 +39,12 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing)
       get_handler_(get_timer_, dispatcher_) {
 }
 
+void DataGetter::Stop() {
+  get_timer_.CancelAll();
+  get_versions_timer_.CancelAll();
+  get_branch_timer_.CancelAll();
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe
