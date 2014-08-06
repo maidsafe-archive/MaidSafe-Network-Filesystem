@@ -64,7 +64,7 @@ void DataGetterService::HandleMessage(const GetCachedResponse& message,
     get_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != make_error_code(CommonErrors::invalid_parameter))
+    if (error.code() != make_error_code(CommonErrors::no_such_element))
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -80,7 +80,7 @@ void DataGetterService::HandleMessage(const GetVersionsResponse& message,
     get_versions_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != make_error_code(CommonErrors::invalid_parameter))
+    if (error.code() != make_error_code(CommonErrors::no_such_element))
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -96,7 +96,7 @@ void DataGetterService::HandleMessage(const GetBranchResponse& message,
     get_branch_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != make_error_code(CommonErrors::invalid_parameter))
+    if (error.code() != make_error_code(CommonErrors::no_such_element))
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
