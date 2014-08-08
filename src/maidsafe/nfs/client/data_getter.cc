@@ -30,14 +30,13 @@ DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing)
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
       dispatcher_(routing),
+      get_handler_(get_timer_, dispatcher_),
       service_([&]()->std::unique_ptr<DataGetterService> {
                  std::unique_ptr<DataGetterService> service(
-                 new DataGetterService(routing, get_timer_, get_versions_timer_,
+                 new DataGetterService(routing, get_handler_, get_versions_timer_,
                                        get_branch_timer_));
                  return std::move(service);
-               }()),
-      get_handler_(get_timer_, dispatcher_) {
-}
+               }()) {}
 
 void DataGetter::Stop() {
   get_timer_.CancelAll();

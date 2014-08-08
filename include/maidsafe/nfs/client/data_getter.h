@@ -93,8 +93,8 @@ class DataGetter {
   routing::Timer<DataGetterService::GetVersionsResponse::Contents> get_versions_timer_;
   routing::Timer<DataGetterService::GetBranchResponse::Contents> get_branch_timer_;
   DataGetterDispatcher dispatcher_;
-  nfs::Service<DataGetterService> service_;
   GetHandler<DataGetterDispatcher> get_handler_;
+  nfs::Service<DataGetterService> service_;
 };
 
 // ==================== Implementation =============================================================

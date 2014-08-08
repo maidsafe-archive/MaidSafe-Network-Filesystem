@@ -23,11 +23,11 @@ namespace maidsafe {
 namespace nfs_client {
 
 DataGetterService::DataGetterService(
-    routing::Routing& routing, routing::Timer<DataGetterService::GetResponse::Contents>& get_timer,
+    routing::Routing& routing, GetHandler<DataGetterDispatcher>& get_handler,
     routing::Timer<DataGetterService::GetVersionsResponse::Contents>& get_versions_timer,
     routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer)
         : routing_(routing),
-          get_timer_(get_timer),
+          get_handler_(get_handler),
           get_versions_timer_(get_versions_timer),
           get_branch_timer_(get_branch_timer) {}
 
@@ -41,7 +41,7 @@ void DataGetterService::HandleMessage(const GetResponse& message,
   static_cast<void>(receiver);
   static_cast<void>(routing_);
   try {
-    get_timer_.AddResponse(message.id.data, *message.contents);
+    get_handler_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != make_error_code(CommonErrors::no_such_element))
@@ -61,10 +61,10 @@ void DataGetterService::HandleMessage(const GetCachedResponse& message,
   static_cast<void>(receiver);
   static_cast<void>(routing_);
   try {
-    get_timer_.AddResponse(message.id.data, *message.contents);
+    get_handler_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != make_error_code(CommonErrors::invalid_parameter))
+    if (error.code() != make_error_code(CommonErrors::no_such_element))
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -80,7 +80,7 @@ void DataGetterService::HandleMessage(const GetVersionsResponse& message,
     get_versions_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != make_error_code(CommonErrors::invalid_parameter))
+    if (error.code() != make_error_code(CommonErrors::no_such_element))
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
@@ -96,7 +96,7 @@ void DataGetterService::HandleMessage(const GetBranchResponse& message,
     get_branch_timer_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
-    if (error.code() != make_error_code(CommonErrors::invalid_parameter))
+    if (error.code() != make_error_code(CommonErrors::no_such_element))
       throw;
     else
       LOG(kWarning) << "Timer does not expect:" << message.id.data;
