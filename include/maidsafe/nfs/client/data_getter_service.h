@@ -25,6 +25,8 @@
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
+#include "maidsafe/nfs/client/get_handler.h"
+#include "maidsafe/nfs/client/data_getter_dispatcher.h"
 
 namespace maidsafe {
 
@@ -43,7 +45,7 @@ class DataGetterService {
 
   DataGetterService(
       routing::Routing& routing,
-      routing::Timer<DataGetterService::GetResponse::Contents>& get_timer,
+      GetHandler<DataGetterDispatcher>& get_handler,
       routing::Timer<DataGetterService::GetVersionsResponse::Contents>& get_versions_timer,
       routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer);
 
@@ -61,7 +63,7 @@ class DataGetterService {
 
  private:
   routing::Routing& routing_;
-  routing::Timer<DataGetterService::GetResponse::Contents>& get_timer_;
+  GetHandler<DataGetterDispatcher>& get_handler_;
   routing::Timer<DataGetterService::GetVersionsResponse::Contents>& get_versions_timer_;
   routing::Timer<DataGetterService::GetBranchResponse::Contents>& get_branch_timer_;
 };

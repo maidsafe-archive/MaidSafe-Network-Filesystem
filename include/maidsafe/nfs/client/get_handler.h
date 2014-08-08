@@ -142,6 +142,7 @@ void GetHandler<DistaptcherType>::Get(
 template <typename DistaptcherType>
 void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
                                               const DataNameAndContentOrReturnCode& response) {
+  LOG(kVerbose) << " GetHandler::AddResponse "  << task_id;
   Operation operation(Operation::kNoOperation);
   routing::TaskId new_task_id(0);
   GetInfo get_info;
@@ -168,8 +169,9 @@ void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
     }
   }
 
-  LOG(kVerbose) << static_cast<int>(operation) << " GetHandler::AddResponse "  << task_id
-                <<  " original task id: " << std::get<1>(get_info_[task_id]);
+  LOG(kVerbose) << " GetHandler::AddResponse "  << task_id
+                << " original task id: " << std::get<1>(get_info_[task_id])
+                << " operation " << static_cast<int>(operation);
 
   if (operation == Operation::kAddResponse) {
     get_timer_.AddResponse(std::get<1>(get_info), response);
