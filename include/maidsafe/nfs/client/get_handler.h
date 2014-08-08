@@ -40,9 +40,10 @@ namespace maidsafe {
 
 namespace nfs_client {
 
+template <typename DistaptcherType>
 class GetHandlerVisitor : public boost::static_visitor<> {
  public:
-  GetHandlerVisitor(MaidNodeDispatcher& dispatcher_in, routing::TaskId task_id)
+  GetHandlerVisitor(DistaptcherType& dispatcher_in, routing::TaskId task_id)
       : dispatcher_(dispatcher_in), kTaskId_(task_id) {}
 
   template <typename Name>
@@ -53,7 +54,7 @@ class GetHandlerVisitor : public boost::static_visitor<> {
   }
 
  private:
-  MaidNodeDispatcher& dispatcher_;
+  DistaptcherType& dispatcher_;
   const routing::TaskId kTaskId_;
 };
 
@@ -173,7 +174,7 @@ void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
   if (operation == Operation::kAddResponse) {
     get_timer_.AddResponse(std::get<1>(get_info), response);
   } else if (operation == Operation::kSendRequest) {
-    GetHandlerVisitor get_handler_visitor(dispatcher_, new_task_id);
+    GetHandlerVisitor<DistaptcherType> get_handler_visitor(dispatcher_, new_task_id);
     boost::apply_visitor(get_handler_visitor, std::get<2>(get_info_[new_task_id]));
   } else if (operation == Operation::kCancelTask) {
     get_timer_.CancelTask(std::get<1>(get_info));
