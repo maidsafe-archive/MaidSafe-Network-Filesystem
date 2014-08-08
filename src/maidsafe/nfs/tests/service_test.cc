@@ -68,7 +68,7 @@ TEST_F(ServiceTest, BEH_All) {
   get_handler.Get(immutable_data.name(), promise, std::chrono::milliseconds(500));
   boost::future<ImmutableData> result(promise->get_future());
 
-  typename GetResponse::Contents contents(immutable_data);
+  GetResponse::Contents contents(immutable_data);
   auto task_id(get_timer.NewTaskId());
   --task_id;
   GetResponse get_response(MessageId(task_id), contents);
@@ -77,9 +77,9 @@ TEST_F(ServiceTest, BEH_All) {
   NodeId sender_node_id(NodeId::IdType::kRandomId);
   NodeId sender_group_id(NodeId::IdType::kRandomId);
   NodeId receiver_node_id(routing.kNodeId());
-  typename GetResponse::Sender sender((routing::GroupId(sender_node_id)),
-                                      (routing::SingleId(sender_group_id)));
-  typename GetResponse::Receiver receiver(receiver_node_id);
+  GetResponse::Sender sender((routing::GroupId(sender_node_id)),
+                             (routing::SingleId(sender_group_id)));
+  GetResponse::Receiver receiver(receiver_node_id);
 
   auto response_tuple(ParseMessageWrapper(serialised_get_response));
 
