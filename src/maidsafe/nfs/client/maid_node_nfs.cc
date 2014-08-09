@@ -124,8 +124,12 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
     : kMaid_(maid),
       asio_service_(2),
       rpc_timers_(asio_service_),
+      network_health_mutex_(),
+      network_health_condition_variable_(),
+      network_health_(-1),
       network_health_change_signal_(),
       routing_(maidsafe::make_unique<routing::Routing>(kMaid_)),
+      public_pmid_helper_(),
       dispatcher_(*routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
@@ -173,7 +177,7 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
   routing::Functors functors;
   std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
   functors.typed_message_and_caching.single_to_single.message_received =
-      [=](const routing::SingleToSingleMessage& message) {
+      [this_ptr](const routing::SingleToSingleMessage& message) {
         this_ptr->OnMessageReceived(message);
       };
   functors.typed_message_and_caching.group_to_single.message_received =
@@ -209,10 +213,11 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
 }
 
 void MaidNodeNfs::OnNetworkStatusChange(int updated_network_health) {
-  asio_service_.service().post([=] {
-    routing::UpdateNetworkHealth(updated_network_health, network_health_, network_health_mutex_,
-                                 network_health_condition_variable_,
-                                 NodeId(kMaid_.name()->string()));
+  std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
+  asio_service_.service().post([this_ptr, updated_network_health] {
+    routing::UpdateNetworkHealth(updated_network_health, this_ptr->network_health_,
+        this_ptr->network_health_mutex_, this_ptr->network_health_condition_variable_,
+        NodeId(this_ptr->kMaid_.name()->string()));
   });
 }
 
