@@ -50,10 +50,14 @@ ms_glob_dir(NfsClient ${NfsSourcesDir}/client "Nfs Client")
 ms_glob_dir(NfsVault ${NfsSourcesDir}/vault "Nfs Vault")
 ms_glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
 set(NfsTestsMain ${NfsSourcesDir}/tests/tests_main.cc)
-set(NfsNetworkTestsAllFiles ${NfsSourcesDir}/tests/data_getter_test.cc ${NfsTestsMain}
-                            ${NfsSourcesDir}/tests/maid_node_nfs_test.cc ${NfsTestsMain})
-set(NfsWeeklyTestsAllFiles ${NfsSourcesDir}/tests/maid_node_nfs_test.cc ${NfsTestsMain})
-list(REMOVE_ITEM NfsTestsAllFiles ${NfsNetworkTestsAllFiles} ${NfsWeeklyTestsAllFiles})
+set(NfsNetworkTestsAllFiles ${NfsSourcesDir}/tests/data_getter_test.cc
+                            ${NfsSourcesDir}/tests/maid_node_nfs_test.h
+                            ${NfsSourcesDir}/tests/maid_node_nfs_test.cc
+                            ${NfsTestsMain})
+set(NfsWeeklyNetworkTestsAllFiles ${NfsSourcesDir}/tests/maid_node_nfs_test.h
+                                  ${NfsSourcesDir}/tests/maid_node_nfs_lengthy_test.cc
+                                  ${NfsTestsMain})
+list(REMOVE_ITEM NfsTestsAllFiles ${NfsNetworkTestsAllFiles} ${NfsWeeklyNetworkTestsAllFiles})
 list(APPEND NfsTestsAllFiles ${NfsTestsMain})
 
 
@@ -80,11 +84,13 @@ if(MaidsafeTesting)
   target_link_libraries(network_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(network_test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+  target_include_directories(network_test_nfs PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-  ms_add_executable(weekly_network_test_nfs "Tests/NFS" ${NfsWeeklyTestsAllFiles})
+  ms_add_executable(weekly_network_test_nfs "Tests/NFS" ${NfsWeeklyNetworkTestsAllFiles})
   target_link_libraries(weekly_network_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(weekly_network_test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+  target_include_directories(weekly_network_test_nfs PRIVATE ${PROJECT_SOURCE_DIR}/src)
 endif()
 
 ms_rename_outdated_built_exes()
