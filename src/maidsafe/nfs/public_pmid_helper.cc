@@ -83,9 +83,9 @@ void PublicPmidHelper::Poll() {
       auto public_pmid = ready_future_itr->get();
       LOG(kVerbose) << " got public_pmid of " << HexSubstr(public_pmid.name()->string())
                     << " from network";
-      functors.at(index)(public_pmid.public_key());
+      functors.at(index)(boost::optional<asymm::PublicKey>(public_pmid.public_key()));
     } catch (const std::exception& /*e*/) {
-      functors.at(index)(asymm::PublicKey());
+      functors.at(index)(boost::optional<asymm::PublicKey>());
     }
     futures.erase(ready_future_itr);
     functors.erase(functors.begin() + index);
