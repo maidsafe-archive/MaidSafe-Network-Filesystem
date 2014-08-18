@@ -145,7 +145,7 @@ class Service {
 //     LOG(kVerbose) << "nfs HandlePublicMessage";
     PublicMessages public_variant_message;
     if (!nfs::GetVariant(message, public_variant_message)) {
-      LOG(kError) << "Not a valid public message";
+//       LOG(kError) << "Not a valid public message";
       BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
     }
     return boost::apply_visitor(demuxer, public_variant_message);
