@@ -52,14 +52,19 @@ void DoGetPublicKey(T& persona, const NodeId& node_id,
     auto itr(std::find_if(
         std::begin(public_pmids_from_file), std::end(public_pmids_from_file),
         [&name](const passport::PublicPmid & pmid) { return pmid.name() == name; }));
-    if (itr == public_pmids_from_file.end()) {
-//       LOG(kWarning) << "can't Get PublicPmid " << HexSubstr(name.value)
-//                     << " from local";
-    } else {
+    if (itr != public_pmids_from_file.end()) {
       LOG(kVerbose) << "got public_pmid of " << HexSubstr(name.value) << " from local";
       give_key((*itr).public_key());
       return;
     }
+//     if (itr == public_pmids_from_file.end()) {
+//       LOG(kWarning) << "can't Get PublicPmid " << HexSubstr(name.value)
+//                     << " from local";
+//     } else {
+//       LOG(kVerbose) << "got public_pmid of " << HexSubstr(name.value) << " from local";
+//       give_key((*itr).public_key());
+//       return;
+//     }
   }
   auto future_key(persona.Get(name, std::chrono::seconds(10)));
   public_pmid_helper.AddEntry(std::move(future_key), give_key);
