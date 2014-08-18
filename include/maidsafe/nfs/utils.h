@@ -47,8 +47,8 @@ void DoGetPublicKey(T& persona, const NodeId& node_id,
                     detail::PublicPmidHelper& public_pmid_helper) {
   passport::PublicPmid::Name name(Identity(node_id.string()));
   if (!public_pmids_from_file.empty()) {
-    LOG(kVerbose) << "fetch from local list containing "
-                  << public_pmids_from_file.size() << " pmids";
+//     LOG(kVerbose) << "fetch from local list containing "
+//                   << public_pmids_from_file.size() << " pmids";
     auto itr(std::find_if(
         std::begin(public_pmids_from_file), std::end(public_pmids_from_file),
         [&name](const passport::PublicPmid & pmid) { return pmid.name() == name; }));
@@ -56,7 +56,7 @@ void DoGetPublicKey(T& persona, const NodeId& node_id,
       LOG(kWarning) << "can't Get PublicPmid " << HexSubstr(name.value)
                     << " from local";
     } else {
-      LOG(kVerbose) << "DataGetter Get PublicPmid " << HexSubstr(name.value);
+      LOG(kVerbose) << "Got PublicPmidKey " << HexSubstr(name.value) << " from local";
       give_key((*itr).public_key());
       return;
     }
