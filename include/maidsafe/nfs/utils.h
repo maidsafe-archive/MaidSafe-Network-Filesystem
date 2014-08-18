@@ -53,10 +53,10 @@ void DoGetPublicKey(T& persona, const NodeId& node_id,
         std::begin(public_pmids_from_file), std::end(public_pmids_from_file),
         [&name](const passport::PublicPmid & pmid) { return pmid.name() == name; }));
     if (itr == public_pmids_from_file.end()) {
-      LOG(kWarning) << "can't Get PublicPmid " << HexSubstr(name.value)
-                    << " from local";
+//       LOG(kWarning) << "can't Get PublicPmid " << HexSubstr(name.value)
+//                     << " from local";
     } else {
-      LOG(kVerbose) << "Got PublicPmidKey " << HexSubstr(name.value) << " from local";
+      LOG(kVerbose) << "got public_pmid of " << HexSubstr(name.value) << " from local";
       give_key((*itr).public_key());
       return;
     }
