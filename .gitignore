@@ -5,5 +5,3 @@
 desktop.ini
 .kdev4/
 *.kdev4
-include/maidsafe/nfs/message_types.h
-
