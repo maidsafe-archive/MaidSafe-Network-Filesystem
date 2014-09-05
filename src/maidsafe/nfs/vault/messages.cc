@@ -365,11 +365,11 @@ std::string DataNameAndContent::Serialise() const {
 }
 
 bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs) {
-  LOG(kVerbose) << "DataNameAndContent comparation : "
-                << "lhs.name : " << HexSubstr(lhs.name.Serialise())
-                << " ; rhs.name : " << HexSubstr(rhs.name.Serialise())
-                << " ; lhs.content : " << HexSubstr(lhs.content.string())
-                << " ; rhs.content : " << HexSubstr(rhs.content.string());
+//   LOG(kVerbose) << "DataNameAndContent comparation : "
+//                 << "lhs.name : " << HexSubstr(lhs.name.Serialise())
+//                 << " ; rhs.name : " << HexSubstr(rhs.name.Serialise())
+//                 << " ; lhs.content : " << HexSubstr(lhs.content.string())
+//                 << " ; rhs.content : " << HexSubstr(rhs.content.string());
   return lhs.name == rhs.name && lhs.content == rhs.content;
 }
 

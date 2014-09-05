@@ -57,7 +57,7 @@ class PersonaDemuxer : public boost::static_visitor<
                               std::is_same<Receiver, typename Message::Receiver>::value,
                           typename PersonaService::HandleMessageReturnType>::type
   operator()(const Message& message) const {
-    LOG(kVerbose) << "PersonaDemuxer calling persona_service HandleMessage";
+//     LOG(kVerbose) << "PersonaDemuxer calling persona_service HandleMessage";
     // If you have a compiler error leading here, you probably haven't implemented HandleMessage for
     // *every* type of message in the PublicMessages and VaultMessages variants of PersonaService.
     return persona_service_.HandleMessage(message, sender_, receiver_);
@@ -111,7 +111,7 @@ class Service {
   }
 
   void HandleChurnEvent(std::shared_ptr<routing::CloseNodesChange> close_nodes_change) {
-    LOG(kVerbose) << "NFS service calling persona_service HandleChurnEvent";
+//     LOG(kVerbose) << "NFS service calling persona_service HandleChurnEvent";
     return impl_->HandleChurnEvent(close_nodes_change);
   }
 
@@ -142,10 +142,10 @@ class Service {
   template <typename Demuxer>
   ReturnType HandlePublicMessage(const nfs::TypeErasedMessageWrapper& message,
                                  const Demuxer& demuxer) {
-    LOG(kVerbose) << "nfs HandlePublicMessage";
+//     LOG(kVerbose) << "nfs HandlePublicMessage";
     PublicMessages public_variant_message;
     if (!nfs::GetVariant(message, public_variant_message)) {
-      LOG(kError) << "Not a valid public message";
+//       LOG(kError) << "Not a valid public message";
       BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
     }
     return boost::apply_visitor(demuxer, public_variant_message);
@@ -153,7 +153,7 @@ class Service {
   template <typename Demuxer>
   ReturnType HandleVaultMessage(const nfs::TypeErasedMessageWrapper& message,
                                 const Demuxer& demuxer) {
-    LOG(kVerbose) << "nfs HandleVaultMessage";
+//     LOG(kVerbose) << "nfs HandleVaultMessage";
     VaultMessages vault_variant_message;
     if (!vault::GetVariant(message, vault_variant_message)) {
       LOG(kError) << "Not a valid vault message" << vault_variant_message;

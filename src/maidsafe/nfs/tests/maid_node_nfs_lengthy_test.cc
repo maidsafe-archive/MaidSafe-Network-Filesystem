@@ -1,4 +1,4 @@
-/*  Copyright 2013 MaidSafe.net limited
+/*  Copyright 2014 MaidSafe.net limited
 
     This MaidSafe Software is licensed to you under (1) the MaidSafe.net Commercial License,
     version 1.0 or later, or (2) The General Public License (GPL), version 3, depending on which
@@ -16,13 +16,22 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "maidsafe/nfs/client/get_handler.h"
+#include "maidsafe/nfs/tests/maid_node_nfs_test.h"
 
 namespace maidsafe {
 
-namespace nfs_client {
+namespace nfs {
 
-}  // namespace nfs_client
+namespace test {
+
+TEST_F(MaidNodeNfsTest, FUNC_PopulateLengthyTree) {
+  VersionTreeTest(100, 1, 1500, 256);
+  VersionTreeTest(15000, 1, 14580, 128);
+  VersionTreeTest(100, 1, 20000, 128);
+}
+
+}  // namespace test
+
+}  // namespace nfs
 
 }  // namespace maidsafe
-

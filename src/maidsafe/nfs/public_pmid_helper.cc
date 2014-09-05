@@ -76,7 +76,7 @@ void PublicPmidHelper::Poll() {
         break;
       }
     }
-    LOG(kVerbose) << " polling on (" << futures.size() << ") futures";
+//     LOG(kVerbose) << " polling on (" << futures.size() << ") futures";
     auto ready_future_itr = boost::wait_for_any(futures.begin(), futures.end());
     auto index = ready_future_itr - futures.begin();
     try {

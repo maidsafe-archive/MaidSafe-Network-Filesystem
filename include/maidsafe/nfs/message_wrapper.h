@@ -106,8 +106,8 @@ bool operator==(
                          RoutingReceiverType, ContentsType>& lhs,
     const MessageWrapper<action, SourcePersonaType, RoutingSenderType, DestinationPersonaType,
                          RoutingReceiverType, ContentsType>& rhs) {
-  LOG(kVerbose) << "comparing two messages : lhs message id -- " << lhs.id.data
-                << " rhs message id -- " << rhs.id.data;
+//   LOG(kVerbose) << "comparing two messages : lhs message id -- " << lhs.id.data
+//                 << " rhs message id -- " << rhs.id.data;
   if (lhs.id != rhs.id) {
     LOG(kInfo) << "message id mismatch";
     return false;
