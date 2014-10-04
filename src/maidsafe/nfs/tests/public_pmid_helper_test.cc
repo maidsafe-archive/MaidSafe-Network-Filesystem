@@ -51,8 +51,9 @@ TEST(PublicPmidHelperTest, BEH_FutureWaitForAny) {
     for (int i(0); i < 10 ; ++i) {
       boost::promise<passport::PublicPmid> promise;
       auto future = promise.get_future();
-      routing::GivePublicKeyFunctor functor = [i, pmid](asymm::PublicKey public_key) {
-        ASSERT_TRUE(rsa::MatchingKeys(public_key, pmid.public_key()));
+      routing::GivePublicKeyFunctor functor = [i, pmid](
+          boost::optional<asymm::PublicKey> public_key) {
+        ASSERT_TRUE(rsa::MatchingKeys(*public_key, pmid.public_key()));
       };
       public_pmid_helper.AddEntry(std::move(future), functor);
       promises.push_back(std::move(promise));

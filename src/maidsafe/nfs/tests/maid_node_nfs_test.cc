@@ -84,8 +84,8 @@ TEST_F(MaidNodeNfsTest, FUNC_MultipleSequentialPuts) {
 
 TEST_F(MaidNodeNfsTest, FUNC_MultipleParallelPuts) {
   routing::Parameters::caching = false;
-  LOG(kVerbose) << "put 20 chunks with 1 clients";
-  PutGetTest(1, 20);
+  LOG(kVerbose) << "put 10 chunks with 1 clients";
+  PutGetTest(1, 10);
   LOG(kVerbose) << "Multiple parallel puts test has finished successfully";
 }
 

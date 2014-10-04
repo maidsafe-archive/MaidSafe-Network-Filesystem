@@ -152,12 +152,16 @@ void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
     auto found(get_info_.find(task_id));
     if (found == std::end(get_info_))
       return;
+
+    if (std::get<1>(get_info_[task_id]) == 0)
+      return;
+
     get_info = get_info_[task_id];
     std::get<0>(get_info_[task_id])++;
     if (response.content && ValidateData(*response.content, std::get<2>(get_info_[task_id]))) {
       operation = Operation::kAddResponse;
     } else if (response.return_code &&
-               (std::get<0>(get_info_[task_id]) >= routing::Parameters::group_size)) {
+               (std::get<0>(get_info_[task_id]) == routing::Parameters::group_size - 1)) {
       new_task_id = get_timer_.NewTaskId();
       get_info_.insert(std::make_pair(new_task_id,
                                       std::make_tuple(0, std::get<1>(get_info_[task_id]),
