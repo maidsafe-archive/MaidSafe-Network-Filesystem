@@ -53,7 +53,7 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
 }  // unnamed namespace
 
 // ==================== ReturnCode =================================================================
-ReturnCode::ReturnCode() : value(CommonErrors::success) {}
+ReturnCode::ReturnCode() : value(CommonErrors::defaulted) {}
 
 ReturnCode::ReturnCode(const ReturnCode& other) : value(other.value) {}
 
