@@ -729,6 +729,72 @@ bool operator==(const DataNameAndSpaceAndReturnCode& lhs,
          lhs.return_code == rhs.return_code;
 }
 
+// ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
+DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
+    const DataNameAndSizeAndSpaceAndReturnCode& data)
+    : name(data.name), size(data.size),
+      available_space(data.available_space), return_code(data.return_code) {}
+
+DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode()
+    : name(), size(), available_space(), return_code() {}
+
+DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
+    const DataTagValue& type_in, const Identity& name_in,
+    int32_t size_in, int64_t available_space_in, const nfs_client::ReturnCode& code_in)
+    : name(nfs_vault::DataName(type_in, name_in)),
+      size(size_in),
+      available_space(available_space_in),
+      return_code(std::move(code_in)) {}
+
+DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
+    DataNameAndSizeAndSpaceAndReturnCode&& other)
+    : name(std::move(other.name)),
+      size(std::move(other.size)),
+      available_space(std::move(other.available_space)),
+      return_code(std::move(other.return_code)) {}
+
+DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
+    const std::string& serialised_copy) {
+  protobuf::DataNameAndSizeAndSpaceAndReturnCode proto;
+  if (!proto.ParseFromString(serialised_copy))
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+
+  name = nfs_vault::DataName(proto.serialised_name());
+  size = proto.size();
+  available_space = proto.space();
+  return_code = nfs_client::ReturnCode(proto.serialised_return_code());
+}
+
+std::string DataNameAndSizeAndSpaceAndReturnCode::Serialise() const {
+  protobuf::DataNameAndSizeAndSpaceAndReturnCode proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_size(size);
+  proto_copy.set_space(available_space);
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+DataNameAndSizeAndSpaceAndReturnCode& DataNameAndSizeAndSpaceAndReturnCode::operator=(
+    DataNameAndSizeAndSpaceAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+void swap(DataNameAndSizeAndSpaceAndReturnCode& lhs,
+          DataNameAndSizeAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.size, rhs.size);
+  swap(lhs.available_space, rhs.available_space);
+  swap(lhs.return_code, rhs.return_code);
+}
+
+bool operator==(const DataNameAndSizeAndSpaceAndReturnCode& lhs,
+                const DataNameAndSizeAndSpaceAndReturnCode& rhs) {
+  return lhs.name == rhs.name && lhs.size == rhs.size &&
+         lhs.available_space == rhs.available_space && lhs.return_code == rhs.return_code;
+}
+
 // ==================== PmidHealthAndReturnCode ====================================================
 PmidHealthAndReturnCode::PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
                                                  const nfs_client::ReturnCode& code_in)

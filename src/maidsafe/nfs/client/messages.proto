@@ -88,6 +88,13 @@ message DataNameAndSpaceAndReturnCode {
   required bytes serialised_return_code = 3;
 }
 
+message DataNameAndSizeAndSpaceAndReturnCode {
+  required bytes serialised_name = 1;
+  required int32 size = 2;
+  required int64 space = 3;
+  required bytes serialised_return_code = 4;
+}
+
 message PmidHealthAndReturnCode {
   required bytes serialised_pmid_health = 1;
   required bytes serialised_return_code = 2;
