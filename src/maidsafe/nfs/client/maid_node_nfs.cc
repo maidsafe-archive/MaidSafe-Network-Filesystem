@@ -246,31 +246,6 @@ void MaidNodeNfs::RemoveAccount(const nfs_vault::AccountRemoval& account_removal
   dispatcher_.SendRemoveAccountRequest(account_removal);
 }
 
-boost::future<void> MaidNodeNfs::RegisterPmid(const passport::Pmid& pmid,
-                                              const std::chrono::steady_clock::duration& timeout) {
-  nfs_vault::PmidRegistration pmid_registration{ kMaid_, pmid, false };
-  typedef MaidNodeService::RegisterPmidResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<void>>());
-  auto response_functor([promise](const ResponseContents &result) {
-      HandleRegisterPmidResult(result, promise);
-  });
-  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
-      routing::Parameters::group_size - 1, response_functor));
-  auto task_id(rpc_timers_.register_pmid_timer.NewTaskId());
-  rpc_timers_.register_pmid_timer.AddTask(
-      timeout, [op_data](ResponseContents create_account_response) {
-                 op_data->HandleResponseContents(std::move(create_account_response));
-               },
-      // TODO(Mahmoud): Confirm expected count
-      routing::Parameters::group_size - 1, task_id);
-  dispatcher_.SendRegisterPmidRequest(task_id, pmid_registration);
-  return promise->get_future();
-}
-
-void MaidNodeNfs::UnregisterPmid(const passport::PublicPmid::Name& pmid_name) {
-  dispatcher_.SendUnregisterPmidRequest(pmid_name);
-}
-
 MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(
     const passport::PublicPmid::Name& pmid_name,
     const std::chrono::steady_clock::duration& timeout) {

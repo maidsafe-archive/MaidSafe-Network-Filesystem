@@ -81,11 +81,6 @@ class MaidNodeDispatcher {
 
   void SendRemoveAccountRequest(const nfs_vault::AccountRemoval& account_removal);
 
-  void SendRegisterPmidRequest(routing::TaskId task_id,
-                               const nfs_vault::PmidRegistration& pmid_registration);
-
-  void SendUnregisterPmidRequest(const passport::PublicPmid::Name& pmid_name);
-
   void SendPmidHealthRequest(routing::TaskId task_id, const passport::PublicPmid::Name& pmid_name);
 
  private:
