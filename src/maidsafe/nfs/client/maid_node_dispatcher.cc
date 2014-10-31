@@ -55,15 +55,6 @@ void MaidNodeDispatcher::SendRemoveAccountRequest(
   RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
-void MaidNodeDispatcher::SendPmidHealthRequest(routing::TaskId task_id,
-                                               const passport::PublicPmid::Name& pmid_name) {
-  typedef nfs::PmidHealthRequestFromMaidNodeToMaidManager NfsMessage;
-  CheckSourcePersonaType<NfsMessage>();
-  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(nfs::MessageId(task_id), (nfs_vault::DataName(pmid_name)));
-  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
-}
-
 }  // namespace nfs_client
 
 }  // namespace maidsafe

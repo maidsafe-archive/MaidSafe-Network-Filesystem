@@ -5,4 +5,3 @@ Action:DeleteBranchUntilForkRequest     Source:MaidNode:Single        Destinatio
 Action:CreateAccountRequest             Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::AccountCreation
 Action:RemoveAccountRequest             Source:MaidNode:Single        Destination:MaidManager:Group      Contents:class:maidsafe::nfs_vault::AccountRemoval
 Action:CreateVersionTreeRequest         Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::VersionTreeCreation
-Action:PmidHealthRequest                Source:MaidNode:Single        Destination:MaidManager:Group      Contents:struct:maidsafe::nfs_vault::DataName

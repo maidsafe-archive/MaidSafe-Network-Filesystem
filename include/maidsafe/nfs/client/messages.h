@@ -318,24 +318,6 @@ struct DataNameAndSpaceAndReturnCode {
 void swap(DataNameAndSpaceAndReturnCode& lhs, DataNameAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 bool operator==(const DataNameAndSpaceAndReturnCode& lhs, const DataNameAndSpaceAndReturnCode& rhs);
 
-// ==================== PmidHealthAndReturnCode ====================================================
-struct PmidHealthAndReturnCode {
-  PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
-                          const nfs_client::ReturnCode& code_in);
-
-  explicit PmidHealthAndReturnCode(const std::string& serialised_copy);
-  PmidHealthAndReturnCode(const PmidHealthAndReturnCode& other);
-  PmidHealthAndReturnCode(PmidHealthAndReturnCode&& other);
-  PmidHealthAndReturnCode& operator=(PmidHealthAndReturnCode other);
-  std::string Serialise() const;
-
-  nfs_vault::PmidHealth pmid_health;
-  nfs_client::ReturnCode return_code;
-};
-
-void swap(PmidHealthAndReturnCode& lhs, PmidHealthAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-bool operator==(const PmidHealthAndReturnCode& lhs, const PmidHealthAndReturnCode& rhs);
-
 }  // namespace nfs_client
 
 namespace nfs {
