@@ -63,8 +63,6 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (GetPmidAccountResponse)
     (Synchronise)
     (AccountTransfer)
-    (AccountRequest)
-    (AccountResponse)
     (AccountQuery)
     (AccountQueryResponse)
     (AddPmid)
