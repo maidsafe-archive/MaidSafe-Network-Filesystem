@@ -684,7 +684,7 @@ DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(const DataTagValue&
                                                              const nfs_client::ReturnCode& code_in)
     : name(nfs_vault::DataName(type_in, name_in)),
       available_space(available_space_in),
-      return_code(std::move(code_in)) {}
+      return_code(code_in) {}
 
 DataNameAndSpaceAndReturnCode::DataNameAndSpaceAndReturnCode(DataNameAndSpaceAndReturnCode&& other)
     : name(std::move(other.name)),
@@ -744,7 +744,7 @@ DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
     : name(nfs_vault::DataName(type_in, name_in)),
       size(size_in),
       available_space(available_space_in),
-      return_code(std::move(code_in)) {}
+      return_code(code_in) {}
 
 DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
     DataNameAndSizeAndSpaceAndReturnCode&& other)
