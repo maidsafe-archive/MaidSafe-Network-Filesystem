@@ -293,31 +293,6 @@ struct PmidRegistrationAndReturnCode {
 bool operator==(const PmidRegistrationAndReturnCode& lhs, const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ==================== DataNameAndSpaceAndReturnCode ==============================================
-struct DataNameAndSpaceAndReturnCode {
-  template <typename DataNameType>
-  DataNameAndSpaceAndReturnCode(const DataNameType& name_in, int64_t available_space_in,
-                                const nfs_client::ReturnCode& code_in)
-      : name(name_in), available_space(available_space_in), return_code(code_in) {}
-
-  DataNameAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
-                                int64_t available_space_in,
-                                const nfs_client::ReturnCode& code_in);
-  explicit DataNameAndSpaceAndReturnCode(const std::string& serialised_copy);
-  DataNameAndSpaceAndReturnCode();
-  DataNameAndSpaceAndReturnCode(const DataNameAndSpaceAndReturnCode& other);
-  DataNameAndSpaceAndReturnCode(DataNameAndSpaceAndReturnCode&& other);
-  DataNameAndSpaceAndReturnCode& operator=(DataNameAndSpaceAndReturnCode other);
-  std::string Serialise() const;
-
-  nfs_vault::DataName name;
-  int64_t available_space;
-  nfs_client::ReturnCode return_code;
-};
-
-void swap(DataNameAndSpaceAndReturnCode& lhs, DataNameAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-bool operator==(const DataNameAndSpaceAndReturnCode& lhs, const DataNameAndSpaceAndReturnCode& rhs);
-
 // ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
 struct DataNameAndSizeAndSpaceAndReturnCode {
   template <typename DataNameType>
