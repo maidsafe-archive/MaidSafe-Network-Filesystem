@@ -296,14 +296,14 @@ void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs
 // ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
 struct DataNameAndSizeAndSpaceAndReturnCode {
   template <typename DataNameType>
-  DataNameAndSizeAndSpaceAndReturnCode(const DataNameType& name_in, int32_t size_in,
+  DataNameAndSizeAndSpaceAndReturnCode(const DataNameType& name_in, uint64_t size_in,
                                 int64_t available_space_in,
                                 const nfs_client::ReturnCode& code_in)
       : name(name_in), size(size_in), available_space(available_space_in), return_code(code_in) {}
 
   DataNameAndSizeAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
-                                int32_t size_in, int64_t available_space_in,
-                                const nfs_client::ReturnCode& code_in);
+                                       uint64_t size_in, int64_t available_space_in,
+                                       const nfs_client::ReturnCode& code_in);
   explicit DataNameAndSizeAndSpaceAndReturnCode(const std::string& serialised_copy);
   DataNameAndSizeAndSpaceAndReturnCode();
   DataNameAndSizeAndSpaceAndReturnCode(const DataNameAndSizeAndSpaceAndReturnCode& other);
@@ -312,7 +312,7 @@ struct DataNameAndSizeAndSpaceAndReturnCode {
   std::string Serialise() const;
 
   nfs_vault::DataName name;
-  int32_t size;
+  uint64_t size;
   int64_t available_space;
   nfs_client::ReturnCode return_code;
 };
