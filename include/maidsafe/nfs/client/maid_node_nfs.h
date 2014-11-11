@@ -86,6 +86,15 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   template <typename DataName>
   void Delete(const DataName& data_name);
 
+  void IncrementReferenceCount(const std::vector<ImmutableData::Name>& /*data_names*/) {}
+  void DecrementReferenceCount(const std::vector<ImmutableData::Name>& /*data_names*/) {}
+
+  template <typename DataName>
+  void IncrementReferenceCount(const DataName& data_name);
+
+  template <typename DataName>
+  void DecrementReferenceCount(const DataName& data_name);
+
   template <typename DataName>
   boost::future<void> CreateVersionTree(const DataName& data_name,
                          const StructuredDataVersions::VersionName& version_name,
@@ -221,6 +230,14 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
 template <typename DataName>
 void MaidNodeNfs::Delete(const DataName& data_name) {
   dispatcher_.SendDeleteRequest(data_name);
+}
+
+template <typename DataName>
+void MaidNodeNfs::IncrementReferenceCount(const DataName& /*data_name*/) {
+}
+
+template <typename DataName>
+void MaidNodeNfs::DecrementReferenceCount(const DataName& /*data_name*/) {
 }
 
 template <typename DataName>
