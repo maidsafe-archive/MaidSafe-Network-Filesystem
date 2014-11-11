@@ -293,30 +293,34 @@ struct PmidRegistrationAndReturnCode {
 bool operator==(const PmidRegistrationAndReturnCode& lhs, const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ==================== DataNameAndSpaceAndReturnCode ==============================================
-struct DataNameAndSpaceAndReturnCode {
+// ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
+struct DataNameAndSizeAndSpaceAndReturnCode {
   template <typename DataNameType>
-  DataNameAndSpaceAndReturnCode(const DataNameType& name_in, int64_t available_space_in,
-                                const nfs_client::ReturnCode& code_in)
-      : name(name_in), available_space(available_space_in), return_code(code_in) {}
-
-  DataNameAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
+  DataNameAndSizeAndSpaceAndReturnCode(const DataNameType& name_in, uint64_t size_in,
                                 int64_t available_space_in,
-                                const nfs_client::ReturnCode& code_in);
-  explicit DataNameAndSpaceAndReturnCode(const std::string& serialised_copy);
-  DataNameAndSpaceAndReturnCode();
-  DataNameAndSpaceAndReturnCode(const DataNameAndSpaceAndReturnCode& other);
-  DataNameAndSpaceAndReturnCode(DataNameAndSpaceAndReturnCode&& other);
-  DataNameAndSpaceAndReturnCode& operator=(DataNameAndSpaceAndReturnCode other);
+                                const nfs_client::ReturnCode& code_in)
+      : name(name_in), size(size_in), available_space(available_space_in), return_code(code_in) {}
+
+  DataNameAndSizeAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
+                                       uint64_t size_in, int64_t available_space_in,
+                                       const nfs_client::ReturnCode& code_in);
+  explicit DataNameAndSizeAndSpaceAndReturnCode(const std::string& serialised_copy);
+  DataNameAndSizeAndSpaceAndReturnCode();
+  DataNameAndSizeAndSpaceAndReturnCode(const DataNameAndSizeAndSpaceAndReturnCode& other);
+  DataNameAndSizeAndSpaceAndReturnCode(DataNameAndSizeAndSpaceAndReturnCode&& other);
+  DataNameAndSizeAndSpaceAndReturnCode& operator=(DataNameAndSizeAndSpaceAndReturnCode other);
   std::string Serialise() const;
 
   nfs_vault::DataName name;
+  uint64_t size;
   int64_t available_space;
   nfs_client::ReturnCode return_code;
 };
 
-void swap(DataNameAndSpaceAndReturnCode& lhs, DataNameAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-bool operator==(const DataNameAndSpaceAndReturnCode& lhs, const DataNameAndSpaceAndReturnCode& rhs);
+void swap(DataNameAndSizeAndSpaceAndReturnCode& lhs,
+          DataNameAndSizeAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndSizeAndSpaceAndReturnCode& lhs,
+                const DataNameAndSizeAndSpaceAndReturnCode& rhs);
 
 }  // namespace nfs_client
 
