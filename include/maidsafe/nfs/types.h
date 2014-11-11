@@ -59,8 +59,6 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (PmidHealthResponse)
     (GetPmidTotalsRequest)
     (GetPmidTotalsResponse)
-    (GetPmidAccountRequest)
-    (GetPmidAccountResponse)
     (Synchronise)
     (AccountTransfer)
     (AccountQuery)
