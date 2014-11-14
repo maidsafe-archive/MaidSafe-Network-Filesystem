@@ -4,8 +4,6 @@ Action:GetCachedResponse          Source:CacheHandler:Single    Destination:Maid
 Action:PutFailure                 Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::DataNameAndReturnCode
 Action:GetVersionsResponse        Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
 Action:GetBranchResponse          Source:VersionHandler:Group   Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::StructuredDataNameAndContentOrReturnCode
-Action:PmidHealthResponse         Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::AvailableSizeAndReturnCode
 Action:CreateAccountResponse      Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode
 Action:PutVersionResponse         Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::TipOfTreeAndReturnCode
 Action:CreateVersionTreeResponse  Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode
-Action:RegisterPmidResponse       Source:MaidManager:Group      Destination:MaidNode:Single        Contents:struct:maidsafe::nfs_client::ReturnCode

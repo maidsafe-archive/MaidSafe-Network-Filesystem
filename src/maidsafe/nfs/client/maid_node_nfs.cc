@@ -246,52 +246,6 @@ void MaidNodeNfs::RemoveAccount(const nfs_vault::AccountRemoval& account_removal
   dispatcher_.SendRemoveAccountRequest(account_removal);
 }
 
-boost::future<void> MaidNodeNfs::RegisterPmid(const passport::Pmid& pmid,
-                                              const std::chrono::steady_clock::duration& timeout) {
-  nfs_vault::PmidRegistration pmid_registration{ kMaid_, pmid, false };
-  typedef MaidNodeService::RegisterPmidResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<void>>());
-  auto response_functor([promise](const ResponseContents &result) {
-      HandleRegisterPmidResult(result, promise);
-  });
-  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
-      routing::Parameters::group_size - 1, response_functor));
-  auto task_id(rpc_timers_.register_pmid_timer.NewTaskId());
-  rpc_timers_.register_pmid_timer.AddTask(
-      timeout, [op_data](ResponseContents create_account_response) {
-                 op_data->HandleResponseContents(std::move(create_account_response));
-               },
-      // TODO(Mahmoud): Confirm expected count
-      routing::Parameters::group_size - 1, task_id);
-  dispatcher_.SendRegisterPmidRequest(task_id, pmid_registration);
-  return promise->get_future();
-}
-
-void MaidNodeNfs::UnregisterPmid(const passport::PublicPmid::Name& pmid_name) {
-  dispatcher_.SendUnregisterPmidRequest(pmid_name);
-}
-
-MaidNodeNfs::PmidHealthFuture MaidNodeNfs::GetPmidHealth(
-    const passport::PublicPmid::Name& pmid_name,
-    const std::chrono::steady_clock::duration& timeout) {
-  typedef MaidNodeService::PmidHealthResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<uint64_t>>());
-  auto response_functor([promise](const ResponseContents& result) {
-      HandlePmidHealthResult(result, promise);
-  });
-  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
-      routing::Parameters::group_size - 1, response_functor));
-  auto task_id(rpc_timers_.pmid_health_timer.NewTaskId());
-  rpc_timers_.pmid_health_timer.AddTask(
-      timeout, [op_data](ResponseContents pmid_health_response) {
-                 op_data->HandleResponseContents(std::move(pmid_health_response));
-               },
-      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::group_size - 1, task_id);
-  dispatcher_.SendPmidHealthRequest(task_id, pmid_name);
-  return promise->get_future();
-}
-
 }  // namespace nfs_client
 
 }  // namespace maidsafe

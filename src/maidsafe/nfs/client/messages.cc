@@ -620,56 +620,6 @@ void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSA
   swap(lhs.return_code, rhs.return_code);
 }
 
-// ==================== PmidRegistrationAndReturnCode ==============================================
-PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode()
-    : pmid_registration(), return_code() {}
-
-PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(
-    nfs_vault::PmidRegistration pmid_health, ReturnCode return_code_in)
-        : pmid_registration(std::move(pmid_health)), return_code(std::move(return_code_in)) {}
-
-PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(
-    const PmidRegistrationAndReturnCode& other)
-    : pmid_registration(other.pmid_registration), return_code(other.return_code) {}
-
-PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(PmidRegistrationAndReturnCode&& other)
-    : pmid_registration(std::move(other.pmid_registration)),
-      return_code(std::move(other.return_code)) {}
-
-PmidRegistrationAndReturnCode& PmidRegistrationAndReturnCode::operator=(
-    PmidRegistrationAndReturnCode other) {
-  swap(*this, other);
-  return *this;
-}
-
-PmidRegistrationAndReturnCode::PmidRegistrationAndReturnCode(const std::string& serialised_copy)
-    : pmid_registration(), return_code() {
-  protobuf::PmidRegistrationAndReturnCode proto_copy;
-  if (!proto_copy.ParseFromString(serialised_copy))
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-  pmid_registration = nfs_vault::PmidRegistration(proto_copy.serialised_pmid_registration());
-  return_code = ReturnCode(proto_copy.serialised_return_code());
-}
-
-std::string PmidRegistrationAndReturnCode::Serialise() const {
-  protobuf::PmidRegistrationAndReturnCode proto_copy;
-  proto_copy.set_serialised_pmid_registration(pmid_registration.Serialise());
-  proto_copy.set_serialised_return_code(return_code.Serialise());
-  return proto_copy.SerializeAsString();
-}
-
-bool operator==(const PmidRegistrationAndReturnCode& lhs,
-                const PmidRegistrationAndReturnCode& rhs) {
-  return lhs.pmid_registration == rhs.pmid_registration && lhs.return_code == rhs.return_code;
-}
-
-void swap(PmidRegistrationAndReturnCode& lhs,
-          PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
-  using std::swap;
-  swap(lhs.pmid_registration, rhs.pmid_registration);
-  swap(lhs.return_code, rhs.return_code);
-}
-
 // ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
 DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
     const DataNameAndSizeAndSpaceAndReturnCode& data)
@@ -734,61 +684,6 @@ bool operator==(const DataNameAndSizeAndSpaceAndReturnCode& lhs,
                 const DataNameAndSizeAndSpaceAndReturnCode& rhs) {
   return lhs.name == rhs.name && lhs.size == rhs.size &&
          lhs.available_space == rhs.available_space && lhs.return_code == rhs.return_code;
-}
-
-// ==================== PmidHealthAndReturnCode ====================================================
-PmidHealthAndReturnCode::PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
-                                                 const nfs_client::ReturnCode& code_in)
-      : pmid_health(pmid_health_in), return_code(code_in) {
-  LOG(kVerbose) << "PmidHealthAndReturnCode pmid_health.serialised_pmid_health : "
-                << HexSubstr(pmid_health.serialised_pmid_health)
-                << " pmid_health.Serialise() " << HexSubstr(pmid_health.Serialise())
-                << " return_code : " << return_code.value.what();
-}
-
-PmidHealthAndReturnCode::PmidHealthAndReturnCode(const std::string& serialised_copy) {
-  protobuf::PmidHealthAndReturnCode pmid_health_proto;
-  if (!pmid_health_proto.ParseFromString(serialised_copy)) {
-    LOG(kError) << "PmidHealthAndReturnCode can't parse from string " << HexSubstr(serialised_copy);
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-  }
-  pmid_health = nfs_vault::PmidHealth(pmid_health_proto.serialised_pmid_health());
-  return_code = ReturnCode(pmid_health_proto.serialised_return_code());
-  LOG(kVerbose) << "PmidHealthAndReturnCode from string, pmid_health.serialised_pmid_health : "
-                << HexSubstr(pmid_health.serialised_pmid_health)
-                << " pmid_health.Serialise() " << HexSubstr(pmid_health.Serialise())
-                << " return_code : " << return_code.value.what();
-}
-
-PmidHealthAndReturnCode::PmidHealthAndReturnCode(const PmidHealthAndReturnCode& other)
-    : pmid_health(other.pmid_health),
-      return_code(other.return_code) {}
-
-PmidHealthAndReturnCode::PmidHealthAndReturnCode(PmidHealthAndReturnCode&& other)
-    : pmid_health(std::move(other.pmid_health)),
-      return_code(std::move(other.return_code)) {}
-
-PmidHealthAndReturnCode& PmidHealthAndReturnCode::operator=(PmidHealthAndReturnCode other) {
-  swap(*this, other);
-  return *this;
-}
-std::string PmidHealthAndReturnCode::Serialise() const {
-  protobuf::PmidHealthAndReturnCode pmid_health_proto;
-  pmid_health_proto.set_serialised_pmid_health(pmid_health.Serialise());
-  pmid_health_proto.set_serialised_return_code(return_code.Serialise());
-  std::string serialised_copy(pmid_health_proto.SerializeAsString());
-  LOG(kVerbose) << "PmidHealthAndReturnCode serialised as " << HexSubstr(serialised_copy);
-  return serialised_copy;
-}
-
-void swap(PmidHealthAndReturnCode& lhs, PmidHealthAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
-  using std::swap;
-  swap(lhs.pmid_health, rhs.pmid_health);
-  swap(lhs.return_code, rhs.return_code);
-}
-bool operator==(const PmidHealthAndReturnCode& lhs, const PmidHealthAndReturnCode& rhs) {
-  return lhs.pmid_health == rhs.pmid_health &&
-         lhs.return_code == rhs.return_code;
 }
 
 }  // namespace nfs_client
