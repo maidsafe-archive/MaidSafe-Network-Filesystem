@@ -66,17 +66,6 @@ message StructuredDataNameAndContentOrReturnCode {
   optional bytes serialised_data_name_and_return_code = 2;
 }
 
-message DataPmidHintAndReturnCode {
-  required bytes serialised_data_and_pmid_hint = 1;
-  required bytes serialised_return_code = 2;
-}
-
-message DataNameAndContentAndReturnCode {
-  required bytes serialised_name = 1;
-  required bytes serialised_return_code = 2;
-  optional bytes content = 3;
-}
-
 message DataNameAndSizeAndSpaceAndReturnCode {
   required bytes serialised_name = 1;
   required uint64 size = 2;

@@ -579,47 +579,6 @@ void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOE
   swap(lhs.return_code, rhs.return_code);
 }
 
-// ==================== DataPmidHintAndReturnCode ==================================================
-DataPmidHintAndReturnCode::DataPmidHintAndReturnCode() : data_and_pmid_hint(), return_code() {}
-
-DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(const DataPmidHintAndReturnCode& other)
-    : data_and_pmid_hint(other.data_and_pmid_hint), return_code(other.return_code) {}
-
-DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(DataPmidHintAndReturnCode&& other)
-    : data_and_pmid_hint(std::move(other.data_and_pmid_hint)),
-      return_code(std::move(other.return_code)) {}
-
-DataPmidHintAndReturnCode& DataPmidHintAndReturnCode::operator=(DataPmidHintAndReturnCode other) {
-  swap(*this, other);
-  return *this;
-}
-
-DataPmidHintAndReturnCode::DataPmidHintAndReturnCode(const std::string& serialised_copy)
-    : data_and_pmid_hint(), return_code() {
-  protobuf::DataPmidHintAndReturnCode proto_copy;
-  if (!proto_copy.ParseFromString(serialised_copy))
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-  data_and_pmid_hint = nfs_vault::DataAndPmidHint(proto_copy.serialised_data_and_pmid_hint());
-  return_code = ReturnCode(proto_copy.serialised_return_code());
-}
-
-std::string DataPmidHintAndReturnCode::Serialise() const {
-  protobuf::DataPmidHintAndReturnCode proto_copy;
-  proto_copy.set_serialised_data_and_pmid_hint(data_and_pmid_hint.Serialise());
-  proto_copy.set_serialised_return_code(return_code.Serialise());
-  return proto_copy.SerializeAsString();
-}
-
-bool operator==(const DataPmidHintAndReturnCode& lhs, const DataPmidHintAndReturnCode& rhs) {
-  return lhs.data_and_pmid_hint == rhs.data_and_pmid_hint && lhs.return_code == rhs.return_code;
-}
-
-void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
-  using std::swap;
-  swap(lhs.data_and_pmid_hint, rhs.data_and_pmid_hint);
-  swap(lhs.return_code, rhs.return_code);
-}
-
 // ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
 DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
     const DataNameAndSizeAndSpaceAndReturnCode& data)
