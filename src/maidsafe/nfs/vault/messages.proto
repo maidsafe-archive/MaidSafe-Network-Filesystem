@@ -71,11 +71,6 @@ message DataNameAndSize {
   required int32 size = 2;
 }
 
-message DataAndPmidHint {
-  required bytes serialised_data_name_and_content = 1;
-  required bytes pmid_hint = 2;
-}
-
 message DataNameAndContentOrCheckResult {
   required bytes serialised_name = 1;
   optional bytes content = 2;

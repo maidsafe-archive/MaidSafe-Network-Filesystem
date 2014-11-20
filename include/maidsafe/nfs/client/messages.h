@@ -257,23 +257,6 @@ struct TipOfTreeAndReturnCode {
 bool operator==(const TipOfTreeAndReturnCode& lhs, const TipOfTreeAndReturnCode& rhs);
 void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ==================== DataPmidHintAndReturnCode ==================================================
-struct DataPmidHintAndReturnCode {
-  DataPmidHintAndReturnCode();
-  DataPmidHintAndReturnCode(const DataPmidHintAndReturnCode& other);
-  DataPmidHintAndReturnCode(DataPmidHintAndReturnCode&& other);
-  DataPmidHintAndReturnCode& operator=(DataPmidHintAndReturnCode other);
-
-  explicit DataPmidHintAndReturnCode(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  nfs_vault::DataAndPmidHint data_and_pmid_hint;
-  ReturnCode return_code;
-};
-
-bool operator==(const DataPmidHintAndReturnCode& lhs, const DataPmidHintAndReturnCode& rhs);
-void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 // ==================== PmidRegistrationAndReturnCode ==============================================
 struct PmidRegistrationAndReturnCode {
   PmidRegistrationAndReturnCode();
