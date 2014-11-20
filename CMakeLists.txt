@@ -74,7 +74,7 @@ target_link_libraries(maidsafe_nfs_core maidsafe_routing)
 target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
 target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
-if(MaidsafeTesting)
+if(INCLUDE_TESTS)
   ms_add_executable(test_nfs "Tests/NFS" ${NfsTestsAllFiles})
   target_link_libraries(test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
@@ -105,7 +105,7 @@ include(standard_flags)
 #==================================================================================================#
 # Tests                                                                                            #
 #==================================================================================================#
-if(MaidsafeTesting)
+if(INCLUDE_TESTS)
   ms_add_default_tests()
   ms_add_gtests(test_nfs)
   ms_add_network_gtests(network_test_nfs)
@@ -124,7 +124,7 @@ install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault COMPONE
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ COMPONENT Development DESTINATION include)
 install(FILES ${OutputFile} COMPONENT Development DESTINATION include/maidsafe/nfs)
 
-if(MaidsafeTesting)
+if(INCLUDE_TESTS)
   install(TARGETS test_nfs network_test_nfs weekly_network_test_nfs COMPONENT Tests CONFIGURATIONS Debug RUNTIME DESTINATION bin/debug)
   install(TARGETS test_nfs network_test_nfs weekly_network_test_nfs COMPONENT Tests CONFIGURATIONS Release RUNTIME DESTINATION bin)
 endif()
