@@ -49,8 +49,7 @@ class MaidNodeDispatcher {
   void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
 
   template <typename Data>
-  void SendPutRequest(routing::TaskId task_id, const Data& data,
-                      const passport::PublicPmid::Name& pmid_node_hint);
+  void SendPutRequest(routing::TaskId task_id, const Data& data);
 
   template <typename DataName>
   void SendDeleteRequest(const DataName& data_name);
@@ -119,17 +118,14 @@ void MaidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
 }
 
 template <typename Data>
-void MaidNodeDispatcher::SendPutRequest(routing::TaskId task_id, const Data& data,
-                                        const passport::PublicPmid::Name& pmid_node_hint) {
+void MaidNodeDispatcher::SendPutRequest(routing::TaskId task_id, const Data& data) {
   LOG(kVerbose) << "MaidNodeDispatcher::SendPutRequest for chunk "
-                << HexSubstr(data.name().value.string())
-                << " to PmidHint " << HexSubstr(pmid_node_hint.value);
+                << HexSubstr(data.name().value.string());
   typedef nfs::PutRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage::Contents contents;
-  contents.data = nfs_vault::DataNameAndContent(data);
-  contents.pmid_hint = pmid_node_hint.value;
+  contents = nfs_vault::DataNameAndContent(data);
   NfsMessage nfs_message(nfs::MessageId(task_id), contents);
   RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
