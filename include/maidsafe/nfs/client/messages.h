@@ -107,6 +107,29 @@ struct DataNameAndReturnCode {
 bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& rhs);
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
+// ============================ DataNameAndSizeAndReturnCode ======================================
+struct DataNameAndSizeAndReturnCode {
+  template<typename DataNameType>
+  DataNameAndSizeAndReturnCode(const DataNameType& data_name, uint64_t size_in,
+                            const ReturnCode& return_code_in)
+      : name(data_name), size(size_in), return_code(return_code_in) {}
+  DataNameAndSizeAndReturnCode();
+  DataNameAndSizeAndReturnCode(nfs_vault::DataName data_name, uint64_t size_in, ReturnCode code);
+  DataNameAndSizeAndReturnCode(const DataNameAndSizeAndReturnCode& other);
+  DataNameAndSizeAndReturnCode(DataNameAndSizeAndReturnCode&& other);
+  DataNameAndSizeAndReturnCode& operator=(DataNameAndSizeAndReturnCode other);
+
+  explicit DataNameAndSizeAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  nfs_vault::DataName name;
+  uint64_t size;
+  ReturnCode return_code;
+};
+
+bool operator==(const DataNameAndSizeAndReturnCode& lhs, const DataNameAndSizeAndReturnCode& rhs);
+void swap(DataNameAndSizeAndReturnCode& lhs, DataNameAndSizeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+
 // ==================== DataNamesAndReturnCode =====================================================
 struct DataNamesAndReturnCode {
   explicit DataNamesAndReturnCode(const ReturnCode& code);
