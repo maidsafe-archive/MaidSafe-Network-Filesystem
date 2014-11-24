@@ -93,7 +93,7 @@ class MaidManagerServiceImpl {
 template <>
 std::string MaidManagerServiceImpl::Handle(const PutRequest& message) {
   LOG(kInfo) << "MaidManager handling Put";
-  return message.contents->data.name.raw_name.string();
+  return message.contents->name.raw_name.string();
 }
 
 template <>
@@ -140,8 +140,7 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
 
   GetRequest get(GetRequest::Contents(data1.name()));
   PutRequest::Contents put_contents;
-  put_contents.data = nfs_vault::DataNameAndContent(data2);
-  put_contents.pmid_hint = Identity(RandomString(crypto::SHA512::DIGESTSIZE));
+  put_contents = nfs_vault::DataNameAndContent(data2);
   PutRequest put(put_contents);
   DeleteRequest del(DeleteRequest::Contents(data3.name()));
 

@@ -537,50 +537,6 @@ void swap(DataNameAndSize& lhs, DataNameAndSize& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.size, rhs.size);
 }
 
-// ==================== DataAndPmidHint ============================================================
-
-DataAndPmidHint::DataAndPmidHint() : data(), pmid_hint() {}
-
-DataAndPmidHint::DataAndPmidHint(const DataName& data_name, const NonEmptyString& content,
-                                 Identity pmid_node_hint)
-    : data(data_name.type, data_name.raw_name, content), pmid_hint(std::move(pmid_node_hint)) {}
-
-DataAndPmidHint::DataAndPmidHint(const DataAndPmidHint& other)
-    : data(other.data), pmid_hint(other.pmid_hint) {}
-
-DataAndPmidHint::DataAndPmidHint(DataAndPmidHint&& other)
-    : data(std::move(other.data)), pmid_hint(std::move(other.pmid_hint)) {}
-
-DataAndPmidHint& DataAndPmidHint::operator=(DataAndPmidHint other) {
-  swap(*this, other);
-  return *this;
-}
-
-DataAndPmidHint::DataAndPmidHint(const std::string& serialised_copy) : data(), pmid_hint() {
-  protobuf::DataAndPmidHint proto_copy;
-  if (!proto_copy.ParseFromString(serialised_copy))
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-  data = DataNameAndContent(proto_copy.serialised_data_name_and_content());
-  pmid_hint = Identity(proto_copy.pmid_hint());
-}
-
-std::string DataAndPmidHint::Serialise() const {
-  protobuf::DataAndPmidHint proto_copy;
-  proto_copy.set_serialised_data_name_and_content(data.Serialise());
-  proto_copy.set_pmid_hint(pmid_hint.string());
-  return proto_copy.SerializeAsString();
-}
-
-bool operator==(const DataAndPmidHint& lhs, const DataAndPmidHint& rhs) {
-  return lhs.data == rhs.data && lhs.pmid_hint == rhs.pmid_hint;
-}
-
-void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT {
-  using std::swap;
-  swap(lhs.data, rhs.data);
-  swap(lhs.pmid_hint, rhs.pmid_hint);
-}
-
 // ========================== DataNameAndContentOrCheckResult ======================================
 
 DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(

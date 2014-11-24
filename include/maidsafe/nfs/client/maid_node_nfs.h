@@ -206,7 +206,6 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
   typedef MaidNodeService::PutResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
   NodeId node_id;
-  passport::PublicPmid::Name pmid_hint(Identity((node_id.string())));
 
   auto response_functor([promise](const nfs_client::ReturnCode& result) {
                            HandlePutResponseResult(result, promise);
@@ -223,7 +222,7 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
       },
       routing::Parameters::group_size - 1, task_id);
   rpc_timers_.put_timer.PrintTaskIds();
-  dispatcher_.SendPutRequest(task_id, data, pmid_hint);
+  dispatcher_.SendPutRequest(task_id, data);
   return promise->get_future();
 }
 
