@@ -65,6 +65,23 @@ struct AvailableSize {
 bool operator==(const AvailableSize& lhs, const AvailableSize& rhs);
 void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT;
 
+// ================================ DiffSize =======================================================
+
+struct DiffSize {
+  explicit DiffSize(uint64_t size);
+  DiffSize(const DiffSize& other);
+  DiffSize(DiffSize&& other);
+  DiffSize& operator=(DiffSize other);
+
+  explicit DiffSize(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  int32_t diff_size;
+};
+
+bool operator==(const DiffSize& lhs, const DiffSize& rhs);
+void swap(DiffSize& lhs, DiffSize& rhs) MAIDSAFE_NOEXCEPT;
+
 // ========================== DataName =============================================================
 
 struct DataName {

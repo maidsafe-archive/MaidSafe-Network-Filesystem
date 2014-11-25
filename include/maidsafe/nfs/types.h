@@ -62,6 +62,7 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (CreatePmidAccountRequest)
     (CreateVersionTreeRequest)
     (CreateVersionTreeResponse)
+    (UpdateAccount)
     (NoOperation))  // NoOperation is added to avoid re-definition of types error in
                     // vault::message_types.
 // Defines:

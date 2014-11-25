@@ -70,6 +70,43 @@ void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.available_size, rhs.available_size);
 }
 
+// ========================================== DiffSize =============================================
+
+DiffSize::DiffSize(uint64_t size) : diff_size(size) {}
+
+DiffSize::DiffSize(const DiffSize& other) : diff_size(other.diff_size) {}
+
+DiffSize::DiffSize(DiffSize&& other)
+    : diff_size(std::move(other.diff_size)) {}
+
+DiffSize& DiffSize::operator=(DiffSize other) {
+  swap(*this, other);
+  return *this;
+}
+
+DiffSize::DiffSize(const std::string& serialised_copy)
+    : diff_size([&serialised_copy]() {
+                       protobuf::DiffSize proto_size;
+                       if (!proto_size.ParseFromString(serialised_copy))
+                         BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+                       return proto_size.size();
+                     }()) {}
+
+std::string DiffSize::Serialise() const {
+  protobuf::DiffSize proto_size;
+  proto_size.set_size(diff_size);
+  return proto_size.SerializeAsString();
+}
+
+bool operator==(const DiffSize& lhs, const DiffSize& rhs) {
+  return lhs.diff_size == rhs.diff_size;
+}
+
+void swap(DiffSize& lhs, DiffSize& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.diff_size, rhs.diff_size);
+}
+
 // ==================== DataName ===================================================================
 DataName::DataName(DataTagValue type_in, Identity raw_name_in)
     : type(type_in), raw_name(std::move(raw_name_in)) {}
