@@ -816,7 +816,7 @@ bool IsSuccess<nfs_client::DataNameAndContentOrReturnCode>(
     }
   }
 
-  return response.content;
+  return static_cast<bool>(response.content);
 }
 
 template <>
@@ -845,7 +845,7 @@ bool IsSuccess<nfs_client::StructuredDataNameAndContentOrReturnCode>(
       LOG(kError) << "IsSuccess<nfs_client::nfs_client::StructuredDataNameAndContentOrReturnCode>"
                   << " neither structured_data or data_name_and_return_code is initialized";
   }
-  return response.structured_data;
+  return static_cast<bool>(response.structured_data);
 }
 
 template <>
