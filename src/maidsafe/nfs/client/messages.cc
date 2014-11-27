@@ -53,7 +53,7 @@ maidsafe_error GetError(int error_value, const std::string& error_category_name)
 }  // unnamed namespace
 
 // ==================== ReturnCode =================================================================
-ReturnCode::ReturnCode() : value(CommonErrors::defaulted) {}
+ReturnCode::ReturnCode() : value(CommonErrors::success) {}
 
 ReturnCode::ReturnCode(const ReturnCode& other) : value(other.value) {}
 
@@ -177,6 +177,56 @@ bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& r
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.name, rhs.name);
+  swap(lhs.return_code, rhs.return_code);
+}
+
+// ============================== DataNameAndSizeAndReturnCode =======================================
+DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode() : name(), size(), return_code() {}
+
+DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(
+    nfs_vault::DataName data_name, uint64_t size_in, ReturnCode code)
+    : name(std::move(data_name)), size(std::move(size_in)), return_code(std::move(code)) {}
+
+DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(
+    const DataNameAndSizeAndReturnCode& other)
+    : name(other.name), size(other.size), return_code(other.return_code) {}
+
+//DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(DataNameAndSizeAndReturnCode&& other)
+//    : name(std::move(other.name)), size(std::move(other.size)),
+//      return_code(std::move(other.return_code)) {}
+
+//DataNameAndSizeAndReturnCode& DataNameAndSizeAndReturnCode::operator=(
+//    DataNameAndSizeAndReturnCode other) {
+//  swap(*this, other);
+//  return *this;
+//}
+
+DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(const std::string& serialised_copy)
+    : name(), size(), return_code() {
+  protobuf::DataNameAndSizeAndReturnCode proto_copy;
+  if (!proto_copy.ParseFromString(serialised_copy))
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+  name = nfs_vault::DataName(proto_copy.serialised_name());
+  size = proto_copy.size();
+  return_code = ReturnCode(proto_copy.serialised_return_code());
+}
+
+std::string DataNameAndSizeAndReturnCode::Serialise() const {
+  protobuf::DataNameAndSizeAndReturnCode proto_copy;
+  proto_copy.set_serialised_name(name.Serialise());
+  proto_copy.set_size(size);
+  proto_copy.set_serialised_return_code(return_code.Serialise());
+  return proto_copy.SerializeAsString();
+}
+
+bool operator==(const DataNameAndSizeAndReturnCode& lhs, const DataNameAndSizeAndReturnCode& rhs) {
+  return lhs.name == rhs.name && lhs.size == rhs.size && lhs.return_code == rhs.return_code;
+}
+
+void swap(DataNameAndSizeAndReturnCode& lhs, DataNameAndSizeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.name, rhs.name);
+  swap(lhs.size, rhs.size);
   swap(lhs.return_code, rhs.return_code);
 }
 
