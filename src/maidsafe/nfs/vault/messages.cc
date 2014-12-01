@@ -72,7 +72,7 @@ void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT {
 
 // ========================================== DiffSize =============================================
 
-DiffSize::DiffSize(uint64_t size) : diff_size(size) {}
+DiffSize::DiffSize(int64_t size) : diff_size(size) {}
 
 DiffSize::DiffSize(const DiffSize& other) : diff_size(other.diff_size) {}
 
