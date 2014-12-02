@@ -191,15 +191,15 @@ DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(
     const DataNameAndSizeAndReturnCode& other)
     : name(other.name), size(other.size), return_code(other.return_code) {}
 
-//DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(DataNameAndSizeAndReturnCode&& other)
-//    : name(std::move(other.name)), size(std::move(other.size)),
-//      return_code(std::move(other.return_code)) {}
+DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(DataNameAndSizeAndReturnCode&& other)
+    : name(std::move(other.name)), size(std::move(other.size)),
+      return_code(std::move(other.return_code)) {}
 
-//DataNameAndSizeAndReturnCode& DataNameAndSizeAndReturnCode::operator=(
-//    DataNameAndSizeAndReturnCode other) {
-//  swap(*this, other);
-//  return *this;
-//}
+DataNameAndSizeAndReturnCode& DataNameAndSizeAndReturnCode::operator=(
+    DataNameAndSizeAndReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
 
 DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(const std::string& serialised_copy)
     : name(), size(), return_code() {
