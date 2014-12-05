@@ -186,8 +186,9 @@ class Service {
     try {
       return HandlePublicMessage(message, demuxer);
     }
-    catch (const maidsafe_error& /*error*/) {
-      return HandleVaultMessage(message, demuxer);
+    catch (const maidsafe_error& error) {
+      if (error.code() != make_error_code((CommonErrors::invalid_parameter)))
+        return HandleVaultMessage(message, demuxer);
     }
   }
 
