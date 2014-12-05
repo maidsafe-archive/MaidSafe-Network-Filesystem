@@ -157,7 +157,8 @@ class Service {
     VaultMessages vault_variant_message;
     if (!vault::GetVariant(message, vault_variant_message)) {
       LOG(kError) << "Not a valid vault message" << vault_variant_message;
-      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+      //BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+      return ReturnType();  // BEFORE_RELEASE : The line above should be uncommented
     } else {
       LOG(kVerbose) << "processing: " << vault_variant_message;
     }
