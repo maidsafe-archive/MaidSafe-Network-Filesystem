@@ -157,8 +157,7 @@ class Service {
     VaultMessages vault_variant_message;
     if (!vault::GetVariant(message, vault_variant_message)) {
       LOG(kError) << "Not a valid vault message" << vault_variant_message;
-      //BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
-      return ReturnType();  // BEFORE_RELEASE : The line above should be uncommented
+      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
     } else {
       LOG(kVerbose) << "processing: " << vault_variant_message;
     }
@@ -188,7 +187,14 @@ class Service {
     }
     catch (const maidsafe_error& error) {
       if (error.code() != make_error_code((CommonErrors::invalid_parameter)))
-        return HandleVaultMessage(message, demuxer);
+        throw;
+    }
+    try {
+      return HandleVaultMessage(message, demuxer);
+    }
+    catch (const maidsafe_error& error) {
+     if (error.code() != make_error_code((CommonErrors::invalid_parameter)))
+       throw;
     }
   }
 
