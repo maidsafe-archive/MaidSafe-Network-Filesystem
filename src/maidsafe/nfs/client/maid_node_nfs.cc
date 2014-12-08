@@ -237,7 +237,7 @@ boost::future<void> MaidNodeNfs::CreateAccount(
                  op_data->HandleResponseContents(std::move(create_account_response));
                },
       // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-      routing::Parameters::group_size * 2, task_id);
+      routing::Parameters::group_size - 1, task_id);
   dispatcher_.SendCreateAccountRequest(task_id, account_creation);
   return promise->get_future();
 }
