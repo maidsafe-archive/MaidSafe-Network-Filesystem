@@ -161,6 +161,7 @@ void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
     if (response.content && ValidateData(*response.content, std::get<2>(get_info_[task_id]))) {
       operation = Operation::kAddResponse;
     } else if (response.return_code &&
+               response.return_code->value.code() != make_error_code(CommonErrors::success) &&
                (std::get<0>(get_info_[task_id]) == routing::Parameters::group_size - 1)) {
       new_task_id = get_timer_.NewTaskId();
       get_info_.insert(std::make_pair(new_task_id,
@@ -168,8 +169,11 @@ void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
                                                       std::get<2>(get_info_[task_id]))));
       get_info_.erase(task_id);
       operation = Operation::kSendRequest;
-    } else  if (!response.return_code && !response.content) {
-      operation = Operation::kCancelTask;
+    } else if (response.return_code &&
+               response.return_code->value.code() == make_error_code(CommonErrors::success) &&
+               !response.content) {
+      operation = Operation::kCancelTask;  // timed-out : VERY VERY IMPORTANT PLEASE NOTE
+      // THIS HAS TO BE COMPATIBLE WITH THE DEFAULT CONSTRUCTOR OF RETURN-CODE
     }
   }
 
