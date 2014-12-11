@@ -36,7 +36,7 @@ TEST_F(MaidNodeNfsTest, FUNC_Constructor) {
 TEST_F(MaidNodeNfsTest, FUNC_FailingGet) {
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   AddClient();
-  auto future(clients_.back()->Get<ImmutableData::Name>(data.name()));
+  auto future(clients_.back()->Get<ImmutableData::Name>(data.name(), std::chrono::seconds(10)));
   EXPECT_THROW(future.get(), std::exception) << "must have failed";
 }
 
@@ -52,7 +52,7 @@ TEST_F(MaidNodeNfsTest, FUNC_PutGet) {
     GTEST_FAIL() << "Failed to put: " << DebugId(NodeId(data.name()->string()));
   }
 
-  auto future(clients_.back()->Get<ImmutableData::Name>(data.name()));
+  auto future(clients_.back()->Get<ImmutableData::Name>(data.name(), std::chrono::seconds(360)));
   try {
     auto retrieved(future.get());
     EXPECT_EQ(retrieved.data(), data.data());
@@ -76,7 +76,7 @@ TEST_F(MaidNodeNfsTest, FUNC_MultipleSequentialPuts) {
   std::vector<boost::future<ImmutableData>> get_futures;
   for (const auto& chunk : chunks_) {
     get_futures.emplace_back(clients_.back()->Get<ImmutableData::Name>(
-        chunk.name(), std::chrono::seconds(kIterations * 2)));
+        chunk.name(), std::chrono::seconds(kIterations * 36)));
   }
   CompareGetResult(chunks_, get_futures);
   LOG(kVerbose) << "Multiple sequential puts is finished successfully";
