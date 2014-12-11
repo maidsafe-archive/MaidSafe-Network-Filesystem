@@ -54,7 +54,7 @@ struct ReturnCode {
                       typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
       : value(error) {}
 
-  ReturnCode(const maidsafe_error& error = MakeError(CommonErrors::success));
+  ReturnCode(const maidsafe_error& error = MakeError(CommonErrors::defaulted));
   ReturnCode(const ReturnCode& other);
   ReturnCode(ReturnCode&& other);
   ReturnCode& operator=(ReturnCode other);

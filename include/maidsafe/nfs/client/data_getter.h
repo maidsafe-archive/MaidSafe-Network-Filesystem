@@ -59,18 +59,18 @@ class DataGetter {
   template <typename DataName>
   boost::future<typename DataName::data_type> Get(
       const DataName& data_name,
-      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
+      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(120));
 
   template <typename DataName>
   VersionNamesFuture GetVersions(const DataName& data_name,
                                  const std::chrono::steady_clock::duration& timeout =
-                                     std::chrono::seconds(10));
+                                     std::chrono::seconds(120));
 
   template <typename DataName>
   VersionNamesFuture GetBranch(const DataName& data_name,
                                const StructuredDataVersions::VersionName& branch_tip,
                                const std::chrono::steady_clock::duration& timeout =
-                                   std::chrono::seconds(10));
+                                   std::chrono::seconds(120));
 
   // This should be the function used in the GroupToSingle (and maybe also SingleToSingle) functors
   // passed to 'routing.Join'.

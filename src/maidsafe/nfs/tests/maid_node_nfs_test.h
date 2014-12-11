@@ -43,6 +43,11 @@ class MaidNodeNfsTest : public testing::Test {
  public:
   MaidNodeNfsTest() {}
 
+  ~MaidNodeNfsTest() {
+    for (auto& client : clients_)
+      client->Stop();
+  }
+
  protected:
   void AddClient() {
     auto maid_and_signer(passport::CreateMaidAndSigner());

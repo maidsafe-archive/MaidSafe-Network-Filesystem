@@ -431,7 +431,7 @@ DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     : name(data_name_and_return_code.name), return_code(data_name_and_return_code.return_code) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode()
-    : name(), content(), return_code() {}
+    : name(), content(), return_code(ReturnCode()) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndContentOrReturnCode& other)
