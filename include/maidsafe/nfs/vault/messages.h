@@ -65,6 +65,23 @@ struct AvailableSize {
 bool operator==(const AvailableSize& lhs, const AvailableSize& rhs);
 void swap(AvailableSize& lhs, AvailableSize& rhs) MAIDSAFE_NOEXCEPT;
 
+// ================================ DiffSize =======================================================
+
+struct DiffSize {
+  explicit DiffSize(int64_t size);
+  DiffSize(const DiffSize& other);
+  DiffSize(DiffSize&& other);
+  DiffSize& operator=(DiffSize other);
+
+  explicit DiffSize(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  int64_t diff_size;
+};
+
+bool operator==(const DiffSize& lhs, const DiffSize& rhs);
+void swap(DiffSize& lhs, DiffSize& rhs) MAIDSAFE_NOEXCEPT;
+
 // ========================== DataName =============================================================
 
 struct DataName {
@@ -304,26 +321,6 @@ struct DataNameAndSize {
 
 bool operator==(const DataNameAndSize& lhs, const DataNameAndSize& rhs);
 void swap(DataNameAndSize& lhs, DataNameAndSize& rhs) MAIDSAFE_NOEXCEPT;
-
-// ========================== DataAndPmidHint ======================================================
-
-struct DataAndPmidHint {
-  DataAndPmidHint();
-  DataAndPmidHint(const DataName& data_name, const NonEmptyString& content,
-                  Identity pmid_node_hint);
-  DataAndPmidHint(const DataAndPmidHint& other);
-  DataAndPmidHint(DataAndPmidHint&& other);
-  DataAndPmidHint& operator=(DataAndPmidHint other);
-
-  explicit DataAndPmidHint(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  DataNameAndContent data;
-  Identity pmid_hint;
-};
-
-bool operator==(const DataAndPmidHint& lhs, const DataAndPmidHint& rhs);
-void swap(DataAndPmidHint& lhs, DataAndPmidHint& rhs) MAIDSAFE_NOEXCEPT;
 
 // ========================== DataNameAndContentOrCheckResult ======================================
 

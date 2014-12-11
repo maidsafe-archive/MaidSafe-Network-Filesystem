@@ -54,7 +54,7 @@ struct ReturnCode {
                       typename std::enable_if<!std::is_error_code_enum<Error>::value>::type* = 0)
       : value(error) {}
 
-  ReturnCode();
+  ReturnCode(const maidsafe_error& error = MakeError(CommonErrors::defaulted));
   ReturnCode(const ReturnCode& other);
   ReturnCode(ReturnCode&& other);
   ReturnCode& operator=(ReturnCode other);
@@ -106,6 +106,29 @@ struct DataNameAndReturnCode {
 
 bool operator==(const DataNameAndReturnCode& lhs, const DataNameAndReturnCode& rhs);
 void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+
+// ============================ DataNameAndSizeAndReturnCode ======================================
+struct DataNameAndSizeAndReturnCode {
+  template<typename DataNameType>
+  DataNameAndSizeAndReturnCode(const DataNameType& data_name, uint64_t size_in,
+                            const ReturnCode& return_code_in)
+      : name(data_name), size(size_in), return_code(return_code_in) {}
+  DataNameAndSizeAndReturnCode();
+  DataNameAndSizeAndReturnCode(nfs_vault::DataName data_name, uint64_t size_in, ReturnCode code);
+  DataNameAndSizeAndReturnCode(const DataNameAndSizeAndReturnCode& other);
+  DataNameAndSizeAndReturnCode(DataNameAndSizeAndReturnCode&& other);
+  DataNameAndSizeAndReturnCode& operator=(DataNameAndSizeAndReturnCode other);
+
+  explicit DataNameAndSizeAndReturnCode(const std::string& serialised_copy);
+  std::string Serialise() const;
+
+  nfs_vault::DataName name;
+  uint64_t size;
+  ReturnCode return_code;
+};
+
+bool operator==(const DataNameAndSizeAndReturnCode& lhs, const DataNameAndSizeAndReturnCode& rhs);
+void swap(DataNameAndSizeAndReturnCode& lhs, DataNameAndSizeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 // ==================== DataNamesAndReturnCode =====================================================
 struct DataNamesAndReturnCode {
@@ -257,23 +280,6 @@ struct TipOfTreeAndReturnCode {
 bool operator==(const TipOfTreeAndReturnCode& lhs, const TipOfTreeAndReturnCode& rhs);
 void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ==================== DataPmidHintAndReturnCode ==================================================
-struct DataPmidHintAndReturnCode {
-  DataPmidHintAndReturnCode();
-  DataPmidHintAndReturnCode(const DataPmidHintAndReturnCode& other);
-  DataPmidHintAndReturnCode(DataPmidHintAndReturnCode&& other);
-  DataPmidHintAndReturnCode& operator=(DataPmidHintAndReturnCode other);
-
-  explicit DataPmidHintAndReturnCode(const std::string& serialised_copy);
-  std::string Serialise() const;
-
-  nfs_vault::DataAndPmidHint data_and_pmid_hint;
-  ReturnCode return_code;
-};
-
-bool operator==(const DataPmidHintAndReturnCode& lhs, const DataPmidHintAndReturnCode& rhs);
-void swap(DataPmidHintAndReturnCode& lhs, DataPmidHintAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-
 // ==================== PmidRegistrationAndReturnCode ==============================================
 struct PmidRegistrationAndReturnCode {
   PmidRegistrationAndReturnCode();
@@ -293,48 +299,34 @@ struct PmidRegistrationAndReturnCode {
 bool operator==(const PmidRegistrationAndReturnCode& lhs, const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ==================== DataNameAndSpaceAndReturnCode ==============================================
-struct DataNameAndSpaceAndReturnCode {
+// ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
+struct DataNameAndSizeAndSpaceAndReturnCode {
   template <typename DataNameType>
-  DataNameAndSpaceAndReturnCode(const DataNameType& name_in, int64_t available_space_in,
-                                const nfs_client::ReturnCode& code_in)
-      : name(name_in), available_space(available_space_in), return_code(code_in) {}
-
-  DataNameAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
+  DataNameAndSizeAndSpaceAndReturnCode(const DataNameType& name_in, uint64_t size_in,
                                 int64_t available_space_in,
-                                const nfs_client::ReturnCode& code_in);
-  explicit DataNameAndSpaceAndReturnCode(const std::string& serialised_copy);
-  DataNameAndSpaceAndReturnCode();
-  DataNameAndSpaceAndReturnCode(const DataNameAndSpaceAndReturnCode& other);
-  DataNameAndSpaceAndReturnCode(DataNameAndSpaceAndReturnCode&& other);
-  DataNameAndSpaceAndReturnCode& operator=(DataNameAndSpaceAndReturnCode other);
+                                const nfs_client::ReturnCode& code_in)
+      : name(name_in), size(size_in), available_space(available_space_in), return_code(code_in) {}
+
+  DataNameAndSizeAndSpaceAndReturnCode(const DataTagValue& type_in, const Identity& name_in,
+                                       uint64_t size_in, int64_t available_space_in,
+                                       const nfs_client::ReturnCode& code_in);
+  explicit DataNameAndSizeAndSpaceAndReturnCode(const std::string& serialised_copy);
+  DataNameAndSizeAndSpaceAndReturnCode();
+  DataNameAndSizeAndSpaceAndReturnCode(const DataNameAndSizeAndSpaceAndReturnCode& other);
+  DataNameAndSizeAndSpaceAndReturnCode(DataNameAndSizeAndSpaceAndReturnCode&& other);
+  DataNameAndSizeAndSpaceAndReturnCode& operator=(DataNameAndSizeAndSpaceAndReturnCode other);
   std::string Serialise() const;
 
   nfs_vault::DataName name;
+  uint64_t size;
   int64_t available_space;
   nfs_client::ReturnCode return_code;
 };
 
-void swap(DataNameAndSpaceAndReturnCode& lhs, DataNameAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-bool operator==(const DataNameAndSpaceAndReturnCode& lhs, const DataNameAndSpaceAndReturnCode& rhs);
-
-// ==================== PmidHealthAndReturnCode ====================================================
-struct PmidHealthAndReturnCode {
-  PmidHealthAndReturnCode(const nfs_vault::PmidHealth& pmid_health_in,
-                          const nfs_client::ReturnCode& code_in);
-
-  explicit PmidHealthAndReturnCode(const std::string& serialised_copy);
-  PmidHealthAndReturnCode(const PmidHealthAndReturnCode& other);
-  PmidHealthAndReturnCode(PmidHealthAndReturnCode&& other);
-  PmidHealthAndReturnCode& operator=(PmidHealthAndReturnCode other);
-  std::string Serialise() const;
-
-  nfs_vault::PmidHealth pmid_health;
-  nfs_client::ReturnCode return_code;
-};
-
-void swap(PmidHealthAndReturnCode& lhs, PmidHealthAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
-bool operator==(const PmidHealthAndReturnCode& lhs, const PmidHealthAndReturnCode& rhs);
+void swap(DataNameAndSizeAndSpaceAndReturnCode& lhs,
+          DataNameAndSizeAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
+bool operator==(const DataNameAndSizeAndSpaceAndReturnCode& lhs,
+                const DataNameAndSizeAndSpaceAndReturnCode& rhs);
 
 }  // namespace nfs_client
 

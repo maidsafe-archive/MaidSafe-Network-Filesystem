@@ -55,9 +55,6 @@ void HandleGetVersionsOrBranchResult(
 void HandleCreateAccountResult(const ReturnCode& result,
                                std::shared_ptr<boost::promise<void>> promise);
 
-void HandlePmidHealthResult(const AvailableSizeAndReturnCode& result,
-                            std::shared_ptr<boost::promise<uint64_t>> promise);
-
 void HandleCreateVersionTreeResult(const ReturnCode& result,
                                    std::shared_ptr<boost::promise<void>> promise);
 

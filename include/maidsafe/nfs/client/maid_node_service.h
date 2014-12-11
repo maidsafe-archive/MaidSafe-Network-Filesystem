@@ -47,10 +47,8 @@ class MaidNodeService {
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
   typedef nfs::PutVersionResponseFromMaidManagerToMaidNode PutVersionResponse;
   typedef nfs::GetBranchResponseFromVersionHandlerToMaidNode GetBranchResponse;
-  typedef nfs::PmidHealthResponseFromMaidManagerToMaidNode PmidHealthResponse;
   typedef nfs::CreateAccountResponseFromMaidManagerToMaidNode CreateAccountResponse;
   typedef nfs::CreateVersionTreeResponseFromMaidManagerToMaidNode CreateVersionTreeResponse;
-  typedef nfs::RegisterPmidResponseFromMaidManagerToMaidNode RegisterPmidResponse;
 
   struct RpcTimers {
     explicit RpcTimers(AsioService& asio_service_);
@@ -61,10 +59,8 @@ class MaidNodeService {
     routing::Timer<GetVersionsResponse::Contents> get_versions_timer;
     routing::Timer<GetBranchResponse::Contents> get_branch_timer;
     routing::Timer<CreateAccountResponse::Contents> create_account_timer;
-    routing::Timer<PmidHealthResponse::Contents> pmid_health_timer;
     routing::Timer<CreateVersionTreeResponse::Contents> create_version_tree_timer;
     routing::Timer<PutVersionResponse::Contents> put_version_timer;
-    routing::Timer<RegisterPmidResponse::Contents> register_pmid_timer;
   };
 
 
@@ -93,9 +89,6 @@ class MaidNodeService {
   void HandleMessage(const GetBranchResponse& message, const GetBranchResponse::Sender& sender,
                      const GetBranchResponse::Receiver& receiver);
 
-  void HandleMessage(const PmidHealthResponse& message, const PmidHealthResponse::Sender& sender,
-                     const PmidHealthResponse::Receiver& receiver);
-
   void HandleMessage(const CreateAccountResponse& message,
                      const CreateAccountResponse::Sender& sender,
                      const CreateAccountResponse::Receiver& receiver);
@@ -103,10 +96,6 @@ class MaidNodeService {
   void HandleMessage(const CreateVersionTreeResponse& message,
                      const CreateVersionTreeResponse::Sender& sender,
                      const CreateVersionTreeResponse::Receiver& receiver);
-
-  void HandleMessage(const RegisterPmidResponse& message,
-                     const RegisterPmidResponse::Sender& sender,
-                     const RegisterPmidResponse::Receiver& receiver);
 
  private:
   template <typename Data>

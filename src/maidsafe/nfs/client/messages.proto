@@ -35,6 +35,12 @@ message DataNameAndReturnCode {
   required bytes serialised_return_code = 2;
 }
 
+message DataNameAndSizeAndReturnCode {
+  required bytes serialised_name = 1;
+  required uint64 size = 2;
+  required bytes serialised_return_code = 3;
+}
+
 message DataNamesAndReturnCode {
   repeated bytes serialised_name = 1;
   required bytes serialised_return_code = 2;
@@ -66,31 +72,11 @@ message StructuredDataNameAndContentOrReturnCode {
   optional bytes serialised_data_name_and_return_code = 2;
 }
 
-message DataPmidHintAndReturnCode {
-  required bytes serialised_data_and_pmid_hint = 1;
-  required bytes serialised_return_code = 2;
-}
-
-message PmidRegistrationAndReturnCode {
-  required bytes serialised_pmid_registration = 1;
-  required bytes serialised_return_code = 2;
-}
-
-message DataNameAndContentAndReturnCode {
+message DataNameAndSizeAndSpaceAndReturnCode {
   required bytes serialised_name = 1;
-  required bytes serialised_return_code = 2;
-  optional bytes content = 3;
-}
-
-message DataNameAndSpaceAndReturnCode {
-  required bytes serialised_name = 1;
-  required int64 space = 2;
-  required bytes serialised_return_code = 3;
-}
-
-message PmidHealthAndReturnCode {
-  required bytes serialised_pmid_health = 1;
-  required bytes serialised_return_code = 2;
+  required uint64 size = 2;
+  required int64 space = 3;
+  required bytes serialised_return_code = 4;
 }
 
 message TipOfTreeAndReturnCode {

@@ -40,10 +40,8 @@ MaidNodeService::RpcTimers::RpcTimers(AsioService& asio_service_)
       get_versions_timer(asio_service_),
       get_branch_timer(asio_service_),
       create_account_timer(asio_service_),
-      pmid_health_timer(asio_service_),
       create_version_tree_timer(asio_service_),
-      put_version_timer(asio_service_),
-      register_pmid_timer(asio_service_) {}
+      put_version_timer(asio_service_) {}
 
 void MaidNodeService::RpcTimers::CancellAll() {
   get_timer.CancelAll();
@@ -51,10 +49,8 @@ void MaidNodeService::RpcTimers::CancellAll() {
   get_versions_timer.CancelAll();
   get_branch_timer.CancelAll();
   create_account_timer.CancelAll();
-  pmid_health_timer.CancelAll();
   create_version_tree_timer.CancelAll();
   put_version_timer.CancelAll();
-  register_pmid_timer.CancelAll();
 }
 
 MaidNodeService::MaidNodeService(const routing::SingleId& receiver,
@@ -172,21 +168,6 @@ void MaidNodeService::HandleMessage(const GetBranchResponse& message,
   }
 }
 
-void MaidNodeService::HandleMessage(const PmidHealthResponse& message,
-                                    const PmidHealthResponse::Sender& /*sender*/,
-                                    const PmidHealthResponse::Receiver& /*receiver*/) {
-  LOG(kInfo) << "Get response for PmidHealth";
-  try {
-    rpc_timers_.pmid_health_timer.AddResponse(message.id.data, *message.contents);
-  }
-  catch (const maidsafe_error& error) {
-    if (error.code() != NoSuchElement())
-      throw;
-    else
-      LOG(kWarning) << "Timer does not expect:" << message.id.data;
-  }
-}
-
 void MaidNodeService::HandleMessage(const CreateAccountResponse& message,
                                     const CreateAccountResponse::Sender& /*sender*/,
                                     const CreateAccountResponse::Receiver& /*receiver*/) {
@@ -208,21 +189,6 @@ void MaidNodeService::HandleMessage(const CreateVersionTreeResponse& message,
   LOG(kInfo) << "Get response for CreateVersionTree";
   try {
     rpc_timers_.create_version_tree_timer.AddResponse(message.id.data, *message.contents);
-  }
-  catch (const maidsafe_error& error) {
-    if (error.code() != NoSuchElement())
-      throw;
-    else
-      LOG(kWarning) << "Timer does not expect:" << message.id.data;
-  }
-}
-
-void MaidNodeService::HandleMessage(const RegisterPmidResponse& message,
-                                    const RegisterPmidResponse::Sender& /*sender*/,
-                                    const RegisterPmidResponse::Receiver& /*receiver*/) {
-  LOG(kInfo) << "Get response for RegisterPmid";
-  try {
-    rpc_timers_.register_pmid_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != NoSuchElement())
