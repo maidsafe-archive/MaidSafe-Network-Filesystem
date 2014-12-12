@@ -242,7 +242,10 @@ void FakeStore::SetMaxDiskUsage(DiskUsage max_disk_usage) {
 
 DiskUsage FakeStore::GetMaxDiskUsage() const { return max_disk_usage_; }
 
-DiskUsage FakeStore::GetCurrentDiskUsage() const { return current_disk_usage_; }
+DiskUsage FakeStore::GetCurrentDiskUsage() const {
+  std::unique_lock<std::mutex> lock(mutex_);
+  return current_disk_usage_;
+}
 
 fs::path FakeStore::GetFilePath(const KeyType& key) const {
   return kDiskPath_ / detail::GetFileName(key);
