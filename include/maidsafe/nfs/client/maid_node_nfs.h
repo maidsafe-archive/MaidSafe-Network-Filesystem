@@ -77,11 +77,11 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   template <typename DataName>
   boost::future<typename DataName::data_type> Get(
       const DataName& data_name,
-      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
+      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(120));
 
   template <typename Data>
   boost::future<void> Put(const Data& data, const std::chrono::steady_clock::duration& timeout =
-                                                std::chrono::seconds(10));
+                                                std::chrono::seconds(360));
 
   template <typename DataName>
   void Delete(const DataName& data_name);
@@ -100,25 +100,25 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
                          const StructuredDataVersions::VersionName& version_name,
                          uint32_t max_versions, uint32_t max_branches,
                          const std::chrono::steady_clock::duration& timeout =
-                             std::chrono::seconds(10));
+                             std::chrono::seconds(120));
 
   template <typename DataName>
   VersionNamesFuture GetVersions(const DataName& data_name,
                                  const std::chrono::steady_clock::duration& timeout =
-                                     std::chrono::seconds(10));
+                                     std::chrono::seconds(120));
 
   template <typename DataName>
   VersionNamesFuture GetBranch(const DataName& data_name,
                                const StructuredDataVersions::VersionName& branch_tip,
                                const std::chrono::steady_clock::duration& timeout =
-                                   std::chrono::seconds(10));
+                                   std::chrono::seconds(120));
 
   template <typename DataName>
   PutVersionFuture PutVersion(const DataName& data_name,
                               const StructuredDataVersions::VersionName& old_version_name,
                               const StructuredDataVersions::VersionName& new_version_name,
                               const std::chrono::steady_clock::duration& timeout =
-                                  std::chrono::seconds(10));
+                                  std::chrono::seconds(360));
 
   template <typename DataName>
   void DeleteBranchUntilFork(const DataName& data_name,
@@ -126,7 +126,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   // TODO(Prakash): This can move to private section
   boost::future<void> CreateAccount(const nfs_vault::AccountCreation& account_creation,
                                     const std::chrono::steady_clock::duration& timeout =
-                                        std::chrono::seconds(10));
+                                        std::chrono::seconds(240));
 
   void RemoveAccount(const nfs_vault::AccountRemoval& account_removal);
 

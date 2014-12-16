@@ -74,8 +74,8 @@ TEST_F(ServiceTest, BEH_All) {
   GetResponse get_response(MessageId(task_id), contents);
   auto serialised_get_response(get_response.Serialise());
 
-  NodeId sender_node_id(NodeId::IdType::kRandomId);
-  NodeId sender_group_id(NodeId::IdType::kRandomId);
+  NodeId sender_node_id(RandomString(NodeId::kSize));
+  NodeId sender_group_id(RandomString(NodeId::kSize));
   NodeId receiver_node_id(routing.kNodeId());
   GetResponse::Sender sender((routing::GroupId(sender_node_id)),
                              (routing::SingleId(sender_group_id)));
