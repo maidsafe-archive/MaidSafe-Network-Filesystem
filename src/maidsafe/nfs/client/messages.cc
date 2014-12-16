@@ -180,7 +180,7 @@ void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXC
   swap(lhs.return_code, rhs.return_code);
 }
 
-// ============================== DataNameAndSizeAndReturnCode =======================================
+//============================ DataNameAndSizeAndReturnCode =======================================
 DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode() : name(), size(), return_code() {}
 
 DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(
@@ -629,7 +629,7 @@ void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOE
   swap(lhs.return_code, rhs.return_code);
 }
 
-// ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
+// =============== DataNameAndSizeAndSpaceAndReturnCode ===========================================
 DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
     const DataNameAndSizeAndSpaceAndReturnCode& data)
     : name(data.name), size(data.size),

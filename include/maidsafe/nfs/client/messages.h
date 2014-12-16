@@ -299,7 +299,7 @@ struct PmidRegistrationAndReturnCode {
 bool operator==(const PmidRegistrationAndReturnCode& lhs, const PmidRegistrationAndReturnCode& rhs);
 void swap(PmidRegistrationAndReturnCode& lhs, PmidRegistrationAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
-// ==================== DataNameAndSizeAndSpaceAndReturnCode ==============================================
+// ==================== DataNameAndSizeAndSpaceAndReturnCode ======================================
 struct DataNameAndSizeAndSpaceAndReturnCode {
   template <typename DataNameType>
   DataNameAndSizeAndSpaceAndReturnCode(const DataNameType& name_in, uint64_t size_in,
