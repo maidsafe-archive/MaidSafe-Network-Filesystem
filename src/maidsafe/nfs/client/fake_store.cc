@@ -127,7 +127,7 @@ NonEmptyString FakeStore::DoGet(const KeyType& key) const {
 }
 
 void FakeStore::DoPut(const KeyType& key, const NonEmptyString& value) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   if (!fs::exists(kDiskPath_))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::filesystem_io_error));
 
@@ -207,7 +207,7 @@ void FakeStore::DecrementReferenceCount(const std::vector<ImmutableData::Name>& 
 }
 
 void FakeStore::DoIncrement(const std::vector<ImmutableData::Name>& data_names) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   if (!fs::exists(kDiskPath_))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::filesystem_io_error));
 
@@ -243,7 +243,7 @@ void FakeStore::SetMaxDiskUsage(DiskUsage max_disk_usage) {
 DiskUsage FakeStore::GetMaxDiskUsage() const { return max_disk_usage_; }
 
 DiskUsage FakeStore::GetCurrentDiskUsage() const {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   return current_disk_usage_;
 }
 
