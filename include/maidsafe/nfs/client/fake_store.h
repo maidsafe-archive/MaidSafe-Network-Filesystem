@@ -59,10 +59,10 @@ class FakeStore {
       const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(10));
 
   template <typename Data>
-  void Put(const Data& data);
+  boost::future<void> Put(const Data& data);
 
   template <typename DataName>
-  void Delete(const DataName& data_name);
+  boost::future<void> Delete(const DataName& data_name);
 
   void IncrementReferenceCount(const std::vector<ImmutableData::Name>& data_names);
   void DecrementReferenceCount(const std::vector<ImmutableData::Name>& data_names);
@@ -86,13 +86,15 @@ class FakeStore {
                                    std::chrono::seconds(10));
 
   template <typename DataName>
-  void PutVersion(const DataName& data_name,
-                  const StructuredDataVersions::VersionName& old_version_name,
-                  const StructuredDataVersions::VersionName& new_version_name);
+  boost::future<void> PutVersion(
+      const DataName& data_name,
+      const StructuredDataVersions::VersionName& old_version_name,
+      const StructuredDataVersions::VersionName& new_version_name);
 
   template <typename DataName>
-  void DeleteBranchUntilFork(const DataName& data_name,
-                             const StructuredDataVersions::VersionName& branch_tip);
+  boost::future<void> DeleteBranchUntilFork(
+      const DataName& data_name,
+      const StructuredDataVersions::VersionName& branch_tip);
 
   void SetMaxDiskUsage(DiskUsage max_disk_usage);
 
@@ -159,30 +161,39 @@ boost::future<typename DataName::data_type> FakeStore::Get(
 }
 
 template <typename Data>
-void FakeStore::Put(const Data& data) {
+boost::future<void> FakeStore::Put(const Data& data) {
   LOG(kVerbose) << "Putting: " << HexSubstr(data.name().value) << "  "
                 << HexSubstr(data.Serialise().data);
-  asio_service_.service().post([this, data] {
+  const auto promise(std::make_shared<boost::promise<void>>());
+  asio_service_.service().post([this, data, promise] {
     try {
       DoPut(KeyType(data.name()), data.Serialise());
+      promise->set_value();
     }
     catch (const std::exception& e) {
       LOG(kWarning) << "Put failed: " << boost::diagnostic_information(e);
+      promise->set_exception(e);
     }
   });
+  return promise->get_future();
 }
 
 template <typename DataName>
-void FakeStore::Delete(const DataName& data_name) {
+boost::future<void> FakeStore::Delete(const DataName& data_name) {
   LOG(kVerbose) << "Deleting: " << HexSubstr(data_name.value);
-  asio_service_.service().post([this, data_name] {
+  const auto promise(std::make_shared<boost::promise<void>>());
+  asio_service_.service().post([this, data_name, promise] {
     try {
       DoDelete(KeyType(data_name));
+      promise->set_value();
     }
     catch (const std::exception& e) {
       LOG(kWarning) << "Delete failed: " << boost::diagnostic_information(e);
+      promise->set_exception(e);
     }
   });
+
+  return promise->get_future();
 }
 
 template <typename DataName>
@@ -256,9 +267,10 @@ FakeStore::VersionNamesFuture FakeStore::GetBranch(
 }
 
 template <typename DataName>
-void FakeStore::PutVersion(const DataName& data_name,
-                            const StructuredDataVersions::VersionName& old_version_name,
-                            const StructuredDataVersions::VersionName& new_version_name) {
+boost::future<void> FakeStore::PutVersion(
+    const DataName& data_name,
+    const StructuredDataVersions::VersionName& old_version_name,
+    const StructuredDataVersions::VersionName& new_version_name) {
   LOG(kVerbose) << "Putting version: " << HexSubstr(data_name.value) << ".  Old: "
                 << (old_version_name.id.value.IsInitialised() ?
                        (std::to_string(old_version_name.index) + "-" +
@@ -270,33 +282,41 @@ void FakeStore::PutVersion(const DataName& data_name,
     auto versions(ReadVersions(key));
     if (!versions) {
       LOG(kError) << "Failed to read versions";
-      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::uninitialised));
+      return boost::make_exceptional_future<void>(MakeError(CommonErrors::uninitialised));
     }
     versions->Put(old_version_name, new_version_name);
     WriteVersions(key, *versions);
   }
   catch (const std::exception& e) {
     LOG(kError) << "Failed putting version: " << boost::diagnostic_information(e);
+    return boost::make_exceptional_future<void>(e);
   }
+
+  return boost::make_ready_future();
 }
 
 template <typename DataName>
-void FakeStore::DeleteBranchUntilFork(const DataName& data_name,
-                                       const StructuredDataVersions::VersionName& branch_tip) {
+boost::future<void> FakeStore::DeleteBranchUntilFork(
+    const DataName& data_name,
+    const StructuredDataVersions::VersionName& branch_tip) {
   LOG(kVerbose) << "Deleting branch: " << HexSubstr(data_name.value) << ".  Tip: "
                 << branch_tip.index << "-" << HexSubstr(branch_tip.id.value);
   try {
     KeyType key(data_name);
     std::lock_guard<std::mutex> lock(mutex_);
     auto versions(ReadVersions(key));
-    if (!versions)
-      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::no_such_element));
+    if (!versions) {
+      return boost::make_exceptional_future<void>(MakeError(CommonErrors::no_such_element));
+    }
     versions->DeleteBranchUntilFork(branch_tip);
     WriteVersions(key, *versions);
   }
   catch (const std::exception& e) {
     LOG(kError) << "Failed deleting branch: " << boost::diagnostic_information(e);
+    return boost::make_exceptional_future<void>(e);
   }
+
+  return boost::make_ready_future();
 }
 
 }  // namespace nfs
