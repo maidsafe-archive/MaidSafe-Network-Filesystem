@@ -84,7 +84,7 @@ void HandleGetResult<Data>::operator()(const DataNameAndContentOrReturnCode& res
     } else if (result.return_code) {
       LOG(kWarning) << "HandleGetResult don't have a result but having a return code "
                     << result.return_code->value.what();
-      boost::throw_exception(result.return_code->value);
+      BOOST_THROW_EXCEPTION(result.return_code->value);
     } else {
       LOG(kError) << "HandleGetResult result uninitialised";
       BOOST_THROW_EXCEPTION(MakeError(CommonErrors::uninitialised));
