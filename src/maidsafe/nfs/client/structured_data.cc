@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "maidsafe/common/error.h"
+#include "maidsafe/common/serialisation/serialisation.h"
 
 #include "maidsafe/nfs/client/structured_data.pb.h"
 
@@ -46,14 +47,16 @@ StructuredData::StructuredData(const std::string& serialised_copy) : versions() 
   protobuf::StructuredData proto_structured_data;
   if (!proto_structured_data.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-  for (auto i(0); i < proto_structured_data.serialised_versions_size(); ++i)
-    versions.emplace_back(proto_structured_data.serialised_versions(i));
+  for (auto i(0); i < proto_structured_data.serialised_versions_size(); ++i) {
+    versions.push_back(ConvertFromString<StructuredDataVersions::VersionName>(
+        proto_structured_data.serialised_versions(i)));
+  }
 }
 
 std::string StructuredData::Serialise() const {
   protobuf::StructuredData proto_structured_data;
   for (const auto& version : versions)
-    proto_structured_data.add_serialised_versions(version.Serialise());
+    proto_structured_data.add_serialised_versions(ConvertToString(version));
   return proto_structured_data.SerializeAsString();
 }
 
