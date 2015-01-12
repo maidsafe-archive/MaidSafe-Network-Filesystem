@@ -128,8 +128,7 @@ std::string AvailableSizeAndReturnCode::Serialise() const {
 }
 
 bool operator==(const AvailableSizeAndReturnCode& lhs, const AvailableSizeAndReturnCode& rhs) {
-  return lhs.available_size == rhs.available_size &&
-         lhs.return_code == rhs.return_code;
+  return lhs.available_size == rhs.available_size && lhs.return_code == rhs.return_code;
 }
 
 void swap(AvailableSizeAndReturnCode& lhs, AvailableSizeAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
@@ -183,8 +182,8 @@ void swap(DataNameAndReturnCode& lhs, DataNameAndReturnCode& rhs) MAIDSAFE_NOEXC
 //============================ DataNameAndSizeAndReturnCode =======================================
 DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode() : name(), size(), return_code() {}
 
-DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(
-    nfs_vault::DataName data_name, uint64_t size_in, ReturnCode code)
+DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(nfs_vault::DataName data_name,
+                                                           uint64_t size_in, ReturnCode code)
     : name(std::move(data_name)), size(std::move(size_in)), return_code(std::move(code)) {}
 
 DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(
@@ -192,7 +191,8 @@ DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(
     : name(other.name), size(other.size), return_code(other.return_code) {}
 
 DataNameAndSizeAndReturnCode::DataNameAndSizeAndReturnCode(DataNameAndSizeAndReturnCode&& other)
-    : name(std::move(other.name)), size(std::move(other.size)),
+    : name(std::move(other.name)),
+      size(std::move(other.size)),
       return_code(std::move(other.return_code)) {}
 
 DataNameAndSizeAndReturnCode& DataNameAndSizeAndReturnCode::operator=(
@@ -232,13 +232,11 @@ void swap(DataNameAndSizeAndReturnCode& lhs, DataNameAndSizeAndReturnCode& rhs) 
 
 // ==================== DataNamesAndReturnCode =====================================================
 DataNamesAndReturnCode::DataNamesAndReturnCode(const ReturnCode& code)
-    : names(),
-      return_code(code) {}
+    : names(), return_code(code) {}
 
 DataNamesAndReturnCode::DataNamesAndReturnCode(const std::vector<nfs_vault::DataName>& data_names,
                                                const ReturnCode& code)
-    : names(),
-      return_code(code) {
+    : names(), return_code(code) {
   for (auto data_name : data_names)
     names.insert(data_name);
 }
@@ -259,8 +257,7 @@ void DataNamesAndReturnCode::AddDataName(const DataTagValue& tag_value, const Id
 }
 
 DataNamesAndReturnCode::DataNamesAndReturnCode(const std::string& serialised_copy)
-    : names(),
-      return_code() {
+    : names(), return_code() {
   protobuf::DataNamesAndReturnCode names_proto;
   if (!names_proto.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
@@ -280,7 +277,7 @@ std::string DataNamesAndReturnCode::Serialise() const {
 }
 
 bool operator==(const DataNamesAndReturnCode& lhs, const DataNamesAndReturnCode& rhs) {
-  return  lhs.return_code == rhs.return_code && lhs.names == rhs.names;
+  return lhs.return_code == rhs.return_code && lhs.names == rhs.names;
 }
 
 void swap(DataNamesAndReturnCode& lhs, DataNamesAndReturnCode& rhs) MAIDSAFE_NOEXCEPT {
@@ -435,12 +432,13 @@ DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode()
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     const DataNameAndContentOrReturnCode& other)
-        : name(other.name), content(other.content), return_code(other.return_code) {}
+    : name(other.name), content(other.content), return_code(other.return_code) {}
 
 DataNameAndContentOrReturnCode::DataNameAndContentOrReturnCode(
     DataNameAndContentOrReturnCode&& other)
-        : name(std::move(other.name)), content(std::move(other.content)),
-          return_code(std::move(other.return_code)) {}
+    : name(std::move(other.name)),
+      content(std::move(other.content)),
+      return_code(std::move(other.return_code)) {}
 
 DataNameAndContentOrReturnCode& DataNameAndContentOrReturnCode::operator=(
     DataNameAndContentOrReturnCode other) {
@@ -572,18 +570,16 @@ void swap(StructuredDataNameAndContentOrReturnCode& lhs,
 }
 
 // ========================== TipOfTreeAndReturnCode ===================================
-TipOfTreeAndReturnCode::TipOfTreeAndReturnCode()
-    : tip_of_tree(), return_code() {}
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode() : tip_of_tree(), return_code() {}
 
 TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(const ReturnCode return_code_in)
     : tip_of_tree(), return_code(return_code_in) {}
 
-TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(
-    const TipOfTreeAndReturnCode& other)
-        : tip_of_tree(other.tip_of_tree), return_code(other.return_code) {}
+TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(const TipOfTreeAndReturnCode& other)
+    : tip_of_tree(other.tip_of_tree), return_code(other.return_code) {}
 
 TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(TipOfTreeAndReturnCode&& other)
-        : tip_of_tree(std::move(other.tip_of_tree)), return_code(std::move(other.return_code)) {}
+    : tip_of_tree(std::move(other.tip_of_tree)), return_code(std::move(other.return_code)) {}
 
 TipOfTreeAndReturnCode& TipOfTreeAndReturnCode::operator=(TipOfTreeAndReturnCode other) {
   swap(*this, other);
@@ -596,8 +592,8 @@ TipOfTreeAndReturnCode::TipOfTreeAndReturnCode(const std::string& serialised_cop
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   if (proto_copy.has_serialised_tip_of_tree()) {
-    tip_of_tree.reset(StructuredDataVersions::VersionName(
-                          proto_copy.serialised_tip_of_tree()));
+    tip_of_tree.reset(ConvertFromString<StructuredDataVersions::VersionName>(
+        proto_copy.serialised_tip_of_tree()));
   }
 
   return_code = ReturnCode(proto_copy.serialised_return_code());
@@ -607,7 +603,7 @@ std::string TipOfTreeAndReturnCode::Serialise() const {
   protobuf::TipOfTreeAndReturnCode proto_copy;
 
   if (tip_of_tree)
-    proto_copy.set_serialised_tip_of_tree(tip_of_tree->Serialise());
+    proto_copy.set_serialised_tip_of_tree(ConvertToString(*tip_of_tree));
 
   proto_copy.set_serialised_return_code(return_code.Serialise());
   return proto_copy.SerializeAsString();
@@ -632,15 +628,17 @@ void swap(TipOfTreeAndReturnCode& lhs, TipOfTreeAndReturnCode& rhs) MAIDSAFE_NOE
 // =============== DataNameAndSizeAndSpaceAndReturnCode ===========================================
 DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
     const DataNameAndSizeAndSpaceAndReturnCode& data)
-    : name(data.name), size(data.size),
-      available_space(data.available_space), return_code(data.return_code) {}
+    : name(data.name),
+      size(data.size),
+      available_space(data.available_space),
+      return_code(data.return_code) {}
 
 DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode()
     : name(), size(), available_space(), return_code() {}
 
 DataNameAndSizeAndSpaceAndReturnCode::DataNameAndSizeAndSpaceAndReturnCode(
-    const DataTagValue& type_in, const Identity& name_in,
-    uint64_t size_in, int64_t available_space_in, const nfs_client::ReturnCode& code_in)
+    const DataTagValue& type_in, const Identity& name_in, uint64_t size_in,
+    int64_t available_space_in, const nfs_client::ReturnCode& code_in)
     : name(nfs_vault::DataName(type_in, name_in)),
       size(size_in),
       available_space(available_space_in),
