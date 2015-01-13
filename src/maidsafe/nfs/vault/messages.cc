@@ -20,6 +20,7 @@
 
 #include <cstdint>
 
+#include "maidsafe/common/serialisation/serialisation.h"
 #include "maidsafe/nfs/utils.h"
 #include "maidsafe/nfs/vault/messages.pb.h"
 
@@ -49,11 +50,11 @@ AvailableSize& AvailableSize::operator=(AvailableSize other) {
 
 AvailableSize::AvailableSize(const std::string& serialised_copy)
     : available_size([&serialised_copy]() {
-                       protobuf::AvailableSize proto_size;
-                       if (!proto_size.ParseFromString(serialised_copy))
-                         BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-                       return proto_size.size();
-                     }()) {}
+        protobuf::AvailableSize proto_size;
+        if (!proto_size.ParseFromString(serialised_copy))
+          BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+        return proto_size.size();
+      }()) {}
 
 std::string AvailableSize::Serialise() const {
   protobuf::AvailableSize proto_size;
@@ -76,8 +77,7 @@ DiffSize::DiffSize(int64_t size) : diff_size(size) {}
 
 DiffSize::DiffSize(const DiffSize& other) : diff_size(other.diff_size) {}
 
-DiffSize::DiffSize(DiffSize&& other)
-    : diff_size(std::move(other.diff_size)) {}
+DiffSize::DiffSize(DiffSize&& other) : diff_size(std::move(other.diff_size)) {}
 
 DiffSize& DiffSize::operator=(DiffSize other) {
   swap(*this, other);
@@ -86,11 +86,11 @@ DiffSize& DiffSize::operator=(DiffSize other) {
 
 DiffSize::DiffSize(const std::string& serialised_copy)
     : diff_size([&serialised_copy]() {
-                       protobuf::DiffSize proto_size;
-                       if (!proto_size.ParseFromString(serialised_copy))
-                         BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
-                       return proto_size.size();
-                     }()) {}
+        protobuf::DiffSize proto_size;
+        if (!proto_size.ParseFromString(serialised_copy))
+          BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+        return proto_size.size();
+      }()) {}
 
 std::string DiffSize::Serialise() const {
   protobuf::DiffSize proto_size;
@@ -98,9 +98,7 @@ std::string DiffSize::Serialise() const {
   return proto_size.SerializeAsString();
 }
 
-bool operator==(const DiffSize& lhs, const DiffSize& rhs) {
-  return lhs.diff_size == rhs.diff_size;
-}
+bool operator==(const DiffSize& lhs, const DiffSize& rhs) { return lhs.diff_size == rhs.diff_size; }
 
 void swap(DiffSize& lhs, DiffSize& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
@@ -154,23 +152,20 @@ void swap(DataName& lhs, DataName& rhs) MAIDSAFE_NOEXCEPT {
 }
 
 // ==================== DataNames ==================================
-DataNames::DataNames(const std::vector<DataName>& data_names)
-    : data_names_(data_names) {}
+DataNames::DataNames(const std::vector<DataName>& data_names) : data_names_(data_names) {}
 
 DataNames::DataNames() : data_names_() {}
 
 DataNames::DataNames(const DataNames& other) : data_names_(other.data_names_) {}
 
-DataNames::DataNames(DataNames&& other)
-    : data_names_(std::move(other.data_names_)) {}
+DataNames::DataNames(DataNames&& other) : data_names_(std::move(other.data_names_)) {}
 
 DataNames& DataNames::operator=(DataNames other) {
   swap(*this, other);
   return *this;
 }
 
-DataNames::DataNames(const std::string& serialised_copy)
-    : data_names_() {
+DataNames::DataNames(const std::string& serialised_copy) : data_names_() {
   protobuf::DataNames proto_copy;
   if (!proto_copy.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
@@ -197,7 +192,7 @@ bool operator==(const DataNames& lhs, const DataNames& rhs) {
     return false;
   for (const auto& data_name : lhs.data_names_) {
     if (std::find(std::begin(rhs.data_names_), std::end(rhs.data_names_), data_name) ==
-            std::end(rhs.data_names_))
+        std::end(rhs.data_names_))
       return false;
   }
   return true;
@@ -233,13 +228,14 @@ DataNameAndVersion::DataNameAndVersion(const std::string& serialised_copy)
   if (!proto_copy.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name = DataName(proto_copy.serialised_data_name());
-  version_name = StructuredDataVersions::VersionName(proto_copy.serialised_version_name());
+  version_name =
+      ConvertFromString<StructuredDataVersions::VersionName>(proto_copy.serialised_version_name());
 }
 
 std::string DataNameAndVersion::Serialise() const {
   protobuf::DataNameAndVersion proto_copy;
   proto_copy.set_serialised_data_name(data_name.Serialise());
-  proto_copy.set_serialised_version_name(version_name.Serialise());
+  proto_copy.set_serialised_version_name(ConvertToString(version_name));
   return proto_copy.SerializeAsString();
 }
 
@@ -258,11 +254,10 @@ void swap(DataNameAndVersion& lhs, DataNameAndVersion& rhs) MAIDSAFE_NOEXCEPT {
 DataNameOldNewVersion::DataNameOldNewVersion()
     : data_name(), old_version_name(), new_version_name() {}
 
-DataNameOldNewVersion::DataNameOldNewVersion(
-    const DataName& name, const StructuredDataVersions::VersionName& old_version,
-    const StructuredDataVersions::VersionName& new_version)
-        : data_name(name), old_version_name(old_version),
-          new_version_name(new_version) {}
+DataNameOldNewVersion::DataNameOldNewVersion(const DataName& name,
+                                             const StructuredDataVersions::VersionName& old_version,
+                                             const StructuredDataVersions::VersionName& new_version)
+    : data_name(name), old_version_name(old_version), new_version_name(new_version) {}
 
 DataNameOldNewVersion::DataNameOldNewVersion(const DataNameOldNewVersion& other)
     : data_name(other.data_name),
@@ -286,17 +281,18 @@ DataNameOldNewVersion::DataNameOldNewVersion(const std::string& serialised_copy)
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name = DataName(proto_copy.serialised_data_name());
   if (proto_copy.has_serialised_old_version_name())
-    old_version_name = StructuredDataVersions::VersionName(
-                           proto_copy.serialised_old_version_name());
-  new_version_name = StructuredDataVersions::VersionName(proto_copy.serialised_new_version_name());
+    old_version_name = ConvertFromString<StructuredDataVersions::VersionName>(
+        proto_copy.serialised_old_version_name());
+  new_version_name = ConvertFromString<StructuredDataVersions::VersionName>(
+      proto_copy.serialised_new_version_name());
 }
 
 std::string DataNameOldNewVersion::Serialise() const {
   protobuf::DataNameOldNewVersion proto_copy;
   proto_copy.set_serialised_data_name(data_name.Serialise());
   if (old_version_name.id->IsInitialised())
-    proto_copy.set_serialised_old_version_name(old_version_name.Serialise());
-  proto_copy.set_serialised_new_version_name(new_version_name.Serialise());
+    proto_copy.set_serialised_old_version_name(ConvertToString(old_version_name));
+  proto_copy.set_serialised_new_version_name(ConvertToString(new_version_name));
   return proto_copy.SerializeAsString();
 }
 
@@ -317,16 +313,22 @@ void swap(DataNameOldNewVersion& lhs, DataNameOldNewVersion& rhs) MAIDSAFE_NOEXC
 VersionTreeCreation::VersionTreeCreation(const DataName& name,
                                          const StructuredDataVersions::VersionName& version,
                                          uint32_t max_versions_in, uint32_t max_branches_in)
-    : data_name(name), version_name(version), max_versions(max_versions_in),
+    : data_name(name),
+      version_name(version),
+      max_versions(max_versions_in),
       max_branches(max_branches_in) {}
 
 VersionTreeCreation::VersionTreeCreation(const VersionTreeCreation& other)
-    : data_name(other.data_name), version_name(other.version_name),
-      max_versions(other.max_versions), max_branches(other.max_branches) {}
+    : data_name(other.data_name),
+      version_name(other.version_name),
+      max_versions(other.max_versions),
+      max_branches(other.max_branches) {}
 
 VersionTreeCreation::VersionTreeCreation(VersionTreeCreation&& other)
-    : data_name(std::move(other.data_name)), version_name(std::move(other.version_name)),
-      max_versions(std::move(other.max_versions)), max_branches(std::move(other.max_branches)) {}
+    : data_name(std::move(other.data_name)),
+      version_name(std::move(other.version_name)),
+      max_versions(std::move(other.max_versions)),
+      max_branches(std::move(other.max_branches)) {}
 
 VersionTreeCreation& VersionTreeCreation::operator=(VersionTreeCreation other) {
   swap(*this, other);
@@ -339,7 +341,8 @@ VersionTreeCreation::VersionTreeCreation(const std::string& serialised_copy)
   if (!proto_copy.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
   data_name = DataName(proto_copy.serialised_data_name());
-  version_name = StructuredDataVersions::VersionName(proto_copy.serialised_version_name());
+  version_name =
+      ConvertFromString<StructuredDataVersions::VersionName>(proto_copy.serialised_version_name());
   max_versions = proto_copy.max_versions();
   max_branches = proto_copy.max_branches();
 }
@@ -347,7 +350,7 @@ VersionTreeCreation::VersionTreeCreation(const std::string& serialised_copy)
 std::string VersionTreeCreation::Serialise() const {
   protobuf::VersionTreeCreation proto_copy;
   proto_copy.set_serialised_data_name(data_name.Serialise());
-  proto_copy.set_serialised_version_name(version_name.Serialise());
+  proto_copy.set_serialised_version_name(ConvertToString(version_name));
   proto_copy.set_max_versions(max_versions);
   proto_copy.set_max_branches(max_branches);
   return proto_copy.SerializeAsString();
@@ -402,11 +405,11 @@ std::string DataNameAndContent::Serialise() const {
 }
 
 bool operator==(const DataNameAndContent& lhs, const DataNameAndContent& rhs) {
-//   LOG(kVerbose) << "DataNameAndContent comparation : "
-//                 << "lhs.name : " << HexSubstr(lhs.name.Serialise())
-//                 << " ; rhs.name : " << HexSubstr(rhs.name.Serialise())
-//                 << " ; lhs.content : " << HexSubstr(lhs.content.string())
-//                 << " ; rhs.content : " << HexSubstr(rhs.content.string());
+  //   LOG(kVerbose) << "DataNameAndContent comparation : "
+  //                 << "lhs.name : " << HexSubstr(lhs.name.Serialise())
+  //                 << " ; rhs.name : " << HexSubstr(rhs.name.Serialise())
+  //                 << " ; lhs.content : " << HexSubstr(lhs.content.string())
+  //                 << " ; rhs.content : " << HexSubstr(rhs.content.string());
   return lhs.name == rhs.name && lhs.content == rhs.content;
 }
 
@@ -417,7 +420,7 @@ void swap(DataNameAndContent& lhs, DataNameAndContent& rhs) MAIDSAFE_NOEXCEPT {
 }
 // ========================== Content ==============================================================
 
-Content::Content(const std::string &data_in) : data(data_in) {}
+Content::Content(const std::string& data_in) : data(data_in) {}
 
 Content::Content() : data() {}
 
@@ -425,18 +428,14 @@ Content::Content(const Content& other) : data(other.data) {}
 
 Content::Content(Content&& other) : data(std::move(other.data)) {}
 
-std::string Content::Serialise() const {
-  return data;
-}
+std::string Content::Serialise() const { return data; }
 
 Content& Content::operator=(Content other) {
   swap(*this, other);
   return *this;
 }
 
-bool operator==(const Content& lhs, const Content& rhs) {
-  return lhs.data == rhs.data;
-}
+bool operator==(const Content& lhs, const Content& rhs) { return lhs.data == rhs.data; }
 
 void swap(Content& lhs, Content& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
@@ -535,8 +534,8 @@ void swap(DataNameAndCost& lhs, DataNameAndCost& rhs) MAIDSAFE_NOEXCEPT {
 
 DataNameAndSize::DataNameAndSize() : name(), size(0) {}
 
-DataNameAndSize::DataNameAndSize(DataTagValue type_in, const Identity& name_in,
-    int32_t size_in) : name(type_in, name_in), size(size_in) {}
+DataNameAndSize::DataNameAndSize(DataTagValue type_in, const Identity& name_in, int32_t size_in)
+    : name(type_in, name_in), size(size_in) {}
 
 DataNameAndSize::DataNameAndSize(const DataNameAndSize& other)
     : name(other.name), size(other.size) {}
@@ -576,28 +575,28 @@ void swap(DataNameAndSize& lhs, DataNameAndSize& rhs) MAIDSAFE_NOEXCEPT {
 
 // ========================== DataNameAndContentOrCheckResult ======================================
 
-DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
-    const DataTagValue& type_in, const Identity& name_in, const NonEmptyString& content_in)
-        : name(type_in, name_in), content(content_in), check_result() {}
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(const DataTagValue& type_in,
+                                                                 const Identity& name_in,
+                                                                 const NonEmptyString& content_in)
+    : name(type_in, name_in), content(content_in), check_result() {}
 
-DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
-    const DataTagValue& type_in, const Identity& name_in, const CheckResult& check_result_in)
-        : name(type_in, name_in), content(), check_result(check_result_in) {}
+DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(const DataTagValue& type_in,
+                                                                 const Identity& name_in,
+                                                                 const CheckResult& check_result_in)
+    : name(type_in, name_in), content(), check_result(check_result_in) {}
 
 DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult()
     : name(), content(), check_result() {}
 
 DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
     DataNameAndContentOrCheckResult&& other)
-        : name(std::move(other.name)),
-          content(std::move(other.content)),
-          check_result(std::move(other.check_result)) {}
+    : name(std::move(other.name)),
+      content(std::move(other.content)),
+      check_result(std::move(other.check_result)) {}
 
 DataNameAndContentOrCheckResult::DataNameAndContentOrCheckResult(
     const DataNameAndContentOrCheckResult& other)
-        : name(other.name),
-          content(other.content),
-          check_result(other.check_result) {}
+    : name(other.name), content(other.content), check_result(other.check_result) {}
 
 DataNameAndContentOrCheckResult& DataNameAndContentOrCheckResult::operator=(
     DataNameAndContentOrCheckResult other) {
@@ -681,9 +680,7 @@ PmidHealth& PmidHealth::operator=(PmidHealth other) {
   return *this;
 }
 
-std::string PmidHealth::Serialise() const {
-  return serialised_pmid_health;
-}
+std::string PmidHealth::Serialise() const { return serialised_pmid_health; }
 
 bool operator==(const PmidHealth& lhs, const PmidHealth& rhs) {
   return lhs.serialised_pmid_health == rhs.serialised_pmid_health;
