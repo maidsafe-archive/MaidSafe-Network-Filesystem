@@ -691,6 +691,54 @@ void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.serialised_pmid_health, rhs.serialised_pmid_health);
 }
 
+// ================================= MpidMessageAlert =============================================
+
+MpidMessageAlert::MpidMessageAlert(const Identity& id_in, const Identity& parent_id_in,
+                                   const MessageHeaderType& signed_message_head_in)
+    : id(id_in), parent_id(parent_id_in), signed_message_head(signed_message_head_in) {}
+
+MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
+  protobuf::MpidMessageAlert proto;
+  if (!proto.ParseFromString(serialised_copy))
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+
+  id = Identity(proto.id());
+  parent_id = Identity(proto.parent_id());
+  signed_message_head = MessageHeaderType(proto.signed_message_head());
+}
+
+MpidMessageAlert::MpidMessageAlert(const MpidMessageAlert& other)
+    : id(other.id), parent_id(other.parent_id), signed_message_head(other.signed_message_head) {}
+
+MpidMessageAlert::MpidMessageAlert(MpidMessageAlert&& other)
+    : id(std::move(other.id)), parent_id(std::move(other.parent_id)),
+      signed_message_head(std::move(other.signed_message_head)) {}
+
+MpidMessageAlert& MpidMessageAlert::operator=(MpidMessageAlert other) {
+  swap(*this, other);
+  return *this;
+}
+
+std::string MpidMessageAlert::Serialise() {
+  protobuf::MpidMessageAlert proto;
+  proto.set_id(id.string());
+  proto.set_parent_id(parent_id.string());
+  proto.set_signed_message_head(signed_message_head.string());
+  return proto.SerializeAsString();
+}
+
+bool operator==(const MpidMessageAlert& lhs, const MpidMessageAlert& rhs) {
+  return (lhs.id == rhs.id) && (lhs.parent_id == rhs.parent_id) &&
+         (lhs.signed_message_head == rhs.signed_message_head);
+}
+
+void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.id, rhs.id);
+  swap(lhs.parent_id, rhs.parent_id);
+  swap(lhs.signed_message_head, rhs.signed_message_head);
+}
+
 }  // namespace nfs_vault
 
 }  // namespace maidsafe

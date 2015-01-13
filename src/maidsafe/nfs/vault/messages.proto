@@ -85,3 +85,9 @@ message PmidHealth {
   required bytes serialised_pmid_health = 1;
 }
 
+message MpidMessageAlert {
+  required bytes id = 1;
+  required bytes parent_id = 2;
+  required bytes signed_message_head = 3;
+}
+

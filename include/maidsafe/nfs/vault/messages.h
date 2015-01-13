@@ -28,6 +28,7 @@
 #include "maidsafe/common/types.h"
 #include "maidsafe/common/data_types/data_type_values.h"
 #include "maidsafe/common/data_types/structured_data_versions.h"
+#include "maidsafe/common/bounded_string.h"
 
 #include "maidsafe/nfs/vault/account_creation.h"
 #include "maidsafe/nfs/vault/account_removal.h"
@@ -37,6 +38,9 @@
 namespace maidsafe {
 
 namespace nfs_vault {
+
+const unsigned int kMaxHeaderSize = 128;
+using  MessageHeaderType = detail::BoundedString<0, kMaxHeaderSize>;
 
 // ========================== Empty ================================================================
 
@@ -373,6 +377,25 @@ struct PmidHealth {
 
 bool operator==(const PmidHealth& lhs, const PmidHealth& rhs);
 void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT;
+
+// ================================= MpidMessageAlert =============================================
+
+struct MpidMessageAlert {
+  MpidMessageAlert(const Identity& id_in, const Identity& parent_id_in,
+                   const MessageHeaderType& signed_message_head_in);
+  explicit MpidMessageAlert(const std::string& serialised_copy);
+  MpidMessageAlert(const MpidMessageAlert& other);
+  MpidMessageAlert(MpidMessageAlert&& other);
+  MpidMessageAlert& operator=(MpidMessageAlert other);
+
+  std::string Serialise();
+
+  Identity id, parent_id;
+  MessageHeaderType signed_message_head;
+};
+
+bool operator==(const MpidMessageAlert& lhs, const MpidMessageAlert& rhs);
+void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_vault
 
