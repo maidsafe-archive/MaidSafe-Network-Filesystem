@@ -42,7 +42,9 @@ namespace maidsafe {
 namespace nfs_vault {
 
 const unsigned int kMaxHeaderSize = 128;
+const unsigned int kMaxBodySize = 1024 * 1024;
 using  MessageHeaderType = detail::BoundedString<0, kMaxHeaderSize>;
+using  MessageBodyType = detail::BoundedString<0, kMaxBodySize>;
 
 // ========================== Empty ================================================================
 
@@ -384,8 +386,7 @@ void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT;
 
 struct MpidMessageAlert {
   MpidMessageAlert();
-  MpidMessageAlert(const passport::PublicMpid::Name& sender_in, const Identity& id_in,
-                   const Identity& parent_id_in,
+  MpidMessageAlert(const passport::PublicMpid::Name& sender_in, int32_t id_in, int32_t parent_id_in,
                    const MessageHeaderType& signed_header_in);
   explicit MpidMessageAlert(const std::string& serialised_copy);
   MpidMessageAlert(const MpidMessageAlert& other);
@@ -395,7 +396,7 @@ struct MpidMessageAlert {
   std::string Serialise() const;
 
   passport::PublicMpid::Name sender;
-  Identity id, parent_id;
+  int32_t id, parent_id;
   MessageHeaderType signed_header;
 };
 
@@ -405,9 +406,8 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT;
 // ================================= MpidMessage ==================================================
 
 struct MpidMessage {
-  MpidMessage(const passport::PublicMpid::Name& receiver_in, const Identity& id_in,
-              const Identity& parent_id_in, const MessageHeaderType& signed_header_in,
-              const std::string& signed_body_in);
+  MpidMessage(const passport::PublicMpid::Name& receiver_in, int32_t id_in, int32_t parent_id_in,
+              const MessageHeaderType& signed_header_in, const std::string& signed_body_in);
   explicit MpidMessage(const std::string& serialised_copy);
   MpidMessage(const MpidMessage& other);
   MpidMessage(MpidMessage&& other);
@@ -416,9 +416,9 @@ struct MpidMessage {
   std::string Serialise() const;
 
   passport::PublicMpid::Name receiver;
-  Identity id, parent_id;
+  int32_t id, parent_id;
   MessageHeaderType signed_header;
-  std::string signed_body;
+  MessageBodyType signed_body;
 };
 
 bool operator==(const MpidMessage& lhs, const MpidMessage& rhs);

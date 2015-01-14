@@ -696,9 +696,8 @@ void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT {
 MpidMessageAlert::MpidMessageAlert()
     : id(), parent_id(), signed_header() {}
 
-MpidMessageAlert::MpidMessageAlert(const passport::PublicMpid::Name& sender_in,
-                                   const Identity& id_in, const Identity& parent_id_in,
-                                   const MessageHeaderType& signed_header_in)
+MpidMessageAlert::MpidMessageAlert(const passport::PublicMpid::Name& sender_in, int32_t id_in,
+                                   int32_t parent_id_in, const MessageHeaderType& signed_header_in)
     : sender(sender_in), id(id_in), parent_id(parent_id_in), signed_header(signed_header_in) {}
 
 MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
@@ -707,8 +706,8 @@ MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   sender = passport::PublicMpid::Name(Identity(proto.sender()));
-  id = Identity(proto.id());
-  parent_id = Identity(proto.parent_id());
+  id = proto.id();
+  parent_id = proto.parent_id();
   signed_header = MessageHeaderType(proto.signed_header());
 }
 
@@ -728,8 +727,8 @@ MpidMessageAlert& MpidMessageAlert::operator=(MpidMessageAlert other) {
 std::string MpidMessageAlert::Serialise() const {
   protobuf::MpidMessageAlert proto;
   proto.set_sender(sender->string());
-  proto.set_id(id.string());
-  proto.set_parent_id(parent_id.string());
+  proto.set_id(id);
+  proto.set_parent_id(parent_id);
   proto.set_signed_header(signed_header.string());
   return proto.SerializeAsString();
 }
@@ -749,11 +748,11 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
 
 // ================================= MpidMessage ==================================================
 
-MpidMessage::MpidMessage(const passport::PublicMpid::Name& receiver_in, const Identity& id_in,
-                         const Identity& parent_id_in, const MessageHeaderType& signed_header_in,
+MpidMessage::MpidMessage(const passport::PublicMpid::Name& receiver_in, int32_t id_in,
+                         int32_t parent_id_in, const MessageHeaderType& signed_header_in,
                          const std::string& signed_body_in)
-    : receiver(receiver_in), id(id_in), parent_id(parent_id_in), signed_header(signed_header_in),
-      signed_body(signed_body_in) {}
+    : receiver(receiver_in), id(id_in), parent_id(parent_id_in),
+      signed_header(signed_header_in), signed_body(signed_body_in) {}
 
 MpidMessage::MpidMessage(const std::string& serialised_copy) {
   protobuf::MpidMessage proto;
@@ -761,10 +760,10 @@ MpidMessage::MpidMessage(const std::string& serialised_copy) {
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   receiver = passport::PublicMpid::Name(Identity(proto.receiver()));
-  id = Identity(proto.id());
-  parent_id = Identity(proto.parent_id());
+  id = proto.id();
+  parent_id = proto.parent_id();
   signed_header = MessageHeaderType(proto.signed_header());
-  signed_body = proto.signed_body();
+  signed_body = MessageBodyType(proto.signed_body());
 }
 
 MpidMessage::MpidMessage(const MpidMessage& other)
@@ -784,10 +783,10 @@ MpidMessage& MpidMessage::operator=(MpidMessage other) {
 std::string MpidMessage::Serialise() const {
   protobuf::MpidMessage proto;
   proto.set_receiver(receiver->string());
-  proto.set_id(id.string());
-  proto.set_parent_id(parent_id.string());
+  proto.set_id(id);
+  proto.set_parent_id(parent_id);
   proto.set_signed_header(signed_header.string());
-  proto.set_signed_body(signed_body);
+  proto.set_signed_body(signed_body.string());
   return proto.SerializeAsString();
 }
 
