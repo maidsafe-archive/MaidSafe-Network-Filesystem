@@ -48,7 +48,7 @@ TEST_F(ServiceTest, BEH_All) {
   passport::Anmaid anmaid;
   passport::Maid maid(anmaid);
   routing::Routing routing(maid);
-  AsioService asio_service(2);
+  BoostAsioService asio_service(2);
   typedef nfs_client::DataGetterService::GetResponse GetResponse;
   nfs_client::DataGetterDispatcher dispatcher(routing);
   routing::Timer<typename GetResponse::Contents> get_timer(asio_service);

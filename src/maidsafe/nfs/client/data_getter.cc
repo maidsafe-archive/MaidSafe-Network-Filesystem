@@ -25,7 +25,7 @@ namespace maidsafe {
 
 namespace nfs_client {
 
-DataGetter::DataGetter(AsioService& asio_service, routing::Routing& routing)
+DataGetter::DataGetter(BoostAsioService& asio_service, routing::Routing& routing)
     : get_timer_(asio_service),
       get_versions_timer_(asio_service),
       get_branch_timer_(asio_service),
