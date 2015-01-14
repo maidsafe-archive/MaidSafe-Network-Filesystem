@@ -1,0 +1,1 @@
+Action:MessageAlert            Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
