@@ -30,6 +30,8 @@
 #include "maidsafe/common/data_types/structured_data_versions.h"
 #include "maidsafe/common/bounded_string.h"
 
+#include "maidsafe/passport/types.h"
+
 #include "maidsafe/nfs/vault/account_creation.h"
 #include "maidsafe/nfs/vault/account_removal.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
@@ -381,21 +383,46 @@ void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT;
 // ================================= MpidMessageAlert =============================================
 
 struct MpidMessageAlert {
-  MpidMessageAlert(const Identity& id_in, const Identity& parent_id_in,
-                   const MessageHeaderType& signed_message_head_in);
+  MpidMessageAlert();
+  MpidMessageAlert(const passport::PublicMpid::Name& sender_in, const Identity& id_in,
+                   const Identity& parent_id_in,
+                   const MessageHeaderType& signed_header_in);
   explicit MpidMessageAlert(const std::string& serialised_copy);
   MpidMessageAlert(const MpidMessageAlert& other);
   MpidMessageAlert(MpidMessageAlert&& other);
   MpidMessageAlert& operator=(MpidMessageAlert other);
 
-  std::string Serialise();
+  std::string Serialise() const;
 
+  passport::PublicMpid::Name sender;
   Identity id, parent_id;
-  MessageHeaderType signed_message_head;
+  MessageHeaderType signed_header;
 };
 
 bool operator==(const MpidMessageAlert& lhs, const MpidMessageAlert& rhs);
 void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT;
+
+// ================================= MpidMessage ==================================================
+
+struct MpidMessage {
+  MpidMessage(const passport::PublicMpid::Name& receiver_in, const Identity& id_in,
+              const Identity& parent_id_in, const MessageHeaderType& signed_header_in,
+              const std::string& signed_body_in);
+  explicit MpidMessage(const std::string& serialised_copy);
+  MpidMessage(const MpidMessage& other);
+  MpidMessage(MpidMessage&& other);
+  MpidMessage& operator=(MpidMessage other);
+
+  std::string Serialise() const;
+
+  passport::PublicMpid::Name receiver;
+  Identity id, parent_id;
+  MessageHeaderType signed_header;
+  std::string signed_body;
+};
+
+bool operator==(const MpidMessage& lhs, const MpidMessage& rhs);
+void swap(MpidMessage& lhs, MpidMessage& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_vault
 
