@@ -16,7 +16,7 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "maidsafe/nfs/tests/maid_node_nfs_test.h"
+#include "maidsafe/nfs/tests/maid_client_test.h"
 
 namespace maidsafe {
 
@@ -24,7 +24,7 @@ namespace nfs {
 
 namespace test {
 
-TEST_F(MaidNodeNfsTest, FUNC_PopulateLengthyTree) {
+TEST_F(MaidClientTest, FUNC_PopulateLengthyTree) {
   VersionTreeTest(100, 1, 1500, 256);
   VersionTreeTest(15000, 1, 14580, 128);
   VersionTreeTest(100, 1, 20000, 128);

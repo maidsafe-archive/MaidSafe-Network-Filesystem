@@ -76,9 +76,9 @@ class MaidNodeDispatcher {
                                         const StructuredDataVersions::VersionName& branch_tip);
 
   void SendCreateAccountRequest(routing::TaskId task_id,
-                                const nfs_vault::AccountCreation& account_creation);
+                                const nfs_vault::MaidAccountCreation& account_creation);
 
-  void SendRemoveAccountRequest(const nfs_vault::AccountRemoval& account_removal);
+  void SendRemoveAccountRequest(const nfs_vault::MaidAccountRemoval& account_removal);
 
  private:
   MaidNodeDispatcher();

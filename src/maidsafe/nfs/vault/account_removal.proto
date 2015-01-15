@@ -20,8 +20,14 @@ option optimize_for = LITE_RUNTIME;
 
 package maidsafe.nfs_vault.protobuf;
 
-message AccountRemoval {
+message MaidAccountRemoval {
   required bytes random_data = 1;
   required bytes public_anmaid_name = 2;
+  required bytes signature = 3;
+}
+
+message MpidAccountRemoval {
+  required bytes random_data = 1;
+  required bytes public_anmpid_name = 2;
   required bytes signature = 3;
 }

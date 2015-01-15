@@ -102,7 +102,7 @@ template <typename DataName>
 boost::future<typename DataName::data_type> DataGetter::Get(
     const DataName& data_name,
     const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Get " << HexSubstr(data_name.value);
+  LOG(kVerbose) << "MaidClient Get " << HexSubstr(data_name.value);
   auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
   get_handler_.Get(data_name, promise, timeout);
   return promise->get_future();

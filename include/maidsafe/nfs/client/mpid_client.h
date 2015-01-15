@@ -16,8 +16,8 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#ifndef MAIDSAFE_NFS_CLIENT_MPID_NODE_NFS_H_
-#define MAIDSAFE_NFS_CLIENT_MPID_NODE_NFS_H_
+#ifndef MAIDSAFE_NFS_CLIENT_MPID_CLIENT_H_
+#define MAIDSAFE_NFS_CLIENT_MPID_CLIENT_H_
 
 #include <functional>
 #include <memory>
@@ -55,21 +55,39 @@ namespace maidsafe {
 
 namespace nfs_client {
 
-class MpidNodeNfs : public std::enable_shared_from_this<MpidNodeNfs>  {
+class MpidClient : public std::enable_shared_from_this<MpidClient>  {
  public:
-  static std::shared_ptr<MpidNodeNfs> MakeShared(const passport::MpidAndSigner& mpid_and_signer);
+   // Logging in for already existing mpid accounts
+  static std::shared_ptr<MpidClient> MakeShared(const passport::Mpid& mpid);
+  // Creates mpid account and logs in. Throws on failure to create account.
+  static std::shared_ptr<MpidClient> MakeShared(const passport::MpidAndSigner& mpid_and_signer);
   // Disconnects from network and all unfinished tasks will be cancelled
   void Stop();
+
+  template <typename DataName>
+  boost::future<typename DataName::data_type> Get(
+      const DataName& data_name,
+      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(120));
 
  private:
 //  typedef std::function<void(const AlertOrReturnCode&)> AlertFunctor;
 //  typedef std::function<void(const ContentOrReturnCode&)> GetFunctor;
 
-  explicit MpidNodeNfs(const passport::Mpid& mpid);
+  explicit MpidClient(const passport::Mpid& mpid);
 
-  MpidNodeNfs(const MpidNodeNfs&);
-  MpidNodeNfs(MpidNodeNfs&&);
-  MpidNodeNfs& operator=(MpidNodeNfs);
+  MpidClient(const MpidClient&);
+  MpidClient(MpidClient&&);
+  MpidClient& operator=(MpidClient);
+
+  void Init(const passport::MpidAndSigner& mpid_and_signer);
+  void Init();
+  void InitRouting();
+
+  void CreateAccount(const passport::PublicMpid& public_mpid,
+                     const passport::PublicAnmpid& public_anmpid);
+
+  routing::Functors InitialiseRoutingCallbacks();
+  void OnNetworkStatusChange(int updated_network_health);
 
   template <typename T>
   void OnMessageReceived(const T& routing_message);
@@ -80,40 +98,40 @@ class MpidNodeNfs : public std::enable_shared_from_this<MpidNodeNfs>  {
   const passport::Mpid kMpid_;
   AsioService asio_service_;
 //  MpidNodeService::RpcTimers rpc_timers_;
+  std::mutex network_health_mutex_;
+  std::condition_variable network_health_condition_variable_;
+  int network_health_;
+//  OnNetworkHealthChange network_health_change_signal_;
+  std::unique_ptr<routing::Routing> routing_;
+  nfs::detail::PublicPmidHelper public_pmid_helper_;
 //  MpidNodeDispatcher dispatcher_;
 //  nfs::Service<MpidNodeService> service_;
 //  GetHandler<MpidNodeDispatcher> get_handler_;
 };
 
+// ==================== Implementation =============================================================
+template <typename DataName>
+boost::future<typename DataName::data_type> MpidClient::Get(
+    const DataName& data_name,
+    const std::chrono::steady_clock::duration& /*timeout*/) {
+  LOG(kVerbose) << "MpidClient Get " << HexSubstr(data_name.value);
+  auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
+//  get_handler_.Get(data_name, promise, timeout);
+  return promise->get_future();
+}
 
 template <typename T>
-void MpidNodeNfs::OnMessageReceived(const T& routing_message) {
+void MpidClient::OnMessageReceived(const T& routing_message) {
   LOG(kVerbose) << "NFS::OnMessageReceived";
-  std::shared_ptr<MpidNodeNfs> this_ptr(shared_from_this());
+  std::shared_ptr<MpidClient> this_ptr(shared_from_this());
   asio_service_.service().post([=] {
       LOG(kVerbose) << "NFS::OnMessageReceived invoked task in asio_service";
       this_ptr->HandleMessage(routing_message);
   });
 }
 
-template <typename T>
-void MpidNodeNfs::HandleMessage(const T& routing_message) {
-  LOG(kVerbose) << "MpidNodeNfs::HandleMessage";
-  auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
-  const auto& destination_persona(std::get<2>(wrapper_tuple));
-  static_assert(std::is_same<decltype(destination_persona),
-                             const nfs::detail::DestinationTaggedValue&>::value,
-                "The value retrieved from the tuple isn't the destination type, but should be.");
-  if (destination_persona.data == nfs::Persona::kMaidNode)
-    return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
-  auto action(std::get<0>(wrapper_tuple));
-  auto source_persona(std::get<1>(wrapper_tuple).data);
-  LOG(kError) << " MpidNodeNfs::HandleMessage unhandled message from " << source_persona
-              << " " << action << " to " << destination_persona;
-}
-
 }  // namespace nfs_client
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_CLIENT_MPID_NODE_NFS_H_
+#endif  // MAIDSAFE_NFS_CLIENT_MPID_CLIENT_H_

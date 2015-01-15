@@ -16,8 +16,8 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#ifndef MAIDSAFE_NFS_CLIENT_MAID_NODE_NFS_H_
-#define MAIDSAFE_NFS_CLIENT_MAID_NODE_NFS_H_
+#ifndef MAIDSAFE_NFS_CLIENT_MAID_CLIENT_H_
+#define MAIDSAFE_NFS_CLIENT_MAID_CLIENT_H_
 
 #include <functional>
 #include <memory>
@@ -58,16 +58,16 @@ namespace vault_manager { namespace tools { class PublicPmidStorer; } }
 
 namespace nfs_client {
 
-class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
+class MaidClient : public std::enable_shared_from_this<MaidClient>  {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
   typedef boost::future<std::unique_ptr<StructuredDataVersions::VersionName>> PutVersionFuture;
   typedef boost::signals2::signal<void(int32_t)> OnNetworkHealthChange;
 
   // Logging in for already existing maid accounts
-  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::Maid& maid);
+  static std::shared_ptr<MaidClient> MakeShared(const passport::Maid& maid);
   // Creates maid account and logs in. Throws on failure to create account.
-  static std::shared_ptr<MaidNodeNfs> MakeShared(const passport::MaidAndSigner& maid_and_signer);
+  static std::shared_ptr<MaidClient> MakeShared(const passport::MaidAndSigner& maid_and_signer);
   // Disconnects from network and all unfinished tasks will be cancelled
   void Stop();
 
@@ -124,11 +124,11 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   void DeleteBranchUntilFork(const DataName& data_name,
                              const StructuredDataVersions::VersionName& branch_tip);
   // TODO(Prakash): This can move to private section
-  boost::future<void> CreateAccount(const nfs_vault::AccountCreation& account_creation,
+  boost::future<void> CreateAccount(const nfs_vault::MaidAccountCreation& account_creation,
                                     const std::chrono::steady_clock::duration& timeout =
                                         std::chrono::seconds(240));
 
-  void RemoveAccount(const nfs_vault::AccountRemoval& account_removal);
+  void RemoveAccount(const nfs_vault::MaidAccountRemoval& account_removal);
 
   friend class vault_manager::tools::PublicPmidStorer;
  private:
@@ -137,15 +137,15 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   typedef std::function<void(const StructuredDataNameAndContentOrReturnCode&)> GetBranchFunctor;
   typedef boost::promise<std::vector<StructuredDataVersions::VersionName>> VersionNamesPromise;
 
-  explicit MaidNodeNfs(const passport::Maid& maid);
+  explicit MaidClient(const passport::Maid& maid);
 
-  MaidNodeNfs(const MaidNodeNfs&);
-  MaidNodeNfs(MaidNodeNfs&&);
-  MaidNodeNfs& operator=(MaidNodeNfs);
+  MaidClient(const MaidClient&);
+  MaidClient(MaidClient&&);
+  MaidClient& operator=(MaidClient);
 
   // Creates maid account and logs in. Only used for Zero state client
   // Can only do public key lookup in provided public_pmids (not in network).
-  static std::shared_ptr<MaidNodeNfs> MakeSharedZeroState(
+  static std::shared_ptr<MaidClient> MakeSharedZeroState(
       const passport::MaidAndSigner& maid_and_signer,
       const std::vector<passport::PublicPmid>& public_pmids);
 
@@ -185,23 +185,23 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
 
 void CreateAccount(std::shared_ptr<passport::Maid> maid,
                    std::shared_ptr<passport::Anmaid> anmaid,
-                   std::shared_ptr<MaidNodeNfs> client_nfs);
+                   std::shared_ptr<MaidClient> client_nfs);
 
 // ==================== Implementation =============================================================
 template <typename DataName>
-boost::future<typename DataName::data_type> MaidNodeNfs::Get(
+boost::future<typename DataName::data_type> MaidClient::Get(
     const DataName& data_name,
     const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Get " << HexSubstr(data_name.value);
+  LOG(kVerbose) << "MaidClient Get " << HexSubstr(data_name.value);
   auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
   get_handler_.Get(data_name, promise, timeout);
   return promise->get_future();
 }
 
 template <typename Data>
-boost::future<void> MaidNodeNfs::Put(const Data& data,
+boost::future<void> MaidClient::Put(const Data& data,
                                      const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs put " << HexSubstr(data.name().value.string())
+  LOG(kVerbose) << "MaidClient put " << HexSubstr(data.name().value.string())
                 << " of size " << data.Serialise().data.string().size();
   typedef MaidNodeService::PutResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
@@ -216,7 +216,7 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
   rpc_timers_.put_timer.AddTask(
       timeout,
       [op_data, data](ResponseContents put_response) {
-        LOG(kVerbose) << "MaidNodeNfs Put HandleResponseContents for "
+        LOG(kVerbose) << "MaidClient Put HandleResponseContents for "
                       << HexSubstr(data.name().value);
         op_data->HandleResponseContents(std::move(put_response));
       },
@@ -227,24 +227,24 @@ boost::future<void> MaidNodeNfs::Put(const Data& data,
 }
 
 template <typename DataName>
-void MaidNodeNfs::Delete(const DataName& data_name) {
+void MaidClient::Delete(const DataName& data_name) {
   dispatcher_.SendDeleteRequest(data_name);
 }
 
 template <typename DataName>
-void MaidNodeNfs::IncrementReferenceCount(const DataName& /*data_name*/) {
+void MaidClient::IncrementReferenceCount(const DataName& /*data_name*/) {
 }
 
 template <typename DataName>
-void MaidNodeNfs::DecrementReferenceCount(const DataName& /*data_name*/) {
+void MaidClient::DecrementReferenceCount(const DataName& /*data_name*/) {
 }
 
 template <typename DataName>
-boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
+boost::future<void> MaidClient::CreateVersionTree(const DataName& data_name,
                        const StructuredDataVersions::VersionName& version_name,
                        uint32_t max_versions, uint32_t max_branches,
                        const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Create Version " << HexSubstr(data_name.value);
+  LOG(kVerbose) << "MaidClient Create Version " << HexSubstr(data_name.value);
   typedef MaidNodeService::CreateVersionTreeResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
   auto response_functor([promise](const nfs_client::ReturnCode& result) {
@@ -255,7 +255,7 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
   rpc_timers_.create_version_tree_timer.AddTask(
       timeout,
       [op_data, data_name](ResponseContents get_response) {
-        LOG(kVerbose) << "MaidNodeNfs CreateVersionTree HandleResponseContents for "
+        LOG(kVerbose) << "MaidClient CreateVersionTree HandleResponseContents for "
                       << HexSubstr(data_name.value);
         op_data->HandleResponseContents(std::move(get_response));
       },
@@ -267,9 +267,9 @@ boost::future<void> MaidNodeNfs::CreateVersionTree(const DataName& data_name,
 }
 
 template <typename DataName>
-MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
+MaidClient::VersionNamesFuture MaidClient::GetVersions(
     const DataName& data_name, const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Get Version for " << HexSubstr(data_name.value);
+  LOG(kVerbose) << "MaidClient Get Version for " << HexSubstr(data_name.value);
   typedef MaidNodeService::GetVersionsResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode&
@@ -287,10 +287,10 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetVersions(
 }
 
 template <typename DataName>
-MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
+MaidClient::VersionNamesFuture MaidClient::GetBranch(
     const DataName& data_name, const StructuredDataVersions::VersionName& branch_tip,
     const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Get Branch for " << HexSubstr(data_name.value);
+  LOG(kVerbose) << "MaidClient Get Branch for " << HexSubstr(data_name.value);
   typedef MaidNodeService::GetBranchResponse::Contents ResponseContents;
   auto promise(std::make_shared<VersionNamesPromise>());
   auto response_functor([promise](const StructuredDataNameAndContentOrReturnCode &
@@ -308,11 +308,11 @@ MaidNodeNfs::VersionNamesFuture MaidNodeNfs::GetBranch(
 }
 
 template <typename DataName>
-MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
+MaidClient::PutVersionFuture MaidClient::PutVersion(
     const DataName& data_name, const StructuredDataVersions::VersionName& old_version_name,
     const StructuredDataVersions::VersionName& new_version_name,
     const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs::PutVersion put new version "
+  LOG(kVerbose) << "MaidClient::PutVersion put new version "
                 << DebugId(new_version_name.id) << " after old version "
                 << DebugId(old_version_name.id) << " for " << HexSubstr(data_name.value);
   typedef MaidNodeService::PutVersionResponse::Contents ResponseContents;
@@ -326,7 +326,7 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
   rpc_timers_.put_version_timer.AddTask(
       timeout,
       [op_data, data_name, new_version_name, old_version_name](ResponseContents get_response) {
-        LOG(kVerbose) << "MaidNodeNfs PutVersion HandleResponseContents put new version "
+        LOG(kVerbose) << "MaidClient PutVersion HandleResponseContents put new version "
                       << DebugId(new_version_name.id) << " after old version "
                       << DebugId(old_version_name.id) << " for " << HexSubstr(data_name.value);
         op_data->HandleResponseContents(std::move(get_response));
@@ -338,15 +338,15 @@ MaidNodeNfs::PutVersionFuture MaidNodeNfs::PutVersion(
 }
 
 template <typename DataName>
-void MaidNodeNfs::DeleteBranchUntilFork(const DataName& data_name,
+void MaidClient::DeleteBranchUntilFork(const DataName& data_name,
                                         const StructuredDataVersions::VersionName& branch_tip) {
   dispatcher_.SendDeleteBranchUntilForkRequest(data_name, branch_tip);
 }
 
 template <typename T>
-void MaidNodeNfs::OnMessageReceived(const T& routing_message) {
+void MaidClient::OnMessageReceived(const T& routing_message) {
   LOG(kVerbose) << "NFS::OnMessageReceived";
-  std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
+  std::shared_ptr<MaidClient> this_ptr(shared_from_this());
   asio_service_.service().post([=] {
       LOG(kVerbose) << "NFS::OnMessageReceived invoked task in asio_service";
       this_ptr->HandleMessage(routing_message);
@@ -354,8 +354,8 @@ void MaidNodeNfs::OnMessageReceived(const T& routing_message) {
 }
 
 template <typename T>
-void MaidNodeNfs::HandleMessage(const T& routing_message) {
-  LOG(kVerbose) << "MaidNodeNfs::HandleMessage";
+void MaidClient::HandleMessage(const T& routing_message) {
+  LOG(kVerbose) << "MaidClient::HandleMessage";
   auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
   const auto& destination_persona(std::get<2>(wrapper_tuple));
   static_assert(std::is_same<decltype(destination_persona),
@@ -365,7 +365,7 @@ void MaidNodeNfs::HandleMessage(const T& routing_message) {
     return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
   auto action(std::get<0>(wrapper_tuple));
   auto source_persona(std::get<1>(wrapper_tuple).data);
-  LOG(kError) << " MaidNodeNfs::HandleMessage unhandled message from " << source_persona
+  LOG(kError) << " MaidClient::HandleMessage unhandled message from " << source_persona
               << " " << action << " to " << destination_persona;
 }
 
@@ -373,4 +373,4 @@ void MaidNodeNfs::HandleMessage(const T& routing_message) {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_CLIENT_MAID_NODE_NFS_H_
+#endif  // MAIDSAFE_NFS_CLIENT_MAID_CLIENT_H_

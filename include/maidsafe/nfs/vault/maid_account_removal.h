@@ -16,8 +16,8 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#ifndef MAIDSAFE_NFS_VAULT_ACCOUNT_REMOVAL_H_
-#define MAIDSAFE_NFS_VAULT_ACCOUNT_REMOVAL_H_
+#ifndef MAIDSAFE_NFS_VAULT_MAID_ACCOUNT_REMOVAL_H_
+#define MAIDSAFE_NFS_VAULT_MAID_ACCOUNT_REMOVAL_H_
 
 #include <string>
 
@@ -31,22 +31,22 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
-class AccountRemoval {
+class MaidAccountRemoval {
  public:
-  AccountRemoval();
-  explicit AccountRemoval(const passport::Anmaid& anmaid);
-  explicit AccountRemoval(const std::string& serialised_copy);
-  AccountRemoval(const AccountRemoval& other);
-  AccountRemoval(AccountRemoval&& other);
+  MaidAccountRemoval();
+  explicit MaidAccountRemoval(const passport::Anmaid& anmaid);
+  explicit MaidAccountRemoval(const std::string& serialised_copy);
+  MaidAccountRemoval(const MaidAccountRemoval& other);
+  MaidAccountRemoval(MaidAccountRemoval&& other);
 
-  AccountRemoval& operator=(AccountRemoval other);
+  MaidAccountRemoval& operator=(MaidAccountRemoval other);
   std::string Serialise() const;
 
   passport::PublicAnmaid::Name public_anmaid_name() const { return public_anmaid_name_; }
   bool Validate(const passport::PublicAnmaid& public_anmaid) const;
 
-  friend bool operator==(const AccountRemoval& lhs, const AccountRemoval& rhs);
-  friend void swap(AccountRemoval& lhs, AccountRemoval& rhs) MAIDSAFE_NOEXCEPT;
+  friend bool operator==(const MaidAccountRemoval& lhs, const MaidAccountRemoval& rhs);
+  friend void swap(MaidAccountRemoval& lhs, MaidAccountRemoval& rhs) MAIDSAFE_NOEXCEPT;
 
  private:
   NonEmptyString random_data_;
@@ -58,4 +58,4 @@ class AccountRemoval {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_VAULT_ACCOUNT_REMOVAL_H_
+#endif  // MAIDSAFE_NFS_VAULT_MAID_ACCOUNT_REMOVAL_H_

@@ -16,8 +16,8 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#ifndef MAIDSAFE_NFS_VAULT_ACCOUNT_CREATION_H_
-#define MAIDSAFE_NFS_VAULT_ACCOUNT_CREATION_H_
+#ifndef MAIDSAFE_NFS_VAULT_MPID_ACCOUNT_CREATION_H_
+#define MAIDSAFE_NFS_VAULT_MPID_ACCOUNT_CREATION_H_
 
 #include <memory>
 #include <string>
@@ -31,30 +31,30 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
-struct AccountCreation {
-  AccountCreation();
-  AccountCreation(const passport::PublicMaid& public_maid,
-                  const passport::PublicAnmaid& public_anmaid);
-  explicit AccountCreation(const std::string& serialised_copy);
-  AccountCreation(const AccountCreation& other);
-  AccountCreation(AccountCreation&& other);
+struct MpidAccountCreation {
+  MpidAccountCreation();
+  MpidAccountCreation(const passport::PublicMpid& public_mpid,
+                      const passport::PublicAnmpid& public_anmpid);
+  explicit MpidAccountCreation(const std::string& serialised_copy);
+  MpidAccountCreation(const MpidAccountCreation& other);
+  MpidAccountCreation(MpidAccountCreation&& other);
 
-  passport::PublicMaid public_maid() const { return *public_maid_ptr; }
-  passport::PublicAnmaid public_anmaid() const { return *public_anmaid_ptr; }
+  passport::PublicMpid public_mpid() const { return *public_mpid_ptr; }
+  passport::PublicAnmpid public_anmpid() const { return *public_anmpid_ptr; }
 
-  AccountCreation& operator=(AccountCreation other);
+  MpidAccountCreation& operator=(MpidAccountCreation other);
   std::string Serialise() const;
 
-  friend bool operator==(const AccountCreation& lhs, const AccountCreation& rhs);
-  friend void swap(AccountCreation& lhs, AccountCreation& rhs) MAIDSAFE_NOEXCEPT;
+  friend bool operator==(const MpidAccountCreation& lhs, const MpidAccountCreation& rhs);
+  friend void swap(MpidAccountCreation& lhs, MpidAccountCreation& rhs) MAIDSAFE_NOEXCEPT;
 
  private:
-  std::unique_ptr<passport::PublicMaid> public_maid_ptr;
-  std::unique_ptr<passport::PublicAnmaid> public_anmaid_ptr;
+  std::unique_ptr<passport::PublicMpid> public_mpid_ptr;
+  std::unique_ptr<passport::PublicAnmpid> public_anmpid_ptr;
 };
 
 }  // namespace nfs_vault
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_VAULT_ACCOUNT_CREATION_H_
+#endif  // MAIDSAFE_NFS_VAULT_MPID_ACCOUNT_CREATION_H_

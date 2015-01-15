@@ -16,15 +16,15 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "maidsafe/nfs/client/maid_node_nfs.h"
+#include "maidsafe/nfs/client/maid_client.h"
 
 #include "maidsafe/common/on_scope_exit.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/make_unique.h"
 
-#include "maidsafe/nfs/vault/account_creation.h"
-#include "maidsafe/nfs/vault/account_removal.h"
+#include "maidsafe/nfs/vault/maid_account_creation.h"
+#include "maidsafe/nfs/vault/maid_account_removal.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
 
 namespace maidsafe {
@@ -35,7 +35,7 @@ namespace {
 
 // NOTE: methods - MakeSharedZeroState() GivePublicPmidKey() & UpdateRequestPublicKeyFunctor()
 // are used for ZeroState network setup only.
-// This allows a cleint to lookup *only* in a provided public pmid list, when it is
+// This allows a client to lookup *only* in a provided public pmid list, when it is
 // validating a peer while connecting.
 void GivePublicPmidKey(const NodeId& node_id, routing::GivePublicKeyFunctor give_key,
                        const std::vector<passport::PublicPmid>& public_pmids) {
@@ -67,28 +67,28 @@ void UpdateRequestPublicKeyFunctor(routing::RequestPublicKeyFunctor& request_pub
 }  // anonymous namespace
 
 
-std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(const passport::Maid& maid) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid } };
+std::shared_ptr<MaidClient> MaidClient::MakeShared(const passport::Maid& maid) {
+  std::shared_ptr<MaidClient> maid_node_ptr{ new MaidClient{ maid } };
   maid_node_ptr->Init();
   return maid_node_ptr;
 }
 
-std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeShared(
+std::shared_ptr<MaidClient> MaidClient::MakeShared(
     const passport::MaidAndSigner& maid_and_signer) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first } };
+  std::shared_ptr<MaidClient> maid_node_ptr{ new MaidClient{ maid_and_signer.first } };
   maid_node_ptr->Init(maid_and_signer);
   return maid_node_ptr;
 }
 
-std::shared_ptr<MaidNodeNfs> MaidNodeNfs::MakeSharedZeroState(
+std::shared_ptr<MaidClient> MaidClient::MakeSharedZeroState(
     const passport::MaidAndSigner& maid_and_signer,
     const std::vector<passport::PublicPmid>& public_pmids) {
-  std::shared_ptr<MaidNodeNfs> maid_node_ptr{ new MaidNodeNfs{ maid_and_signer.first } };
+  std::shared_ptr<MaidClient> maid_node_ptr{ new MaidClient{ maid_and_signer.first } };
   maid_node_ptr->InitZeroState(maid_and_signer, public_pmids);
   return maid_node_ptr;
 }
 
-void MaidNodeNfs::Init(const passport::MaidAndSigner& maid_and_signer) {
+void MaidClient::Init(const passport::MaidAndSigner& maid_and_signer) {
   on_scope_exit cleanup_on_error([&] { Stop(); });
   InitRouting();
   CreateAccount(passport::PublicMaid{ maid_and_signer.first },
@@ -96,7 +96,7 @@ void MaidNodeNfs::Init(const passport::MaidAndSigner& maid_and_signer) {
   cleanup_on_error.Release();
 }
 
-void MaidNodeNfs::InitZeroState(const passport::MaidAndSigner& maid_and_signer,
+void MaidClient::InitZeroState(const passport::MaidAndSigner& maid_and_signer,
                                 const std::vector<passport::PublicPmid>& public_pmids) {
   on_scope_exit cleanup_on_error([&] { Stop(); });
   InitRouting(public_pmids);
@@ -105,22 +105,22 @@ void MaidNodeNfs::InitZeroState(const passport::MaidAndSigner& maid_and_signer,
   cleanup_on_error.Release();
 }
 
-void MaidNodeNfs::CreateAccount(const passport::PublicMaid& public_maid,
+void MaidClient::CreateAccount(const passport::PublicMaid& public_maid,
                                 const passport::PublicAnmaid& public_anmaid) {
   LOG(kInfo) << "Calling CreateAccount for maid ID:" << DebugId(public_maid.name());
-  nfs_vault::AccountCreation account_creation{ public_maid, public_anmaid };
+  nfs_vault::MaidAccountCreation account_creation{ public_maid, public_anmaid };
   auto create_account_future = CreateAccount(account_creation);
   create_account_future.get();
   LOG(kInfo) << " CreateAccount for maid ID:" << DebugId(public_maid.name()) << " succeeded.";
 }
 
-void MaidNodeNfs::Init() {
+void MaidClient::Init() {
   on_scope_exit cleanup_on_error([&] { Stop(); });
   InitRouting();
   cleanup_on_error.Release();
 }
 
-MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
+MaidClient::MaidClient(const passport::Maid& maid)
     : kMaid_(maid),
       asio_service_(2),
       rpc_timers_(asio_service_),
@@ -139,23 +139,23 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
       get_handler_(rpc_timers_.get_timer, dispatcher_) {
 }
 
-void MaidNodeNfs::Stop() {
-  LOG(kVerbose) << "MaidNodeNfs::Stop()";
+void MaidClient::Stop() {
+  LOG(kVerbose) << "MaidClient::Stop()";
   dispatcher_.Stop();
-  LOG(kVerbose) << "MaidNodeNfs::Stop() : dispatcher_";
+  LOG(kVerbose) << "MaidClient::Stop() : dispatcher_";
   routing_.reset();
-  LOG(kVerbose) << "MaidNodeNfs::Stop() : routing_";
+  LOG(kVerbose) << "MaidClient::Stop() : routing_";
   rpc_timers_.CancellAll();
-  LOG(kVerbose) << "MaidNodeNfs::Stop() : rpc_timers_";
+  LOG(kVerbose) << "MaidClient::Stop() : rpc_timers_";
   asio_service_.Stop();
-  LOG(kVerbose) << "MaidNodeNfs::Stop() : asio_service_";
+  LOG(kVerbose) << "MaidClient::Stop() : asio_service_";
 }
 
-MaidNodeNfs::OnNetworkHealthChange& MaidNodeNfs::network_health_change_signal() {
+MaidClient::OnNetworkHealthChange& MaidClient::network_health_change_signal() {
   return network_health_change_signal_;
 }
 
-void MaidNodeNfs::InitRouting(std::vector<passport::PublicPmid> public_pmids) {
+void MaidClient::InitRouting(std::vector<passport::PublicPmid> public_pmids) {
   routing::Functors functors(InitialiseRoutingCallbacks());
   if (!public_pmids.empty()) {
     UpdateRequestPublicKeyFunctor(functors.request_public_key, public_pmids);
@@ -173,9 +173,9 @@ void MaidNodeNfs::InitRouting(std::vector<passport::PublicPmid> public_pmids) {
     BOOST_THROW_EXCEPTION(MakeError(RoutingErrors::not_connected));
 }
 
-routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
+routing::Functors MaidClient::InitialiseRoutingCallbacks() {
   routing::Functors functors;
-  std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
+  std::shared_ptr<MaidClient> this_ptr(shared_from_this());
   functors.typed_message_and_caching.single_to_single.message_received =
       [this_ptr](const routing::SingleToSingleMessage& message) {
         this_ptr->OnMessageReceived(message);
@@ -212,8 +212,8 @@ routing::Functors MaidNodeNfs::InitialiseRoutingCallbacks() {
   return functors;
 }
 
-void MaidNodeNfs::OnNetworkStatusChange(int updated_network_health) {
-  std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
+void MaidClient::OnNetworkStatusChange(int updated_network_health) {
+  std::shared_ptr<MaidClient> this_ptr(shared_from_this());
   asio_service_.service().post([this_ptr, updated_network_health] {
     routing::UpdateNetworkHealth(updated_network_health, this_ptr->network_health_,
         this_ptr->network_health_mutex_, this_ptr->network_health_condition_variable_,
@@ -221,8 +221,8 @@ void MaidNodeNfs::OnNetworkStatusChange(int updated_network_health) {
   });
 }
 
-boost::future<void> MaidNodeNfs::CreateAccount(
-    const nfs_vault::AccountCreation& account_creation,
+boost::future<void> MaidClient::CreateAccount(
+    const nfs_vault::MaidAccountCreation& account_creation,
     const std::chrono::steady_clock::duration& timeout) {
   typedef MaidNodeService::CreateAccountResponse::Contents ResponseContents;
   auto promise(std::make_shared<boost::promise<void>>());
@@ -242,7 +242,7 @@ boost::future<void> MaidNodeNfs::CreateAccount(
   return promise->get_future();
 }
 
-void MaidNodeNfs::RemoveAccount(const nfs_vault::AccountRemoval& account_removal) {
+void MaidClient::RemoveAccount(const nfs_vault::MaidAccountRemoval& account_removal) {
   dispatcher_.SendRemoveAccountRequest(account_removal);
 }
 
