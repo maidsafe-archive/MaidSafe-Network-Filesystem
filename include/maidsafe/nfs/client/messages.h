@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "boost/optional.hpp"
+#include "boost/expected/expected.hpp"
 
 #include "maidsafe/common/config.h"
 #include "maidsafe/common/error.h"
@@ -327,6 +328,24 @@ void swap(DataNameAndSizeAndSpaceAndReturnCode& lhs,
           DataNameAndSizeAndSpaceAndReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 bool operator==(const DataNameAndSizeAndSpaceAndReturnCode& lhs,
                 const DataNameAndSizeAndSpaceAndReturnCode& rhs);
+
+// ================================= MpidMessageOrReturnCode =======================================
+
+struct MpidMessageOrReturnCode {
+  MpidMessageOrReturnCode(
+      const boost::expected<nfs_vault::MpidMessage, maidsafe_error>& expected);
+  explicit MpidMessageOrReturnCode(const std::string& serialised_copy);
+  MpidMessageOrReturnCode(const MpidMessageOrReturnCode& other);
+  MpidMessageOrReturnCode(MpidMessageOrReturnCode&& other);
+  MpidMessageOrReturnCode& operator=(MpidMessageOrReturnCode other);
+
+  std::string Serialise() const;
+  boost::optional<nfs_vault::MpidMessage> mpid_message;
+  boost::optional<ReturnCode> return_code;
+};
+
+bool operator==(const MpidMessageOrReturnCode& lhs, const MpidMessageOrReturnCode& rhs);
+void swap(MpidMessageOrReturnCode& lhs, MpidMessageOrReturnCode& rhs) MAIDSAFE_NOEXCEPT;
 
 }  // namespace nfs_client
 
