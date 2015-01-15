@@ -1,1 +1,3 @@
-Action:GetMessageRequest            Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:GetRequest                   Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:DeleteRequest                Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:SendMessage                  Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessage
