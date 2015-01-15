@@ -63,7 +63,7 @@ DEFINE_OSTREAMABLE_ENUM_VALUES(MessageAction, int32_t,
     (CreateVersionTreeRequest)
     (CreateVersionTreeResponse)
     (UpdateAccount)
-    (SendMessage)
+    (SendMessageRequest)
     (MessageAlert)
     (GetMessageRequest)
     (GetMessageResponse)

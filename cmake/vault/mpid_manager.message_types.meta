@@ -1,4 +1,5 @@
-Action:SendMessage                  Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessage
+Action:SendMessageRequest           Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessage
 Action:GetMessageRequest            Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
 Action:CreateAccountRequest         Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidAccountCreation
 Action:RemoveAccountRequest         Source:MpidNode:Single      Destination:MpidManager:Group      Contents:class:maidsafe::nfs_vault::MpidAccountRemoval
+Action:GetRequest                   Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::DataName                Cacheable

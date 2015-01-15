@@ -99,5 +99,3 @@ message MpidMessage {
   required bytes signed_header = 4;
   required bytes signed_body = 5;
 }
-
-

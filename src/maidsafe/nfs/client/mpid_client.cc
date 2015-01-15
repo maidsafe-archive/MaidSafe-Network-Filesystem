@@ -43,32 +43,57 @@ std::shared_ptr<MpidClient> MpidClient::MakeShared(
 MpidClient::MpidClient(const passport::Mpid& mpid)
     : kMpid_(mpid),
       asio_service_(2),
-//      rpc_timers_(asio_service_),
+      rpc_timers_(asio_service_),
       network_health_mutex_(),
       network_health_condition_variable_(),
       network_health_(-1),
-//      network_health_change_signal_(),
+      network_health_change_signal_(),
       routing_(maidsafe::make_unique<routing::Routing>(kMpid_)),
-      public_pmid_helper_()
-//      dispatcher_(*routing_),
-      //service_([&]()->std::unique_ptr<MpidNodeService> {
-      //  std::unique_ptr<MpidNodeService> service(
-      //      new MpidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_, get_handler_));
-      //  return std::move(service);
-      //}()),
-//      get_handler_(rpc_timers_.get_timer, dispatcher_) {
-      {}
+      public_mpid_helper_(),
+      dispatcher_(*routing_),
+      service_([&]()->std::unique_ptr<MpidNodeService> {
+        std::unique_ptr<MpidNodeService> service(
+          new MpidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_, get_handler_));
+        return std::move(service);
+      }()),
+      get_handler_(rpc_timers_.get_timer, dispatcher_) {}
 
 void MpidClient::Stop() {
-  LOG(kVerbose) << "MpidClient::Stop()";
-//  dispatcher_.Stop();
-  LOG(kVerbose) << "MpidClient::Stop() : dispatcher_";
+  dispatcher_.Stop();
   routing_.reset();
-  LOG(kVerbose) << "MpidClient::Stop() : routing_";
-//  rpc_timers_.CancellAll();
-  LOG(kVerbose) << "MpidClient::Stop() : rpc_timers_";
+  rpc_timers_.CancellAll();
   asio_service_.Stop();
-  LOG(kVerbose) << "MpidClient::Stop() : asio_service_";
+}
+
+boost::future<void> MpidClient::CreateAccount(
+    const nfs_vault::MpidAccountCreation& account_creation,
+    const std::chrono::steady_clock::duration& timeout) {
+  typedef MpidNodeService::CreateAccountResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<void>>());
+  auto response_functor([promise](const ResponseContents &result) {
+      HandleCreateAccountResult(result, promise);
+  });
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
+      routing::Parameters::group_size - 1, response_functor));
+  auto task_id(rpc_timers_.create_account_timer.NewTaskId());
+  rpc_timers_.create_account_timer.AddTask(
+      timeout, [op_data](ResponseContents create_account_response) {
+                 op_data->HandleResponseContents(std::move(create_account_response));
+               },
+      routing::Parameters::group_size - 1, task_id);
+  dispatcher_.SendCreateAccountRequest(task_id, account_creation);
+  return promise->get_future();
+}
+
+void MpidClient::CreateAccount(const passport::PublicMpid& public_mpid,
+                               const passport::PublicAnmpid& public_anmpid) {
+  nfs_vault::MpidAccountCreation account_creation{ public_mpid, public_anmpid };
+  auto create_account_future = CreateAccount(account_creation);
+  create_account_future.get();
+}
+
+void MpidClient::RemoveAccount(const nfs_vault::MpidAccountRemoval& account_removal) {
+  dispatcher_.SendRemoveAccountRequest(account_removal);
 }
 
 void MpidClient::Init(const passport::MpidAndSigner& mpid_and_signer) {
@@ -114,13 +139,11 @@ routing::Functors MpidClient::InitialiseRoutingCallbacks() {
   functors.close_nodes_change = [](std::shared_ptr<routing::CloseNodesChange> /*close_change*/) {};
   functors.request_public_key = [this_ptr](const NodeId& node_id,
                                        const routing::GivePublicKeyFunctor& give_key) {
-    auto future_key(this_ptr->Get(passport::PublicPmid::Name{ Identity{ node_id.string() } },
+    auto future_key(this_ptr->Get(passport::PublicMpid::Name{ Identity{ node_id.string() } },
                                         std::chrono::seconds(10)));
-    this_ptr->public_pmid_helper_.AddEntry(std::move(future_key), give_key);
+    this_ptr->public_mpid_helper_.AddEntry(std::move(future_key), give_key);
   };
 
-  // TODO(Prakash) fix routing asserts for clients so client need not to provide callbacks for all
-  // functors
   functors.typed_message_and_caching.single_to_group.message_received =
       [](const routing::SingleToGroupMessage& /*message*/) {};
   functors.typed_message_and_caching.group_to_group.message_received =
@@ -136,48 +159,14 @@ routing::Functors MpidClient::InitialiseRoutingCallbacks() {
   return functors;
 }
 
-//void MpidClient::CreateAccount(const passport::PublicMpid& public_mpid,
-//                               const passport::PublicAnmpid& public_anmpid) {
-//  LOG(kInfo) << "Calling CreateAccount for maid ID:" << DebugId(public_mpid.name());
-//  nfs_vault::MpidAccountCreation account_creation{ public_mpid, public_anmpid };
-//  auto create_account_future = CreateAccount(account_creation);
-//  create_account_future.get();
-//  LOG(kInfo) << " CreateAccount for mpid ID:" << DebugId(public_mpid.name()) << " succeeded.";
-//}
-//
-//boost::future<void> MpidClient::CreateAccount(
-//    const nfs_vault::MpidAccountCreation& account_creation,
-//    const std::chrono::steady_clock::duration& timeout) {
-//  typedef MaidNodeService::CreateAccountResponse::Contents ResponseContents;
-//  auto promise(std::make_shared<boost::promise<void>>());
-//  auto response_functor([promise](const ResponseContents &result) {
-//      HandleCreateAccountResult(result, promise);
-//  });
-//  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(
-//      routing::Parameters::group_size - 1, response_functor));
-//  auto task_id(rpc_timers_.create_account_timer.NewTaskId());
-//  rpc_timers_.create_account_timer.AddTask(
-//      timeout, [op_data](ResponseContents create_account_response) {
-//                 op_data->HandleResponseContents(std::move(create_account_response));
-//               },
-//      // TODO(Fraser#5#): 2013-08-18 - Confirm expected count
-//      routing::Parameters::group_size - 1, task_id);
-//  dispatcher_.SendCreateAccountRequest(task_id, account_creation);
-//  return promise->get_future();
-//}
-//
-//void MpidClient::RemoveAccount(const nfs_vault::MpidAccountRemoval& account_removal) {
-//  dispatcher_.SendRemoveAccountRequest(account_removal);
-//}
-//
-//void MpidClient::OnNetworkStatusChange(int updated_network_health) {
-//  std::shared_ptr<MpidClient> this_ptr(shared_from_this());
-//  asio_service_.service().post([this_ptr, updated_network_health] {
-//    routing::UpdateNetworkHealth(updated_network_health, this_ptr->network_health_,
-//        this_ptr->network_health_mutex_, this_ptr->network_health_condition_variable_,
-//        NodeId(this_ptr->kMaid_.name()->string()));
-//  });
-//}
+void MpidClient::OnNetworkStatusChange(int updated_network_health) {
+  std::shared_ptr<MpidClient> this_ptr(shared_from_this());
+  asio_service_.service().post([this_ptr, updated_network_health] {
+    routing::UpdateNetworkHealth(updated_network_health, this_ptr->network_health_,
+        this_ptr->network_health_mutex_, this_ptr->network_health_condition_variable_,
+        NodeId(this_ptr->kMpid_.name()->string()));
+  });
+}
 
 }  // namespace nfs_client
 

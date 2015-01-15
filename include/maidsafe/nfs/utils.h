@@ -34,6 +34,7 @@
 #include "maidsafe/routing/api_config.h"
 
 #include "maidsafe/nfs/public_pmid_helper.h"
+#include "maidsafe/nfs/public_mpid_helper.h"
 
 namespace maidsafe {
 

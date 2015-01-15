@@ -34,6 +34,8 @@
 
 #include "maidsafe/nfs/vault/maid_account_creation.h"
 #include "maidsafe/nfs/vault/maid_account_removal.h"
+#include "maidsafe/nfs/vault/mpid_account_creation.h"
+#include "maidsafe/nfs/vault/mpid_account_removal.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
 
 
