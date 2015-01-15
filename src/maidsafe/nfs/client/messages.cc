@@ -693,6 +693,60 @@ bool operator==(const DataNameAndSizeAndSpaceAndReturnCode& lhs,
          lhs.available_space == rhs.available_space && lhs.return_code == rhs.return_code;
 }
 
+// ================================= MpidMessageOrReturnCode =======================================
+
+MpidMessageOrReturnCode::MpidMessageOrReturnCode(
+    const boost::expected<nfs_vault::MpidMessage, maidsafe_error>& expected)
+        : mpid_message(), return_code() {
+  if (expected.valid())
+    mpid_message = *expected;
+  else
+    return_code = ReturnCode(expected.error());
+}
+
+MpidMessageOrReturnCode::MpidMessageOrReturnCode(const std::string& serialised_copy)
+    : mpid_message(), return_code() {
+  protobuf::MpidMessageOrReturnCode proto;
+  if (!proto.ParseFromString(serialised_copy))
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+  if (proto.has_serialised_mpid_message())
+    mpid_message = nfs_vault::MpidMessage(proto.serialised_mpid_message());
+  else
+    return_code = ReturnCode(proto.serialised_return_code());
+}
+
+MpidMessageOrReturnCode::MpidMessageOrReturnCode(const MpidMessageOrReturnCode& other)
+    : mpid_message(other.mpid_message), return_code(other.return_code) {}
+
+MpidMessageOrReturnCode::MpidMessageOrReturnCode(MpidMessageOrReturnCode&& other)
+    : mpid_message(std::move(other.mpid_message)), return_code(std::move(other.return_code)) {}
+
+MpidMessageOrReturnCode& MpidMessageOrReturnCode::operator=(MpidMessageOrReturnCode other) {
+  swap(*this, other);
+  return *this;
+}
+
+std::string MpidMessageOrReturnCode::Serialise() const {
+  protobuf::MpidMessageOrReturnCode proto;
+  if (mpid_message)
+    proto.set_serialised_mpid_message(mpid_message->Serialise());
+  else
+    proto.set_serialised_return_code(return_code->Serialise());
+
+  return proto.SerializeAsString();
+}
+
+bool operator==(const MpidMessageOrReturnCode& lhs, const MpidMessageOrReturnCode& rhs) {
+  return lhs.return_code == rhs.return_code &&
+         lhs.mpid_message == rhs.mpid_message;
+}
+
+void swap(MpidMessageOrReturnCode& lhs, MpidMessageOrReturnCode& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.mpid_message, rhs.mpid_message);
+  swap(lhs.return_code, rhs.return_code);
+}
+
 }  // namespace nfs_client
 
 namespace nfs {

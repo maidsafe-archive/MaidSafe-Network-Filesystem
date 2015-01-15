@@ -83,3 +83,8 @@ message TipOfTreeAndReturnCode {
   optional bytes serialised_tip_of_tree = 1;
   required bytes serialised_return_code = 2;
 }
+
+message MpidMessageOrReturnCode {
+  optional bytes serialised_mpid_message = 1;
+  optional bytes serialised_return_code = 2;
+}
