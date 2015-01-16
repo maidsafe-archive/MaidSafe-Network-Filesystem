@@ -65,7 +65,7 @@ void HandleCreateVersionTreeResult(const ReturnCode& result,
 
 void HandlePutVersionResult(
     const TipOfTreeAndReturnCode& result,
-    std::shared_ptr<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>> promise);
+    std::shared_ptr<boost::promise<void>> promise);
 
 void HandleRegisterPmidResult(const ReturnCode& result,
                               std::shared_ptr<boost::promise<void>> promise);

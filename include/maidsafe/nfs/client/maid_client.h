@@ -61,7 +61,7 @@ namespace nfs_client {
 class MaidClient : public std::enable_shared_from_this<MaidClient>  {
  public:
   typedef boost::future<std::vector<StructuredDataVersions::VersionName>> VersionNamesFuture;
-  typedef boost::future<std::unique_ptr<StructuredDataVersions::VersionName>> PutVersionFuture;
+  typedef boost::future<void> PutVersionFuture;
   typedef boost::signals2::signal<void(int32_t)> OnNetworkHealthChange;
 
   // Logging in for already existing maid accounts
@@ -315,7 +315,7 @@ MaidClient::PutVersionFuture MaidClient::PutVersion(
                 << DebugId(old_version_name.id) << " for " << HexSubstr(data_name.value);
   typedef MaidNodeService::PutVersionResponse::Contents ResponseContents;
   auto promise(
-      std::make_shared<boost::promise<std::unique_ptr<StructuredDataVersions::VersionName>>>());
+      std::make_shared<boost::promise<void>>());
   auto response_functor([promise](const nfs_client::TipOfTreeAndReturnCode& result) {
                            HandlePutVersionResult(result, promise);
                         });
