@@ -1,4 +1,5 @@
 Action:MessageAlert              Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:SendMessageResponse       Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
 Action:GetMessageResponse        Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::MpidMessageOrReturnCode
 Action:CreateAccountResponse     Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
-Action:GetResponse               Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode
+Action:GetResponse               Source:DataManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode

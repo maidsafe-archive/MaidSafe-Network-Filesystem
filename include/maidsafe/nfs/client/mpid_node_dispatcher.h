@@ -96,7 +96,7 @@ void MpidNodeDispatcher::SendMessageRequest(routing::TaskId task_id, const Data&
 
 template <typename Data>
 void SendDeleteRequest(const Data& data) {
-  typedef nfs::DeleteRequestFromMpidNodeToMpidManager NfsMessage;
+  typedef nfs::DeleteMessageRequestFromMpidNodeToMpidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
@@ -117,7 +117,7 @@ void MpidNodeDispatcher::SendGetMessageRequest(routing::TaskId task_id, const Da
 
 template <typename DataName>
 void MpidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName& data_name) {
-  typedef nfs::GetRequestFromMpidNodeToMpidManager NfsMessage;
+  typedef nfs::GetRequestFromMpidNodeToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<typename DataName::data_type>::value ?

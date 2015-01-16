@@ -37,12 +37,14 @@ std::error_code NoSuchElement() {
 MpidNodeService::RpcTimers::RpcTimers(AsioService& asio_service_)
     : message_alert_timer(asio_service_),
       get_message_timer(asio_service_),
+      send_message_timer(asio_service_),
       create_account_timer(asio_service_),
       get_timer(asio_service_) {}
 
 void MpidNodeService::RpcTimers::CancellAll() {
   message_alert_timer.CancelAll();
   get_message_timer.CancelAll();
+  send_message_timer.CancelAll();
   create_account_timer.CancelAll();
   get_timer.CancelAll();
 }
@@ -73,6 +75,22 @@ void MpidNodeService::HandleMessage(const GetMessageResponse& message,
   static_cast<void>(receiver);
   try {
     rpc_timers_.get_message_timer.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code() != NoSuchElement())
+      throw;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
+}
+
+void MpidNodeService::HandleMessage(const SendMessageResponse& message,
+                                    const SendMessageResponse::Sender& /*sender*/,
+                                    const SendMessageResponse::Receiver& receiver) {
+  assert(receiver == kReceiver_);
+  static_cast<void>(receiver);
+  try {
+    rpc_timers_.send_message_timer.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != NoSuchElement())
