@@ -87,17 +87,15 @@ message PmidHealth {
 
 message MpidMessageAlert {
   required bytes sender = 1;
-  required int32 id = 2;
-  required int32 parent_id = 3;
-  required bytes signed_header = 4;
+  required bytes receiver = 2;
+  required int32 id = 3;
+  required int32 parent_id = 4;
+  required bytes signed_header = 5;
 }
 
 message MpidMessage {
-  required bytes receiver = 1;
-  required int32 id = 2;
-  required int32 parent_id = 3;
-  required bytes signed_header = 4;
-  required bytes signed_body = 5;
+  required bytes serialised_alert = 1;
+  required bytes signed_body = 2;
 }
 
 
