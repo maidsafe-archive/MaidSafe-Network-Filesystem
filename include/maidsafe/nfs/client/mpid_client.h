@@ -73,6 +73,9 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
   boost::future<void> Send(const Data& data, const std::chrono::steady_clock::duration& timeout =
                                                 std::chrono::seconds(360));
 
+  template <typename Data>
+  void Delete(const Data& data);
+
   boost::future<void> CreateAccount(const nfs_vault::MpidAccountCreation& account_creation,
                                     const std::chrono::steady_clock::duration& timeout =
                                         std::chrono::seconds(240));
@@ -146,6 +149,11 @@ boost::future<void> MpidClient::Send(const Data& data,
   rpc_timers_.put_timer.PrintTaskIds();
   dispatcher_.SendMessageRequest(task_id, data);
   return promise->get_future();
+}
+
+template <typename Data>
+void MpidClient::Delete(const Data& data) {
+  dispatcher_.SendDeleteRequest(data);
 }
 
 template <typename DataName>

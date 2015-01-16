@@ -49,6 +49,9 @@ class MpidNodeDispatcher {
   void SendMessageRequest(routing::TaskId task_id, const Data& data);
 
   template <typename Data>
+  void SendDeleteRequest(const Data& data);
+
+  template <typename Data>
   void SendGetMessageRequest(routing::TaskId task_id, const Data& alert);
 
   template <typename DataName>
@@ -88,6 +91,16 @@ void MpidNodeDispatcher::SendMessageRequest(routing::TaskId task_id, const Data&
   NfsMessage::Contents contents;
   contents = nfs_vault::MpidMessage(data);
   NfsMessage nfs_message(nfs::MessageId(task_id), contents);
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
+}
+
+template <typename Data>
+void SendDeleteRequest(const Data& data) {
+  typedef nfs::DeleteRequestFromMpidNodeToMpidManager NfsMessage;
+  CheckSourcePersonaType<NfsMessage>();
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+
+  NfsMessage nfs_message((NfsMessage::Contents(nfs_vault::MpidMessage(data))));
   RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
 }
 
