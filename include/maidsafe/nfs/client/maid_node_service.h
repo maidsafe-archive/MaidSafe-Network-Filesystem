@@ -51,7 +51,7 @@ class MaidNodeService {
   typedef nfs::CreateVersionTreeResponseFromMaidManagerToMaidNode CreateVersionTreeResponse;
 
   struct RpcTimers {
-    explicit RpcTimers(AsioService& asio_service_);
+    explicit RpcTimers(BoostAsioService& asio_service_);
     void CancellAll();
 
     routing::Timer<GetResponse::Contents> get_timer;
