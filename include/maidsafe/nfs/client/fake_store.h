@@ -172,7 +172,7 @@ boost::future<void> FakeStore::Put(const Data& data) {
     }
     catch (const std::exception& e) {
       LOG(kWarning) << "Put failed: " << boost::diagnostic_information(e);
-      promise->set_exception(e);
+      promise->set_exception(boost::current_exception());
     }
   });
   return promise->get_future();
@@ -189,7 +189,7 @@ boost::future<void> FakeStore::Delete(const DataName& data_name) {
     }
     catch (const std::exception& e) {
       LOG(kWarning) << "Delete failed: " << boost::diagnostic_information(e);
-      promise->set_exception(e);
+      promise->set_exception(boost::current_exception());
     }
   });
 
@@ -289,7 +289,7 @@ boost::future<void> FakeStore::PutVersion(
   }
   catch (const std::exception& e) {
     LOG(kError) << "Failed putting version: " << boost::diagnostic_information(e);
-    return boost::make_exceptional_future<void>(e);
+    return boost::make_exceptional_future<void>(boost::current_exception());
   }
 
   return boost::make_ready_future();
@@ -313,7 +313,7 @@ boost::future<void> FakeStore::DeleteBranchUntilFork(
   }
   catch (const std::exception& e) {
     LOG(kError) << "Failed deleting branch: " << boost::diagnostic_information(e);
-    return boost::make_exceptional_future<void>(e);
+    return boost::make_exceptional_future<void>(boost::current_exception());
   }
 
   return boost::make_ready_future();
