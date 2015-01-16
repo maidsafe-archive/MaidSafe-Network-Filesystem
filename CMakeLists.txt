@@ -47,6 +47,7 @@ ms_set_meta_files_custom_commands("${OutputFile}" "${InputFile}" "${MetaFiles}" 
 set(NfsSourcesDir ${PROJECT_SOURCE_DIR}/src/maidsafe/nfs)
 ms_glob_dir(Nfs ${NfsSourcesDir} Nfs)
 ms_glob_dir(NfsClient ${NfsSourcesDir}/client "Nfs Client")
+ms_glob_dir(NfsDetail ${NfsSourcesDir}/detail "Nfs Detail")
 ms_glob_dir(NfsVault ${NfsSourcesDir}/vault "Nfs Vault")
 ms_glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
 set(NfsTestsMain ${NfsSourcesDir}/tests/tests_main.cc)
@@ -67,12 +68,15 @@ list(APPEND NfsTestsAllFiles ${NfsTestsMain})
 # Define MaidSafe libraries and executables                                                        #
 #==================================================================================================#
 ms_add_static_library(maidsafe_nfs_core ${NfsAllFiles} ${OutputFile} ${InputFile} ${MetaFiles})
+ms_add_static_library(maidsafe_nfs_detail ${NfsDetailAllFiles})
 ms_add_static_library(maidsafe_nfs_client ${NfsClientAllFiles})
 ms_add_static_library(maidsafe_nfs_vault ${NfsVaultAllFiles})
 target_include_directories(maidsafe_nfs_core PUBLIC ${CMAKE_BINARY_DIR}/GeneratedProtoFiles ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(maidsafe_nfs_detail PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_client PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_vault PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(maidsafe_nfs_core maidsafe_routing protobuf_lite)
+target_link_libraries(maidsafe_nfs_detail maidsafe_common maidsafe_encrypt maidsafe_routing)
 target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
 target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
