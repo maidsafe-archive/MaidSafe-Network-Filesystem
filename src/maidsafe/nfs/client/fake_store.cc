@@ -347,7 +347,8 @@ std::unique_ptr<StructuredDataVersions> FakeStore::ReadVersions(const KeyType& k
       std::move(std::unique_ptr<StructuredDataVersions>());
 }
 
-void FakeStore::WriteVersions(const KeyType& key, const StructuredDataVersions& versions) {
+void FakeStore::WriteVersions(
+    const KeyType& key, const StructuredDataVersions& versions, const bool creation) {
   if (!fs::exists(kDiskPath_))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::filesystem_io_error));
 
@@ -355,8 +356,12 @@ void FakeStore::WriteVersions(const KeyType& key, const StructuredDataVersions& 
   file_path.replace_extension(".ver");
 
   boost::system::error_code ec;
-  if (fs::exists(file_path, ec))
+  if (fs::exists(file_path, ec)) {
+    if (creation) {
+      BOOST_THROW_EXCEPTION(MakeError(VaultErrors::data_already_exists));
+    }
     current_disk_usage_.data -= fs::file_size(file_path, ec);
+  }
 
   auto serialised_versions(versions.Serialise().data);
   uint32_t value_size(static_cast<uint32_t>(serialised_versions.string().size()));
