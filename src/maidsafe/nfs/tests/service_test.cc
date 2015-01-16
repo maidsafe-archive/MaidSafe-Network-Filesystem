@@ -90,6 +90,7 @@ TEST_F(ServiceTest, BEH_All) {
       << "\nOriginal name:  " << Base64Substr(immutable_data.name()->string())
       << "\nRetrieved name: " << Base64Substr(retrieved.name()->string());
   EXPECT_EQ(immutable_data.data(), retrieved.data());
+  asio_service.Stop();
 }
 
 }  // namespace test
