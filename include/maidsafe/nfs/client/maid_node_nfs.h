@@ -170,7 +170,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   void HandleMessage(const T& routing_message);
 
   const passport::Maid kMaid_;
-  AsioService asio_service_;
+  BoostAsioService asio_service_;
   MaidNodeService::RpcTimers rpc_timers_;
   std::mutex network_health_mutex_;
   std::condition_variable network_health_condition_variable_;
