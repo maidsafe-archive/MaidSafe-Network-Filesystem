@@ -204,7 +204,9 @@ struct VersionTreeCreation {
   template <typename DataNameType>
   VersionTreeCreation(const DataNameType& name, const StructuredDataVersions::VersionName& version,
                       uint32_t max_versions_in, uint32_t max_branches_in)
-      : data_name(name), version_name(version), max_versions(max_versions_in),
+      : data_name(name),
+        version_name(version),
+        max_versions(max_versions_in),
         max_branches(max_branches_in) {}
 
   VersionTreeCreation(const DataName& name, const StructuredDataVersions::VersionName& version,
