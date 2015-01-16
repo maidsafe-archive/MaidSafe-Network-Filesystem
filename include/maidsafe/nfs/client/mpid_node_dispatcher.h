@@ -96,7 +96,7 @@ void MpidNodeDispatcher::SendMessageRequest(routing::TaskId task_id, const Data&
 
 template <typename Data>
 void SendDeleteRequest(const Data& data) {
-  typedef nfs::DeleteMessageRequestFromMpidNodeToMpidManager NfsMessage;
+  typedef nfs::DeleteRequestFromMpidNodeToMpidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
 
@@ -106,7 +106,7 @@ void SendDeleteRequest(const Data& data) {
 
 template <typename Data>
 void MpidNodeDispatcher::SendGetMessageRequest(routing::TaskId task_id, const Data& data) {
-  typedef nfs::GetMessageRequestFromMpidNodeToMpidManager NfsMessage;
+  typedef nfs::GetRequestFromMpidNodeToMpidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage::Contents content;
@@ -116,8 +116,8 @@ void MpidNodeDispatcher::SendGetMessageRequest(routing::TaskId task_id, const Da
 }
 
 template <typename DataName>
-void MpidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName& data_name) {
-  typedef nfs::GetRequestFromMpidNodeToDataManager NfsMessage;
+void MpidNodeDispatcher::SendGetRequest(routing::TaskId /*task_id*/, const DataName& /*data_name*/) {
+  /*typedef nfs::GetRequestFromMpidNodeToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<typename DataName::data_type>::value ?
@@ -127,7 +127,7 @@ void MpidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName&
   NfsMessage nfs_message(message_id, content);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
-  RoutingSend(routing_message);
+  RoutingSend(routing_message);*/
 }
 
 template <typename Message>

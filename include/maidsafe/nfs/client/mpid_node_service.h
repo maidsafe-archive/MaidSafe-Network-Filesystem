@@ -42,7 +42,7 @@ class MpidNodeService {
 
   typedef nfs::MessageAlertFromMpidManagerToMpidNode MessageAlert;
   typedef nfs::SendMessageResponseFromMpidManagerToMpidNode SendMessageResponse;
-  typedef nfs::GetMessageResponseFromMpidManagerToMpidNode GetMessageResponse;
+  typedef nfs::GetResponseFromMpidManagerToMpidNode GetMessageResponse;
   typedef nfs::CreateAccountResponseFromMpidManagerToMpidNode CreateAccountResponse;
   typedef nfs::GetResponseFromDataManagerToMpidNode GetResponse;
 
