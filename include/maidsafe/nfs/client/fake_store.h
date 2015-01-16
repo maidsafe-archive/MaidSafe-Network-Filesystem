@@ -229,7 +229,7 @@ FakeStore::VersionNamesFuture FakeStore::GetVersions(
       std::lock_guard<std::mutex> lock(this->mutex_);
       auto versions(this->ReadVersions(key));
       if (!versions)
-        BOOST_THROW_EXCEPTION(MakeError(CommonErrors::no_such_element));
+        BOOST_THROW_EXCEPTION(MakeError(VaultErrors::no_such_account));
       promise->set_value(versions->Get());
     }
     catch (const std::exception& e) {
