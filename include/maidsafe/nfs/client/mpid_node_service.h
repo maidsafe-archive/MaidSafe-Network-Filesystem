@@ -47,7 +47,7 @@ class MpidNodeService {
   typedef nfs::GetResponseFromDataManagerToMpidNode GetResponse;
 
   struct RpcTimers {
-    explicit RpcTimers(AsioService& asio_service_);
+    explicit RpcTimers(BoostAsioService& asio_service_);
     void CancellAll();
 
     routing::Timer<MessageAlert::Contents> message_alert_timer;

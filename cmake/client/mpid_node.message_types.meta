@@ -2,3 +2,4 @@ Action:MessageAlert              Source:MpidManager:Group      Destination:MpidN
 Action:SendMessageResponse       Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
 Action:GetResponse               Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::MpidMessageOrReturnCode
 Action:CreateAccountResponse     Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
+Action:GetResponse               Source:DataManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode

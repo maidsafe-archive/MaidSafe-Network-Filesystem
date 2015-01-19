@@ -65,6 +65,11 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
   // Creates mpid account and logs in. Throws on failure to create account.
   static std::shared_ptr<MpidClient> MakeShared(const passport::MpidAndSigner& mpid_and_signer);
   // Disconnects from network and all unfinished tasks will be cancelled
+
+  MpidClient(const MpidClient&) = delete;
+  MpidClient(MpidClient&&) = delete;
+  MpidClient& operator=(MpidClient) = delete;
+
   void Stop();
 
   OnNetworkHealthChange& network_health_change_signal();
@@ -87,13 +92,7 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
       const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(120));
 
  private:
-  typedef std::function<void(const DataNameAndContentOrReturnCode&)> GetFunctor;
-
   explicit MpidClient(const passport::Mpid& mpid);
-
-  MpidClient(const MpidClient&);
-  MpidClient(MpidClient&&);
-  MpidClient& operator=(MpidClient);
 
   void Init(const passport::MpidAndSigner& mpid_and_signer);
   void Init();
@@ -112,7 +111,7 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
   void HandleMessage(const T& routing_message);
 
   const passport::Mpid kMpid_;
-  AsioService asio_service_;
+  BoostAsioService asio_service_;
   MpidNodeService::RpcTimers rpc_timers_;
   std::mutex network_health_mutex_;
   std::condition_variable network_health_condition_variable_;

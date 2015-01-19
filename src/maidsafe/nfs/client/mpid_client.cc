@@ -51,12 +51,12 @@ MpidClient::MpidClient(const passport::Mpid& mpid)
       routing_(maidsafe::make_unique<routing::Routing>(kMpid_)),
       public_mpid_helper_(),
       dispatcher_(*routing_),
+      get_handler_(rpc_timers_.get_timer, dispatcher_),
       service_([&]()->std::unique_ptr<MpidNodeService> {
         std::unique_ptr<MpidNodeService> service(
           new MpidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_, get_handler_));
         return std::move(service);
-      }()),
-      get_handler_(rpc_timers_.get_timer, dispatcher_) {}
+      }()) {}
 
 void MpidClient::Stop() {
   dispatcher_.Stop();

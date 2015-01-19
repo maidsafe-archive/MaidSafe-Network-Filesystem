@@ -34,7 +34,7 @@ std::error_code NoSuchElement() {
 
 }  // unnamed namespace
 
-MpidNodeService::RpcTimers::RpcTimers(AsioService& asio_service_)
+MpidNodeService::RpcTimers::RpcTimers(BoostAsioService& asio_service_)
     : message_alert_timer(asio_service_),
       get_message_timer(asio_service_),
       send_message_timer(asio_service_),
