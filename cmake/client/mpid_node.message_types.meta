@@ -1,0 +1,3 @@
+Action:SendAlert               Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:GetResponse             Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::MpidMessageOrReturnCode
+Action:SendMessageResponse     Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
