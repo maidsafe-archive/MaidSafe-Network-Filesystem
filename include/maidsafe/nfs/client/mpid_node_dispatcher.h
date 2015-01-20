@@ -43,31 +43,28 @@ class MpidNodeDispatcher {
  public:
   explicit MpidNodeDispatcher(routing::Routing& routing);
 
+  MpidNodeDispatcher() = delete;
+  MpidNodeDispatcher(const MpidNodeDispatcher&) = delete;
+  MpidNodeDispatcher(MpidNodeDispatcher&&) = delete;
+  MpidNodeDispatcher& operator=(MpidNodeDispatcher) = delete;
+
   void Stop();
 
-  template <typename Data>
-  void SendMessageRequest(routing::TaskId task_id, const Data& data);
+  void SendMessageRequest(routing::TaskId task_id, const nfs_vault::MpidMessage& mpid_message);
+  void DeleteMessageRequest(const nfs_vault::MpidMessageAlert& mpid_message_alert);
+  void GetMessageRequest(routing::TaskId task_id,
+                         const nfs_vault::MpidMessageAlert& mpid_message_alert);
 
-  template <typename Data>
-  void SendDeleteRequest(const Data& data);
-
-  template <typename Data>
-  void SendGetMessageRequest(routing::TaskId task_id, const Data& alert);
-
-  template <typename DataName>
-  void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
-
+  
   void SendCreateAccountRequest(routing::TaskId task_id,
                                 const nfs_vault::MpidAccountCreation& account_creation);
 
   void SendRemoveAccountRequest(const nfs_vault::MpidAccountRemoval& account_removal);
 
- private:
-  MpidNodeDispatcher();
-  MpidNodeDispatcher(const MpidNodeDispatcher&);
-  MpidNodeDispatcher(MpidNodeDispatcher&&);
-  MpidNodeDispatcher& operator=(MpidNodeDispatcher);
+  template <typename DataName>
+  void SendGetRequest(routing::TaskId task_id, const DataName& data_name);
 
+ private:
   template <typename Message>
   void CheckSourcePersonaType() const;
 
@@ -82,38 +79,6 @@ class MpidNodeDispatcher {
 };
 
 // ==================== Implementation =============================================================
-
-template <typename Data>
-void MpidNodeDispatcher::SendMessageRequest(routing::TaskId task_id, const Data& data) {
-  typedef nfs::SendMessageRequestFromMpidNodeToMpidManager NfsMessage;
-  CheckSourcePersonaType<NfsMessage>();
-  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage::Contents contents;
-  contents = nfs_vault::MpidMessage(data);
-  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
-  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
-}
-
-template <typename Data>
-void SendDeleteRequest(const Data& data) {
-  typedef nfs::DeleteRequestFromMpidNodeToMpidManager NfsMessage;
-  CheckSourcePersonaType<NfsMessage>();
-  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-
-  NfsMessage nfs_message((NfsMessage::Contents(nfs_vault::MpidMessage(data))));
-  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
-}
-
-template <typename Data>
-void MpidNodeDispatcher::SendGetMessageRequest(routing::TaskId task_id, const Data& data) {
-  typedef nfs::GetRequestFromMpidNodeToMpidManager NfsMessage;
-  CheckSourcePersonaType<NfsMessage>();
-  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage::Contents content;
-  contents = nfs_vault::MpidMessageAlert(data);
-  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
-  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
-}
 
 template <typename DataName>
 void MpidNodeDispatcher::SendGetRequest(routing::TaskId /*task_id*/, const DataName& /*data_name*/) {

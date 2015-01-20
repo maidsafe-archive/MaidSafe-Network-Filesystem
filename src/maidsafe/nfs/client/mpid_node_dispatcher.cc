@@ -36,6 +36,35 @@ void MpidNodeDispatcher::Stop() {
   LOG(kWarning) << " MpidNodeDispatcher::Stop() !";
 }
 
+void MpidNodeDispatcher::SendMessageRequest(routing::TaskId task_id,
+                                            const nfs_vault::MpidMessage& mpid_message) {
+  typedef nfs::SendMessageRequestFromMpidNodeToMpidManager NfsMessage;
+  CheckSourcePersonaType<NfsMessage>();
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+  NfsMessage::Contents contents(mpid_message);
+  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
+}
+
+void MpidNodeDispatcher::DeleteMessageRequest(
+      const nfs_vault::MpidMessageAlert& mpid_message_alert) {
+  typedef nfs::DeleteRequestFromMpidNodeToMpidManager NfsMessage;
+  CheckSourcePersonaType<NfsMessage>();
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+  NfsMessage nfs_message((NfsMessage::Contents(mpid_message_alert)));
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
+}
+
+void MpidNodeDispatcher::GetMessageRequest(routing::TaskId task_id,
+                                           const nfs_vault::MpidMessageAlert& mpid_message_alert) {
+  typedef nfs::GetRequestFromMpidNodeToMpidManager NfsMessage;
+  CheckSourcePersonaType<NfsMessage>();
+  typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
+  NfsMessage::Contents contents(mpid_message_alert);
+  NfsMessage nfs_message(nfs::MessageId(task_id), contents);
+  RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMpidManagerReceiver_));
+}
+
 void MpidNodeDispatcher::SendCreateAccountRequest(
     routing::TaskId task_id,
     const nfs_vault::MpidAccountCreation& mpid_account_creation) {

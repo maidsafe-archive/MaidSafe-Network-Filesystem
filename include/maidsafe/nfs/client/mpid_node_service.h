@@ -40,7 +40,7 @@ class MpidNodeService {
   typedef void VaultMessages;
   typedef void HandleMessageReturnType;
 
-  typedef nfs::MessageAlertFromMpidManagerToMpidNode MessageAlert;
+  typedef nfs::SendAlertFromMpidManagerToMpidNode MessageAlert;
   typedef nfs::SendMessageResponseFromMpidManagerToMpidNode SendMessageResponse;
   typedef nfs::GetResponseFromMpidManagerToMpidNode GetMessageResponse;
   typedef nfs::CreateAccountResponseFromMpidManagerToMpidNode CreateAccountResponse;

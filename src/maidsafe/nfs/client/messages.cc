@@ -695,6 +695,9 @@ bool operator==(const DataNameAndSizeAndSpaceAndReturnCode& lhs,
 
 // ================================= MpidMessageOrReturnCode =======================================
 
+MpidMessageOrReturnCode::MpidMessageOrReturnCode()
+    : mpid_message(), return_code() {}
+
 MpidMessageOrReturnCode::MpidMessageOrReturnCode(
     const boost::expected<nfs_vault::MpidMessage, maidsafe_error>& expected)
         : mpid_message(), return_code() {
@@ -728,11 +731,8 @@ MpidMessageOrReturnCode& MpidMessageOrReturnCode::operator=(MpidMessageOrReturnC
 
 std::string MpidMessageOrReturnCode::Serialise() const {
   protobuf::MpidMessageOrReturnCode proto;
-  if (mpid_message)
-    proto.set_serialised_mpid_message(mpid_message->Serialise());
-  else
-    proto.set_serialised_return_code(return_code->Serialise());
-
+  proto.set_serialised_mpid_message(mpid_message.Serialise());
+  proto.set_serialised_return_code(return_code.Serialise());
   return proto.SerializeAsString();
 }
 

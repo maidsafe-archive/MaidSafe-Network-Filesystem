@@ -754,6 +754,9 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
 
 // ================================= MpidMessage ==================================================
 
+MpidMessage::MpidMessage()
+    : alert(), signed_body() {}
+
 MpidMessage::MpidMessage(const MpidMessageAlert& alert_in, MessageBodyType& signed_body_in)
     : alert(alert_in), signed_body(signed_body_in) {}
 

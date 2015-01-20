@@ -65,6 +65,57 @@ void MpidClient::Stop() {
   asio_service_.Stop();
 }
 
+boost::future<void> MpidClient::SendMessage(const nfs_vault::MpidMessage& mpid_message,
+                                            const std::chrono::steady_clock::duration& timeout) {
+  typedef MpidNodeService::SendMessageResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<void>>());
+  NodeId node_id;
+
+  auto response_functor([promise](const nfs_client::ReturnCode& result) {
+                           HandleSendMessageResponseResult(result, promise);
+                        });
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(routing::Parameters::group_size - 1,
+                                                               response_functor));
+  auto task_id(rpc_timers_.send_message_timer.NewTaskId());
+  rpc_timers_.send_message_timer.AddTask(
+      timeout,
+      [op_data](ResponseContents send_message_response) {
+        op_data->HandleResponseContents(std::move(send_message_response));
+      },
+      routing::Parameters::group_size - 1, task_id);
+  rpc_timers_.send_message_timer.PrintTaskIds();
+  dispatcher_.SendMessageRequest(task_id, mpid_message);
+  return promise->get_future();
+}
+
+void MpidClient::DeleteMessage(const nfs_vault::MpidMessageAlert& mpid_message_alert) {
+  dispatcher_.DeleteMessageRequest(mpid_message_alert);
+}
+
+boost::future<typename nfs_vault::MpidMessage> MpidClient::GetMessage(
+      const nfs_vault::MpidMessageAlert& mpid_message_alert,
+      const std::chrono::steady_clock::duration& timeout) {
+  typedef MpidNodeService::GetMessageResponse::Contents ResponseContents;
+  auto promise(std::make_shared<boost::promise<nfs_vault::MpidMessage>>());
+  NodeId node_id;
+
+  auto response_functor([promise](const MpidMessageOrReturnCode& result) {
+                           HandleGetMessageResponseResult(result, promise);
+                        });
+  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(routing::Parameters::group_size - 1,
+                                                               response_functor));
+  auto task_id(rpc_timers_.get_message_timer.NewTaskId());
+  rpc_timers_.get_message_timer.AddTask(
+      timeout,
+      [op_data](ResponseContents get_message_response) {
+        op_data->HandleResponseContents(std::move(get_message_response));
+      },
+      routing::Parameters::group_size - 1, task_id);
+  rpc_timers_.get_message_timer.PrintTaskIds();
+  dispatcher_.GetMessageRequest(task_id, mpid_message_alert);
+  return promise->get_future();
+}
+
 boost::future<void> MpidClient::CreateAccount(
     const nfs_vault::MpidAccountCreation& account_creation,
     const std::chrono::steady_clock::duration& timeout) {

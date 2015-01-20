@@ -74,16 +74,19 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
 
   OnNetworkHealthChange& network_health_change_signal();
 
-  template <typename Data>
-  boost::future<void> Send(const Data& data, const std::chrono::steady_clock::duration& timeout =
-                                                std::chrono::seconds(360));
+  boost::future<void> SendMessage(const nfs_vault::MpidMessage& mpid_message,
+      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(360));
 
-  template <typename Data>
-  void Delete(const Data& data);
+  void DeleteMessage(const nfs_vault::MpidMessageAlert& mpid_message_alert);
+
+  boost::future<typename nfs_vault::MpidMessage> GetMessage(
+      const nfs_vault::MpidMessageAlert& mpid_message_alert,
+      const std::chrono::steady_clock::duration& timeout = std::chrono::seconds(120));
 
   boost::future<void> CreateAccount(const nfs_vault::MpidAccountCreation& account_creation,
                                     const std::chrono::steady_clock::duration& timeout =
                                         std::chrono::seconds(240));
+
   void RemoveAccount(const nfs_vault::MpidAccountRemoval& account_removal);
 
   template <typename DataName>
@@ -120,40 +123,11 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
   std::unique_ptr<routing::Routing> routing_;
   nfs::detail::PublicMpidHelper public_mpid_helper_;
   MpidNodeDispatcher dispatcher_;
-  nfs::Service<MpidNodeService> service_;
   GetHandler<MpidNodeDispatcher> get_handler_;
+  nfs::Service<MpidNodeService> service_;
 };
 
 // ==================== Implementation =============================================================
-
-template <typename Data>
-boost::future<void> MpidClient::Send(const Data& data,
-                                    const std::chrono::steady_clock::duration& timeout) {
-  typedef MpidNodeService::SendMessageResponse::Contents ResponseContents;
-  auto promise(std::make_shared<boost::promise<void>>());
-  NodeId node_id;
-
-  auto response_functor([promise](const nfs_client::ReturnCode& result) {
-                           HandleSendMessageResponseResult(result, promise);
-                        });
-  auto op_data(std::make_shared<nfs::OpData<ResponseContents>>(routing::Parameters::group_size - 1,
-                                                               response_functor));
-  auto task_id(rpc_timers_.put_timer.NewTaskId());
-  rpc_timers_.put_timer.AddTask(
-      timeout,
-      [op_data, data](ResponseContents put_response) {
-        op_data->HandleResponseContents(std::move(put_response));
-      },
-      routing::Parameters::group_size - 1, task_id);
-  rpc_timers_.put_timer.PrintTaskIds();
-  dispatcher_.SendMessageRequest(task_id, data);
-  return promise->get_future();
-}
-
-template <typename Data>
-void MpidClient::Delete(const Data& data) {
-  dispatcher_.SendDeleteRequest(data);
-}
 
 template <typename DataName>
 boost::future<typename DataName::data_type> MpidClient::Get(
