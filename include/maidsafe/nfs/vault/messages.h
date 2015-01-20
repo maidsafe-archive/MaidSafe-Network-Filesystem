@@ -388,8 +388,9 @@ void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT;
 
 struct MpidMessageAlert {
   MpidMessageAlert();
-  MpidMessageAlert(const passport::PublicMpid::Name& sender_in, int32_t id_in, int32_t parent_id_in,
-                   const MessageHeaderType& signed_header_in);
+  MpidMessageAlert(const passport::PublicMpid::Name& sender_in,
+                   const passport::PublicMpid::Name& receiver_in, int32_t id_in,
+                   int32_t parent_id_in, const MessageHeaderType& signed_header_in);
   explicit MpidMessageAlert(const std::string& serialised_copy);
   MpidMessageAlert(const MpidMessageAlert& other);
   MpidMessageAlert(MpidMessageAlert&& other);
@@ -397,7 +398,7 @@ struct MpidMessageAlert {
 
   std::string Serialise() const;
 
-  passport::PublicMpid::Name sender;
+  passport::PublicMpid::Name sender, receiver;
   int32_t id, parent_id;
   MessageHeaderType signed_header;
 };
@@ -408,8 +409,7 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT;
 // ================================= MpidMessage ==================================================
 
 struct MpidMessage {
-  MpidMessage(const passport::PublicMpid::Name& receiver_in, int32_t id_in, int32_t parent_id_in,
-              const MessageHeaderType& signed_header_in, const std::string& signed_body_in);
+  MpidMessage(const MpidMessageAlert& alert, MessageBodyType& signed_body_in);
   explicit MpidMessage(const std::string& serialised_copy);
   MpidMessage(const MpidMessage& other);
   MpidMessage(MpidMessage&& other);
@@ -417,9 +417,7 @@ struct MpidMessage {
 
   std::string Serialise() const;
 
-  passport::PublicMpid::Name receiver;
-  int32_t id, parent_id;
-  MessageHeaderType signed_header;
+  MpidMessageAlert alert;
   MessageBodyType signed_body;
 };
 

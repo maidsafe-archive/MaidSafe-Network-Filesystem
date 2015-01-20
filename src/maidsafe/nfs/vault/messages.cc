@@ -694,11 +694,14 @@ void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT {
 // ================================= MpidMessageAlert =============================================
 
 MpidMessageAlert::MpidMessageAlert()
-    : id(), parent_id(), signed_header() {}
+    : sender(), receiver(), id(), parent_id(), signed_header() {}
 
-MpidMessageAlert::MpidMessageAlert(const passport::PublicMpid::Name& sender_in, int32_t id_in,
+MpidMessageAlert::MpidMessageAlert(const passport::PublicMpid::Name& sender_in,
+                                   const passport::PublicMpid::Name& receiver_in,
+                                   int32_t id_in,
                                    int32_t parent_id_in, const MessageHeaderType& signed_header_in)
-    : sender(sender_in), id(id_in), parent_id(parent_id_in), signed_header(signed_header_in) {}
+    : sender(sender_in), receiver(receiver_in), id(id_in), parent_id(parent_id_in),
+      signed_header(signed_header_in) {}
 
 MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
   protobuf::MpidMessageAlert proto;
@@ -706,18 +709,19 @@ MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
   sender = passport::PublicMpid::Name(Identity(proto.sender()));
+  receiver = passport::PublicMpid::Name(Identity(proto.receiver()));
   id = proto.id();
   parent_id = proto.parent_id();
   signed_header = MessageHeaderType(proto.signed_header());
 }
 
 MpidMessageAlert::MpidMessageAlert(const MpidMessageAlert& other)
-    : sender(other.sender), id(other.id), parent_id(other.parent_id),
+    : sender(other.sender), receiver(), id(other.id), parent_id(other.parent_id),
       signed_header(other.signed_header) {}
 
 MpidMessageAlert::MpidMessageAlert(MpidMessageAlert&& other)
-    : id(std::move(other.id)), parent_id(std::move(other.parent_id)),
-      signed_header(std::move(other.signed_header)) {}
+    : sender(std::move(sender)), receiver(std::move(receiver)), id(std::move(other.id)),
+      parent_id(std::move(other.parent_id)), signed_header(std::move(other.signed_header)) {}
 
 MpidMessageAlert& MpidMessageAlert::operator=(MpidMessageAlert other) {
   swap(*this, other);
@@ -727,6 +731,7 @@ MpidMessageAlert& MpidMessageAlert::operator=(MpidMessageAlert other) {
 std::string MpidMessageAlert::Serialise() const {
   protobuf::MpidMessageAlert proto;
   proto.set_sender(sender->string());
+  proto.set_receiver(receiver->string());
   proto.set_id(id);
   proto.set_parent_id(parent_id);
   proto.set_signed_header(signed_header.string());
@@ -734,13 +739,14 @@ std::string MpidMessageAlert::Serialise() const {
 }
 
 bool operator==(const MpidMessageAlert& lhs, const MpidMessageAlert& rhs) {
-  return (lhs.sender == rhs.sender) && (lhs.id == rhs.id) && (lhs.parent_id == rhs.parent_id) &&
-         (lhs.signed_header == rhs.signed_header);
+  return (lhs.sender == rhs.sender) && (lhs.receiver == rhs.receiver) &&  (lhs.id == rhs.id) &&
+         (lhs.parent_id == rhs.parent_id) && (lhs.signed_header == rhs.signed_header);
 }
 
 void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.sender, rhs.sender);
+  swap(lhs.receiver, rhs.receiver);
   swap(lhs.id, rhs.id);
   swap(lhs.parent_id, rhs.parent_id);
   swap(lhs.signed_header, rhs.signed_header);
@@ -748,32 +754,23 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
 
 // ================================= MpidMessage ==================================================
 
-MpidMessage::MpidMessage(const passport::PublicMpid::Name& receiver_in, int32_t id_in,
-                         int32_t parent_id_in, const MessageHeaderType& signed_header_in,
-                         const std::string& signed_body_in)
-    : receiver(receiver_in), id(id_in), parent_id(parent_id_in),
-      signed_header(signed_header_in), signed_body(signed_body_in) {}
+MpidMessage::MpidMessage(const MpidMessageAlert& alert_in, MessageBodyType& signed_body_in)
+    : alert(alert_in), signed_body(signed_body_in) {}
 
 MpidMessage::MpidMessage(const std::string& serialised_copy) {
   protobuf::MpidMessage proto;
   if (!proto.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
-  receiver = passport::PublicMpid::Name(Identity(proto.receiver()));
-  id = proto.id();
-  parent_id = proto.parent_id();
-  signed_header = MessageHeaderType(proto.signed_header());
+  alert = MpidMessageAlert(proto.serialised_alert());
   signed_body = MessageBodyType(proto.signed_body());
 }
 
 MpidMessage::MpidMessage(const MpidMessage& other)
-    : receiver(other.receiver), id(other.id), parent_id(other.parent_id),
-      signed_header(other.signed_header), signed_body(other.signed_body){}
+    : alert(other.alert), signed_body(other.signed_body){}
 
 MpidMessage::MpidMessage(MpidMessage&& other)
-    : receiver(std::move(other.receiver)), id(std::move(other.id)),
-      parent_id(std::move(other.parent_id)), signed_header(std::move(other.signed_header)),
-      signed_body(std::move(other.signed_body)) {}
+    : alert(std::move(other.alert)), signed_body(std::move(other.signed_body)) {}
 
 MpidMessage& MpidMessage::operator=(MpidMessage other) {
   swap(*this, other);
@@ -782,25 +779,18 @@ MpidMessage& MpidMessage::operator=(MpidMessage other) {
 
 std::string MpidMessage::Serialise() const {
   protobuf::MpidMessage proto;
-  proto.set_receiver(receiver->string());
-  proto.set_id(id);
-  proto.set_parent_id(parent_id);
-  proto.set_signed_header(signed_header.string());
+  proto.set_serialised_alert(alert.Serialise());
   proto.set_signed_body(signed_body.string());
   return proto.SerializeAsString();
 }
 
 bool operator==(const MpidMessage& lhs, const MpidMessage& rhs) {
-  return (lhs.receiver == rhs.receiver) && (lhs.id == rhs.id) && (lhs.parent_id == rhs.parent_id) &&
-         (lhs.signed_header == rhs.signed_header) && (lhs.signed_body == rhs.signed_body);
+  return (lhs.alert == rhs.alert) && (lhs.signed_body == rhs.signed_body);
 }
 
 void swap(MpidMessage& lhs, MpidMessage& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
-  swap(lhs.receiver, rhs.receiver);
-  swap(lhs.id, rhs.id);
-  swap(lhs.parent_id, rhs.parent_id);
-  swap(lhs.signed_header, rhs.signed_header);
+  swap(lhs.alert, rhs.alert);
   swap(lhs.signed_body, rhs.signed_body);
 }
 
