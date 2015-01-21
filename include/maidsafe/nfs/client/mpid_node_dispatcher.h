@@ -55,7 +55,6 @@ class MpidNodeDispatcher {
   void GetMessageRequest(routing::TaskId task_id,
                          const nfs_vault::MpidMessageAlert& mpid_message_alert);
 
-  
   void SendCreateAccountRequest(routing::TaskId task_id,
                                 const nfs_vault::MpidAccountCreation& account_creation);
 
@@ -81,7 +80,8 @@ class MpidNodeDispatcher {
 // ==================== Implementation =============================================================
 
 template <typename DataName>
-void MpidNodeDispatcher::SendGetRequest(routing::TaskId /*task_id*/, const DataName& /*data_name*/) {
+void MpidNodeDispatcher::SendGetRequest(routing::TaskId /*task_id*/,
+                                        const DataName& /*data_name*/) {
   /*typedef nfs::GetRequestFromMpidNodeToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;

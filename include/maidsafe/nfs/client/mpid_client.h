@@ -60,7 +60,7 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
  public:
   typedef boost::signals2::signal<void(int32_t)> OnNetworkHealthChange;
 
-   // Logging in for already existing mpid accounts
+  // Logging in for already existing mpid accounts
   static std::shared_ptr<MpidClient> MakeShared(const passport::Mpid& mpid);
   // Creates mpid account and logs in. Throws on failure to create account.
   static std::shared_ptr<MpidClient> MakeShared(const passport::MpidAndSigner& mpid_and_signer);
