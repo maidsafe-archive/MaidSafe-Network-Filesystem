@@ -53,6 +53,8 @@ set(NfsTestsMain ${NfsSourcesDir}/tests/tests_main.cc)
 set(NfsNetworkTestsAllFiles ${NfsSourcesDir}/tests/data_getter_test.cc
                             ${NfsSourcesDir}/tests/maid_client_test.h
                             ${NfsSourcesDir}/tests/maid_client_test.cc
+                            ${NfsSourcesDir}/tests/mpid_client_test.h
+                            ${NfsSourcesDir}/tests/mpid_client_test.cc
                             ${NfsTestsMain})
 set(NfsWeeklyNetworkTestsAllFiles ${NfsSourcesDir}/tests/maid_client_test.h
                                   ${NfsSourcesDir}/tests/maid_client_lengthy_test.cc
