@@ -752,7 +752,7 @@ void swap(MpidMessageBase& lhs, MpidMessageBase& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.signed_header, rhs.signed_header);
 }
 
-// ================================= MpidMessageAlert ==================================================
+// ================================= MpidMessageAlert =============================================
 
 MpidMessageAlert::MpidMessageAlert(const MpidMessageBase& base_in,
                                    const MessageIdType& message_id_in)
