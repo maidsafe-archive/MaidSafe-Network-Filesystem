@@ -166,7 +166,9 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   template <typename T>
   void OnMessageReceived(const T& routing_message);
 
-  void HandleMessage(const TypeErasedMessageWrapper& wrapper_tuple);
+  template <typename Sender, typename Receiver>
+  void HandleMessage(const nfs::TypeErasedMessageWrapper& wrapper_tuple, const Sender& sender,
+                     const Receiver& receiver);
 
   const passport::Maid kMaid_;
   BoostAsioService asio_service_;
@@ -349,8 +351,23 @@ void MaidNodeNfs::OnMessageReceived(const T& routing_message) {
   std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
   asio_service_.service().post([=] {
       LOG(kVerbose) << "NFS::OnMessageReceived invoked task in asio_service";
-      this_ptr->HandleMessage(wrapper_tuple);
+      this_ptr->HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
   });
+}
+
+template <typename Sender, typename Receiver>
+void MaidNodeNfs::HandleMessage(const nfs::TypeErasedMessageWrapper& wrapper_tuple,
+                                const Sender& sender, const Receiver& receiver) {
+  const auto& destination_persona(std::get<2>(wrapper_tuple));
+  static_assert(std::is_same<decltype(destination_persona),
+                             const nfs::detail::DestinationTaggedValue&>::value,
+                "The value retrieved from the tuple isn't the destination type, but should be.");
+  if (destination_persona.data == nfs::Persona::kMaidNode)
+    return service_.HandleMessage(wrapper_tuple, sender, receiver);
+  auto action(std::get<0>(wrapper_tuple));
+  auto source_persona(std::get<1>(wrapper_tuple).data);
+  LOG(kError) << " MaidNodeNfs::HandleMessage unhandled message from " << source_persona
+              << " " << action << " to " << destination_persona;
 }
 
 }  // namespace nfs_client

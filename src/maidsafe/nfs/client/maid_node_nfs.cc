@@ -105,19 +105,6 @@ void MaidNodeNfs::InitZeroState(const passport::MaidAndSigner& maid_and_signer,
   cleanup_on_error.Release();
 }
 
-void MaidNodeNfs::HandleMessage(const TypeErasedMessageWrapper& wrapper_tuple) {
-  const auto& destination_persona(std::get<2>(wrapper_tuple));
-  static_assert(std::is_same<decltype(destination_persona),
-                             const nfs::detail::DestinationTaggedValue&>::value,
-                "The value retrieved from the tuple isn't the destination type, but should be.");
-  if (destination_persona.data == nfs::Persona::kMaidNode)
-    return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
-  auto action(std::get<0>(wrapper_tuple));
-  auto source_persona(std::get<1>(wrapper_tuple).data);
-  LOG(kError) << " MaidNodeNfs::HandleMessage unhandled message from " << source_persona
-              << " " << action << " to " << destination_persona;
-}
-
 void MaidNodeNfs::CreateAccount(const passport::PublicMaid& public_maid,
                                 const passport::PublicAnmaid& public_anmaid) {
   LOG(kInfo) << "Calling CreateAccount for maid ID:" << DebugId(public_maid.name());
