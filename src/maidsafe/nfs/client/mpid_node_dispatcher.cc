@@ -57,7 +57,7 @@ void MpidNodeDispatcher::DeleteMessageRequest(
 
 void MpidNodeDispatcher::GetMessageRequest(routing::TaskId task_id,
                                            const nfs_vault::MpidMessageAlert& mpid_message_alert) {
-  typedef nfs::GetRequestFromMpidNodeToMpidManager NfsMessage;
+  typedef nfs::GetMessageRequestFromMpidNodeToMpidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   NfsMessage::Contents contents(mpid_message_alert);

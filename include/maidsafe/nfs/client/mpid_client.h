@@ -121,7 +121,7 @@ class MpidClient : public std::enable_shared_from_this<MpidClient>  {
   int network_health_;
   OnNetworkHealthChange network_health_change_signal_;
   std::unique_ptr<routing::Routing> routing_;
-  nfs::detail::PublicMpidHelper public_mpid_helper_;
+  nfs::detail::PublicPmidHelper public_pmid_helper_;
   MpidNodeDispatcher dispatcher_;
   GetHandler<MpidNodeDispatcher> get_handler_;
   nfs::Service<MpidNodeService> service_;

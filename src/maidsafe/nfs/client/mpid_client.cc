@@ -49,7 +49,7 @@ MpidClient::MpidClient(const passport::Mpid& mpid)
       network_health_(-1),
       network_health_change_signal_(),
       routing_(maidsafe::make_unique<routing::Routing>(kMpid_)),
-      public_mpid_helper_(),
+      public_pmid_helper_(),
       dispatcher_(*routing_),
       get_handler_(rpc_timers_.get_timer, dispatcher_),
       service_([&]()->std::unique_ptr<MpidNodeService> {
@@ -63,6 +63,10 @@ void MpidClient::Stop() {
   routing_.reset();
   rpc_timers_.CancellAll();
   asio_service_.Stop();
+}
+
+MpidClient::OnNetworkHealthChange& MpidClient::network_health_change_signal() {
+  return network_health_change_signal_;
 }
 
 boost::future<void> MpidClient::SendMessage(const nfs_vault::MpidMessage& mpid_message,
@@ -190,9 +194,9 @@ routing::Functors MpidClient::InitialiseRoutingCallbacks() {
   functors.close_nodes_change = [](std::shared_ptr<routing::CloseNodesChange> /*close_change*/) {};
   functors.request_public_key = [this_ptr](const NodeId& node_id,
                                        const routing::GivePublicKeyFunctor& give_key) {
-    auto future_key(this_ptr->Get(passport::PublicMpid::Name{ Identity{ node_id.string() } },
+    auto future_key(this_ptr->Get(passport::PublicPmid::Name{ Identity{ node_id.string() } },
                                         std::chrono::seconds(10)));
-    this_ptr->public_mpid_helper_.AddEntry(std::move(future_key), give_key);
+    this_ptr->public_pmid_helper_.AddEntry(std::move(future_key), give_key);
   };
 
   functors.typed_message_and_caching.single_to_group.message_received =

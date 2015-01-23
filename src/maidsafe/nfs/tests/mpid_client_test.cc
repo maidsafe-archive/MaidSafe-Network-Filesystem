@@ -29,7 +29,7 @@ TEST_F(MpidClientTest, FUNC_Constructor) {
   {
     auto nfs_new_account = nfs_client::MpidClient::MakeShared(mpid_and_signer);
   }
-  auto nfs_existing_account = nfs_client::MpidClient::MakeShared(mpid_and_signer.first);
+//  auto nfs_existing_account = nfs_client::MpidClient::MakeShared(mpid_and_signer.first);
 }
 
 }  // namespace test

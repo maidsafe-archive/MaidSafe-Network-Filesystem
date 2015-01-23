@@ -132,6 +132,22 @@ void MpidNodeService::HandleMessage(const GetResponse& message,
   }
 }
 
+void MpidNodeService::HandleMessage(const GetCachedResponse& message,
+                                    const GetCachedResponse::Sender& /*sender*/,
+                                    const GetCachedResponse::Receiver& receiver) {
+  assert(receiver == kReceiver_);
+  static_cast<void>(receiver);
+  try {
+    get_handler_.AddResponse(message.id.data, *message.contents);
+  }
+  catch (const maidsafe_error& error) {
+    if (error.code() != NoSuchElement())
+      throw;
+    else
+      LOG(kWarning) << "Timer does not expect:" << message.id.data;
+  }
+}
+
 }  // namespace nfs_client
 
 }  // namespace maidsafe

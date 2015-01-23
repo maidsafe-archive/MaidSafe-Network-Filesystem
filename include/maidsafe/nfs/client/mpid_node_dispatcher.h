@@ -80,9 +80,8 @@ class MpidNodeDispatcher {
 // ==================== Implementation =============================================================
 
 template <typename DataName>
-void MpidNodeDispatcher::SendGetRequest(routing::TaskId /*task_id*/,
-                                        const DataName& /*data_name*/) {
-  /*typedef nfs::GetRequestFromMpidNodeToDataManager NfsMessage;
+void MpidNodeDispatcher::SendGetRequest(routing::TaskId task_id, const DataName& data_name) {
+  typedef nfs::GetRequestFromMpidNodeToDataManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
   static const routing::Cacheable kCacheable(is_cacheable<typename DataName::data_type>::value ?
@@ -92,7 +91,7 @@ void MpidNodeDispatcher::SendGetRequest(routing::TaskId /*task_id*/,
   NfsMessage nfs_message(message_id, content);
   NfsMessage::Receiver receiver(routing::GroupId(NodeId(data_name->string())));
   RoutingMessage routing_message(nfs_message.Serialise(), kThisNodeAsSender_, receiver, kCacheable);
-  RoutingSend(routing_message);*/
+  RoutingSend(routing_message);
 }
 
 template <typename Message>

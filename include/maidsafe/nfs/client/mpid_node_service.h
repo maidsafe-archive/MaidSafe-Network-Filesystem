@@ -42,9 +42,10 @@ class MpidNodeService {
 
   typedef nfs::SendAlertFromMpidManagerToMpidNode MessageAlert;
   typedef nfs::SendMessageResponseFromMpidManagerToMpidNode SendMessageResponse;
-  typedef nfs::GetResponseFromMpidManagerToMpidNode GetMessageResponse;
+  typedef nfs::GetMessageResponseFromMpidManagerToMpidNode GetMessageResponse;
   typedef nfs::CreateAccountResponseFromMpidManagerToMpidNode CreateAccountResponse;
   typedef nfs::GetResponseFromDataManagerToMpidNode GetResponse;
+  typedef nfs::GetCachedResponseFromCacheHandlerToMpidNode GetCachedResponse;
 
   struct RpcTimers {
     explicit RpcTimers(BoostAsioService& asio_service_);
@@ -75,6 +76,9 @@ class MpidNodeService {
 
   void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
                      const GetResponse::Receiver& receiver);
+
+  void HandleMessage(const GetCachedResponse& message, const GetCachedResponse::Sender& sender,
+                     const GetCachedResponse::Receiver& receiver);
 
  private:
   const routing::SingleId kReceiver_;
