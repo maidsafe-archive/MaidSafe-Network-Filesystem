@@ -105,6 +105,19 @@ void MaidNodeNfs::InitZeroState(const passport::MaidAndSigner& maid_and_signer,
   cleanup_on_error.Release();
 }
 
+void MaidNodeNfs::HandleMessage(const TypeErasedMessageWrapper& wrapper_tuple) {
+  const auto& destination_persona(std::get<2>(wrapper_tuple));
+  static_assert(std::is_same<decltype(destination_persona),
+                             const nfs::detail::DestinationTaggedValue&>::value,
+                "The value retrieved from the tuple isn't the destination type, but should be.");
+  if (destination_persona.data == nfs::Persona::kMaidNode)
+    return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
+  auto action(std::get<0>(wrapper_tuple));
+  auto source_persona(std::get<1>(wrapper_tuple).data);
+  LOG(kError) << " MaidNodeNfs::HandleMessage unhandled message from " << source_persona
+              << " " << action << " to " << destination_persona;
+}
+
 void MaidNodeNfs::CreateAccount(const passport::PublicMaid& public_maid,
                                 const passport::PublicAnmaid& public_anmaid) {
   LOG(kInfo) << "Calling CreateAccount for maid ID:" << DebugId(public_maid.name());
@@ -129,14 +142,14 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
       network_health_(-1),
       network_health_change_signal_(),
       routing_(maidsafe::make_unique<routing::Routing>(kMaid_)),
+      data_getter_(asio_service_, *routing_),
       public_pmid_helper_(),
       dispatcher_(*routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
-            new MaidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_, get_handler_));
+            new MaidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_));
         return std::move(service);
-      }()),
-      get_handler_(rpc_timers_.get_timer, dispatcher_) {
+      }()) {
 }
 
 void MaidNodeNfs::Stop() {

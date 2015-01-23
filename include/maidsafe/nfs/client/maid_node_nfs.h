@@ -50,7 +50,7 @@
 #include "maidsafe/nfs/client/client_utils.h"
 #include "maidsafe/nfs/client/maid_node_dispatcher.h"
 #include "maidsafe/nfs/client/maid_node_service.h"
-#include "maidsafe/nfs/client/get_handler.h"
+#include "maidsafe/nfs/client/data_getter.h"
 
 namespace maidsafe {
 
@@ -166,8 +166,7 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   template <typename T>
   void OnMessageReceived(const T& routing_message);
 
-  template <typename T>
-  void HandleMessage(const T& routing_message);
+  void HandleMessage(const TypeErasedMessageWrapper& wrapper_tuple);
 
   const passport::Maid kMaid_;
   BoostAsioService asio_service_;
@@ -177,10 +176,10 @@ class MaidNodeNfs : public std::enable_shared_from_this<MaidNodeNfs>  {
   int network_health_;
   OnNetworkHealthChange network_health_change_signal_;
   std::unique_ptr<routing::Routing> routing_;
+  DataGetter data_getter_;
   nfs::detail::PublicPmidHelper public_pmid_helper_;
   MaidNodeDispatcher dispatcher_;
   nfs::Service<MaidNodeService> service_;
-  GetHandler<MaidNodeDispatcher> get_handler_;
 };
 
 void CreateAccount(std::shared_ptr<passport::Maid> maid,
@@ -192,10 +191,7 @@ template <typename DataName>
 boost::future<typename DataName::data_type> MaidNodeNfs::Get(
     const DataName& data_name,
     const std::chrono::steady_clock::duration& timeout) {
-  LOG(kVerbose) << "MaidNodeNfs Get " << HexSubstr(data_name.value);
-  auto promise(std::make_shared<boost::promise<typename DataName::data_type>>());
-  get_handler_.Get(data_name, promise, timeout);
-  return promise->get_future();
+  return data_getter_.Get(data_name, timeout);
 }
 
 template <typename Data>
@@ -345,28 +341,16 @@ void MaidNodeNfs::DeleteBranchUntilFork(const DataName& data_name,
 
 template <typename T>
 void MaidNodeNfs::OnMessageReceived(const T& routing_message) {
-  LOG(kVerbose) << "NFS::OnMessageReceived";
+  auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
+  const auto& destination_persona(std::get<2>(wrapper_tuple));
+  if (destination_persona.data == nfs::Persona::kDataGetter)
+    return data_getter_.HandleMessage(routing_message);
+
   std::shared_ptr<MaidNodeNfs> this_ptr(shared_from_this());
   asio_service_.service().post([=] {
       LOG(kVerbose) << "NFS::OnMessageReceived invoked task in asio_service";
-      this_ptr->HandleMessage(routing_message);
+      this_ptr->HandleMessage(wrapper_tuple);
   });
-}
-
-template <typename T>
-void MaidNodeNfs::HandleMessage(const T& routing_message) {
-  LOG(kVerbose) << "MaidNodeNfs::HandleMessage";
-  auto wrapper_tuple(nfs::ParseMessageWrapper(routing_message.contents));
-  const auto& destination_persona(std::get<2>(wrapper_tuple));
-  static_assert(std::is_same<decltype(destination_persona),
-                             const nfs::detail::DestinationTaggedValue&>::value,
-                "The value retrieved from the tuple isn't the destination type, but should be.");
-  if (destination_persona.data == nfs::Persona::kMaidNode)
-    return service_.HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
-  auto action(std::get<0>(wrapper_tuple));
-  auto source_persona(std::get<1>(wrapper_tuple).data);
-  LOG(kError) << " MaidNodeNfs::HandleMessage unhandled message from " << source_persona
-              << " " << action << " to " << destination_persona;
 }
 
 }  // namespace nfs_client
