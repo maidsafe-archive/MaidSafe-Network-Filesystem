@@ -716,11 +716,11 @@ MpidMessageBase::MpidMessageBase(const std::string& serialised_copy) {
 }
 
 MpidMessageBase::MpidMessageBase(const MpidMessageBase& other)
-    : sender(other.sender), receiver(), id(other.id), parent_id(other.parent_id),
+    : sender(other.sender), receiver(other.receiver), id(other.id), parent_id(other.parent_id),
       signed_header(other.signed_header) {}
 
 MpidMessageBase::MpidMessageBase(MpidMessageBase&& other)
-    : sender(std::move(sender)), receiver(std::move(receiver)), id(std::move(other.id)),
+    : sender(std::move(other.sender)), receiver(std::move(other.receiver)), id(std::move(other.id)),
       parent_id(std::move(other.parent_id)), signed_header(std::move(other.signed_header)) {}
 
 MpidMessageBase& MpidMessageBase::operator=(MpidMessageBase other) {
