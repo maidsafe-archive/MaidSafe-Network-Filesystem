@@ -129,14 +129,14 @@ MaidNodeNfs::MaidNodeNfs(const passport::Maid& maid)
       network_health_(-1),
       network_health_change_signal_(),
       routing_(maidsafe::make_unique<routing::Routing>(kMaid_)),
+      data_getter_(asio_service_, *routing_),
       public_pmid_helper_(),
       dispatcher_(*routing_),
       service_([&]()->std::unique_ptr<MaidNodeService> {
         std::unique_ptr<MaidNodeService> service(
-            new MaidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_, get_handler_));
+            new MaidNodeService(routing::SingleId(routing_->kNodeId()), rpc_timers_));
         return std::move(service);
-      }()),
-      get_handler_(rpc_timers_.get_timer, dispatcher_) {
+      }()) {
 }
 
 void MaidNodeNfs::Stop() {

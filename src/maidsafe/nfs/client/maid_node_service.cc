@@ -35,8 +35,7 @@ std::error_code NoSuchElement() {
 }  // unnamed namespace
 
 MaidNodeService::RpcTimers::RpcTimers(BoostAsioService& asio_service_)
-    : get_timer(asio_service_),
-      put_timer(asio_service_),
+    : put_timer(asio_service_),
       get_versions_timer(asio_service_),
       get_branch_timer(asio_service_),
       create_account_timer(asio_service_),
@@ -44,7 +43,6 @@ MaidNodeService::RpcTimers::RpcTimers(BoostAsioService& asio_service_)
       put_version_timer(asio_service_) {}
 
 void MaidNodeService::RpcTimers::CancellAll() {
-  get_timer.CancelAll();
   put_timer.CancelAll();
   get_versions_timer.CancelAll();
   get_branch_timer.CancelAll();
@@ -54,28 +52,8 @@ void MaidNodeService::RpcTimers::CancellAll() {
 }
 
 MaidNodeService::MaidNodeService(const routing::SingleId& receiver,
-                                 RpcTimers& rpc_timers,
-                                 GetHandler<MaidNodeDispatcher>& get_handler)
-    : kReceiver_(receiver), rpc_timers_(rpc_timers), get_handler_(get_handler) {}
-
-void MaidNodeService::HandleMessage(const GetResponse& message,
-                                    const GetResponse::Sender& /*sender*/,
-                                    const GetResponse::Receiver& receiver) {
-  LOG(kVerbose) << "MaidNodeService::HandleMessage GetResponse "
-                << HexSubstr(message.Serialise()) << " with content "
-                << HexSubstr(message.contents->Serialise());
-  assert(receiver == kReceiver_);
-  static_cast<void>(receiver);
-  try {
-    get_handler_.AddResponse(message.id.data, *message.contents);
-  }
-  catch (const maidsafe_error& error) {
-    if (error.code() != NoSuchElement())
-      throw;
-    else
-      LOG(kWarning) << "Timer does not expect:" << message.id.data;
-  }
-}
+                                 RpcTimers& rpc_timers)
+    : kReceiver_(receiver), rpc_timers_(rpc_timers) {}
 
 void MaidNodeService::HandleMessage(const PutResponse& message,
                                     const PutResponse::Sender& /*sender*/,
@@ -85,25 +63,6 @@ void MaidNodeService::HandleMessage(const PutResponse& message,
   static_cast<void>(receiver);
   try {
     rpc_timers_.put_timer.AddResponse(message.id.data, *message.contents);
-  }
-  catch (const maidsafe_error& error) {
-    if (error.code() != NoSuchElement())
-      throw;
-    else
-      LOG(kWarning) << "Timer does not expect:" << message.id.data;
-  }
-}
-
-void MaidNodeService::HandleMessage(const GetCachedResponse& message,
-                                    const GetCachedResponse::Sender& /*sender*/,
-                                    const GetCachedResponse::Receiver& receiver) {
-  LOG(kVerbose) << "MaidNodeService::HandleMessage GetCachedResponse "
-                << HexSubstr(message.Serialise()) << " with content "
-                << HexSubstr(message.contents->Serialise());
-  assert(receiver == kReceiver_);
-  static_cast<void>(receiver);
-  try {
-    get_handler_.AddResponse(message.id.data, *message.contents);
   }
   catch (const maidsafe_error& error) {
     if (error.code() != NoSuchElement())

@@ -25,7 +25,6 @@
 #include "maidsafe/nfs/message_types.h"
 #include "maidsafe/nfs/client/messages.h"
 #include "maidsafe/nfs/vault/messages.h"
-#include "maidsafe/nfs/client/get_handler.h"
 
 namespace maidsafe {
 
@@ -40,9 +39,7 @@ class MaidNodeService {
   typedef void VaultMessages;
   typedef void HandleMessageReturnType;
 
-  typedef nfs::GetResponseFromDataManagerToMaidNode GetResponse;
   typedef nfs::PutResponseFromMaidManagerToMaidNode PutResponse;
-  typedef nfs::GetCachedResponseFromCacheHandlerToMaidNode GetCachedResponse;
   typedef nfs::PutFailureFromMaidManagerToMaidNode PutFailure;
   typedef nfs::GetVersionsResponseFromVersionHandlerToMaidNode GetVersionsResponse;
   typedef nfs::PutVersionResponseFromMaidManagerToMaidNode PutVersionResponse;
@@ -54,7 +51,6 @@ class MaidNodeService {
     explicit RpcTimers(BoostAsioService& asio_service_);
     void CancellAll();
 
-    routing::Timer<GetResponse::Contents> get_timer;
     routing::Timer<PutResponse::Contents> put_timer;
     routing::Timer<GetVersionsResponse::Contents> get_versions_timer;
     routing::Timer<GetBranchResponse::Contents> get_branch_timer;
@@ -63,19 +59,10 @@ class MaidNodeService {
     routing::Timer<PutVersionResponse::Contents> put_version_timer;
   };
 
-
-  MaidNodeService(const routing::SingleId& receiver,
-                  RpcTimers& rpc_timers,
-                  GetHandler<MaidNodeDispatcher>& get_handler);
-
-  void HandleMessage(const GetResponse& message, const GetResponse::Sender& sender,
-                     const GetResponse::Receiver& receiver);
+  MaidNodeService(const routing::SingleId& receiver, RpcTimers& rpc_timers);
 
   void HandleMessage(const PutResponse& message, const PutResponse::Sender& sender,
                      const PutResponse::Receiver& receiver);
-
-  void HandleMessage(const GetCachedResponse& message, const GetCachedResponse::Sender& sender,
-                     const GetCachedResponse::Receiver& receiver);
 
   void HandleMessage(const PutFailure& message, const PutFailure::Sender& sender,
                      const PutFailure::Receiver& receiver);
@@ -104,7 +91,6 @@ class MaidNodeService {
 
   const routing::SingleId kReceiver_;
   RpcTimers& rpc_timers_;
-  GetHandler<MaidNodeDispatcher>& get_handler_;
 };
 
 }  // namespace nfs_client
