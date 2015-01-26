@@ -61,7 +61,7 @@ Network::Network(std::shared_ptr<Interface> interface)
 
 Network::~Network() {
   try {
-    interface_.reset(); // cancels existing operations
+    interface_.reset();  // cancels existing operations
     continue_waiting_ = false;
     waiting_notification_.notify_one();
     waiting_thread_.join();
@@ -110,11 +110,11 @@ void Network::WaitForTokens() {
   }
   catch (const std::exception& exception) {
     LOG(kError) << exception.what();
-    throw; // abort process
+    throw;  // abort process
   }
   catch (...) {
     LOG(kError) << "Unknown exception";
-    throw; // abort process
+    throw;  // abort process
   }
 }
 

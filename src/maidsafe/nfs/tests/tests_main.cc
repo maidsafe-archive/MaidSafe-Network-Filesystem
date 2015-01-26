@@ -21,13 +21,13 @@
 #include "boost/program_options/parsers.hpp"
 #include "boost/program_options/variables_map.hpp"
 
-#include "network_fixture.h"
 #include "maidsafe/common/config.h"
 #include "maidsafe/common/log.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/passport/passport.h"
 #include "maidsafe/nfs/detail/disk_backend.h"
 #include "maidsafe/nfs/detail/network_backend.h"
+#include "maidsafe/nfs/tests/network_fixture.h"
 
 namespace {
 const maidsafe::DiskUsage kDefaultMaxDiskUsage(2000);
@@ -38,11 +38,11 @@ const auto create_network_backend = []() {
 };
 
 const auto create_disk_backend = []() {
-
   // shared_ptr that erases folder when refcount == 0
   const auto disk_space = ::maidsafe::test::CreateTestPath("MaidSafe_Test_FakeStore");
 
-  const auto delete_disk_backend = [disk_space](maidsafe::nfs::detail::Network::Interface* interface) {
+  const auto delete_disk_backend =
+  [disk_space](maidsafe::nfs::detail::Network::Interface* interface) {
     const std::unique_ptr<maidsafe::nfs::detail::Network::Interface> ptr(interface);
   };
 
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
 
       if (network_test) {
         maidsafe::nfs::detail::test::NetworkFixture::SetCreator(create_network_backend);
-      } else { // default to local
+      } else {  // default to local
         maidsafe::nfs::detail::test::NetworkFixture::SetCreator(create_disk_backend);
       }
     } catch (const po::error& e) {

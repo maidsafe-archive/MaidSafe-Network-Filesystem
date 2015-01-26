@@ -28,8 +28,8 @@ namespace detail {
 struct ContainerIdTag;
 typedef TaggedValue<MutableData::Name, ContainerIdTag> ContainerId;
 
-}  // detail
-}  // nfs
-}  // maidsafe
+}  // namespace detail
+}  // namespace nfs
+}  // namespace maidsafe
 
 #endif  // MAIDSAFE_NFS_DETAIL_CONTAINER_ID_H_

@@ -19,11 +19,10 @@
 
 #include "asio/use_future.hpp"
 
-#include "network_fixture.h"
-
 #include "maidsafe/common/test.h"
 #include "maidsafe/common/utils.h"
 #include "maidsafe/nfs/detail/container_key.h"
+#include "maidsafe/nfs/tests/network_fixture.h"
 
 namespace maidsafe {
 namespace nfs {
@@ -122,7 +121,8 @@ TEST_F(BackendTest, BEH_UpdateExistingSDV) {
   EXPECT_CALL(GetNetworkMock(), DoPutSDVVersion(container_key.GetId(), container_version1,
                                                 container_version2)).Times(1);
 
-  auto sdv = network()->CreateSDV(container_key.GetId(), container_version1, asio::use_future).get();
+  auto sdv = network()->CreateSDV(
+      container_key.GetId(), container_version1, asio::use_future).get();
   EXPECT_TRUE(sdv.valid());
 
   sdv = network()->PutSDVVersion(
@@ -179,7 +179,8 @@ TEST_F(BackendTest, BEH_UpdateExistingSDVBranchFailure) {
       DoPutSDVVersion(container_key.GetId(), container_version1, container_version3))
     .Times(1);
 
-  auto sdv = network()->CreateSDV(container_key.GetId(), container_version1, asio::use_future).get();
+  auto sdv = network()->CreateSDV(
+      container_key.GetId(), container_version1, asio::use_future).get();
   EXPECT_TRUE(sdv.valid());
 
   sdv = network()->PutSDVVersion(
@@ -218,7 +219,8 @@ TEST_F(BackendTest, DISABLED_BEH_UpdateExistingSDVBadRootFailure) {
       DoPutSDVVersion(container_key.GetId(), container_version3, container_version2))
     .Times(1);
 
-  auto sdv = network()->CreateSDV(container_key.GetId(), container_version1, asio::use_future).get();
+  auto sdv = network()->CreateSDV(
+      container_key.GetId(), container_version1, asio::use_future).get();
   EXPECT_TRUE(sdv.valid());
 
   sdv = network()->PutSDVVersion(

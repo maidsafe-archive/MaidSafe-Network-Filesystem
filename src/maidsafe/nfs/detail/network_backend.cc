@@ -28,7 +28,8 @@ boost::future<void> NetworkBackend::DoCreateSDV(
     const ContainerVersion& initial_version,
     std::uint32_t max_versions,
     std::uint32_t max_branches) {
-  return backend_->CreateVersionTree(container_id.data, initial_version, max_versions, max_branches);
+  return backend_->CreateVersionTree(
+      container_id.data, initial_version, max_versions, max_branches);
 }
 
 boost::future<void> NetworkBackend::DoPutSDVVersion(
@@ -56,6 +57,6 @@ boost::future<ImmutableData> NetworkBackend::DoGetChunk(const ImmutableData::Nam
   return backend_->Get(name);
 }
 
-}  // detail
-}  // nfs
-}  // maidsafe
+}  // namespace detail
+}  // namespace nfs
+}  // namespace maidsafe

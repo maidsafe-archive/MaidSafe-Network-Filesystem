@@ -46,8 +46,8 @@ class ContainerKey {
   Identity key_;
 };
 
-}  // detail
-}  // nfs
-}  // maidsafe
+}  // namespace detail
+}  // namespace nfs
+}  // namespace maidsafe
 
 #endif  // MAIDSAFE_NFS_DETAIL_CONTAINER_KEY_H_

@@ -21,9 +21,9 @@
 #include <functional>
 #include <memory>
 
-#include "mock_backend.h"
 #include "maidsafe/common/test.h"
 #include "maidsafe/nfs/detail/network.h"
+#include "maidsafe/nfs/tests/mock_backend.h"
 
 namespace maidsafe {
 namespace nfs {
@@ -47,7 +47,6 @@ class NetworkFixture {
   const std::shared_ptr<Network>& network() const { return network_; }
 
  private:
-  const ::maidsafe::test::TestPath storage_location_;
   const std::shared_ptr<MockBackend> mock_;
   const std::shared_ptr<Network> network_;
 };

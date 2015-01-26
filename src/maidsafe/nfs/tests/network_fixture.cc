@@ -15,7 +15,7 @@
 
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
-#include "network_fixture.h"
+#include "maidsafe/nfs/tests/network_fixture.h"
 
 #include "maidsafe/common/error.h"
 
@@ -32,8 +32,7 @@ std::function<std::shared_ptr<Network::Interface>()>& GetCreator() {
 }  // namespace
 
 NetworkFixture::NetworkFixture()
-  : storage_location_(),
-    mock_(std::make_shared<MockBackend>(Create())),
+  : mock_(std::make_shared<MockBackend>(Create())),
     network_(std::make_shared<Network>(mock_)) {
   GetNetworkMock().SetDefaults();
 }

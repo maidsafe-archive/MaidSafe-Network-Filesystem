@@ -18,12 +18,26 @@
 #ifndef MAIDSAFE_NFS_DETAIL_NETWORK_BACKEND_H_
 #define MAIDSAFE_NFS_DETAIL_NETWORK_BACKEND_H_
 
+#include <cstdint>
 #include <stdexcept>
+#include <vector>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
+#include "boost/thread/future.hpp"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include "boost/throw_exception.hpp"
 
+#include "maidsafe/common/data_types/immutable_data.h"
 #include "maidsafe/common/error.h"
 #include "maidsafe/nfs/client/maid_node_nfs.h"
+#include "maidsafe/nfs/container_version.h"
+#include "maidsafe/nfs/detail/container_id.h"
 #include "maidsafe/nfs/detail/network.h"
 
 namespace maidsafe {
@@ -47,7 +61,7 @@ class NetworkBackend : public Network::Interface {
  private:
   NetworkBackend(const NetworkBackend&) = delete;
   NetworkBackend(NetworkBackend&&) = delete;
-  
+
   NetworkBackend& operator=(const NetworkBackend&) = delete;
   NetworkBackend& operator=(NetworkBackend&&) = delete;
 
@@ -72,8 +86,8 @@ class NetworkBackend : public Network::Interface {
   const std::shared_ptr<nfs_client::MaidNodeNfs> backend_;
 };
 
-}  // detail
-}  // nfs
-}  // maidsafe
+}  // namespace detail
+}  // namespace nfs
+}  // namespace maidsafe
 
 #endif  // MAIDSAFE_NFS_DETAIL_NETWORK_BACKEND_H_

@@ -18,11 +18,24 @@
 #ifndef MAIDSAFE_NFS_TESTS_MOCK_BACKEND_H_
 #define MAIDSAFE_NFS_TESTS_MOCK_BACKEND_H_
 
+#include <cstdint>
 #include <memory>
+#include <vector>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
+#include "boost/thread/future.hpp"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include "gmock/gmock.h"
 
+#include "maidsafe/common/data_types/immutable_data.h"
 #include "maidsafe/common/test.h"
+#include "maidsafe/nfs/container_version.h"
+#include "maidsafe/nfs/detail/container_id.h"
 #include "maidsafe/nfs/detail/network.h"
 
 namespace maidsafe {

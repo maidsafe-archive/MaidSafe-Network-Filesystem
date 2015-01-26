@@ -15,7 +15,7 @@
 
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
-#include "mock_backend.h"
+#include "maidsafe/nfs/tests/mock_backend.h"
 
 #include "maidsafe/common/error.h"
 
@@ -50,13 +50,15 @@ MockBackend::Mock::Mock(std::shared_ptr<Network::Interface> real)
 void MockBackend::Mock::SetDefaultDoCreateSDV() {
   using ::testing::_;
   using ::testing::Invoke;
-  ON_CALL(*this, DoCreateSDV(_, _, _, _)).WillByDefault(Invoke(Real(&Network::Interface::DoCreateSDV)));
+  ON_CALL(*this, DoCreateSDV(_, _, _, _))
+    .WillByDefault(Invoke(Real(&Network::Interface::DoCreateSDV)));
 }
 
 void MockBackend::Mock::SetDefaultDoPutSDVVersion() {
   using ::testing::_;
   using ::testing::Invoke;
-  ON_CALL(*this, DoPutSDVVersion(_, _, _)).WillByDefault(Invoke(Real(&Network::Interface::DoPutSDVVersion)));
+  ON_CALL(*this, DoPutSDVVersion(_, _, _))
+    .WillByDefault(Invoke(Real(&Network::Interface::DoPutSDVVersion)));
 }
 
 void MockBackend::Mock::SetDefaultDoGetBranches() {
@@ -68,7 +70,8 @@ void MockBackend::Mock::SetDefaultDoGetBranches() {
 void MockBackend::Mock::SetDefaultDoGetBranchVersions() {
   using ::testing::_;
   using ::testing::Invoke;
-  ON_CALL(*this, DoGetBranchVersions(_, _)).WillByDefault(Invoke(Real(&Network::Interface::DoGetBranchVersions)));
+  ON_CALL(*this, DoGetBranchVersions(_, _))
+    .WillByDefault(Invoke(Real(&Network::Interface::DoGetBranchVersions)));
 }
 
 void MockBackend::Mock::SetDefaultDoPutChunk() {

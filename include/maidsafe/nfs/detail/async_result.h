@@ -33,8 +33,8 @@ using AsyncHandler = typename asio::handler_type<Token, void(Expected<Result>)>:
 template<typename Token, typename Result>
 using AsyncResultReturn = typename asio::async_result<AsyncHandler<Token, Result>>::type;
 
-}  // detail
-}  // nfs
-}  // maidsafe
+}  // namespace detail
+}  // namespace nfs
+}  // namespace maidsafe
 
 #endif  // MAIDSAFE_NFS_DETAIL_ASYNC_RESULT_H_

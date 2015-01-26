@@ -76,6 +76,7 @@ class Network {
 
     virtual boost::future<void> DoPutChunk(const ImmutableData& data) = 0;
     virtual boost::future<ImmutableData> DoGetChunk(const ImmutableData::Name& name) = 0;
+
    private:
     Interface(const Interface&) = delete;
     Interface(Interface&&) = delete;
@@ -223,7 +224,7 @@ class Network {
   template<typename Handler>
   class Bridge {
    public:
-    Bridge(Handler handler) : handler_(std::move(handler)) {}
+    explicit Bridge(Handler handler) : handler_(std::move(handler)) {}
 
     Bridge(const Bridge&) = default;
     Bridge(Bridge&& other) : handler_(std::move(other.handler_)) {}
@@ -254,8 +255,8 @@ class Network {
   std::atomic<bool> continue_waiting_;
 };
 
-}  // detail
-}  // nfs
-}  // maidsafe
+}  // namespace detail
+}  // namespace nfs
+}  // namespace maidsafe
 
 #endif  // MAIDSAFE_NFS_DETAIL_NETWORK_H_

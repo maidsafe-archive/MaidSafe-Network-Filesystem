@@ -85,6 +85,8 @@ if(INCLUDE_TESTS)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 
+  target_include_directories(test_nfs PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
   ms_add_executable(network_test_nfs "Tests/NFS" ${NfsNetworkTestsAllFiles})
   target_link_libraries(network_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
