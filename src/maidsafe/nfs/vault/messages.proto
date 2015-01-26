@@ -85,7 +85,7 @@ message PmidHealth {
   required bytes serialised_pmid_health = 1;
 }
 
-message MpidMessageAlert {
+message MpidMessageBase {
   required bytes sender = 1;
   required bytes receiver = 2;
   required int32 id = 3;
@@ -93,8 +93,13 @@ message MpidMessageAlert {
   required bytes signed_header = 5;
 }
 
+message MpidMessageAlert {
+  required bytes serialised_base = 1;
+  required bytes message_id = 2;
+}
+
 message MpidMessage {
-  required bytes serialised_alert = 1;
+  required bytes serialised_base = 1;
   required bytes signed_body = 2;
 }
 

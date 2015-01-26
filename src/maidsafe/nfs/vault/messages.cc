@@ -691,20 +691,20 @@ void swap(PmidHealth& lhs, PmidHealth& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.serialised_pmid_health, rhs.serialised_pmid_health);
 }
 
-// ================================= MpidMessageAlert =============================================
+// ================================= MpidMessageBase =============================================
 
-MpidMessageAlert::MpidMessageAlert()
+MpidMessageBase::MpidMessageBase()
     : sender(), receiver(), id(), parent_id(), signed_header() {}
 
-MpidMessageAlert::MpidMessageAlert(const passport::PublicMpid::Name& sender_in,
-                                   const passport::PublicMpid::Name& receiver_in,
-                                   int32_t id_in,
-                                   int32_t parent_id_in, const MessageHeaderType& signed_header_in)
+MpidMessageBase::MpidMessageBase(const passport::PublicMpid::Name& sender_in,
+                                 const passport::PublicMpid::Name& receiver_in,
+                                 int32_t id_in,
+                                 int32_t parent_id_in, const MessageHeaderType& signed_header_in)
     : sender(sender_in), receiver(receiver_in), id(id_in), parent_id(parent_id_in),
       signed_header(signed_header_in) {}
 
-MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
-  protobuf::MpidMessageAlert proto;
+MpidMessageBase::MpidMessageBase(const std::string& serialised_copy) {
+  protobuf::MpidMessageBase proto;
   if (!proto.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
@@ -715,21 +715,21 @@ MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
   signed_header = MessageHeaderType(proto.signed_header());
 }
 
-MpidMessageAlert::MpidMessageAlert(const MpidMessageAlert& other)
-    : sender(other.sender), receiver(), id(other.id), parent_id(other.parent_id),
+MpidMessageBase::MpidMessageBase(const MpidMessageBase& other)
+    : sender(other.sender), receiver(other.receiver), id(other.id), parent_id(other.parent_id),
       signed_header(other.signed_header) {}
 
-MpidMessageAlert::MpidMessageAlert(MpidMessageAlert&& other)
-    : sender(std::move(sender)), receiver(std::move(receiver)), id(std::move(other.id)),
+MpidMessageBase::MpidMessageBase(MpidMessageBase&& other)
+    : sender(std::move(other.sender)), receiver(std::move(other.receiver)), id(std::move(other.id)),
       parent_id(std::move(other.parent_id)), signed_header(std::move(other.signed_header)) {}
 
-MpidMessageAlert& MpidMessageAlert::operator=(MpidMessageAlert other) {
+MpidMessageBase& MpidMessageBase::operator=(MpidMessageBase other) {
   swap(*this, other);
   return *this;
 }
 
-std::string MpidMessageAlert::Serialise() const {
-  protobuf::MpidMessageAlert proto;
+std::string MpidMessageBase::Serialise() const {
+  protobuf::MpidMessageBase proto;
   proto.set_sender(sender->string());
   proto.set_receiver(receiver->string());
   proto.set_id(id);
@@ -738,12 +738,12 @@ std::string MpidMessageAlert::Serialise() const {
   return proto.SerializeAsString();
 }
 
-bool operator==(const MpidMessageAlert& lhs, const MpidMessageAlert& rhs) {
+bool operator==(const MpidMessageBase& lhs, const MpidMessageBase& rhs) {
   return (lhs.sender == rhs.sender) && (lhs.receiver == rhs.receiver) &&  (lhs.id == rhs.id) &&
          (lhs.parent_id == rhs.parent_id) && (lhs.signed_header == rhs.signed_header);
 }
 
-void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
+void swap(MpidMessageBase& lhs, MpidMessageBase& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.sender, rhs.sender);
   swap(lhs.receiver, rhs.receiver);
@@ -752,25 +752,68 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
   swap(lhs.signed_header, rhs.signed_header);
 }
 
+// ================================= MpidMessageAlert =============================================
+
+MpidMessageAlert::MpidMessageAlert(const MpidMessageBase& base_in,
+                                   const MessageIdType& message_id_in)
+    : base(base_in), message_id(message_id_in) {}
+
+MpidMessageAlert::MpidMessageAlert(const std::string& serialised_copy) {
+  protobuf::MpidMessageAlert proto;
+  if (!proto.ParseFromString(serialised_copy))
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
+
+  base = MpidMessageBase(proto.serialised_base());
+  message_id = MessageIdType(proto.message_id());
+}
+
+MpidMessageAlert::MpidMessageAlert(const MpidMessageAlert& other)
+    : base(other.base), message_id(other.message_id){}
+
+MpidMessageAlert::MpidMessageAlert(MpidMessageAlert&& other)
+    : base(std::move(other.base)), message_id(std::move(other.message_id)) {}
+
+MpidMessageAlert& MpidMessageAlert::operator=(MpidMessageAlert other) {
+  swap(*this, other);
+  return *this;
+}
+
+std::string MpidMessageAlert::Serialise() const {
+  protobuf::MpidMessageAlert proto;
+  proto.set_serialised_base(base.Serialise());
+  proto.set_message_id(message_id.string());
+  return proto.SerializeAsString();
+}
+
+bool operator==(const MpidMessageAlert& lhs, const MpidMessageAlert& rhs) {
+  return (lhs.base == rhs.base) && (lhs.message_id == rhs.message_id);
+}
+
+void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
+  using std::swap;
+  swap(lhs.base, rhs.base);
+  swap(lhs.message_id, rhs.message_id);
+}
+
 // ================================= MpidMessage ==================================================
 
-MpidMessage::MpidMessage(const MpidMessageAlert& alert_in, MessageBodyType& signed_body_in)
-    : alert(alert_in), signed_body(signed_body_in) {}
+MpidMessage::MpidMessage(const MpidMessageBase& base_in, MessageBodyType& signed_body_in)
+    : base(base_in), signed_body(signed_body_in) {}
 
 MpidMessage::MpidMessage(const std::string& serialised_copy) {
   protobuf::MpidMessage proto;
   if (!proto.ParseFromString(serialised_copy))
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
 
-  alert = MpidMessageAlert(proto.serialised_alert());
+  base = MpidMessageBase(proto.serialised_base());
   signed_body = MessageBodyType(proto.signed_body());
 }
 
 MpidMessage::MpidMessage(const MpidMessage& other)
-    : alert(other.alert), signed_body(other.signed_body){}
+    : base(other.base), signed_body(other.signed_body){}
 
 MpidMessage::MpidMessage(MpidMessage&& other)
-    : alert(std::move(other.alert)), signed_body(std::move(other.signed_body)) {}
+    : base(std::move(other.base)), signed_body(std::move(other.signed_body)) {}
 
 MpidMessage& MpidMessage::operator=(MpidMessage other) {
   swap(*this, other);
@@ -779,18 +822,18 @@ MpidMessage& MpidMessage::operator=(MpidMessage other) {
 
 std::string MpidMessage::Serialise() const {
   protobuf::MpidMessage proto;
-  proto.set_serialised_alert(alert.Serialise());
+  proto.set_serialised_base(base.Serialise());
   proto.set_signed_body(signed_body.string());
   return proto.SerializeAsString();
 }
 
 bool operator==(const MpidMessage& lhs, const MpidMessage& rhs) {
-  return (lhs.alert == rhs.alert) && (lhs.signed_body == rhs.signed_body);
+  return (lhs.base == rhs.base) && (lhs.signed_body == rhs.signed_body);
 }
 
 void swap(MpidMessage& lhs, MpidMessage& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
-  swap(lhs.alert, rhs.alert);
+  swap(lhs.base, rhs.base);
   swap(lhs.signed_body, rhs.signed_body);
 }
 
