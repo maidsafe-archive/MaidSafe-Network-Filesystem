@@ -136,13 +136,6 @@ class Service {
     impl_->HandleMessage(message, sender, receiver);
   }
 
-  void HandleMessage(
-      const nfs::GetRequestFromMpidNodePartialToDataManager& message,
-      const typename nfs::GetRequestFromMpidNodePartialToDataManager::Sender& sender,
-      const typename nfs::GetRequestFromMpidNodePartialToDataManager::Receiver& receiver) {
-    impl_->HandleMessage(message, sender, receiver);
-  }
-
   void Stop() {
     impl_->Stop();
   }
