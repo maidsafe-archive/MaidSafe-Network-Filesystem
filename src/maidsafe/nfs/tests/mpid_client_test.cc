@@ -27,9 +27,13 @@ namespace test {
 TEST_F(MpidClientTest, FUNC_Constructor) {
   auto mpid_and_signer(passport::CreateMpidAndSigner());
   {
-    auto nfs_new_account = nfs_client::MpidClient::MakeShared(mpid_and_signer);
+    auto new_account = nfs_client::MpidClient::MakeShared(mpid_and_signer);
   }
-//  auto nfs_existing_account = nfs_client::MpidClient::MakeShared(mpid_and_signer.first);
+  auto existing_account = nfs_client::MpidClient::MakeShared(mpid_and_signer.first);
+}
+
+TEST_F(MpidClientTest, FUNC_SendMessageFailure) {
+
 }
 
 }  // namespace test

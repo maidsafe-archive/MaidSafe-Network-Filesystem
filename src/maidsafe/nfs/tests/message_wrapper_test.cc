@@ -40,7 +40,6 @@ namespace test {
 
 namespace {
 
-typedef GetRequestFromMaidNodeToDataManager GetRequest;
 typedef PutRequestFromMaidNodeToMaidManager PutRequest;
 typedef DeleteRequestFromMaidNodeToMaidManager DeleteRequest;
 
@@ -115,12 +114,6 @@ class DataManagerServiceImpl {
   }
 };
 
-template <>
-std::string DataManagerServiceImpl::Handle(const GetRequest& message) {
-  LOG(kInfo) << "DataManager handling Get";
-  return message.contents->raw_name.string();
-}
-
 TEST(MessageWrapperTest, BEH_CheckVariant) {
   LOG(kInfo) << Persona::kMaidNode;
   LOG(kInfo) << Persona::kMpidNode;
@@ -134,29 +127,22 @@ TEST(MessageWrapperTest, BEH_CheckVariant) {
   LOG(kInfo) << Persona::kCacheHandler;
   LOG(kInfo) << static_cast<Persona>(-9);
 
-  ImmutableData data1(NonEmptyString("data 1"));
   ImmutableData data2(NonEmptyString("data 2"));
   ImmutableData data3(NonEmptyString("data 3"));
 
-  GetRequest get(GetRequest::Contents(data1.name()));
   PutRequest::Contents put_contents;
   put_contents = nfs_vault::DataNameAndContent(data2);
   PutRequest put(put_contents);
   DeleteRequest del(DeleteRequest::Contents(data3.name()));
 
-  auto serialised_get(get.Serialise());
   auto serialised_put(put.Serialise());
   auto serialised_del(del.Serialise());
 
   Service<MaidManagerServiceImpl> maid_manager_service;
   Service<DataManagerServiceImpl> data_manager_service;
 
-  auto tuple_get(ParseMessageWrapper(serialised_get));
   auto tuple_put(ParseMessageWrapper(serialised_put));
   auto tuple_del(ParseMessageWrapper(serialised_del));
-
-  EXPECT_THROW(maid_manager_service.HandleMessage(tuple_get), maidsafe_error);
-  EXPECT_EQ(data1.name()->string(), data_manager_service.HandleMessage(tuple_get));
 
   EXPECT_EQ(data2.name()->string(), maid_manager_service.HandleMessage(tuple_put));
   EXPECT_THROW(data_manager_service.HandleMessage(tuple_put), maidsafe_error);
