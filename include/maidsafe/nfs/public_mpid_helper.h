@@ -1,4 +1,4 @@
-/*  Copyright 2014 MaidSafe.net limited
+/*  Copyright 2013 MaidSafe.net limited
 
     This MaidSafe Software is licensed to you under (1) the MaidSafe.net Commercial License,
     version 1.0 or later, or (2) The General Public License (GPL), version 3, depending on which
@@ -16,22 +16,46 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "maidsafe/nfs/tests/maid_node_nfs_test.h"
+#ifndef MAIDSAFE_NFS_PUBLIC_MPID_HELPER_H_
+#define MAIDSAFE_NFS_PUBLIC_MPID_HELPER_H_
+
+#include <functional>
+#include <memory>
+#include <vector>
+
+#include "boost/thread/future.hpp"
+
+#include "maidsafe/passport/types.h"
+#include "maidsafe/routing/api_config.h"
 
 namespace maidsafe {
 
 namespace nfs {
 
-namespace test {
+namespace detail {
 
-TEST_F(MaidNodeNfsTest, FUNC_PopulateLengthyTree) {
-  VersionTreeTest(100, 1, 1500, 256);
-  VersionTreeTest(15000, 1, 14580, 128);
-  VersionTreeTest(100, 1, 20000, 128);
-}
+class PublicMpidHelper {
+ public :
+  PublicMpidHelper();
+  ~PublicMpidHelper();
+  void AddEntry(boost::future<passport::PublicMpid>&& future,
+                routing::GivePublicKeyFunctor give_key_functors);
 
-}  // namespace test
+ private:
+  void Poll();
+  void Run();
+
+  std::mutex mutex_;
+  bool running_;
+  std::vector<routing::GivePublicKeyFunctor> new_functors_;
+  std::vector<boost::future<passport::PublicMpid>> new_futures_;
+  std::future<void> worker_future_;
+};
+
+}  // namespace detail
 
 }  // namespace nfs
 
 }  // namespace maidsafe
+
+#endif  // MAIDSAFE_NFS_PUBLIC_MPID_HELPER_H_

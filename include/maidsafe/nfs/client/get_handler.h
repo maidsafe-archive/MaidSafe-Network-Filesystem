@@ -34,16 +34,18 @@
 #include "maidsafe/nfs/service.h"
 #include "maidsafe/nfs/client/maid_node_dispatcher.h"
 #include "maidsafe/nfs/client/maid_node_service.h"
+#include "maidsafe/nfs/client/mpid_node_dispatcher.h"
+#include "maidsafe/nfs/client/mpid_node_service.h"
 #include "maidsafe/nfs/client/client_utils.h"
 
 namespace maidsafe {
 
 namespace nfs_client {
 
-template <typename DistaptcherType>
+template <typename DispatcherType>
 class GetHandlerVisitor : public boost::static_visitor<> {
  public:
-  GetHandlerVisitor(DistaptcherType& dispatcher_in, routing::TaskId task_id)
+  GetHandlerVisitor(DispatcherType& dispatcher_in, routing::TaskId task_id)
       : dispatcher_(dispatcher_in), kTaskId_(task_id) {}
 
   template <typename Name>
@@ -54,7 +56,7 @@ class GetHandlerVisitor : public boost::static_visitor<> {
   }
 
  private:
-  DistaptcherType& dispatcher_;
+  DispatcherType& dispatcher_;
   const routing::TaskId kTaskId_;
 };
 
@@ -73,7 +75,7 @@ class ValidateDataVisitor : public boost::static_visitor<bool> {
   nfs_vault::Content content_;
 };
 
-template <typename DistaptcherType>
+template <typename DispatcherType>
 class GetHandler {
   typedef std::tuple<size_t, routing::TaskId, DataNameVariant> GetInfo;
   enum class Operation : int {
@@ -85,7 +87,7 @@ class GetHandler {
 
  public:
   GetHandler(routing::Timer<DataNameAndContentOrReturnCode>& get_timer,
-             DistaptcherType& dispatcher)
+             DispatcherType& dispatcher)
       : get_timer_(get_timer), dispatcher_(dispatcher), get_info_(), mutex_() {}
 
   template <typename DataName>
@@ -98,14 +100,14 @@ class GetHandler {
  private:
   bool ValidateData(const nfs_vault::Content& content, const DataNameVariant& data_name);
   routing::Timer<DataNameAndContentOrReturnCode>& get_timer_;
-  DistaptcherType& dispatcher_;
+  DispatcherType& dispatcher_;
   std::map<routing::TaskId, GetInfo> get_info_;
   std::mutex mutex_;
 };
 
-template <typename DistaptcherType>
+template <typename DispatcherType>
 template <typename DataName>
-void GetHandler<DistaptcherType>::Get(
+void GetHandler<DispatcherType>::Get(
     const DataName& data_name,
     std::shared_ptr<boost::promise<typename DataName::data_type>> promise,
     const std::chrono::steady_clock::duration& timeout) {
@@ -139,8 +141,8 @@ void GetHandler<DistaptcherType>::Get(
   dispatcher_.SendGetRequest(task_id, data_name);
 }
 
-template <typename DistaptcherType>
-void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
+template <typename DispatcherType>
+void GetHandler<DispatcherType>::AddResponse(routing::TaskId task_id,
                                               const DataNameAndContentOrReturnCode& response) {
   LOG(kVerbose) << " GetHandler::AddResponse "  << task_id;
   Operation operation(Operation::kNoOperation);
@@ -184,15 +186,15 @@ void GetHandler<DistaptcherType>::AddResponse(routing::TaskId task_id,
   if (operation == Operation::kAddResponse) {
     get_timer_.AddResponse(std::get<1>(get_info), response);
   } else if (operation == Operation::kSendRequest) {
-    GetHandlerVisitor<DistaptcherType> get_handler_visitor(dispatcher_, new_task_id);
+    GetHandlerVisitor<DispatcherType> get_handler_visitor(dispatcher_, new_task_id);
     boost::apply_visitor(get_handler_visitor, std::get<2>(get_info_[new_task_id]));
   } else if (operation == Operation::kCancelTask) {
     get_timer_.CancelTask(std::get<1>(get_info));
   }
 }
 
-template <typename DistaptcherType>
-bool GetHandler<DistaptcherType>::ValidateData(const nfs_vault::Content& content,
+template <typename DispatcherType>
+bool GetHandler<DispatcherType>::ValidateData(const nfs_vault::Content& content,
                               const DataNameVariant& data_name) {
   ValidateDataVisitor validate_data_visitor(content);
   return boost::apply_visitor(validate_data_visitor, data_name);

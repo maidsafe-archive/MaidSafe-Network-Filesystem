@@ -1,4 +1,4 @@
-/*  Copyright 2012 MaidSafe.net limited
+/*  Copyright 2014 MaidSafe.net limited
 
     This MaidSafe Software is licensed to you under (1) the MaidSafe.net Commercial License,
     version 1.0 or later, or (2) The General Public License (GPL), version 3, depending on which
@@ -16,18 +16,28 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-option optimize_for = LITE_RUNTIME;
+#include "maidsafe/nfs/tests/mpid_client_test.h"
 
-package maidsafe.nfs_vault.protobuf;
+namespace maidsafe {
 
-message MaidAccountRemoval {
-  required bytes random_data = 1;
-  required bytes public_anmaid_name = 2;
-  required bytes signature = 3;
+namespace nfs {
+
+namespace test {
+
+TEST_F(MpidClientTest, FUNC_Constructor) {
+  auto mpid_and_signer(passport::CreateMpidAndSigner());
+  {
+    auto new_account = nfs_client::MpidClient::MakeShared(mpid_and_signer);
+  }
+  auto existing_account = nfs_client::MpidClient::MakeShared(mpid_and_signer.first);
 }
 
-message MpidAccountRemoval {
-  required bytes random_data = 1;
-  required bytes public_anmpid_name = 2;
-  required bytes signature = 3;
+TEST_F(MpidClientTest, FUNC_SendMessageFailure) {
+
 }
+
+}  // namespace test
+
+}  // namespace nfs
+
+}  // namespace maidsafe

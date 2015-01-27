@@ -102,5 +102,3 @@ message MpidMessage {
   required bytes serialised_base = 1;
   required bytes signed_body = 2;
 }
-
-

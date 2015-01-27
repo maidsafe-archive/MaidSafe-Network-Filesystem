@@ -1,1 +1,2 @@
 Action:GetRequest        Source:DataGetter:Single      Destination:DataManager:Group      Contents:struct:maidsafe::nfs_vault::DataName     Cacheable
+Action:GetRequest        Source:MpidNode:Single        Destination:DataManager:Group      Contents:struct:maidsafe::nfs_vault::DataName     Cacheable

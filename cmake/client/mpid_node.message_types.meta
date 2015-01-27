@@ -1,3 +1,6 @@
-Action:SendAlert               Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
-Action:GetResponse             Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::MpidMessageOrReturnCode
-Action:SendMessageResponse     Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
+Action:SendAlert                 Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:SendMessageResponse       Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
+Action:GetMessageResponse        Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::MpidMessageOrReturnCode
+Action:CreateAccountResponse     Source:MpidManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::ReturnCode
+Action:GetResponse               Source:DataManager:Group      Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode    Cacheable
+Action:GetCachedResponse         Source:CacheHandler:Single    Destination:MpidNode:Single      Contents:struct:maidsafe::nfs_client::DataNameAndContentOrReturnCode    Cacheable

@@ -1,3 +1,5 @@
-Action:GetRequest                   Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
-Action:DeleteRequest                Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
 Action:SendMessageRequest           Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessage
+Action:DeleteRequest                Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:GetMessageRequest            Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidMessageAlert
+Action:CreateAccountRequest         Source:MpidNode:Single      Destination:MpidManager:Group      Contents:struct:maidsafe::nfs_vault::MpidAccountCreation
+Action:RemoveAccountRequest         Source:MpidNode:Single      Destination:MpidManager:Group      Contents:class:maidsafe::nfs_vault::MpidAccountRemoval

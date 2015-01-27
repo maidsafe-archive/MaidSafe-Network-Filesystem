@@ -16,7 +16,7 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "maidsafe/nfs/vault/account_removal.h"
+#include "maidsafe/nfs/vault/maid_account_removal.h"
 
 #include <utility>
 
@@ -30,16 +30,16 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
-AccountRemoval::AccountRemoval() : random_data_(), public_anmaid_name_(), signature_() {}
+MaidAccountRemoval::MaidAccountRemoval() : random_data_(), public_anmaid_name_(), signature_() {}
 
-AccountRemoval::AccountRemoval(const passport::Anmaid& anmaid)
+MaidAccountRemoval::MaidAccountRemoval(const passport::Anmaid& anmaid)
     : random_data_(RandomString((RandomUint32() % 500) + 1000)),
       public_anmaid_name_(anmaid.name()),
       signature_(asymm::Sign(random_data_, anmaid.private_key())) {}
 
-AccountRemoval::AccountRemoval(const std::string& serialised_copy)
+MaidAccountRemoval::MaidAccountRemoval(const std::string& serialised_copy)
     : random_data_(), public_anmaid_name_(), signature_() {
-  protobuf::AccountRemoval proto_account_removal;
+  protobuf::MaidAccountRemoval proto_account_removal;
   if (!proto_account_removal.ParseFromString(serialised_copy)) {
     LOG(kError) << "Failed to parse account_removal.";
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
@@ -51,40 +51,40 @@ AccountRemoval::AccountRemoval(const std::string& serialised_copy)
   signature_ = asymm::Signature(proto_account_removal.signature());
 }
 
-AccountRemoval::AccountRemoval(const AccountRemoval& other)
+MaidAccountRemoval::MaidAccountRemoval(const MaidAccountRemoval& other)
     : random_data_(other.random_data_),
       public_anmaid_name_(other.public_anmaid_name_),
       signature_(other.signature_) {}
 
-AccountRemoval::AccountRemoval(AccountRemoval&& other)
+MaidAccountRemoval::MaidAccountRemoval(MaidAccountRemoval&& other)
     : random_data_(std::move(other.random_data_)),
       public_anmaid_name_(std::move(other.public_anmaid_name_)),
       signature_(std::move(other.signature_)) {}
 
-AccountRemoval& AccountRemoval::operator=(AccountRemoval other) {
+MaidAccountRemoval& MaidAccountRemoval::operator=(MaidAccountRemoval other) {
   swap(*this, other);
   return *this;
 }
 
-std::string AccountRemoval::Serialise() const {
-  protobuf::AccountRemoval proto_account_removal;
+std::string MaidAccountRemoval::Serialise() const {
+  protobuf::MaidAccountRemoval proto_account_removal;
   proto_account_removal.set_random_data(random_data_.string());
   proto_account_removal.set_public_anmaid_name(public_anmaid_name_->string());
   proto_account_removal.set_signature(signature_.string());
   return proto_account_removal.SerializeAsString();
 }
 
-bool AccountRemoval::Validate(const passport::PublicAnmaid& public_anmaid) const {
+bool MaidAccountRemoval::Validate(const passport::PublicAnmaid& public_anmaid) const {
   return asymm::CheckSignature(random_data_, signature_, public_anmaid.public_key());
 }
 
-bool operator==(const AccountRemoval& lhs, const AccountRemoval& rhs) {
+bool operator==(const MaidAccountRemoval& lhs, const MaidAccountRemoval& rhs) {
   return lhs.random_data_ == rhs.random_data_ &&
          lhs.public_anmaid_name_ == rhs.public_anmaid_name_ &&
          lhs.signature_ == rhs.signature_;
 }
 
-void swap(AccountRemoval& lhs, AccountRemoval& rhs) MAIDSAFE_NOEXCEPT {
+void swap(MaidAccountRemoval& lhs, MaidAccountRemoval& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.random_data_, rhs.random_data_);
   swap(lhs.public_anmaid_name_, rhs.public_anmaid_name_);

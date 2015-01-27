@@ -48,6 +48,11 @@ struct HandleGetResult {
 void HandlePutResponseResult(const ReturnCode& result,
                              std::shared_ptr<boost::promise<void>> promise);
 
+void HandleSendMessageResponseResult(const ReturnCode& result,
+                                     std::shared_ptr<boost::promise<void>> promise);
+void HandleGetMessageResponseResult(const MpidMessageOrReturnCode& result,
+        std::shared_ptr<boost::promise<nfs_vault::MpidMessage>> promise);
+
 void HandleGetVersionsOrBranchResult(
     const StructuredDataNameAndContentOrReturnCode& result,
     std::shared_ptr<boost::promise<std::vector<StructuredDataVersions::VersionName>>> promise);
