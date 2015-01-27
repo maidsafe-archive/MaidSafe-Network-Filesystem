@@ -32,10 +32,6 @@ TEST_F(MpidClientTest, FUNC_Constructor) {
   auto existing_account = nfs_client::MpidClient::MakeShared(mpid_and_signer.first);
 }
 
-TEST_F(MpidClientTest, FUNC_SendMessageFailure) {
-
-}
-
 }  // namespace test
 
 }  // namespace nfs

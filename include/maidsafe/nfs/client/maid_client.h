@@ -348,10 +348,10 @@ void MaidClient::OnMessageReceived(const T& routing_message) {
   if (destination_persona.data == nfs::Persona::kDataGetter)
     return data_getter_.HandleMessage(routing_message);
 
-  std::shared_ptr<MaidClient> this_ptr(shared_from_this()); 
-  asio_service_.service().post([=] { 
-    this_ptr->HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver); 
-  }); 
+  std::shared_ptr<MaidClient> this_ptr(shared_from_this());
+  asio_service_.service().post([=] {
+    this_ptr->HandleMessage(wrapper_tuple, routing_message.sender, routing_message.receiver);
+  });
 }
 
 template <typename Sender, typename Receiver>
