@@ -66,18 +66,48 @@ void HandleCreateAccountResult(const ReturnCode& result,
 
 void HandlePutResponseResult(const ReturnCode& result,
                              std::shared_ptr<boost::promise<void>> promise) {
-  LOG(kVerbose) << "nfs_client::HandlePutResponseResult";
   try {
     if (nfs::IsSuccess(result)) {
-      LOG(kInfo) << "Put succeeded";
       promise->set_value();
     } else {
-      LOG(kWarning) << "nfs_client::HandlePutResponseResult error in Put";
+      LOG(kError) << "nfs_client::HandlePutResponseResult error";
       BOOST_THROW_EXCEPTION(result.value);
     }
   }
   catch (...) {
-    LOG(kError) << "nfs_client::HandlePutResponseResult exception in Put";
+    LOG(kError) << "nfs_client::HandlePutResponseResult exception";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
+void HandleSendMessageResponseResult(const ReturnCode& result,
+                                     std::shared_ptr<boost::promise<void>> promise) {
+  try {
+    if (nfs::IsSuccess(result)) {
+      promise->set_value();
+    } else {
+      LOG(kError) << "nfs_client::HandleSendResponseResult error";
+      BOOST_THROW_EXCEPTION(result.value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandleSendResponseResult exception";
+    promise->set_exception(boost::current_exception());
+  }
+}
+
+void HandleGetMessageResponseResult(const MpidMessageOrReturnCode& result,
+        std::shared_ptr<boost::promise<nfs_vault::MpidMessage>> promise) {
+  try {
+    if (nfs::IsSuccess(result)) {
+      promise->set_value(result.mpid_message);
+    } else {
+      LOG(kError) << "nfs_client::HandleGetMessageResponseResult error";
+      BOOST_THROW_EXCEPTION(result.return_code.value);
+    }
+  }
+  catch (...) {
+    LOG(kError) << "nfs_client::HandleGetMessageResponseResult exception";
     promise->set_exception(boost::current_exception());
   }
 }

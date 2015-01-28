@@ -16,8 +16,8 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#ifndef MAIDSAFE_NFS_TESTS_MAID_NODE_NFS_TEST_H_
-#define MAIDSAFE_NFS_TESTS_MAID_NODE_NFS_TEST_H_
+#ifndef MAIDSAFE_NFS_TESTS_MAID_CLIENT_TEST_H_
+#define MAIDSAFE_NFS_TESTS_MAID_CLIENT_TEST_H_
 
 #include <string>
 #include <utility>
@@ -29,7 +29,7 @@
 #include "maidsafe/passport/passport.h"
 #include "maidsafe/routing/parameters.h"
 
-#include "maidsafe/nfs/client/maid_node_nfs.h"
+#include "maidsafe/nfs/client/maid_client.h"
 
 namespace maidsafe {
 
@@ -39,11 +39,11 @@ namespace test {
 
 static const size_t kTestChunkSize = 1024 * 1024;
 
-class MaidNodeNfsTest : public testing::Test {
+class MaidClientTest : public testing::Test {
  public:
-  MaidNodeNfsTest() {}
+  MaidClientTest() {}
 
-  ~MaidNodeNfsTest() {
+  ~MaidClientTest() {
     for (auto& client : clients_)
       client->Stop();
   }
@@ -51,7 +51,7 @@ class MaidNodeNfsTest : public testing::Test {
  protected:
   void AddClient() {
     auto maid_and_signer(passport::CreateMaidAndSigner());
-    clients_.emplace_back(nfs_client::MaidNodeNfs::MakeShared(maid_and_signer));
+    clients_.emplace_back(nfs_client::MaidClient::MakeShared(maid_and_signer));
   }
 
   void CompareGetResult(const std::vector<ImmutableData>& chunks,
@@ -126,7 +126,7 @@ class MaidNodeNfsTest : public testing::Test {
         max_branches, std::vector<std::pair<size_t, size_t>>());
     version_tree[0].push_back(std::make_pair(0, 0));
 
-    std::vector<nfs_client::MaidNodeNfs::PutVersionFuture> put_version_futures;
+    std::vector<nfs_client::MaidClient::PutVersionFuture> put_version_futures;
     for (size_t index(1); index < chunks_.size(); ++index) {
       size_t cur_branch(RandomInt32() % total_branches);
       size_t cur_version_index(version_tree[cur_branch].back().first);
@@ -205,7 +205,7 @@ class MaidNodeNfsTest : public testing::Test {
   }
 
   std::vector<ImmutableData> chunks_;
-  std::vector<std::shared_ptr<nfs_client::MaidNodeNfs>> clients_;
+  std::vector<std::shared_ptr<nfs_client::MaidClient>> clients_;
 };
 
 }  // namespace test
@@ -214,4 +214,4 @@ class MaidNodeNfsTest : public testing::Test {
 
 }  // namespace maidsafe
 
-#endif  // MAIDSAFE_NFS_TESTS_MAID_NODE_NFS_TEST_H_
+#endif  // MAIDSAFE_NFS_TESTS_MAID_CLIENT_TEST_H_

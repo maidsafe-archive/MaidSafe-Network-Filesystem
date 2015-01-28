@@ -16,7 +16,7 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "maidsafe/nfs/vault/account_creation.h"
+#include "maidsafe/nfs/vault/maid_account_creation.h"
 
 #include <utility>
 
@@ -30,16 +30,16 @@ namespace maidsafe {
 
 namespace nfs_vault {
 
-AccountCreation::AccountCreation() : public_maid_ptr(), public_anmaid_ptr() {}
+MaidAccountCreation::MaidAccountCreation() : public_maid_ptr(), public_anmaid_ptr() {}
 
-AccountCreation::AccountCreation(const passport::PublicMaid& public_maid,
-                                 const passport::PublicAnmaid& public_anmaid)
+MaidAccountCreation::MaidAccountCreation(const passport::PublicMaid& public_maid,
+                                         const passport::PublicAnmaid& public_anmaid)
     : public_maid_ptr(new passport::PublicMaid(public_maid)),
       public_anmaid_ptr(new passport::PublicAnmaid(public_anmaid)) {}
 
-AccountCreation::AccountCreation(const std::string& serialised_copy)
+MaidAccountCreation::MaidAccountCreation(const std::string& serialised_copy)
     : public_maid_ptr(), public_anmaid_ptr() {
-  protobuf::AccountCreation proto_account_creation;
+  protobuf::MaidAccountCreation proto_account_creation;
   if (!proto_account_creation.ParseFromString(serialised_copy)) {
     LOG(kError) << "Failed to parse account_creation.";
     BOOST_THROW_EXCEPTION(MakeError(CommonErrors::parsing_error));
@@ -54,21 +54,21 @@ AccountCreation::AccountCreation(const std::string& serialised_copy)
           NonEmptyString(proto_account_creation.public_anmaid()))));
 }
 
-AccountCreation::AccountCreation(const AccountCreation& other)
+MaidAccountCreation::MaidAccountCreation(const MaidAccountCreation& other)
     : public_maid_ptr(new passport::PublicMaid(*other.public_maid_ptr)),
       public_anmaid_ptr(new passport::PublicAnmaid(*other.public_anmaid_ptr)) {}
 
-AccountCreation::AccountCreation(AccountCreation&& other)
+MaidAccountCreation::MaidAccountCreation(MaidAccountCreation&& other)
     : public_maid_ptr(std::move(other.public_maid_ptr)),
       public_anmaid_ptr(std::move(other.public_anmaid_ptr)) {}
 
-AccountCreation& AccountCreation::operator=(AccountCreation other) {
+MaidAccountCreation& MaidAccountCreation::operator=(MaidAccountCreation other) {
   swap(*this, other);
   return *this;
 }
 
-std::string AccountCreation::Serialise() const {
-  protobuf::AccountCreation proto_account_creation;
+std::string MaidAccountCreation::Serialise() const {
+  protobuf::MaidAccountCreation proto_account_creation;
   proto_account_creation.set_public_maid_name(public_maid_ptr->name().value.string());
   proto_account_creation.set_public_maid(public_maid_ptr->Serialise()->string());
   proto_account_creation.set_public_anmaid_name(public_anmaid_ptr->name().value.string());
@@ -76,7 +76,7 @@ std::string AccountCreation::Serialise() const {
   return proto_account_creation.SerializeAsString();
 }
 
-bool operator==(const AccountCreation& lhs, const AccountCreation& rhs) {
+bool operator==(const MaidAccountCreation& lhs, const MaidAccountCreation& rhs) {
   bool result(
       lhs.public_maid_ptr->name() == rhs.public_maid_ptr->name() &&
       lhs.public_anmaid_ptr->name() == rhs.public_anmaid_ptr->name() &&
@@ -91,7 +91,7 @@ bool operator==(const AccountCreation& lhs, const AccountCreation& rhs) {
   return result;
 }
 
-void swap(AccountCreation& lhs, AccountCreation& rhs) MAIDSAFE_NOEXCEPT {
+void swap(MaidAccountCreation& lhs, MaidAccountCreation& rhs) MAIDSAFE_NOEXCEPT {
   using std::swap;
   swap(lhs.public_maid_ptr, rhs.public_maid_ptr);
   swap(lhs.public_anmaid_ptr, rhs.public_anmaid_ptr);

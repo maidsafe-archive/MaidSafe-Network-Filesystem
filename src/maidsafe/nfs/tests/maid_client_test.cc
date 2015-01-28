@@ -16,7 +16,7 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-#include "maidsafe/nfs/tests/maid_node_nfs_test.h"
+#include "maidsafe/nfs/tests/maid_client_test.h"
 
 namespace maidsafe {
 
@@ -24,23 +24,23 @@ namespace nfs {
 
 namespace test {
 
-TEST_F(MaidNodeNfsTest, FUNC_Constructor) {
+TEST_F(MaidClientTest, FUNC_Constructor) {
   auto maid_and_signer(passport::CreateMaidAndSigner());
   {
-    auto nfs_new_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer);
+    auto nfs_new_account = nfs_client::MaidClient::MakeShared(maid_and_signer);
   }
   LOG(kInfo) << "joining existing account";
-  auto nfs_existing_account = nfs_client::MaidNodeNfs::MakeShared(maid_and_signer.first);
+  auto nfs_existing_account = nfs_client::MaidClient::MakeShared(maid_and_signer.first);
 }
 
-TEST_F(MaidNodeNfsTest, FUNC_FailingGet) {
+TEST_F(MaidClientTest, FUNC_FailingGet) {
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   AddClient();
   auto future(clients_.back()->Get<ImmutableData::Name>(data.name(), std::chrono::seconds(10)));
   EXPECT_THROW(future.get(), std::exception) << "must have failed";
 }
 
-TEST_F(MaidNodeNfsTest, FUNC_PutGet) {
+TEST_F(MaidClientTest, FUNC_PutGet) {
   AddClient();
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   LOG(kVerbose) << "Before put";
@@ -61,7 +61,7 @@ TEST_F(MaidNodeNfsTest, FUNC_PutGet) {
   }
 }
 
-TEST_F(MaidNodeNfsTest, FUNC_MultipleSequentialPuts) {
+TEST_F(MaidClientTest, FUNC_MultipleSequentialPuts) {
   routing::Parameters::caching = true;
   const size_t kIterations(10);
   GenerateChunks(kIterations);
@@ -82,20 +82,20 @@ TEST_F(MaidNodeNfsTest, FUNC_MultipleSequentialPuts) {
   LOG(kVerbose) << "Multiple sequential puts is finished successfully";
 }
 
-TEST_F(MaidNodeNfsTest, FUNC_MultipleParallelPuts) {
+TEST_F(MaidClientTest, FUNC_MultipleParallelPuts) {
   routing::Parameters::caching = false;
   LOG(kVerbose) << "put 10 chunks with 1 clients";
   PutGetTest(1, 10);
   LOG(kVerbose) << "Multiple parallel puts test has finished successfully";
 }
 
-TEST_F(MaidNodeNfsTest, FUNC_MultipleClientsPut) {
+TEST_F(MaidClientTest, FUNC_MultipleClientsPut) {
   LOG(kVerbose) << "put 10 chunks with 5 clients";
   PutGetTest(5, 10);
   LOG(kVerbose) << "Put with multiple clients test has finished successfully";
 }
 
-TEST_F(MaidNodeNfsTest, FUNC_DataFlooding) {
+TEST_F(MaidClientTest, FUNC_DataFlooding) {
   LOG(kVerbose) << "flooding 100 chunks with 10 clients";
   PutGetTest(10, 100);
   LOG(kVerbose) << "Data flooding test has finished successfully";
@@ -103,7 +103,7 @@ TEST_F(MaidNodeNfsTest, FUNC_DataFlooding) {
 
 /*
 // The test below is disbaled as its proper operation assumes a delete funcion is in place
-TEST_F(MaidNodeNfsTest, DISABLED_FUNC_PutMultipleCopies) {
+TEST_F(MaidClientTest, DISABLED_FUNC_PutMultipleCopies) {
   ImmutableData data(NonEmptyString(RandomString(kTestChunkSize)));
   boost::future<ImmutableData> future;
   GetClients().front()->Put(data);
@@ -151,7 +151,7 @@ TEST_F(MaidNodeNfsTest, DISABLED_FUNC_PutMultipleCopies) {
 }
 */
 
-TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
+TEST_F(MaidClientTest, FUNC_PopulateSingleBranchTree) {
   ImmutableData chunk(NonEmptyString(RandomAlphaNumericString(1024)));
   const size_t max_versions(5), max_branches(1);
   GenerateChunks(max_versions * 2);
@@ -190,7 +190,7 @@ TEST_F(MaidNodeNfsTest, FUNC_PopulateSingleBranchTree) {
   }
 }
 
-TEST_F(MaidNodeNfsTest, FUNC_PopulateMultipleBranchTree) {
+TEST_F(MaidClientTest, FUNC_PopulateMultipleBranchTree) {
   VersionTreeTest(5, 4, 20);
   VersionTreeTest(100, 10, 60);
 }

@@ -38,20 +38,20 @@ void MaidNodeDispatcher::Stop() {
 
 void MaidNodeDispatcher::SendCreateAccountRequest(
     routing::TaskId task_id,
-    const nfs_vault::AccountCreation& account_creation) {
+    const nfs_vault::MaidAccountCreation& maid_account_creation) {
   typedef nfs::CreateAccountRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(nfs::MessageId(task_id), account_creation);
+  NfsMessage nfs_message(nfs::MessageId(task_id), maid_account_creation);
   RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 
 void MaidNodeDispatcher::SendRemoveAccountRequest(
-    const nfs_vault::AccountRemoval& account_removal) {
+    const nfs_vault::MaidAccountRemoval& maid_account_removal) {
   typedef nfs::RemoveAccountRequestFromMaidNodeToMaidManager NfsMessage;
   CheckSourcePersonaType<NfsMessage>();
   typedef routing::Message<NfsMessage::Sender, NfsMessage::Receiver> RoutingMessage;
-  NfsMessage nfs_message(account_removal);
+  NfsMessage nfs_message(maid_account_removal);
   RoutingSend(RoutingMessage(nfs_message.Serialise(), kThisNodeAsSender_, kMaidManagerReceiver_));
 }
 

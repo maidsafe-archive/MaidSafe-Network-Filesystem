@@ -20,9 +20,16 @@ option optimize_for = LITE_RUNTIME;
 
 package maidsafe.nfs_vault.protobuf;
 
-message AccountCreation {
+message MaidAccountCreation {
   required bytes public_maid_name = 1;
   required bytes public_maid = 2;
   required bytes public_anmaid_name = 3;
   required bytes public_anmaid = 4;
+}
+
+message MpidAccountCreation {
+  required bytes public_mpid_name = 1;
+  required bytes public_mpid = 2;
+  required bytes public_anmpid_name = 3;
+  required bytes public_anmpid = 4;
 }

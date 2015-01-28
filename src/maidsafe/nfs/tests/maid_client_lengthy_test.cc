@@ -1,4 +1,4 @@
-/*  Copyright 2012 MaidSafe.net limited
+/*  Copyright 2014 MaidSafe.net limited
 
     This MaidSafe Software is licensed to you under (1) the MaidSafe.net Commercial License,
     version 1.0 or later, or (2) The General Public License (GPL), version 3, depending on which
@@ -16,18 +16,22 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
-option optimize_for = LITE_RUNTIME;
+#include "maidsafe/nfs/tests/maid_client_test.h"
 
-package maidsafe.nfs_vault.protobuf;
+namespace maidsafe {
 
-message MaidAccountRemoval {
-  required bytes random_data = 1;
-  required bytes public_anmaid_name = 2;
-  required bytes signature = 3;
+namespace nfs {
+
+namespace test {
+
+TEST_F(MaidClientTest, FUNC_PopulateLengthyTree) {
+  VersionTreeTest(100, 1, 1500, 256);
+  VersionTreeTest(15000, 1, 14580, 128);
+  VersionTreeTest(100, 1, 20000, 128);
 }
 
-message MpidAccountRemoval {
-  required bytes random_data = 1;
-  required bytes public_anmpid_name = 2;
-  required bytes signature = 3;
-}
+}  // namespace test
+
+}  // namespace nfs
+
+}  // namespace maidsafe

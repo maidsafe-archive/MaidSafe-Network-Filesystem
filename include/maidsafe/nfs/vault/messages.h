@@ -32,8 +32,10 @@
 
 #include "maidsafe/passport/types.h"
 
-#include "maidsafe/nfs/vault/account_creation.h"
-#include "maidsafe/nfs/vault/account_removal.h"
+#include "maidsafe/nfs/vault/maid_account_creation.h"
+#include "maidsafe/nfs/vault/maid_account_removal.h"
+#include "maidsafe/nfs/vault/mpid_account_creation.h"
+#include "maidsafe/nfs/vault/mpid_account_removal.h"
 #include "maidsafe/nfs/vault/pmid_registration.h"
 
 
@@ -429,6 +431,7 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT;
 // ================================= MpidMessage ==================================================
 
 struct MpidMessage {
+  MpidMessage();
   MpidMessage(const MpidMessageBase& base_in, MessageBodyType& signed_body_in);
   explicit MpidMessage(const std::string& serialised_copy);
   MpidMessage(const MpidMessage& other);
