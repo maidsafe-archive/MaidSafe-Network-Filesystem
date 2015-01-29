@@ -61,7 +61,6 @@ set(NfsWeeklyNetworkTestsAllFiles ${NfsSourcesDir}/tests/maid_client_test.h
                                   ${NfsSourcesDir}/tests/maid_client_lengthy_test.cc
                                   ${NfsNetworkTestsMain})
 list(REMOVE_ITEM NfsTestsAllFiles ${NfsNetworkTestsAllFiles} ${NfsWeeklyNetworkTestsAllFiles})
-list(APPEND NfsNetworkTestsMain "tests_main.cc")
 
 #==================================================================================================#
 # Define MaidSafe libraries and executables                                                        #
@@ -74,14 +73,14 @@ target_include_directories(maidsafe_nfs_core PUBLIC ${CMAKE_BINARY_DIR}/Generate
 target_include_directories(maidsafe_nfs_detail PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_client PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_vault PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
-target_link_libraries(maidsafe_nfs_core maidsafe_encrypt maidsafe_nfs_detail maidsafe_routing protobuf_lite)
-target_link_libraries(maidsafe_nfs_detail maidsafe_common maidsafe_encrypt maidsafe_routing)
+target_link_libraries(maidsafe_nfs_core maidsafe_routing protobuf_lite)
+target_link_libraries(maidsafe_nfs_detail maidsafe_common maidsafe_nfs_client maidsafe_encrypt maidsafe_routing)
 target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
 target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(INCLUDE_TESTS)
   ms_add_executable(test_nfs "Tests/NFS" ${NfsTestsAllFiles})
-  target_link_libraries(test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_passport maidsafe_test)
+  target_link_libraries(test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_detail maidsafe_nfs_vault maidsafe_passport maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
 
@@ -127,7 +126,7 @@ endif()
 #==================================================================================================#
 # Package                                                                                          #
 #==================================================================================================#
-install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault COMPONENT Development CONFIGURATIONS Debug Release ARCHIVE DESTINATION lib)
+install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_detail maidsafe_nfs_vault COMPONENT Development CONFIGURATIONS Debug Release ARCHIVE DESTINATION lib)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ COMPONENT Development DESTINATION include)
 install(FILES ${OutputFile} COMPONENT Development DESTINATION include/maidsafe/nfs)
 

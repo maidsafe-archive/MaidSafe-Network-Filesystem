@@ -25,7 +25,7 @@ namespace nfs {
 
 using ContainerVersion = StructuredDataVersions::VersionName;
 
-}  // nfs
-}  // maidsafe
+}  // namespace nfs
+}  // namespace maidsafe
 
 #endif  // MAIDSAFE_NFS_CONTAINER_VERSION_H_
