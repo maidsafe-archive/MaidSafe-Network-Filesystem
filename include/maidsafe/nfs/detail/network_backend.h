@@ -35,7 +35,7 @@
 
 #include "maidsafe/common/data_types/immutable_data.h"
 #include "maidsafe/common/error.h"
-#include "maidsafe/nfs/client/maid_node_nfs.h"
+#include "maidsafe/nfs/client/maid_client.h"
 #include "maidsafe/nfs/container_version.h"
 #include "maidsafe/nfs/detail/container_id.h"
 #include "maidsafe/nfs/detail/network.h"
@@ -50,7 +50,7 @@ class NetworkBackend : public Network::Interface {
   template<typename... Args>
   explicit NetworkBackend(Args... args)
     : Network::Interface(),
-      backend_(nfs_client::MaidNodeNfs::MakeShared(std::forward<Args>(args)...)) {
+      backend_(nfs_client::MaidClient::MakeShared(std::forward<Args>(args)...)) {
     if (backend_ == nullptr) {
       BOOST_THROW_EXCEPTION(std::system_error(make_error_code(CommonErrors::null_pointer)));
     }
@@ -83,7 +83,7 @@ class NetworkBackend : public Network::Interface {
   virtual boost::future<ImmutableData> DoGetChunk(const ImmutableData::Name& name) override final;
 
  private:
-  const std::shared_ptr<nfs_client::MaidNodeNfs> backend_;
+  const std::shared_ptr<nfs_client::MaidClient> backend_;
 };
 
 }  // namespace detail
