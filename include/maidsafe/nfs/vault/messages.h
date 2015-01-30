@@ -432,7 +432,7 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT;
 
 struct MpidMessage {
   MpidMessage();
-  MpidMessage(const MpidMessageBase& base_in, MessageBodyType& signed_body_in);
+  MpidMessage(const MpidMessageBase& base_in, const MessageBodyType& signed_body_in);
   explicit MpidMessage(const std::string& serialised_copy);
   MpidMessage(const MpidMessage& other);
   MpidMessage(MpidMessage&& other);

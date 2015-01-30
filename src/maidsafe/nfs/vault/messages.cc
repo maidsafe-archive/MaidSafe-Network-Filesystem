@@ -800,7 +800,7 @@ void swap(MpidMessageAlert& lhs, MpidMessageAlert& rhs) MAIDSAFE_NOEXCEPT {
 MpidMessage::MpidMessage()
     : base(), signed_body() {}
 
-MpidMessage::MpidMessage(const MpidMessageBase& base_in, MessageBodyType& signed_body_in)
+MpidMessage::MpidMessage(const MpidMessageBase& base_in, const MessageBodyType& signed_body_in)
     : base(base_in), signed_body(signed_body_in) {}
 
 MpidMessage::MpidMessage(const std::string& serialised_copy) {
