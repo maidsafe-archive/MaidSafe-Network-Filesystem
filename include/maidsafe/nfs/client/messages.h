@@ -341,7 +341,7 @@ struct MpidMessageOrReturnCode {
   MpidMessageOrReturnCode& operator=(MpidMessageOrReturnCode other);
 
   std::string Serialise() const;
-  nfs_vault::MpidMessage mpid_message;
+  boost::optional<nfs_vault::MpidMessage> mpid_message;
   ReturnCode return_code;
 };
 
