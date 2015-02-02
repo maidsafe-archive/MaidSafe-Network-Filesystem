@@ -731,8 +731,10 @@ MpidMessageOrReturnCode& MpidMessageOrReturnCode::operator=(MpidMessageOrReturnC
 
 std::string MpidMessageOrReturnCode::Serialise() const {
   protobuf::MpidMessageOrReturnCode proto;
-  proto.set_serialised_mpid_message(mpid_message.Serialise());
-  proto.set_serialised_return_code(return_code.Serialise());
+  if (mpid_message)
+    proto.set_serialised_mpid_message(mpid_message->Serialise());
+  else
+    proto.set_serialised_return_code(return_code.Serialise());
   return proto.SerializeAsString();
 }
 

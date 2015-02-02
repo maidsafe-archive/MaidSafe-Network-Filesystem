@@ -100,7 +100,7 @@ void HandleGetMessageResponseResult(const MpidMessageOrReturnCode& result,
         std::shared_ptr<boost::promise<nfs_vault::MpidMessage>> promise) {
   try {
     if (nfs::IsSuccess(result)) {
-      promise->set_value(result.mpid_message);
+      promise->set_value(*result.mpid_message);
     } else {
       LOG(kError) << "nfs_client::HandleGetMessageResponseResult error";
       BOOST_THROW_EXCEPTION(result.return_code.value);
