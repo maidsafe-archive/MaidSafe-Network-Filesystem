@@ -47,40 +47,44 @@ ms_set_meta_files_custom_commands("${OutputFile}" "${InputFile}" "${MetaFiles}" 
 set(NfsSourcesDir ${PROJECT_SOURCE_DIR}/src/maidsafe/nfs)
 ms_glob_dir(Nfs ${NfsSourcesDir} Nfs)
 ms_glob_dir(NfsClient ${NfsSourcesDir}/client "Nfs Client")
+ms_glob_dir(NfsDetail ${NfsSourcesDir}/detail "Nfs Detail")
 ms_glob_dir(NfsVault ${NfsSourcesDir}/vault "Nfs Vault")
 ms_glob_dir(NfsTests ${NfsSourcesDir}/tests Tests)
-set(NfsTestsMain ${NfsSourcesDir}/tests/tests_main.cc)
+set(NfsNetworkTestsMain ${NfsSourcesDir}/tests/network_tests_main.cc)
 set(NfsNetworkTestsAllFiles ${NfsSourcesDir}/tests/data_getter_test.cc
                             ${NfsSourcesDir}/tests/maid_client_test.h
                             ${NfsSourcesDir}/tests/maid_client_test.cc
                             ${NfsSourcesDir}/tests/mpid_client_test.h
                             ${NfsSourcesDir}/tests/mpid_client_test.cc
-                            ${NfsTestsMain})
+                            ${NfsNetworkTestsMain})
 set(NfsWeeklyNetworkTestsAllFiles ${NfsSourcesDir}/tests/maid_client_test.h
                                   ${NfsSourcesDir}/tests/maid_client_lengthy_test.cc
-                                  ${NfsTestsMain})
+                                  ${NfsNetworkTestsMain})
 list(REMOVE_ITEM NfsTestsAllFiles ${NfsNetworkTestsAllFiles} ${NfsWeeklyNetworkTestsAllFiles})
-list(APPEND NfsTestsAllFiles ${NfsTestsMain})
-
 
 #==================================================================================================#
 # Define MaidSafe libraries and executables                                                        #
 #==================================================================================================#
 ms_add_static_library(maidsafe_nfs_core ${NfsAllFiles} ${OutputFile} ${InputFile} ${MetaFiles})
+ms_add_static_library(maidsafe_nfs_detail ${NfsDetailAllFiles})
 ms_add_static_library(maidsafe_nfs_client ${NfsClientAllFiles})
 ms_add_static_library(maidsafe_nfs_vault ${NfsVaultAllFiles})
 target_include_directories(maidsafe_nfs_core PUBLIC ${CMAKE_BINARY_DIR}/GeneratedProtoFiles ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(maidsafe_nfs_detail PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_client PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(maidsafe_nfs_vault PUBLIC ${PROJECT_SOURCE_DIR}/include ${MaidsafeGeneratedSourcesDir}/nfs/include PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(maidsafe_nfs_core maidsafe_routing protobuf_lite)
+target_link_libraries(maidsafe_nfs_detail maidsafe_common maidsafe_nfs_client maidsafe_encrypt maidsafe_routing)
 target_link_libraries(maidsafe_nfs_client maidsafe_nfs_vault maidsafe_nfs_core)
 target_link_libraries(maidsafe_nfs_vault maidsafe_nfs_client maidsafe_nfs_core)
 
 if(INCLUDE_TESTS)
   ms_add_executable(test_nfs "Tests/NFS" ${NfsTestsAllFiles})
-  target_link_libraries(test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
+  target_link_libraries(test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_detail maidsafe_nfs_vault maidsafe_passport maidsafe_test)
   # TODO - Investigate why boost variant requires this warning to be disabled.
   target_compile_options(test_nfs PRIVATE $<$<AND:$<BOOL:${MSVC}>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>>:/wd4702>)
+
+  target_include_directories(test_nfs PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
   ms_add_executable(network_test_nfs "Tests/NFS" ${NfsNetworkTestsAllFiles})
   target_link_libraries(network_test_nfs maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault maidsafe_test)
@@ -122,7 +126,7 @@ endif()
 #==================================================================================================#
 # Package                                                                                          #
 #==================================================================================================#
-install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_vault COMPONENT Development CONFIGURATIONS Debug Release ARCHIVE DESTINATION lib)
+install(TARGETS maidsafe_nfs_core maidsafe_nfs_client maidsafe_nfs_detail maidsafe_nfs_vault COMPONENT Development CONFIGURATIONS Debug Release ARCHIVE DESTINATION lib)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ COMPONENT Development DESTINATION include)
 install(FILES ${OutputFile} COMPONENT Development DESTINATION include/maidsafe/nfs)
 

@@ -126,7 +126,8 @@ class FakeStore {
                    const boost::filesystem::path& new_path);
 
   std::unique_ptr<StructuredDataVersions> ReadVersions(const KeyType& key) const;
-  void WriteVersions(const KeyType& key, const StructuredDataVersions& versions);
+  void WriteVersions(
+      const KeyType& key, const StructuredDataVersions& versions, const bool creation);
 
   BoostAsioService asio_service_;
   const boost::filesystem::path kDiskPath_;
@@ -172,7 +173,7 @@ boost::future<void> FakeStore::Put(const Data& data) {
     }
     catch (const std::exception& e) {
       LOG(kWarning) << "Put failed: " << boost::diagnostic_information(e);
-      promise->set_exception(e);
+      promise->set_exception(boost::current_exception());
     }
   });
   return promise->get_future();
@@ -189,7 +190,7 @@ boost::future<void> FakeStore::Delete(const DataName& data_name) {
     }
     catch (const std::exception& e) {
       LOG(kWarning) << "Delete failed: " << boost::diagnostic_information(e);
-      promise->set_exception(e);
+      promise->set_exception(boost::current_exception());
     }
   });
 
@@ -208,7 +209,7 @@ boost::future<void> FakeStore::CreateVersionTree(const DataName& data_name,
     StructuredDataVersions versions(max_versions, max_branches);
     std::lock_guard<std::mutex> lock(this->mutex_);
     versions.Put(StructuredDataVersions::VersionName(), version_name);
-    WriteVersions(key, versions);
+    WriteVersions(key, versions, true);
     promise->set_value();
   }
   catch (const std::exception& e) {
@@ -229,7 +230,7 @@ FakeStore::VersionNamesFuture FakeStore::GetVersions(
       std::lock_guard<std::mutex> lock(this->mutex_);
       auto versions(this->ReadVersions(key));
       if (!versions)
-        BOOST_THROW_EXCEPTION(MakeError(CommonErrors::no_such_element));
+        BOOST_THROW_EXCEPTION(MakeError(VaultErrors::no_such_account));
       promise->set_value(versions->Get());
     }
     catch (const std::exception& e) {
@@ -282,14 +283,14 @@ boost::future<void> FakeStore::PutVersion(
     auto versions(ReadVersions(key));
     if (!versions) {
       LOG(kError) << "Failed to read versions";
-      return boost::make_exceptional_future<void>(MakeError(CommonErrors::uninitialised));
+      return boost::make_exceptional_future<void>(MakeError(VaultErrors::no_such_account));
     }
     versions->Put(old_version_name, new_version_name);
-    WriteVersions(key, *versions);
+    WriteVersions(key, *versions, false);
   }
   catch (const std::exception& e) {
     LOG(kError) << "Failed putting version: " << boost::diagnostic_information(e);
-    return boost::make_exceptional_future<void>(e);
+    return boost::make_exceptional_future<void>(boost::current_exception());
   }
 
   return boost::make_ready_future();
@@ -309,11 +310,11 @@ boost::future<void> FakeStore::DeleteBranchUntilFork(
       return boost::make_exceptional_future<void>(MakeError(CommonErrors::no_such_element));
     }
     versions->DeleteBranchUntilFork(branch_tip);
-    WriteVersions(key, *versions);
+    WriteVersions(key, *versions, false);
   }
   catch (const std::exception& e) {
     LOG(kError) << "Failed deleting branch: " << boost::diagnostic_information(e);
-    return boost::make_exceptional_future<void>(e);
+    return boost::make_exceptional_future<void>(boost::current_exception());
   }
 
   return boost::make_ready_future();
