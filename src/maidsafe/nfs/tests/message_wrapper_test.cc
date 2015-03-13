@@ -82,7 +82,7 @@ class MaidManagerServiceImpl {
 
   template <typename T>
   std::string Handle(const T& /*message*/) {
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
 #ifdef __GNUC__
     return std::string();
 #endif
@@ -107,7 +107,7 @@ class DataManagerServiceImpl {
 
   template <typename T>
   std::string Handle(const T& /*message*/) {
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
 #ifdef __GNUC__
     return std::string();
 #endif

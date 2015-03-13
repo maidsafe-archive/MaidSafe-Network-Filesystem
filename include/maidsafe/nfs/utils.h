@@ -92,7 +92,7 @@ std::error_code ErrorCode(const MessageContents& response) {
 // If 'responses' contains >= n successsful responses where n is 'successes_required', returns
 // <iterator to nth successful reply, true> otherwise
 // <iterator to most frequent failed reply, false>.  If there is more than one most frequent type,
-// (e.g. 2 'no_such_element' and 2 'invalid_parameter') the iterator points to the first which
+// (e.g. 2 'no_such_element' and 2 'invalid_argument') the iterator points to the first which
 // reaches the frequency.
 template <typename MessageContents>
 std::pair<typename std::vector<MessageContents>::const_iterator, bool>
@@ -158,7 +158,7 @@ OpData<MessageContents>::OpData(int successes_required,
       callback_executed_(!callback) {
   if (!callback || successes_required <= 0) {
     LOG(kError) << "invalid parameters for OpData constructor";
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
   }
 }
 

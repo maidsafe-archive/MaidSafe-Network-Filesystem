@@ -70,7 +70,7 @@ class PersonaDemuxer : public boost::static_visitor<
     LOG(kError) << "invalid function call because of un-specialised templated method";
     // Should never come here.  Ideally this specialisation shouldn't exist, but the static visitor
     // requires all types in the variant to be handled.
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
   }
 
  private:
@@ -151,7 +151,7 @@ class Service {
     PublicMessages public_variant_message;
     if (!nfs::GetVariant(message, public_variant_message)) {
 //       LOG(kError) << "Not a valid public message";
-      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
     }
     return boost::apply_visitor(demuxer, public_variant_message);
   }
@@ -162,7 +162,7 @@ class Service {
     VaultMessages vault_variant_message;
     if (!vault::GetVariant(message, vault_variant_message)) {
       LOG(kError) << "Not a valid vault message" << vault_variant_message;
-      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+      BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
     } else {
       LOG(kVerbose) << "processing: " << vault_variant_message;
     }
@@ -191,14 +191,14 @@ class Service {
       return HandlePublicMessage(message, demuxer);
     }
     catch (const maidsafe_error& error) {
-      if (error.code() != make_error_code((CommonErrors::invalid_parameter)))
+      if (error.code() != make_error_code((CommonErrors::invalid_argument)))
         throw;
     }
     try {
       return HandleVaultMessage(message, demuxer);
     }
     catch (const maidsafe_error& error) {
-     if (error.code() != make_error_code((CommonErrors::invalid_parameter)))
+     if (error.code() != make_error_code((CommonErrors::invalid_argument)))
        throw;
     }
   }
