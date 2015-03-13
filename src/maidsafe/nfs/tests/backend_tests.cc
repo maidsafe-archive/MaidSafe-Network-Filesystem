@@ -39,13 +39,10 @@ class BackendTest : public ::testing::Test, public NetworkFixture {
   }
 
   static ContainerVersion MakeContainerVersion(ContainerVersion::Index index) {
-    return ContainerVersion{
-      index, ImmutableData::Name{Identity{RandomString(64)}}};
+    return ContainerVersion{index, MakeIdentity()};
   }
 
-  static ImmutableData MakeChunk() {
-    return ImmutableData{NonEmptyString{RandomString(100)}};
-  }
+  static ImmutableData MakeChunk() { return ImmutableData{NonEmptyString{RandomBytes(1, 1000)}}; }
 
   template<typename Result>
   static std::shared_ptr<boost::future<Result>> MakeFutureError(std::error_code error) {

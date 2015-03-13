@@ -95,7 +95,7 @@ DiskUsage InitialiseDiskRoot(const fs::path& disk_root) {
       }
       catch (...) {
         LOG(kError) << "exception during InitialiseDiskRoot";
-        BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+        BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
       }
     }
   }
@@ -235,7 +235,7 @@ void FakeStore::SetMaxDiskUsage(DiskUsage max_disk_usage) {
   if (current_disk_usage_ > max_disk_usage) {
     LOG(kError) << "current_disk_usage_ " << current_disk_usage_.data
                 << " exceeds target max_disk_usage " << max_disk_usage.data;
-    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_parameter));
+    BOOST_THROW_EXCEPTION(MakeError(CommonErrors::invalid_argument));
   }
   max_disk_usage_ = max_disk_usage;
 }

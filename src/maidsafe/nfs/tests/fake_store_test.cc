@@ -70,9 +70,9 @@ TEST_F(FakeStoreTest, BEH_SuccessfulStore) {
   ASSERT_TRUE(DiskUsage(0) == fake_store_.GetCurrentDiskUsage());
 
   StructuredDataVersions::VersionName default_version;
-  StructuredDataVersions::VersionName version0(0, ImmutableData::Name(Identity(RandomString(64))));
-  StructuredDataVersions::VersionName version1(1, ImmutableData::Name(Identity(RandomString(64))));
-  StructuredDataVersions::VersionName version2(2, ImmutableData::Name(Identity(RandomString(64))));
+  StructuredDataVersions::VersionName version0(0, MakeIdentity());
+  StructuredDataVersions::VersionName version1(1, MakeIdentity());
+  StructuredDataVersions::VersionName version2(2, MakeIdentity());
   MutableData::Name dir_name(Identity(RandomString(64)));
 
   fake_store_.PutVersion(dir_name, default_version, version0);  // Silently fails
